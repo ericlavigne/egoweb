@@ -1,4 +1,4 @@
-package org.egonet.web.model;
+package net.sf.egonet.model;
 
 public class Section implements java.io.Serializable {
 

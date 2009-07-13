@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="run" name="egonet" basedir=".">
 
-	<property name="src.dir" value="src"/>
+    <property name="src.dir" value="src/main"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="static.dir" value="static"/>
 	<property name="build.dir" value="build"/>
 	<property name="dist.dir" value="dist"/>
-	<property name="main.class.web" value="org.egonet.web.Main" />
+	<property name="main.class.web" value="net.sf.egonet.web.Main" />
 	
 	<path id="build.classpath">
 		<fileset dir="${lib.dir}">

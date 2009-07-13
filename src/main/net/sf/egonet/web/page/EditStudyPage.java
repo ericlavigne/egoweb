@@ -1,4 +1,4 @@
-package org.egonet.web.page;
+package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
 
@@ -13,8 +13,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 
-import org.egonet.web.model.Section;
-import org.egonet.web.model.Study;
+import net.sf.egonet.model.Section;
+import net.sf.egonet.model.Study;
 
 public class EditStudyPage extends EgonetPage {
 

@@ -1,4 +1,4 @@
-package org.egonet.web.page;
+package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
 
@@ -14,8 +14,8 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import org.egonet.web.Main;
-import org.egonet.web.model.Study;
+import net.sf.egonet.web.Main;
+import net.sf.egonet.model.Study;
 
 import org.hibernate.*;
 

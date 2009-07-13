@@ -1,4 +1,4 @@
-package org.egonet.web;
+package net.sf.egonet.web;
 
 import java.io.IOException;
 import java.net.URL;
@@ -6,7 +6,7 @@ import java.net.URL;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketServlet;
 
-import org.egonet.web.page.IndexPage;
+import net.sf.egonet.web.page.IndexPage;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -71,7 +71,7 @@ public class Main extends WebApplication
         Context context = new Context(server, "/", Context.SESSIONS);
         ServletHolder servletHolder = new ServletHolder(new WicketServlet());
         servletHolder.setInitParameter("applicationClassName",
-                "org.egonet.web.Main"); 
+                "net.sf.egonet.web.Main"); 
         servletHolder.setInitOrder(1);
         context.addServlet(servletHolder, "/*");
  

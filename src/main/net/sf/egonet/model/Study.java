@@ -1,4 +1,4 @@
-package org.egonet.web.model;
+package net.sf.egonet.model;
 
 import java.util.ArrayList;
 

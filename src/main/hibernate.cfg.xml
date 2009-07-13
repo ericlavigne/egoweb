@@ -31,7 +31,7 @@
 		<property name="show_sql">true</property>
 		<property name="format_sql">true</property>
 		
-		<mapping resource="org/egonet/web/model/Study.hbm.xml" />
+		<mapping resource="net/sf/egonet/model/Study.hbm.xml" />
 		
 	</session-factory>
 </hibernate-configuration>
