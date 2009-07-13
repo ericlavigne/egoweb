@@ -13,21 +13,17 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 import org.egonet.web.Main;
+import org.egonet.web.model.Study;
 
 import org.hibernate.*;
 
-import org.egonet.web.model.Study;
-
-//import persistence.*;
-
 public class AuthoringPage extends EgonetPage
 {
-	private Label study;
 	private TextField studyField;
 	private Model studyActiveModel;
-	//private ArrayList<Study> studies;
 	
     public AuthoringPage()
     {
@@ -51,19 +47,19 @@ public class AuthoringPage extends EgonetPage
         		@Override
         		public void onSubmit() {
         			String name = (String) studyField.getModelObject();
-        			String active = (String) studyActiveModel.getObject();
-        			study.setModelObject(name+" ("+active+")");
+        			String activity = (String) studyActiveModel.getObject();
+				Boolean active = activity.equalsIgnoreCase("active");
+				
         			studyField.setModelObject("");
-        			//studies.add(new Study(name));
-        			saveStudy(new Study(name));
+				
+				Study newStudy = new Study(name);
+				newStudy.setActive(active);
+        			saveStudy(newStudy);
         		}
         	});
         add(form);
         
-        add(study = new Label("study", new Model("")));
-        
-        //studies = new ArrayList<Study>();
-        ListView studyView = new ListView("studies",getStudies()) { // TODO: need a property model that will call getStudies() on each request
+	ListView studyView = new ListView("studies", new PropertyModel(this, "studies")) { 
         	protected void populateItem(ListItem item) {
         		final Study s = (Study) item.getModelObject();
         		Link studyLink = new Link("studyLink") {
@@ -79,7 +75,7 @@ public class AuthoringPage extends EgonetPage
         add(studyView);
     }
     
-    private ArrayList<Study> getStudies() {
+    public ArrayList<Study> getStudies() {
     	Session session = Main.getDBSessionFactory().openSession();
     	Transaction tx = session.beginTransaction();
     	

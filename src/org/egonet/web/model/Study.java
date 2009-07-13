@@ -22,6 +22,17 @@ public class Study implements java.io.Serializable {
 		sections.add(new Section("Alter Pair Questions",Section.Subject.ALTER_PAIR));
 	}
 	
+	public boolean equals(Object obj) {
+		if(! (obj instanceof Study)) {
+			return false;
+		}
+		return getName().equals(((Study) obj).getName());
+	}
+	
+	public int hashCode() {
+		return getName().hashCode();
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -43,7 +54,9 @@ public class Study implements java.io.Serializable {
 	}
 	
 	public void setActive(Boolean active) {
-		this.active = active;
+		if(active != null) {
+			this.active = active;
+		}
 	}
 	
 	public ArrayList<Section> getSections() {
