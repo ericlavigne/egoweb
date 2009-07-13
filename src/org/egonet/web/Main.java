@@ -13,7 +13,7 @@ import org.hibernate.cfg.Configuration;
 
 import org.mortbay.jetty.Server;
 
-import org.mortbay.jetty.handler.ResourceHandler;
+//import org.mortbay.jetty.handler.ResourceHandler;
 
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -47,7 +47,7 @@ public class Main extends WebApplication
      * @see org.apache.wicket.Application#getHomePage()
      */
 	@Override
-	public Class getHomePage() {
+	public Class<IndexPage> getHomePage() {
 		return IndexPage.class;
 	}
 

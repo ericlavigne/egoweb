@@ -2,7 +2,6 @@ package org.egonet.web.page;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -87,7 +86,7 @@ public class AuthoringPage extends EgonetPage
     	return studies;
     }
     
-    private void saveStudy(Study study) {
+    private Long saveStudy(Study study) {
     	Session session = Main.getDBSessionFactory().openSession();
     	Transaction tx = session.beginTransaction();
     	
@@ -95,6 +94,8 @@ public class AuthoringPage extends EgonetPage
     	
     	tx.commit();
     	session.close();
+    	
+    	return studyId;
     }
 }
 

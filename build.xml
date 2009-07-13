@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="run" name="egonet-wicket" basedir=".">
+<project default="run" name="egonet" basedir=".">
 
 	<property name="src.dir" value="src"/>
 	<property name="lib.dir" value="lib"/>
