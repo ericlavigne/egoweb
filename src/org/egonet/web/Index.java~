@@ -1,0 +1,22 @@
+package org.egoweb;
+
+import org.apache.wicket.markup.html.WebPage;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
+
+public class Index extends WebPage
+{
+    public Index()
+    {
+        add(new Label("message", 
+        	"This is Egoweb's index page, which will have links to "
+        		+ "authoring, interviewing, and analysis."));
+        add(
+        	new Link("authoringLink") {
+        		public void onClick() {
+        			setResponsePage(new Authoring());
+        		}
+        	});
+    }
+}
+

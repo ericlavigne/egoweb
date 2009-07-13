@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<title>Authoring</title>
+	</head>
+	<body>
+		<h1>Authoring</h1>
+    	<span wicket:id="message" id="message">Message goes here</span>
+    	<span wicket:id="feedback"/>
+    	<form wicket:id="form">
+    		<input wicket:id="studyNameField" type="text" />
+    		<select wicket:id="studyActiveField">
+    			<option>Option1</option>
+    			<option>Option2</option>
+    		</select>
+    		<input wicket:id="createStudy" type="submit" value="Create Study"/>
+    	</form>
+    	<p wicket:id="study">Existing study goes here. Will be a list later.</p>
+	</body>
+</html>
+
+

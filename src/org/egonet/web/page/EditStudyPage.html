@@ -1,0 +1,29 @@
+
+		
+<wicket:extend>
+		
+    	<div wicket:id="feedback"/>
+    	
+    	<form wicket:id="sectionForm">
+    		<input wicket:id="sectionNameField" type="text" />
+    		<select wicket:id="sectionSubjectField">
+    			<option>EGO</option>
+    			<option>ALTER_PROMPT</option>
+    			<option>ALTER</option>
+    			<option>ALTER_PAIR</option>
+    		</select>
+    		<input wicket:id="createSection" type="submit" value="Add new section"/>
+    	</form>
+		
+    	<table border="1">
+    		<caption>Sections</caption>
+    		<tr><th>Name</th><th>Subject</th></tr>
+    		<tr wicket:id="sections">
+    			<td><a href="#" wicket:id="sectionLink"><span wicket:id="sectionName">Ego Questions</span></a></td>
+    			<td wicket:id="sectionSubject">EGO</td>
+    		</tr>
+    	</table>
+    	
+</wicket:extend>
+
+

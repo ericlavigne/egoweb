@@ -1,0 +1,29 @@
+package org.egoweb;
+
+public class Study implements java.io.Serializable {
+	private String name;
+	private Boolean active;
+	
+	public Study(String name) {
+		this.name = name;
+		this.active = true;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public Boolean isActive() {
+		return active;
+	}
+	
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+}
+
+
