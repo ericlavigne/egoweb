@@ -1,0 +1,22 @@
+Create classes to represent models: study, interview, and network (and subcomponents of these three, see egonet-schema.png)
+
+Database persistence of models
+File import/export of models (XML?)
+
+Convert interview into network
+Convert collection of networks into whole network
+Combine nodes in a network (aliasing)
+Calculate statistics for network 
+Export network statistics
+
+Represent graphics settings for network (study specific)
+Render graphic of network
+
+Web interface for creating/editing study
+Web interface for conducting an interview
+Web interface for viewing interview results
+
+Import/export of legacy file formats
+      
+	
+
