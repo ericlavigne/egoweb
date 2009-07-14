@@ -22,10 +22,9 @@
 	<target name="compile">
 		<mkdir dir="${build.dir}"/>
 		<mkdir dir="${dist.dir}"/>
-		<javac 
-			destdir="${build.dir}" 
-			srcdir="${src.dir}" 
-			classpathref="build.classpath"/>
+		<javac destdir="${build.dir}" srcdir="${src.dir}" classpathref="build.classpath">
+			<compilerarg value="-Xlint:all" />
+		</javac>
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}">
 				<include name="**/*.*"/>
