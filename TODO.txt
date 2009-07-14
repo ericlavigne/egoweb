@@ -9,7 +9,7 @@ Combine nodes in a network (aliasing)
 Calculate statistics for network 
 Export network statistics
 
-Represent graphics settings for network (study specific)
+Represent graphics settings for network (study specific, this should also go in database and file import/export)
 Render graphic of network
 
 Web interface for creating/editing study
