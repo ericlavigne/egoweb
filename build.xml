@@ -23,7 +23,7 @@
 		<mkdir dir="${build.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<javac destdir="${build.dir}" srcdir="${src.dir}" classpathref="build.classpath">
-			<compilerarg value="-Xlint:all" />
+			<compilerarg value="-Xlint:unchecked" />
 		</javac>
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}">
