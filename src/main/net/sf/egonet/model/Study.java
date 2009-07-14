@@ -2,15 +2,14 @@ package net.sf.egonet.model;
 
 import java.util.ArrayList;
 
-public class Study implements java.io.Serializable
+public class Study extends Entity
 {
-	private Long id;
 	private String name;
 	private Boolean active;
 	private ArrayList<Section> sections;
 
-    public Study()
-    {
+	public Study()
+	{
 		this("");
 	}
 
@@ -25,59 +24,49 @@ public class Study implements java.io.Serializable
 	}
 
 	public boolean equals(Object obj)
-    {
-		if(! (obj instanceof Study))
-        {
+	{
+		if (!(obj instanceof Study))
+		{
 			return false;
 		}
 		return getName().equals(((Study) obj).getName());
 	}
 
 	public int hashCode()
-    {
+	{
 		return getName().hashCode();
 	}
 
-	public Long getId()
-    {
-		return id;
-	}
-
-	public void setId(Long id)
-    {
-		this.id = id;
-	}
-
 	public String getName()
-    {
+	{
 		return name;
 	}
 
 	public void setName(String name)
-    {
+	{
 		this.name = name;
 	}
 
 	public Boolean isActive()
-    {
+	{
 		return active;
 	}
 
 	public void setActive(Boolean active)
-    {
+	{
 		if (active != null)
-        {
+		{
 			this.active = active;
 		}
 	}
 
 	public ArrayList<Section> getSections()
-    {
+	{
 		return sections;
 	}
 
 	public void addSection(String name, Section.Subject subject)
-    {
+	{
 		sections.add(new Section(name, subject));
 	}
 }
