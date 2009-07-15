@@ -13,41 +13,15 @@ public class Study extends Entity
 	private List<Interview> interviews;
 	private List<Question> questions;
 
-	public Study(String name) {
-		this.name = name;
-		this.active = true;
-		this.questions = new ArrayList<Question>();
-	}
-
-	/*
 	public Study()
 	{
 		this("");
 	}
 
-	public boolean equals(Object obj)
-	{
-		if (!(obj instanceof Study))
-		{
-			return false;
-		}
-		return getName().equals(((Study) obj).getName());
-	}
-
-	public int hashCode()
-	{
-		return getName().hashCode();
-	}
-	*/
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
+	public Study(String name) {
 		this.name = name;
+		this.active = true;
+		this.questions = new ArrayList<Question>();
 	}
 
 	public Boolean isActive()
@@ -63,17 +37,28 @@ public class Study extends Entity
 		}
 	}
 
-	public void setAlterPrompt(String alterPrompt)
-	{
-		this.alterPrompt = alterPrompt;
-	}
-
-	public String getAlterPrompt()
-	{
-		return this.alterPrompt;
-	}
+	public void setName(String              val) { this.name        = val; }
+	public void setAlterPrompt(String       val) { this.alterPrompt = val; }
+	public void setQuestions(List<Question> val) { this.questions   = val; }
+	public String         getName()        { return name;             }
+	public String         getAlterPrompt() { return this.alterPrompt; }
+	public List<Question> getQuestions()   { return questions;        }
 
 	/*
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof Study))
+		{
+			return false;
+		}
+		return getName().equals(((Study) obj).getName());
+	}
+
+	public int hashCode()
+	{
+		return getName().hashCode();
+	}
+
 	public void addEgo(String name, Answer.AnswerType answerType)
 	{
 		egoFields.add(new Ego(name, answerType));
