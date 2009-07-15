@@ -1,12 +1,15 @@
 package net.sf.egonet.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Study extends Entity
 {
 	private String name;
 	private Boolean active;
-	private ArrayList<Section> sections;
+	private List<Question> questions;
+	
+	private ArrayList<Section> sections; // TODO: get rid of sections and delete Section.class
 
 	public Study()
 	{
@@ -16,6 +19,7 @@ public class Study extends Entity
 	public Study(String name) {
 		this.name = name;
 		this.active = true;
+		this.setQuestions(new ArrayList<Question>());
 		this.sections = new ArrayList<Section>();
 		sections.add(new Section("Ego Questions"        ,Section.Subject.EGO));
 		sections.add(new Section("Alter Prompt"         ,Section.Subject.ALTER_PROMPT));
@@ -68,5 +72,13 @@ public class Study extends Entity
 	public void addSection(String name, Section.Subject subject)
 	{
 		sections.add(new Section(name, subject));
+	}
+
+	public void setQuestions(List<Question> questions) {
+		this.questions = questions;
+	}
+
+	public List<Question> getQuestions() {
+		return questions;
 	}
 }
