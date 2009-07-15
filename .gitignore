@@ -3,3 +3,7 @@ egonetdata
 build
 dist
 derby.log
+.project
+.classpath
+.settings
+
