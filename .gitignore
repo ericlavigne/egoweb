@@ -4,3 +4,6 @@ build
 dist
 derby.log
 *.swp
+.project
+.classpath
+.settings
