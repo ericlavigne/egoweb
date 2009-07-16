@@ -12,18 +12,20 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 import net.sf.egonet.model.Section;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.web.model.EntityModel;
 
 public class EditStudyPage extends EgonetPage
 {
-	private final Study study;
+	private final EntityModel study;
 
 	public EditStudyPage(Study study)
     {
 		super("Study: "+study.getName());
-		this.study = study;
+		this.study = new EntityModel(study);
 		build();
 	}
 
@@ -51,13 +53,14 @@ public class EditStudyPage extends EgonetPage
                 {
 					String name = (String) sectionNameField.getModelObject();
 					Section.Subject subject = (Section.Subject) sectionSubjectModel.getObject();
-					study.addSection(name,subject);
+					((Study) study.getObject()).addSection(name,subject);
+					study.save();
 				}
 			}
         );
 		add(form);
 
-		ListView sectionsView = new ListView("sections", study.getSections())
+		ListView sectionsView = new ListView("sections", new PropertyModel(study,"sections"))
         {
 			protected void populateItem(ListItem item) {
 				final Section section = (Section) item.getModelObject();
