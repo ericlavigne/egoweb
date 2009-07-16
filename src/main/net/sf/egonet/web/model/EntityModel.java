@@ -1,7 +1,5 @@
 package net.sf.egonet.web.model;
 
-import java.util.ArrayList;
-
 import net.sf.egonet.model.Entity;
 import net.sf.egonet.web.Main;
 
@@ -9,22 +7,22 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-public class EntityModel<E extends Entity> extends LoadableDetachableModel {
+public class EntityModel extends LoadableDetachableModel {
 
 	private Long id;
 	private String className;
 	
-	private transient E entity;
 	private transient Session session;
 	private transient Transaction tx;
 	
-	public EntityModel(E entity) {
-		this.entity = entity;
+	public EntityModel(Entity entity) {
+		super(entity);
 		this.id = entity.getId();
 		this.className = entity.getClass().getCanonicalName();
 	}
 
 	public void save() {
+		Entity entity = (Entity) getObject();
 		if(entity != null) {
 			ensureSessionAvailable();
 			if(entity.getId() == null) {
@@ -43,21 +41,14 @@ public class EntityModel<E extends Entity> extends LoadableDetachableModel {
 	}
 	
 	@Override
-	protected E load() {
-		if(entity == null) {
-			if(this.id == null) {
-				return null;
-			}
-			ensureSessionAvailable();
-			ArrayList<E> entityList = 
-				new ArrayList<E>(
-					session.createQuery("from "+className+" e where e.id = :id")
-						.setLong("id", id)
-						.list());
-			entity = entityList.isEmpty() ? null : entityList.get(0);
+	protected Object load() {
+		if(this.id == null) {
+			return null;
 		}
-		
-		return entity;
+		ensureSessionAvailable();
+		return session.createQuery("from "+className+" e where e.id = :id")
+			.setLong("id", id)
+			.uniqueResult();
 	}
 	
 	protected void onDetach() {
