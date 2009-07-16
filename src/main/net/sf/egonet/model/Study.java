@@ -75,6 +75,10 @@ public class Study extends Entity
 		egoFields.add(new Ego(name, answerType));
 	}
 
+	public List<Question> getQuestionList() {
+		return new ArrayList<Question>(getQuestions());
+	}
+
 	public void addAlter(String name, Answer.AnswerType answerType)
 	{
 		alterFields.add(new Alter(name, answerType));

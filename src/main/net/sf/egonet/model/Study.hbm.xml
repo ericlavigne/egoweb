@@ -13,7 +13,7 @@
 		<property name="name" column="name" />
 		<property name="active" column="active" />
 		
-		<set name="questions" inverse="true" cascade="save-update">
+		<set name="questions" inverse="true" cascade="save-update" lazy="false">
 			<key column="study_id" />
 			<one-to-many class="net.sf.egonet.model.Question" />
 		</set>

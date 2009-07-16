@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
+import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Section;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.web.model.EntityModel;
@@ -78,5 +79,25 @@ public class EditStudyPage extends EgonetPage
 			}
 		};
 		add(sectionsView);
+		
+		ListView questions = new ListView("questions", new PropertyModel(study,"questionList"))
+        {
+			protected void populateItem(ListItem item) {
+				final Question question = (Question) item.getModelObject();
+
+				Link questionLink = new Link("questionLink")
+                {
+					public void onClick() {
+						//
+					}
+				};
+
+				questionLink.add(new Label("questionTitle", question.getTitle()));
+				item.add(questionLink);
+				item.add(new Label("questionPrompt", question.getPrompt()));
+				item.add(new Label("questionResponseType", question.getResponseType().toString()));
+			}
+		};
+		add(questions);
 	}
 }
