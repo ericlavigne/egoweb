@@ -2,6 +2,7 @@ package net.sf.egonet.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Study extends Entity
@@ -67,6 +68,10 @@ public class Study extends Entity
 
 	public Set<Question> getQuestions() {
 		return questions;
+	}
+	
+	public List<Question> getQuestionList() {
+		return new ArrayList<Question>(getQuestions());
 	}
 
 	public Study addQuestion(Question question) {
