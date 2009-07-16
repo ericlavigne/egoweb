@@ -10,7 +10,7 @@ public class Study extends Entity
 	private List<Question> questions;
 	
 	private ArrayList<Section> sections; // TODO: get rid of sections and delete Section.class
-
+	
 	public Study()
 	{
 		this("");

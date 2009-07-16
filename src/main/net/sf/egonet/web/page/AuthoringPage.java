@@ -81,7 +81,7 @@ public class AuthoringPage extends EgonetPage
 		add(studyView);
     }
 
-	public ArrayList<Study> getStudies()
+	public static ArrayList<Study> getStudies()
     {
 		Session session = Main.getDBSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
@@ -94,7 +94,7 @@ public class AuthoringPage extends EgonetPage
 		return studies;
 	}
 
-	private Long saveStudy(Study study)
+	private static Long saveStudy(Study study)
     {
 		Session session = Main.getDBSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
