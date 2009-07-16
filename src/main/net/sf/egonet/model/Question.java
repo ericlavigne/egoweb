@@ -8,6 +8,7 @@ public class Question extends Entity
 	public static enum SubjectType {EGO_ID,EGO,ALTER_ID,ALTER,ALTER_PAIR}
 	public static enum ResponseType {TEXT,NUMBER,CHOICE,MULTI_CHOICE}
 	
+	private Study study;
 	private String title; 
 	private String prompt; 
 	private String citation;
@@ -94,5 +95,13 @@ public class Question extends Entity
 
 	public List<Option> getOptions() {
 		return options;
+	}
+
+	public void setStudy(Study study) {
+		this.study = study;
+	}
+
+	public Study getStudy() {
+		return study;
 	}
 }
