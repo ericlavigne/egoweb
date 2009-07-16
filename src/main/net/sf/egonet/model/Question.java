@@ -57,32 +57,4 @@ public class Question extends Entity
 	public boolean needsNumericalResponse()      { return getAnswerType() == AnswerType.NUMERICAL;          }
 	public boolean needsSelectionResponse()      { return getAnswerType() == AnswerType.SELECTION;          }
 	public boolean needsMultiSelectionResponse() { return getAnswerType() == AnswerType.MULTIPLE_SELECTION; }
-
-	/*
-	public void setSubjectTypeDB(String subjectTypeDB) {
-		for(SubjectType type : SubjectType.values()) {
-			if(type.name().equalsIgnoreCase(subjectTypeDB)) {
-				this.setSubjectType(type);
-			}
-		}
-	}
-
-	public String getSubjectTypeDB() {
-		return getSubjectType().name();
-	}
-	*/
-
-	/*
-	public void setResponseTypeDB(String responseTypeDB) {
-		for(ResponseType type : ResponseType.values()) {
-			if(type.name().equalsIgnoreCase(responseTypeDB)) {
-				this.setResponseType(type);
-			}
-		}
-	}
-
-	public String getResponseTypeDB() {
-		return getResponseType().name();
-	}
-	*/
 }

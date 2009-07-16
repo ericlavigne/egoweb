@@ -8,11 +8,16 @@
 		<id name="id" column="id">
 			<generator class="increment" />
 		</id>
+		<property name="randomKey" column="random_key" />
+		
 		<property name="title" column="title" />
 		<property name="prompt" column="prompt" />
 		<property name="citation" column="citation" />
 		<property name="subjectTypeDB" column="subject_type" />
 		<property name="responseTypeDB" column="response_type" />
+		
+		<many-to-one name="study" column="study_id" class="net.sf.egonet.model.Study" />
+		
 	</class>
 </hibernate-mapping>
 

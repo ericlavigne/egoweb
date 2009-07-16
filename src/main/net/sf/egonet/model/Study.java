@@ -2,6 +2,8 @@ package net.sf.egonet.model;
 
 import java.util.ArrayList;
 import java.util.List;
+//import java.util.HashSet;
+//import java.util.Set;
 
 public class Study extends Entity
 {
@@ -22,6 +24,14 @@ public class Study extends Entity
 		this.name = name;
 		this.active = true;
 		this.questions = new ArrayList<Question>();
+		/*
+		this.setQuestions(new HashSet<Question>());
+		this.sections = new ArrayList<Section>();
+		sections.add(new Section("Ego Questions"        ,Section.Subject.EGO));
+		sections.add(new Section("Alter Prompt"         ,Section.Subject.ALTER_PROMPT));
+		sections.add(new Section("Alter Questions"      ,Section.Subject.ALTER));
+		sections.add(new Section("Alter Pair Questions" ,Section.Subject.ALTER_PAIR));
+		*/
 	}
 
 	public Boolean isActive()
@@ -37,12 +47,13 @@ public class Study extends Entity
 		}
 	}
 
-	public void setName(String              val) { this.name        = val; }
 	public void setAlterPrompt(String       val) { this.alterPrompt = val; }
+	public void setName(String              val) { this.name        = val; }
 	public void setQuestions(List<Question> val) { this.questions   = val; }
-	public String         getName()        { return name;             }
-	public String         getAlterPrompt() { return this.alterPrompt; }
+
 	public List<Question> getQuestions()   { return questions;        }
+	public String         getAlterPrompt() { return this.alterPrompt; }
+	public String         getName()        { return name;             }
 
 	/*
 	public boolean equals(Object obj)
@@ -67,11 +78,6 @@ public class Study extends Entity
 	public void addAlter(String name, Answer.AnswerType answerType)
 	{
 		alterFields.add(new Alter(name, answerType));
-	}
-
-	public void addQuestion(String prompt, Answer.AnswerType answerType, Question.QuestionType questionType, boolean isRequired)
-	{
-		questions.add(new Question(prompt, answerType, questionType, isRequired));
 	}
 	*/
 }
