@@ -16,7 +16,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import net.sf.egonet.model.Question;
-import net.sf.egonet.model.Section;
+//import net.sf.egonet.model.Section;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.web.model.EntityModel;
 
@@ -28,9 +28,10 @@ public class EditStudyPage extends EgonetPage
     {
 		super("Study: "+study.getName());
 		this.study = new EntityModel(study);
-		build();
+//		build();
 	}
 
+	/*
 	private void build()
     {
 		add(new FeedbackPanel("feedback"));
@@ -80,7 +81,7 @@ public class EditStudyPage extends EgonetPage
 			}
 		};
 		add(sectionsView);
-		
+
 		ListView questions = new ListView("questions", new PropertyModel(study,"questionList"))
         {
 			protected void populateItem(ListItem item) {
@@ -106,14 +107,14 @@ public class EditStudyPage extends EgonetPage
 		final TextField questionTitleField = new TextField("questionTitleField", new Model(""));
 		questionTitleField.setRequired(true);
 		form.add(questionTitleField);
-		
+
 		final TextArea questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
-		
+
 		final TextArea questionCitationField = new TextArea("questionCitationField", new Model(""));
 		form.add(questionCitationField);
-		
+
 		final Model questionResponseTypeModel = new Model(Question.ResponseType.TEXT); // Could also leave this null.
 		ArrayList<Question.ResponseType> responseTypeOptions = new ArrayList<Question.ResponseType>();
 		for (Question.ResponseType responseType : Question.ResponseType.values()) {
@@ -140,4 +141,5 @@ public class EditStudyPage extends EgonetPage
         );
 		add(form);
 	}
+*/
 }

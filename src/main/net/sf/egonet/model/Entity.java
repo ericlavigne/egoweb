@@ -1,7 +1,5 @@
 package net.sf.egonet.model;
 
-//import java.util.Random;
-
 public class Entity implements java.io.Serializable
 {
     private Long id;

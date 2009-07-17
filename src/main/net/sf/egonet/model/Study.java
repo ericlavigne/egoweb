@@ -83,5 +83,11 @@ public class Study extends Entity
 	{
 		alterFields.add(new Alter(name, answerType));
 	}
+
+	public Study addQuestion(Question question) {
+		question.setStudy(this);
+		questions.add(question);
+		return this;
+	}
 	*/
 }
