@@ -34,7 +34,31 @@
     		</tr>
     	</table>
     	
-    	
+    	<fieldset>
+    	<legend>Question</legend>
+    	<form wicket:id="questionForm">
+    		
+    		<label for="questionTitleField">Title:</label> 
+    		<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
+    		<br />
+    		
+    		<label for="questionResponseTypeField">Response type:</label> 
+    		<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
+    		<br />
+    		
+    		<label for="questionPromptField">Prompt:</label><br />
+    		<textarea wicket:id="questionPromptField" id="questionPromptField" rows="5" cols="40">
+    		</textarea>
+    		<br />
+    		
+    		<label for="questionCitationField">Citation:</label><br />
+    		<textarea wicket:id="questionCitationField" id="questionCitationField" rows="5" cols="40">
+    		</textarea>
+    		<br />
+    		
+    		<input wicket:id="submitQuestion" type="submit" value="Save"/>
+    	</form>
+    	</fieldset>
     	
 </wicket:extend>
 
