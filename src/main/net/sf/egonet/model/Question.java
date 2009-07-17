@@ -8,9 +8,9 @@ public class Question extends Entity
 	public static enum QuestionType { EGO_ID, EGO, ALTER_ID, ALTER, ALTER_PAIR };
 
 	private Study study;
-	private String title;    // ??
-	private String citation; // ??
-	private String prompt;
+	private String title;    // gender
+	private String citation; // This question originally written by Dr. X from the Institute of Advanced Research.
+	private String prompt;   // Are you male or female?
 	private AnswerType answerType = AnswerType.TEXTUAL;
 	private QuestionType type = QuestionType.EGO;
 	private boolean isRequired;
