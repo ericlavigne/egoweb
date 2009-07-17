@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -99,5 +100,44 @@ public class EditStudyPage extends EgonetPage
 			}
 		};
 		add(questions);
+
+		form = new Form("questionForm");
+
+		final TextField questionTitleField = new TextField("questionTitleField", new Model(""));
+		questionTitleField.setRequired(true);
+		form.add(questionTitleField);
+		
+		final TextArea questionPromptField = new TextArea("questionPromptField", new Model(""));
+		questionPromptField.setRequired(true);
+		form.add(questionPromptField);
+		
+		final TextArea questionCitationField = new TextArea("questionCitationField", new Model(""));
+		form.add(questionCitationField);
+		
+		final Model questionResponseTypeModel = new Model(Question.ResponseType.TEXT); // Could also leave this null.
+		ArrayList<Question.ResponseType> responseTypeOptions = new ArrayList<Question.ResponseType>();
+		for (Question.ResponseType responseType : Question.ResponseType.values()) {
+			responseTypeOptions.add(responseType);
+		}
+		form.add(new DropDownChoice("questionResponseTypeField",questionResponseTypeModel,responseTypeOptions));
+
+		form.add(
+			new Button("submitQuestion")
+            {
+				@Override
+				public void onSubmit()
+                {
+					Question question = new Question();
+					question.setTitle((String) questionTitleField.getModelObject());
+					question.setPrompt((String) questionPromptField.getModelObject());
+					question.setCitation((String) questionTitleField.getModelObject());
+					question.setResponseType((Question.ResponseType) questionResponseTypeModel.getObject());
+
+					((Study) study.getObject()).addQuestion(question);
+					study.save();
+				}
+			}
+        );
+		add(form);
 	}
 }
