@@ -1,26 +1,28 @@
 package net.sf.egonet.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Study extends Entity
 {
 	private String name;
 	private Boolean active;
-	private ArrayList<Section> sections;
-
-	public Study()
-	{
-		this("");
-	}
+	private String alterPrompt;
+	private List<Alter> alters;
+	private List<Ego> egos;
+	private List<Interview> interviews;
+	private List<Question> questions;
 
 	public Study(String name) {
 		this.name = name;
 		this.active = true;
-		this.sections = new ArrayList<Section>();
-		sections.add(new Section("Ego Questions"        ,Section.Subject.EGO));
-		sections.add(new Section("Alter Prompt"         ,Section.Subject.ALTER_PROMPT));
-		sections.add(new Section("Alter Questions"      ,Section.Subject.ALTER));
-		sections.add(new Section("Alter Pair Questions" ,Section.Subject.ALTER_PAIR));
+		this.questions = new ArrayList<Question>();
+	}
+
+	/*
+	public Study()
+	{
+		this("");
 	}
 
 	public boolean equals(Object obj)
@@ -36,6 +38,7 @@ public class Study extends Entity
 	{
 		return getName().hashCode();
 	}
+	*/
 
 	public String getName()
 	{
@@ -60,13 +63,30 @@ public class Study extends Entity
 		}
 	}
 
-	public ArrayList<Section> getSections()
+	public void setAlterPrompt(String alterPrompt)
 	{
-		return sections;
+		this.alterPrompt = alterPrompt;
 	}
 
-	public void addSection(String name, Section.Subject subject)
+	public String getAlterPrompt()
 	{
-		sections.add(new Section(name, subject));
+		return this.alterPrompt;
 	}
+
+	/*
+	public void addEgo(String name, Answer.AnswerType answerType)
+	{
+		egoFields.add(new Ego(name, answerType));
+	}
+
+	public void addAlter(String name, Answer.AnswerType answerType)
+	{
+		alterFields.add(new Alter(name, answerType));
+	}
+
+	public void addQuestion(String prompt, Answer.AnswerType answerType, Question.QuestionType questionType, boolean isRequired)
+	{
+		questions.add(new Question(prompt, answerType, questionType, isRequired));
+	}
+	*/
 }

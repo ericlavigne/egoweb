@@ -1,0 +1,23 @@
+/*
+ * dot -Tpng -o class.png class.dot
+ */
+digraph G {
+	node [ fontname = "Bitstream Vera Sans" fontsize = 8 shape = "record" ] 
+	edge [ fontname = "Bitstream Vera Sans" fontsize = 8                  ] 
+
+	Study     [ label = "{Study|study_id : key\lname : string\lactive : boolean\lalterPrompt : string\l}"                         ]
+	Ego       [ label = "{Ego|ego_id : key\lname : string\lanswerType : enum\l}"                                                  ]
+	Alter     [ label = "{Alter|alter_id : key\lstudy_id : key\lname : string\lanswerType : enum\l}"                              ]
+	Question  [ label = "{Question|question_id : key\lstudy_id : key\lprompt : string\lquestionType : enum\lanswerType : enum\l}" ]
+	Answer    [ label = "{Answer|answer_id : key\linterview_id : key\lquestion_id : key\lvalue : blob\l}"                         ]
+	Interview [ label = "{Interview|interview_id : key\lstudy_id : key\lego_id : key\l}"                                          ]
+	Skip      [ label = "{Skip|question_id : key\lreason : string\lexpression : string\l}"                                        ]
+
+	Study     -> Alter     [ arrowhead = "crow" ]
+	Study     -> Interview [ arrowhead = "crow" ]
+	Study     -> Question  [ arrowhead = "crow" ]
+	Question  -> Skip      [ arrowhead = "none" ]
+	Question  -> Answer    [ arrowhead = "crow" ]
+	Interview -> Answer    [ arrowhead = "crow" ]
+	Ego       -> Interview [ arrowhead = "crow" ]
+}

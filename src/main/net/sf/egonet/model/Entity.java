@@ -1,6 +1,6 @@
 package net.sf.egonet.model;
 
-public abstract class Entity implements java.io.Serializable
+public class Entity implements java.io.Serializable
 {
     private Long id;
 
