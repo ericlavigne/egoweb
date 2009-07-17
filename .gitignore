@@ -3,3 +3,4 @@ egonetdata
 build
 dist
 derby.log
+*.swp
