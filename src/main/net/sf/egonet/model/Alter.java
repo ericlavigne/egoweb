@@ -1,9 +1,8 @@
 package net.sf.egonet.model;
 
-public class Alter extends Field
+import java.util.Set;
+
+public class Alter
 {
-	public Alter(String name, Answer.AnswerType answerType)
-	{
-		super(name, answerType);
-	}
+	private Set<Answer> identifiers;
 }

@@ -6,7 +6,7 @@ import net.sf.egonet.model.Answer.AnswerType;
 
 public class Question extends Entity
 {
-	public static enum QuestionType { EGO, ALTER, ALTER_PAIR };
+	public static enum QuestionType { EGO_ID, EGO, ALTER_ID, ALTER, ALTER_PAIR };
 
 	private String title;    // ??
 	private String citation; // ??
@@ -14,7 +14,6 @@ public class Question extends Entity
 	private AnswerType answerType;
 	private QuestionType type;
 	private boolean isRequired;
-   	// empty if answerType is TEXTUAL or NUMERICAL
 	private List<Option> options;
 
 	public Question(String prompt, AnswerType answerType, QuestionType type, boolean isRequired)
@@ -25,21 +24,35 @@ public class Question extends Entity
 		this.isRequired = isRequired;
 	}
 
+	public List<Option> getOptions()      { return this.options;      }
 	public AnswerType   getAnswerType()   { return this.answerType;   }
 	public String       getCitation()     { return this.citation;     }
-	public List<Option> getOptions()      { return this.options;      }
 	public String       getPrompt()       { return this.prompt;       }
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }
 	public boolean      isRequired()      { return this.isRequired;   }
 
+	/**
+	 * @return
+	 *  if needsSelectionResponse returns a list of one Option,
+	 *  if needsMultiSelectionResponse returns a list of Option
+	 *  otherwise null
+	 */
+	public void setOptions(List<Option>  val) { this.options    = val; }
 	public void setAnswerType(AnswerType val) { this.answerType = val; }
 	public void setCitation(String       val) { this.citation   = val; }
-	public void setOptions(List<Option>  val) { this.options    = val; }
 	public void setPrompt(String         val) { this.prompt     = val; }
 	public void setTitle(String          val) { this.title      = val; }
 	public void setType(QuestionType     val) { this.type       = val; }
 	public void setRequired(boolean      val) { this.isRequired = val; }
+
+	/** Whether the question identifies the interviewee
+	  */
+	public boolean identifiesEgo() { return getType() == QuestionType.EGO_ID; }
+
+	/** Whether the question identifies the interviewee's alter
+	  */
+	public boolean identifiesAlter() { return getType() == QuestionType.ALTER_ID; }
 
 	/** Whether the question concerns the interviewee
 	  */

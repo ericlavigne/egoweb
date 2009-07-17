@@ -1,11 +1,8 @@
 package net.sf.egonet.model;
 
-import java.util.Map;
+import java.util.Set;
 
-public class Ego extends Field
+public class Ego
 {
-	public Ego(String name, Answer.AnswerType answerType)
-	{
-		super(name, answerType);
-	}
+	private Set<Answer> identifiers;
 }

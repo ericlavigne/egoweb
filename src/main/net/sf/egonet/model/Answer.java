@@ -4,16 +4,14 @@ public class Answer extends Entity
 {
 	protected enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION };
 
-	private AnswerType answerType;
 	private Question question;
 
 	public Answer(Question question)
 	{
-		this.answerType = question.getAnswerType();
 		this.question = question;
 	}
 
-	public AnswerType getType() { return answerType; }
+	public AnswerType getType() { return this.question.getAnswerType(); }
 
 	public boolean isTextual()        { return getType() == AnswerType.TEXTUAL;            }
 	public boolean isNumerical()      { return getType() == AnswerType.NUMERICAL;          }
