@@ -38,23 +38,30 @@
     	<legend>Question</legend>
     	<form wicket:id="questionForm">
     		
-    		<label for="questionTitleField">Title:</label> 
-    		<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
-    		<br />
-    		
-    		<label for="questionResponseTypeField">Response type:</label> 
-    		<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
-    		<br />
-    		
-    		<label for="questionPromptField">Prompt:</label><br />
-    		<textarea wicket:id="questionPromptField" id="questionPromptField" rows="5" cols="40">
-    		</textarea>
-    		<br />
-    		
-    		<label for="questionCitationField">Citation:</label><br />
-    		<textarea wicket:id="questionCitationField" id="questionCitationField" rows="5" cols="40">
-    		</textarea>
-    		<br />
+    		<table>
+    		 	<tr>
+    		 		<td>
+    		 			<label for="questionTitleField">Title:</label>
+    		 			<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
+    		 		</td>
+    		 		<td>
+    		 			<label for="questionResponseTypeField">Response type:</label>
+    		 			<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
+    		 		</td>
+    		 	</tr>
+    			<tr>
+    				<th><label for="questionPromptField">Prompt</label></th>
+    				<th><label for="questionCitationField">Citation</label></th>
+    			</tr>
+    			<tr>
+    				<td>
+    					<textarea wicket:id="questionPromptField" id="questionPromptField"></textarea>
+    				</td>
+    				<td>
+    					<textarea wicket:id="questionCitationField" id="questionCitationField"></textarea>
+    				</td>
+    			</tr>
+    		</table>
     		
     		<input wicket:id="submitQuestion" type="submit" value="Save"/>
     	</form>
