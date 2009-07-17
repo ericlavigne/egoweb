@@ -1,7 +1,7 @@
 package net.sf.egonet.web.model;
 
 import net.sf.egonet.model.Entity;
-//import net.sf.egonet.web.Main;
+import net.sf.egonet.web.Main;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.hibernate.Session;
@@ -36,7 +36,7 @@ public class EntityModel extends LoadableDetachableModel
 
 	private void ensureSessionAvailable() {
 		if(session == null || tx == null) {
-//			session = Main.getDBSessionFactory().openSession();
+			session = Main.getDBSessionFactory().openSession();
 			tx = session.beginTransaction();
 		}
 	}

@@ -1,6 +1,5 @@
 package net.sf.egonet.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import net.sf.egonet.model.Answer.AnswerType;
 
@@ -12,8 +11,8 @@ public class Question extends Entity
 	private String title;    // ??
 	private String citation; // ??
 	private String prompt;
-	private AnswerType answerType;
-	private QuestionType type;
+	private AnswerType answerType = AnswerType.TEXTUAL;
+	private QuestionType type = QuestionType.EGO;
 	private boolean isRequired;
 	private List<Option> options;
 
