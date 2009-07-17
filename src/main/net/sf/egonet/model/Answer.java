@@ -2,7 +2,7 @@ package net.sf.egonet.model;
 
 public class Answer extends Entity
 {
-	protected enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION };
+	public enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION };
 
 	private Question question;
 

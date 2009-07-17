@@ -8,6 +8,7 @@ public class Question extends Entity
 {
 	public static enum QuestionType { EGO_ID, EGO, ALTER_ID, ALTER, ALTER_PAIR };
 
+	private Study study;
 	private String title;    // ??
 	private String citation; // ??
 	private String prompt;
@@ -23,6 +24,10 @@ public class Question extends Entity
 		this.type       = type;
 		this.isRequired = isRequired;
 	}
+	
+	public Question() {
+		
+	}
 
 	public List<Option> getOptions()      { return this.options;      }
 	public AnswerType   getAnswerType()   { return this.answerType;   }
@@ -31,7 +36,10 @@ public class Question extends Entity
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }
 	public boolean      isRequired()      { return this.isRequired;   }
-
+	public Study        getStudy()        { return this.study;        }
+	public String       getAnswerTypeDB() { return getAnswerType().name(); }
+	public String       getTypeDB()       { return getType().name();       }
+	
 	/**
 	 * @return
 	 *  if needsSelectionResponse returns a list of one Option,
@@ -45,6 +53,10 @@ public class Question extends Entity
 	public void setTitle(String          val) { this.title      = val; }
 	public void setType(QuestionType     val) { this.type       = val; }
 	public void setRequired(boolean      val) { this.isRequired = val; }
+	public void setStudy(Study           val) { this.study      = val; }
+
+	protected void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
+	protected void setTypeDB(String val) { this.setType(QuestionType.valueOf(val)); }
 
 	/** Whether the question identifies the interviewee
 	  */

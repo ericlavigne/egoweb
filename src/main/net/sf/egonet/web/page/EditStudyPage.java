@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 //import net.sf.egonet.model.Section;
 import net.sf.egonet.model.Study;
@@ -28,59 +29,12 @@ public class EditStudyPage extends EgonetPage
     {
 		super("Study: "+study.getName());
 		this.study = new EntityModel(study);
-//		build();
+		build();
 	}
 
-	/*
 	private void build()
     {
 		add(new FeedbackPanel("feedback"));
-		Form form = new Form("sectionForm");
-
-		final TextField sectionNameField = new TextField("sectionNameField", new Model(""));
-		sectionNameField.setRequired(true);
-		form.add(sectionNameField);
-
-		final Model sectionSubjectModel = new Model(Section.Subject.EGO); // Could also leave this null.
-		ArrayList<Section.Subject> subjectOptions = new ArrayList<Section.Subject>();
-		for (Section.Subject subject : Section.Subject.values()) {
-			subjectOptions.add(subject);
-		}
-		form.add(new DropDownChoice("sectionSubjectField",sectionSubjectModel,subjectOptions));
-
-		form.add(
-			new Button("createSection")
-            {
-				@Override
-				public void onSubmit()
-                {
-					String name = (String) sectionNameField.getModelObject();
-					Section.Subject subject = (Section.Subject) sectionSubjectModel.getObject();
-					((Study) study.getObject()).addSection(name,subject);
-					study.save();
-				}
-			}
-        );
-		add(form);
-
-		ListView sectionsView = new ListView("sections", new PropertyModel(study,"sections"))
-        {
-			protected void populateItem(ListItem item) {
-				final Section section = (Section) item.getModelObject();
-
-				Link sectionLink = new Link("sectionLink")
-                {
-					public void onClick() {
-						// setResponsePage(new EditSectionPage(section));
-					}
-				};
-
-				sectionLink.add(new Label("sectionName", section.name));
-				item.add(sectionLink);
-				item.add(new Label("sectionSubject", section.subject.toString()));
-			}
-		};
-		add(sectionsView);
 
 		ListView questions = new ListView("questions", new PropertyModel(study,"questionList"))
         {
@@ -97,12 +51,12 @@ public class EditStudyPage extends EgonetPage
 				questionLink.add(new Label("questionTitle", question.getTitle()));
 				item.add(questionLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
-				item.add(new Label("questionResponseType", question.getResponseType().toString()));
+				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
 			}
 		};
 		add(questions);
 
-		form = new Form("questionForm");
+		Form form = new Form("questionForm");
 
 		final TextField questionTitleField = new TextField("questionTitleField", new Model(""));
 		questionTitleField.setRequired(true);
@@ -115,9 +69,9 @@ public class EditStudyPage extends EgonetPage
 		final TextArea questionCitationField = new TextArea("questionCitationField", new Model(""));
 		form.add(questionCitationField);
 
-		final Model questionResponseTypeModel = new Model(Question.ResponseType.TEXT); // Could also leave this null.
-		ArrayList<Question.ResponseType> responseTypeOptions = new ArrayList<Question.ResponseType>();
-		for (Question.ResponseType responseType : Question.ResponseType.values()) {
+		final Model questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
+		ArrayList<Answer.AnswerType> responseTypeOptions = new ArrayList<Answer.AnswerType>();
+		for (Answer.AnswerType responseType : Answer.AnswerType.values()) {
 			responseTypeOptions.add(responseType);
 		}
 		form.add(new DropDownChoice("questionResponseTypeField",questionResponseTypeModel,responseTypeOptions));
@@ -132,7 +86,7 @@ public class EditStudyPage extends EgonetPage
 					question.setTitle((String) questionTitleField.getModelObject());
 					question.setPrompt((String) questionPromptField.getModelObject());
 					question.setCitation((String) questionTitleField.getModelObject());
-					question.setResponseType((Question.ResponseType) questionResponseTypeModel.getObject());
+					question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
 
 					((Study) study.getObject()).addQuestion(question);
 					study.save();
@@ -141,5 +95,4 @@ public class EditStudyPage extends EgonetPage
         );
 		add(form);
 	}
-*/
 }

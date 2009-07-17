@@ -1,11 +1,13 @@
 package net.sf.egonet.model;
 
+import java.util.Random;
+
 public class Entity implements java.io.Serializable
 {
     private Long id;
 
-//	private static Random random;
-//  private Long randomKey;
+	private static Random random;
+	private Long randomKey;
 
     public Long getId()
     {
@@ -17,7 +19,6 @@ public class Entity implements java.io.Serializable
 		this.id = id;
 	}
 
-	/*
 	public boolean equals(Object obj)
 	{
 		return obj instanceof Entity && getRandomKey().equals(((Entity) obj).getRandomKey());
@@ -45,5 +46,4 @@ public class Entity implements java.io.Serializable
 		}
 		return random.nextLong();
 	}
-	*/
 }
