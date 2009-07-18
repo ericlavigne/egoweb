@@ -2,6 +2,7 @@
 <project default="run" name="egonet" basedir=".">
 
 	<property name="src.dir" value="src/main/java"/>
+	<property name="resources.dir" value="src/main/resources"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="static.dir" value="static"/>
 	<property name="build.dir" value="build"/>
@@ -29,6 +30,9 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.*"/>
 				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="${resources.dir}">
+				<include name="**/*.*"/>
 			</fileset>
 			<fileset dir="${static.dir}" />
 		</copy>
