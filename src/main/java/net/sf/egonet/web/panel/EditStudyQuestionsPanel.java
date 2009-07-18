@@ -6,7 +6,7 @@ import java.util.List;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
-import net.sf.egonet.web.Main;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.web.model.EntityModel;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,8 +22,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 public class EditStudyQuestionsPanel extends Panel {
 
@@ -103,18 +101,7 @@ public class EditStudyQuestionsPanel extends Panel {
 					studyObject.addQuestion(question);
 					study.save();
 
-					Session session = Main.getDBSessionFactory().openSession();
-					Transaction tx = session.beginTransaction();
-					
-					session.saveOrUpdate(question);
-					
-					tx.commit();
-					session.close();
-					
-					//throw new RuntimeException("\nQuestion: "+question+"\nStudy: "+studyObject);
-					
-					//((Study) study.getObject()).addQuestion(question);
-					//study.save(); // TODO: Figure out why saving doesn't work anymore. Change to EntityModel?
+					DB.save(question);
 				}
 			}
         );

@@ -14,10 +14,8 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import net.sf.egonet.web.Main;
 import net.sf.egonet.model.Study;
-
-import org.hibernate.*;
+import net.sf.egonet.persistence.DB;
 
 public class AuthoringPage extends EgonetPage
 {
@@ -55,7 +53,7 @@ public class AuthoringPage extends EgonetPage
 
                     Study newStudy = new Study(name);
                     newStudy.setActive(active);
-                    saveStudy(newStudy);
+                    DB.save(newStudy);
                 }
             }
         );
@@ -83,28 +81,8 @@ public class AuthoringPage extends EgonetPage
 
 	public static ArrayList<Study> getStudies()
     {
-		Session session = Main.getDBSessionFactory().openSession();
-		Transaction tx = session.beginTransaction();
-
-		ArrayList<Study> studies = new ArrayList<Study>(session.createQuery("from Study s order by s.name").list());
-
-		tx.commit();
-		session.close();
-
-		return studies;
+		return DB.getStudies();
 	}
 
-	private static Long saveStudy(Study study)
-    {
-		Session session = Main.getDBSessionFactory().openSession();
-		Transaction tx = session.beginTransaction();
-
-		Long studyId = (Long) session.save(study);
-
-		tx.commit();
-		session.close();
-
-		return studyId;
-    }
 }
 
