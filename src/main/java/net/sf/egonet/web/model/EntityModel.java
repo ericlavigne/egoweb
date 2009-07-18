@@ -11,7 +11,6 @@ public class EntityModel extends LoadableDetachableModel
 {
 	private Long id;
 	private String className;
-	private Entity nonPersistedEntity;
 
 	private transient Session session;
 	private transient Transaction tx;
@@ -21,9 +20,6 @@ public class EntityModel extends LoadableDetachableModel
 		super(); // Entity may be detached with uninitialized (lazy) fields, so EntityModel must start detached.
 		this.id = entity.getId();
 		this.className = entity.getClass().getCanonicalName();
-		if(id == null) {
-			nonPersistedEntity = entity; // Doesn't have id yet, so hasn't been persisted.
-		}
 	}
 
 	public void save() {
@@ -36,7 +32,6 @@ public class EntityModel extends LoadableDetachableModel
 				session.saveOrUpdate(entity);
 			}
 		}
-		nonPersistedEntity = null; // Just saved, so entity is definitely persisted.
 	}
 
 	private void ensureSessionAvailable() {
@@ -49,7 +44,7 @@ public class EntityModel extends LoadableDetachableModel
 	@Override
 	protected Object load() {
 		if(this.id == null) {
-			return nonPersistedEntity;
+			return null;
 		}
 		ensureSessionAvailable();
 		return session.createQuery("from "+className+" e where e.id = :id")
@@ -66,9 +61,5 @@ public class EntityModel extends LoadableDetachableModel
 		}
 		tx = null;
 		session = null;
-		if(nonPersistedEntity != null && nonPersistedEntity.getId() != null) {
-			this.id = nonPersistedEntity.getId();
-			nonPersistedEntity = null;
-		}
 	}
 }

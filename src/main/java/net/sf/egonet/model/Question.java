@@ -28,6 +28,10 @@ public class Question extends Entity
 		answerType = AnswerType.TEXTUAL;
 		type = QuestionType.EGO;
 	}
+	
+	public String toString() {
+		return "<Question | id="+getId()+" study="+study.getId()+" prompt="+prompt+">";
+	}
 
 	public List<Option> getOptions()      { return this.options;      }
 	public AnswerType   getAnswerType()   { return this.answerType;   }

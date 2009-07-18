@@ -26,6 +26,10 @@ public class Study extends Entity
 		this.active = true;
 	}
 
+	public String toString() {
+		return "<Study with id="+getId()+" and "+questions.size()+" questions>";
+	}
+	
 	public Boolean isActive()
 	{
 		return active;
