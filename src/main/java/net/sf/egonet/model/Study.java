@@ -51,6 +51,16 @@ public class Study extends Entity
 	public List<Question> getQuestionList() {
 		return new ArrayList<Question>(getQuestions());
 	}
+	
+	public List<Question> getQuestionList(Question.QuestionType type) {
+		ArrayList<Question> results = new ArrayList<Question>();
+		for(Question question : getQuestionList()) {
+			if(question.getType().equals(type)) {
+				results.add(question);
+			}
+		}
+		return results;
+	}
 
 	public Study addQuestion(Question question) {
 		question.setStudy(this);

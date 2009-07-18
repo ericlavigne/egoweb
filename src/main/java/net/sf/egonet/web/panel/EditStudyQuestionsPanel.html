@@ -1,0 +1,48 @@
+<wicket:panel>
+	
+	<table border="1">
+    	<caption wicket:id="caption">Questions</caption>
+    	<tr><th>Title</th><th>Prompt</th><th>Response Type</th></tr>
+    	<tr wicket:id="questions">
+    		<td><a href="#" wicket:id="questionLink"><span wicket:id="questionTitle">First Name</span></a></td>
+    		<td wicket:id="questionPrompt">What is your first name?</td>
+    		<td wicket:id="questionResponseType">TEXT</td>
+    	</tr>
+    </table>
+    	
+    <div wicket:id="feedback"/>
+    	
+    <fieldset>
+    	<legend>Question</legend>
+    	<form wicket:id="questionForm">
+    		
+    		<table>
+    	 		<tr>
+    	 			<td>
+    	 				<label for="questionTitleField">Title:</label>
+    	 				<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
+    	 			</td>
+    	 			<td>
+    	 				<label for="questionResponseTypeField">Response type:</label>
+    	 				<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
+    	 			</td>
+    	 		</tr>
+    			<tr>
+    				<th><label for="questionPromptField">Prompt</label></th>
+    				<th><label for="questionCitationField">Citation</label></th>
+    			</tr>
+    			<tr>
+    				<td>
+    					<textarea wicket:id="questionPromptField" id="questionPromptField"></textarea>
+    				</td>
+    				<td>
+    					<textarea wicket:id="questionCitationField" id="questionCitationField"></textarea>
+    				</td>
+    			</tr>
+    		</table>
+    		
+    		<input wicket:id="submitQuestion" type="submit" value="Save"/>
+    	</form>
+    </fieldset>
+    	
+</wicket:panel>
