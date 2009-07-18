@@ -7,3 +7,5 @@ derby.log
 .project
 .classpath
 .settings
+log/*
+target/*
