@@ -4,7 +4,7 @@
 	<property name="src.dir" value="src/main/java"/>
 	<property name="resources.dir" value="src/main/resources"/>
 	<property name="lib.dir" value="lib"/>
-	<property name="static.dir" value="static"/>
+	<property name="static.dir" value="src/main/webapp/static"/>
 	<property name="build.dir" value="build"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="main.class.web" value="net.sf.egonet.web.Main" />

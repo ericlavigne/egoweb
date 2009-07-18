@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<web-app
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd"
+	version="2.5">
+
+	<display-name>Egonet</display-name>
+
+	<!-- SERVLETS ======================================================================= -->
+	<servlet>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
+		<load-on-startup>0</load-on-startup>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>redirectWelcome</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name>EgonetApplication</servlet-name>
+		<servlet-class>org.apache.wicket.protocol.http.WicketServlet</servlet-class>
+		<init-param>
+			<param-name>applicationClassName</param-name>
+			<param-value>net.sf.egonet.web.Main</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- SERVLET MAPPINGS =============================================================== -->
+	<servlet-mapping>
+		<url-pattern>/static/*</url-pattern>
+		<servlet-name>default</servlet-name>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<url-pattern>/*</url-pattern>
+		<servlet-name>EgonetApplication</servlet-name>
+	</servlet-mapping>
+
+
+	<!-- WELCOME PAGES ================================================================== -->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<!-- CUSTOM ERROR PAGES ============================================================= -->
+	<error-page>
+		<error-code>403</error-code>
+		<location>/static/notFound.html</location>
+	</error-page>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/static/notFound.html</location>
+	</error-page>
+
+	<error-page>
+		<error-code>500</error-code>
+		<location>/static/internalError.html</location>
+	</error-page>
+</web-app>
