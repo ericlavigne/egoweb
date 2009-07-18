@@ -24,7 +24,7 @@
         <rollingPolicy
             class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <FileNamePattern>
-                log/rummagebin-%d{yyyy-MM-dd-HH}.log
+                egonet-%d{yyyy-MM-dd-HH}.log
             </FileNamePattern>
         </rollingPolicy>
 
