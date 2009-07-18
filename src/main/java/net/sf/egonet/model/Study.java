@@ -3,8 +3,6 @@ package net.sf.egonet.model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-//import java.util.HashSet;
-//import java.util.Set;
 import java.util.Set;
 
 public class Study extends Entity
@@ -12,6 +10,7 @@ public class Study extends Entity
 	private String name;
 	private Boolean active;
 	private String alterPrompt;
+	// XXX remove these later
 	private List<Alter> alters;
 	private List<Ego> egos;
 	private List<Interview> interviews;
@@ -44,14 +43,16 @@ public class Study extends Entity
 	public void setName(String              val) { this.name        = val; }
 	public void setQuestions(Set<Question>  val) { this.questions   = val; }
 
-	public Set<Question> getQuestions()   { return questions;        }
 	public String        getAlterPrompt() { return this.alterPrompt; }
 	public String        getName()        { return name;             }
+
+	// XXX remove these later
+	public Set<Question> getQuestions()   { return questions;        }
 
 	public List<Question> getQuestionList() {
 		return new ArrayList<Question>(getQuestions());
 	}
-	
+
 	public List<Question> getQuestionList(Question.QuestionType type) {
 		ArrayList<Question> results = new ArrayList<Question>();
 		for(Question question : getQuestionList()) {

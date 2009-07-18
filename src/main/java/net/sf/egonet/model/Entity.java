@@ -2,7 +2,7 @@ package net.sf.egonet.model;
 
 import java.util.Random;
 
-public class Entity implements java.io.Serializable
+public abstract class Entity implements java.io.Serializable
 {
     private Long id;
 
@@ -19,6 +19,10 @@ public class Entity implements java.io.Serializable
 		this.id = id;
 	}
 
+	// ----------------------------------------
+
+	// XXX Add citation of hibernate being fussy without these methods
+
 	public boolean equals(Object obj)
 	{
 		return obj instanceof Entity && getRandomKey().equals(((Entity) obj).getRandomKey());
@@ -28,6 +32,8 @@ public class Entity implements java.io.Serializable
 	{
 		return getRandomKey().hashCode();
 	}
+
+	// ----------------------------------------
 
 	protected void setRandomKey(Long randomKey) {
 		this.randomKey = randomKey;
