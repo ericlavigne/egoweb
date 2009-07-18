@@ -1,6 +1,6 @@
 package net.sf.egonet.web.page;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -17,7 +17,6 @@ import org.apache.wicket.model.PropertyModel;
 
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
-//import net.sf.egonet.model.Section;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.web.model.EntityModel;
 
@@ -70,11 +69,10 @@ public class EditStudyPage extends EgonetPage
 		form.add(questionCitationField);
 
 		final Model questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
-		ArrayList<Answer.AnswerType> responseTypeOptions = new ArrayList<Answer.AnswerType>();
-		for (Answer.AnswerType responseType : Answer.AnswerType.values()) {
-			responseTypeOptions.add(responseType);
-		}
-		form.add(new DropDownChoice("questionResponseTypeField",questionResponseTypeModel,responseTypeOptions));
+		form.add(new DropDownChoice(
+				"questionResponseTypeField",
+				questionResponseTypeModel,
+				Arrays.asList(Answer.AnswerType.values())));
 
 		form.add(
 			new Button("submitQuestion")
