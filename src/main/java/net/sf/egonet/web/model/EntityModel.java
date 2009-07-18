@@ -17,7 +17,7 @@ public class EntityModel extends LoadableDetachableModel
 
 	public EntityModel(Entity entity)
    	{
-		super(entity);
+		super(); // Entity may be detached with uninitialized (lazy) fields, so EntityModel must start detached.
 		this.id = entity.getId();
 		this.className = entity.getClass().getCanonicalName();
 	}
