@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <configuration>
     <appender class="ch.qos.logback.core.FileAppender" name="RootFileAppender">
-        <file>all.log</file>
+		<file>log/all.log</file>
         <append>true</append>
 
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -20,12 +21,9 @@
     </appender>
 
     <appender name="egonet" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>egonet.log</File>
-        <rollingPolicy
-            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>
-                egonet-%d{yyyy-MM-dd-HH}.log
-            </FileNamePattern>
+		<File>log/egonet.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>log/egonet-%d{yyyy-MM-dd-HH}.log</FileNamePattern>
         </rollingPolicy>
 
         <layout class="ch.qos.logback.classic.PatternLayout">
