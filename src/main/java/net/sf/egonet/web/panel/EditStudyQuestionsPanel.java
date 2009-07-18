@@ -94,9 +94,10 @@ public class EditStudyQuestionsPanel extends Panel {
 					question.setPrompt((String) questionPromptField.getModelObject());
 					question.setCitation((String) questionTitleField.getModelObject());
 					question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
+					question.setType(questionType);
 
 					((Study) study.getObject()).addQuestion(question);
-					study.save();
+					study.save(); // TODO: Figure out why saving doesn't work anymore. Change to EntityModel?
 				}
 			}
         );
