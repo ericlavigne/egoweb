@@ -7,7 +7,7 @@ public class Question extends Entity
 {
 	public static enum QuestionType { EGO_ID, EGO, ALTER_ID, ALTER, ALTER_PAIR };
 
-	private Study study;
+	private Long studyId;
 	private String title;    // Gender
 	private String citation; // This question originally written by Dr. X from the Institute of Advanced Research.
 	private String prompt;   // Are you male or female?
@@ -30,7 +30,7 @@ public class Question extends Entity
 	}
 	
 	public String toString() {
-		return "<Question | id="+getId()+" study="+study.getId()+" prompt="+prompt+">";
+		return "<Question | id="+getId()+" study="+studyId+" prompt="+prompt+">";
 	}
 
 	public List<Option> getOptions()      { return this.options;      }
@@ -40,10 +40,11 @@ public class Question extends Entity
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }
 	public boolean      isRequired()      { return this.isRequired;   }
-	public Study        getStudy()        { return this.study;        }
+	public Long         getStudyId()      { return this.studyId;        }
 	public String       getAnswerTypeDB() { return getAnswerType().name(); }
-	public String       getTypeDB()       { return getType().name();       }
-
+	public String       getTypeDB()       { return typeDB(getType());       }
+	
+	public static String typeDB(QuestionType type) { return type.name(); }
 	/**
 	 * @return
 	 *  if needsSelectionResponse returns a list of one Option,
@@ -57,7 +58,7 @@ public class Question extends Entity
 	public void setTitle(String          val) { this.title      = val; }
 	public void setType(QuestionType     val) { this.type       = val; }
 	public void setRequired(boolean      val) { this.isRequired = val; }
-	public void setStudy(Study           val) { this.study      = val; }
+	public void setStudyId(Long          val) { this.studyId      = val; }
 
 	protected void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
 	protected void setTypeDB(String val) { this.setType(QuestionType.valueOf(val)); }

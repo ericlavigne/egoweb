@@ -16,6 +16,6 @@
 		<property name="typeDB" column="subject_type" />
 		<property name="answerTypeDB" column="response_type" />
 
-		<many-to-one name="study" column="study_id" class="net.sf.egonet.model.Study" />
+		<property name="studyId" column="study_id" />
 	</class>
 </hibernate-mapping>

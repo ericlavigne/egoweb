@@ -26,7 +26,7 @@ import org.apache.wicket.model.PropertyModel;
 
 public class EditStudyQuestionsPanel extends Panel {
 
-	private EntityModel study;
+	private Long studyId;
 	private Question.QuestionType questionType;
 	private IModel editedQuestion;
 	
@@ -38,13 +38,17 @@ public class EditStudyQuestionsPanel extends Panel {
 	
 	public EditStudyQuestionsPanel(String id, Study study, Question.QuestionType questionType) {
 		super(id);
-		this.study = new EntityModel(study);
+		this.studyId = study.getId();
 		this.questionType = questionType;
 		build();
 	}
+	
+	public Study getStudy() {
+		return DB.getStudy(studyId);
+	}
 
 	public List<Question> getQuestions() {
-		return ((Study) study.getObject()).getQuestionList(questionType);
+		return DB.getQuestionsForStudy(studyId,questionType);
 	}
 	
 	private void build()
@@ -111,9 +115,6 @@ public class EditStudyQuestionsPanel extends Panel {
 					Question question = 
 						editedQuestion == null ? new Question() : (Question) editedQuestion.getObject();
 					insertFormFieldsIntoQuestion(question);
-					Study studyObject = (Study) study.getObject();
-					studyObject.addQuestion(question);
-					study.save();
 					DB.save(question);
 					form.setVisible(false);
 				}
@@ -135,6 +136,7 @@ public class EditStudyQuestionsPanel extends Panel {
 		question.setCitation((String) questionCitationField.getModelObject());
 		question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
 		question.setType(questionType);
+		question.setStudyId(studyId);
 	}
 
 }

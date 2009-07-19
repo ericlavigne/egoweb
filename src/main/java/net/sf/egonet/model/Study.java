@@ -1,20 +1,10 @@
 package net.sf.egonet.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class Study extends Entity
 {
 	private String name;
 	private Boolean active;
 	private String alterPrompt;
-	// XXX remove these later
-	private List<Alter> alters;
-	private List<Ego> egos;
-	private List<Interview> interviews;
-	private Set<Question> questions = new HashSet<Question>();
 
 	public Study()
 	{
@@ -27,7 +17,10 @@ public class Study extends Entity
 	}
 
 	public String toString() {
-		return "<Study with id="+getId()+" and "+questions.size()+" questions>";
+		return "<Study | id = "+getId()
+			+", name = "+getName()
+			+", active="+isActive()
+			+", alterPrompt="+getAlterPrompt()+">";
 	}
 	
 	public Boolean isActive()
@@ -45,31 +38,8 @@ public class Study extends Entity
 
 	public void setAlterPrompt(String       val) { this.alterPrompt = val; }
 	public void setName(String              val) { this.name        = val; }
-	public void setQuestions(Set<Question>  val) { this.questions   = val; }
 
 	public String        getAlterPrompt() { return this.alterPrompt; }
 	public String        getName()        { return name;             }
 
-	// XXX remove these later
-	public Set<Question> getQuestions()   { return questions;        }
-
-	public List<Question> getQuestionList() {
-		return new ArrayList<Question>(getQuestions());
-	}
-
-	public List<Question> getQuestionList(Question.QuestionType type) {
-		ArrayList<Question> results = new ArrayList<Question>();
-		for(Question question : getQuestionList()) {
-			if(question.getType().equals(type)) {
-				results.add(question);
-			}
-		}
-		return results;
-	}
-
-	public Study addQuestion(Question question) {
-		question.setStudy(this);
-		questions.add(question);
-		return this;
-	}
 }

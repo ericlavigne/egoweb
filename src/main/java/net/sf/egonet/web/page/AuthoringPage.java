@@ -1,6 +1,7 @@
 package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -79,7 +80,7 @@ public class AuthoringPage extends EgonetPage
 		add(studyView);
     }
 
-	public static ArrayList<Study> getStudies()
+	public static List<Study> getStudies()
     {
 		return DB.getStudies();
 	}
