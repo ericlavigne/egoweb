@@ -3,7 +3,7 @@ Egonet networks
 
 Summary of classes and relevant methods:
 
-IAlter (interface)
+Alter (can be anything for now - interface relevant only for implementations of IAlterAdjacency and IAlterEquality)
 IAlterAdjacency (interface)
 	boolean adjacent(Alter,Alter)
 IAlterEquality (interface)
