@@ -1,0 +1,38 @@
+Egonet networks
+===============
+
+Summary of classes and relevant methods:
+
+IAlter (interface)
+IAlterAdjacency (interface)
+	boolean adjacent(Alter,Alter)
+IAlterEquality (interface)
+	boolean sameAlter(Alter,Alter)
+Node
+	List<Alter> getAlters()
+Edge
+	Node getNode1()
+	Node getNode2()
+GraphicSettings
+	Color getColor(Node)
+	Double getSize(Node)
+	Shape getShape(Node)
+	Color getColor(Edge)
+	Double getSize(Edge)
+	Shape getShape(Edge)
+	String getName(Alter)
+Network
+	new Network(List<Alter>,AlterAdjacency,AlterEquality)
+	List<Node> getNodes()
+	List<Edge> getEdges()
+	List<Edge> getEdges(Node)
+	List<Node> getAdjacent(Node)
+	Blob render(GraphicSettings)
+
+Details:
+
+A network is a collection of nodes and connections (edges) between those nodes. Each node contains alters. Two alters are in the same node if and only if AlterEquality.sameAlter returns true. Two nodes node1 and node2 are connected by an edge if there exists at least one pair of alters alter1 and alter2, in node1 and node2 respectively, for which AlterAdjacency(alter1,alter2) returns true.
+
+GraphicSettings is used to customize the appearance of the rendered network. It may have a few more methods than those listed (which I will add to this document later), but the idea is that the appearance of all nodes and edges should be customizable. The return value of GraphicSettings.getName(Alter) should float near that alter in the rendered image.
+
+The "Blob" returned from Network.render should be an in-memory datastructure suitable for serving to a web browser or writing to disk as a (JPEG or PNG?) picture file.
