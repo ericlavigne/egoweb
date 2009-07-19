@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
@@ -27,6 +28,13 @@ public class EditStudyQuestionsPanel extends Panel {
 
 	private EntityModel study;
 	private Question.QuestionType questionType;
+	private IModel editedQuestion;
+	
+	private Form form;
+	private TextField questionTitleField;
+	private TextArea questionPromptField;
+	private TextArea questionCitationField;
+	private Model questionResponseTypeModel;
 	
 	public EditStudyQuestionsPanel(String id, Study study, Question.QuestionType questionType) {
 		super(id);
@@ -53,7 +61,9 @@ public class EditStudyQuestionsPanel extends Panel {
 				Link questionLink = new Link("questionLink")
                 {
 					public void onClick() {
-						//
+						editedQuestion = new EntityModel(question);
+						setFormFieldsFromQuestion(question);
+						form.setVisible(true);
 					}
 				};
 
@@ -65,20 +75,28 @@ public class EditStudyQuestionsPanel extends Panel {
 		};
 		add(questions);
 
-		Form form = new Form("questionForm");
-
-		final TextField questionTitleField = new TextField("questionTitleField", new Model(""));
+		add(new Link("newQuestion") {
+			public void onClick() {
+				editedQuestion = new Model(new Question());
+				setFormFieldsFromQuestion(new Question());
+				form.setVisible(true);
+			}
+		});
+		
+		form = new Form("questionForm");
+		
+		questionTitleField = new TextField("questionTitleField", new Model(""));
 		questionTitleField.setRequired(true);
 		form.add(questionTitleField);
 
-		final TextArea questionPromptField = new TextArea("questionPromptField", new Model(""));
+		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
 
-		final TextArea questionCitationField = new TextArea("questionCitationField", new Model(""));
+		questionCitationField = new TextArea("questionCitationField", new Model(""));
 		form.add(questionCitationField);
 
-		final Model questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
+		questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
 		form.add(new DropDownChoice(
 				"questionResponseTypeField",
 				questionResponseTypeModel,
@@ -90,22 +108,33 @@ public class EditStudyQuestionsPanel extends Panel {
 				@Override
 				public void onSubmit()
                 {
-					Question question = new Question();
-					question.setTitle((String) questionTitleField.getModelObject());
-					question.setPrompt((String) questionPromptField.getModelObject());
-					question.setCitation((String) questionTitleField.getModelObject());
-					question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
-					question.setType(questionType);
-
+					Question question = 
+						editedQuestion == null ? new Question() : (Question) editedQuestion.getObject();
+					insertFormFieldsIntoQuestion(question);
 					Study studyObject = (Study) study.getObject();
 					studyObject.addQuestion(question);
 					study.save();
-
 					DB.save(question);
+					form.setVisible(false);
 				}
 			}
         );
 		add(form);
+	}
+	
+	private void setFormFieldsFromQuestion(Question question) {
+		questionTitleField.setModelObject(question.getTitle());
+		questionPromptField.setModelObject(question.getPrompt());
+		questionCitationField.setModelObject(question.getCitation());
+		questionResponseTypeModel.setObject(question.getAnswerType());
+	}
+	
+	private void insertFormFieldsIntoQuestion(Question question) {
+		question.setTitle((String) questionTitleField.getModelObject());
+		question.setPrompt((String) questionPromptField.getModelObject());
+		question.setCitation((String) questionCitationField.getModelObject());
+		question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
+		question.setType(questionType);
 	}
 
 }

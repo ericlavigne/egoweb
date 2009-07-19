@@ -35,12 +35,16 @@ public class DB {
 		});
 	}
 	
+	public static ArrayList<Study> getStudies(Session session) {
+		return new ArrayList<Study>(session.createQuery("from Study s order by s.name").list());
+	}
+	
 	public static ArrayList<Study> getStudies()
     {
 		Session session = Main.getDBSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
 
-		ArrayList<Study> studies = new ArrayList<Study>(session.createQuery("from Study s order by s.name").list());
+		ArrayList<Study> studies = getStudies(session);
 
 		tx.commit();
 		session.close();
