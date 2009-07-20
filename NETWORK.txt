@@ -14,13 +14,13 @@ Edge
 	Node getNode1()
 	Node getNode2()
 GraphicSettings
+	String getLabel(Node)
 	Color getColor(Node)
 	Double getSize(Node)
 	Shape getShape(Node)
 	Color getColor(Edge)
 	Double getSize(Edge)
 	Shape getShape(Edge)
-	String getName(Alter)
 Network
 	new Network(List<Alter>,AlterAdjacency,AlterEquality)
 	List<Node> getNodes()
