@@ -121,6 +121,7 @@ public class EditStudyQuestionsPanel extends Panel {
 			}
         );
 		add(form);
+		form.setVisible(false);
 	}
 	
 	private void setFormFieldsFromQuestion(Question question) {
