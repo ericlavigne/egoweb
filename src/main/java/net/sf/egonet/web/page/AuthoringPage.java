@@ -1,6 +1,7 @@
 package net.sf.egonet.web.page;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -34,7 +35,7 @@ public class AuthoringPage extends EgonetPage
 		studyField.setRequired(true);
 		form.add(studyField);
 
-		ArrayList<String> studyActiveOptions = new ArrayList<String>();
+		List<String> studyActiveOptions = Lists.newArrayList();
 		studyActiveOptions.add("Active");
 		studyActiveOptions.add("Inactive");
 		studyActiveModel = new Model(studyActiveOptions.get(0)); // Could also leave this null.
@@ -84,6 +85,4 @@ public class AuthoringPage extends EgonetPage
     {
 		return DB.getStudies();
 	}
-
 }
-
