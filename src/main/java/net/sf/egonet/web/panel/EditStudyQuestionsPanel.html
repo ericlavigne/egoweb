@@ -12,39 +12,7 @@
     		<td><a href="#" wicket:id="newQuestion">New question</a></td>
     	</tr>
     </table>
-    	
-    <div wicket:id="feedback"/>
-    	
-    <form wicket:id="questionForm">
-    	<fieldset>
-    		<legend>Question</legend>
-    		<table>
-    	 		<tr>
-    	 			<td>
-    	 				<label for="questionTitleField">Title:</label>
-    	 				<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
-    	 			</td>
-    	 			<td>
-    	 				<label for="questionResponseTypeField">Response type:</label>
-    	 				<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
-    	 			</td>
-    	 		</tr>
-    			<tr>
-    				<th><label for="questionPromptField">Prompt</label></th>
-    				<th><label for="questionCitationField">Citation</label></th>
-    			</tr>
-    			<tr>
-    				<td>
-    					<textarea wicket:id="questionPromptField" id="questionPromptField"></textarea>
-    				</td>
-    				<td>
-    					<textarea wicket:id="questionCitationField" id="questionCitationField"></textarea>
-    				</td>
-    			</tr>
-    		</table>
-    		
-    		<input wicket:id="submitQuestion" type="submit" value="Save"/>
-    	</fieldset>
-    </form>
-    	
+    
+    <div wicket:id="editQuestionPanel">Edit Question Panel</div>
+
 </wicket:panel>
