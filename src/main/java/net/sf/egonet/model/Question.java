@@ -1,6 +1,5 @@
 package net.sf.egonet.model;
 
-import java.util.List;
 import net.sf.egonet.model.Answer.AnswerType;
 
 public class Question extends Entity
@@ -14,7 +13,6 @@ public class Question extends Entity
 	private AnswerType answerType;
 	private QuestionType type;
 	private boolean isRequired;
-	private List<Option> options;
 
 	public Question(String prompt, AnswerType answerType, QuestionType type, boolean isRequired)
 	{
@@ -33,7 +31,6 @@ public class Question extends Entity
 		return "<Question | id="+getId()+" study="+studyId+" prompt="+prompt+">";
 	}
 
-	public List<Option> getOptions()      { return this.options;      }
 	public AnswerType   getAnswerType()   { return this.answerType;   }
 	public String       getCitation()     { return this.citation;     }
 	public String       getPrompt()       { return this.prompt;       }
@@ -51,7 +48,6 @@ public class Question extends Entity
 	 *  if needsMultiSelectionResponse returns a list of Option
 	 *  otherwise null
 	 */
-	public void setOptions(List<Option>  val) { this.options    = val; }
 	public void setAnswerType(AnswerType val) { this.answerType = val; }
 	public void setCitation(String       val) { this.citation   = val; }
 	public void setPrompt(String         val) { this.prompt     = val; }
