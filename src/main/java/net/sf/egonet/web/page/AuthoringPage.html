@@ -1,24 +1,18 @@
-
 <wicket:extend>
 
-    	<div wicket:id="feedback"/>
+    <div wicket:id="feedback"/>
 	
-    	<form wicket:id="form">
-    		<input wicket:id="studyNameField" type="text" />
-    		<select wicket:id="studyActiveField">
-    			<option>Option1</option>
-    			<option>Option2</option>
-    		</select>
-    		<input wicket:id="createStudy" type="submit" value="Create Study"/>
-    	</form>
+    <form wicket:id="form">
+    	<input wicket:id="studyNameField" type="text" />
+    	<select wicket:id="studyActiveField">
+    		<option>Option1</option>
+    		<option>Option2</option>
+    	</select>
+    	<input wicket:id="createStudy" type="submit" value="Create Study"/>
+    </form>
 	
-    	<table border="1">
-    		<tr wicket:id="studies">
-    			<td><a href="#" wicket:id="studyLink"><span wicket:id="name">Social Networks in the Bronx</span></a></td>
-    			<td wicket:id="active">Active</td>
-    		</tr>
-    	</table>
-
+	<div wicket:id="studyList">Study List</div>	
+	
 </wicket:extend>
     	
     	

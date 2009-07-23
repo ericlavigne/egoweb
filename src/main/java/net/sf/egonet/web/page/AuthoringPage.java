@@ -1,9 +1,11 @@
 package net.sf.egonet.web.page;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import java.util.List;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -18,6 +20,7 @@ import org.apache.wicket.model.PropertyModel;
 
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.DB;
+import net.sf.egonet.web.panel.StudyListPanel;
 
 public class AuthoringPage extends EgonetPage
 {
@@ -60,29 +63,11 @@ public class AuthoringPage extends EgonetPage
             }
         );
 		add(form);
-
-        ListView studyView = new ListView("studies", new PropertyModel(this, "studies"))
-        {
-			protected void populateItem(ListItem item)
-            {
-				final Study s = (Study) item.getModelObject();
-				Link studyLink = new Link("studyLink")
-                {
-					public void onClick()
-                    {
-						setResponsePage(new EditStudyPage(s));
-					}
-				};
-				studyLink.add(new Label("name", s.getName()));
-				item.add(studyLink);
-				item.add(new Label("active", s.isActive() ? "ACTIVE" : "INACTIVE"));
+		
+		add(new StudyListPanel("studyList") {
+			protected Page onStudyClick(Study s) {
+				return new EditStudyPage(s);
 			}
-		};
-		add(studyView);
+		});	
     }
-
-	public static List<Study> getStudies()
-    {
-		return DB.getStudies();
-	}
 }
