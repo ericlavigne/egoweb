@@ -11,18 +11,18 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
-import net.sf.egonet.web.model.EntityModel;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.web.panel.EditStudyQuestionsPanel;
 
 public class EditStudyPage extends EgonetPage
 {
-	private final EntityModel study;
+	private final Long studyId;
 	private Panel questionEditorPanel;
 
 	public EditStudyPage(Study study)
     {
 		super("Study: "+study.getName());
-		this.study = new EntityModel(study);
+		this.studyId = study.getId();
 		build();
 	}
 
@@ -39,7 +39,7 @@ public class EditStudyPage extends EgonetPage
 						Panel newPanel = 
 							new EditStudyQuestionsPanel(
 									"questionEditor", 
-									(Study) study.getObject(),
+									DB.getStudy(studyId),
 									questionType);
 						questionEditorPanel.replaceWith(newPanel);
 						questionEditorPanel = newPanel;

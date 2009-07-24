@@ -1,22 +1,16 @@
 package net.sf.egonet.web.page;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import java.util.List;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.DB;
