@@ -1,14 +1,17 @@
 <wicket:extend>
-	<h2>Please identify yourself</h2>
-	<hr />
-	<table>
-		<tr>
-			<td>First name</td>
-			<td><input type="text" /></td>
-		</tr>
-		<tr>
-			<td>Last name</td>
-			<td><input type="text" /></td>
-		</tr>
-	</table>
+	<form wicket:id="form">
+		<fieldset>
+			<legend>Please identify yourself</legend>
+			<table>
+				<tr wicket:id="questions">
+					<td><span wicket:id="questionPrompt">First name</span></td>
+					<td><input wicket:id="answerField" type="text" /></td>
+				</tr>
+				<tr>
+					<td><input type="submit" value="Start or continue interview"/></td>
+				</tr>
+			</table>
+		</fieldset>
+	</form>
+	<span wicket:id="message">Message</span>
 </wicket:extend>
