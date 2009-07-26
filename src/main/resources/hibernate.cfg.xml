@@ -26,5 +26,6 @@
 		<mapping resource="net/sf/egonet/model/Option.hbm.xml" />
 		<mapping resource="net/sf/egonet/model/Interview.hbm.xml" />
 		<mapping resource="net/sf/egonet/model/Answer.hbm.xml" />
+		<mapping resource="net/sf/egonet/model/Alter.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

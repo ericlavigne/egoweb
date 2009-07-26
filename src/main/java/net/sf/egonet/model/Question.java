@@ -4,7 +4,7 @@ import net.sf.egonet.model.Answer.AnswerType;
 
 public class Question extends Entity
 {
-	public static enum QuestionType { EGO_ID, EGO, ALTER_ID, ALTER, ALTER_PAIR };
+	public static enum QuestionType { EGO_ID, EGO, ALTER, ALTER_PAIR };
 
 	private Long studyId;
 	private String title;    // Gender
@@ -62,10 +62,6 @@ public class Question extends Entity
 	/** Whether the question identifies the interviewee
 	  */
 	public boolean identifiesEgo() { return getType() == QuestionType.EGO_ID; }
-
-	/** Whether the question identifies the interviewee's alter
-	  */
-	public boolean identifiesAlter() { return getType() == QuestionType.ALTER_ID; }
 
 	/** Whether the question concerns the interviewee
 	  */

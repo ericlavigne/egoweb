@@ -1,7 +1,5 @@
 package net.sf.egonet.persistence;
 
-import com.google.common.collect.Lists;
-
 import java.util.List;
 
 import net.sf.egonet.model.Entity;
