@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="net.sf.egonet.model.Interview" table="interview">
+		<id name="id" column="id">
+			<generator class="increment" />
+		</id>
+		<property name="randomKey" column="random_key" />
+
+		<property name="studyId" column="study_id" />
+	</class>
+</hibernate-mapping>

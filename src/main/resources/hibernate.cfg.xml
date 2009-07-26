@@ -24,5 +24,7 @@
 		<mapping resource="net/sf/egonet/model/Study.hbm.xml" />
 		<mapping resource="net/sf/egonet/model/Question.hbm.xml" />
 		<mapping resource="net/sf/egonet/model/Option.hbm.xml" />
+		<mapping resource="net/sf/egonet/model/Interview.hbm.xml" />
+		<mapping resource="net/sf/egonet/model/Answer.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

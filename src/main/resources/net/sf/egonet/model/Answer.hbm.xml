@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="net.sf.egonet.model.Answer" table="answer">
+		<id name="id" column="id">
+			<generator class="increment" />
+		</id>
+		<property name="randomKey" column="random_key" />
+
+		<property name="questionId" column="question_id" />
+		<property name="interviewId" column="interview_id" />
+		<property name="alterId1" column="alter_id_1" />
+		<property name="alterId2" column="alter_id_2" />
+		<property name="value" column="value" />
+	</class>
+</hibernate-mapping>
