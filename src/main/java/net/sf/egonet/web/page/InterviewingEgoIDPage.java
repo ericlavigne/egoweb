@@ -2,6 +2,7 @@ package net.sf.egonet.web.page;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -14,6 +15,8 @@ import org.apache.wicket.model.PropertyModel;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
+import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
@@ -24,9 +27,11 @@ public class InterviewingEgoIDPage extends EgonetPage {
 	public ArrayList<QuestionWrapper> questions;
 	private Model message;
 	private ListView questionsView;
+	private Long studyId;
 	
 	public InterviewingEgoIDPage(Study study) {
 		super(study.getName());
+		this.studyId = study.getId();
 		
 		questions = Lists.newArrayList(Lists.transform(
 			DB.getQuestionsForStudy(study.getId(), QuestionType.EGO_ID),
@@ -42,9 +47,13 @@ public class InterviewingEgoIDPage extends EgonetPage {
 			public void onSubmit()
             {
 				String newMessage = "Submitted data:";
+				List<Answer> answers = Lists.newArrayList();
 				for(QuestionWrapper question : questions) {
 					newMessage += " "+question.getAnswer();
+					answers.add(new Answer(question.getQuestion(),question.getAnswer()));
 				}
+				Interview interview = DB.findOrCreateMatchingInterviewForStudy(studyId, answers);
+				newMessage += " interview id is "+interview.getId();
 				message.setObject(newMessage);
             }
         };

@@ -15,5 +15,10 @@
 		<property name="alterId1" column="alter_id_1" />
 		<property name="alterId2" column="alter_id_2" />
 		<property name="value" column="value" />
+		
+		<!-- These properties are redundant, and could be determined from the corresponding Question. -->
+		<property name="studyId" column="study_id" />
+		<property name="questionTypeDB" column="question_type" />
+		<property name="answerTypeDB" column="answer_type" />
 	</class>
 </hibernate-mapping>

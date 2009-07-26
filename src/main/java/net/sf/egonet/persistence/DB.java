@@ -1,8 +1,11 @@
 package net.sf.egonet.persistence;
 
+import java.util.Collection;
 import java.util.List;
 
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Entity;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
@@ -12,6 +15,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 public class DB {
 
@@ -33,14 +38,21 @@ public class DB {
 				.list();
 	}
 
+	public static Study getStudy(Session session, final Long id) {
+		return (Study) session.load(Study.class, id);
+	}
 	public static Study getStudy(final Long id) {
 		return withTx(new Function<Session,Study>(){
 			public Study apply(Session session) {
-				return (Study) session.load(Study.class, id);
+				return getStudy(session, id);
 			}
 		});
 	}
 
+	public static Interview getInterview(Session session, final Long id) {
+		return (Interview) session.load(Interview.class, id);
+	}
+	
 	public static List<Study> getStudies()
     {
 		Session session = Main.getDBSessionFactory().openSession();
@@ -54,15 +66,94 @@ public class DB {
 		return studies;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static List<Question> getQuestionsForStudy(
+			Session session, final Long studyId, final QuestionType type) 
+	{
+		return
+		session.createQuery("from Question q where q.studyId = :studyId and q.typeDB = :type")
+			.setLong("studyId", studyId)
+			.setString("type", Question.typeDB(type))
+			.list();
+	}
+	
 	public static List<Question> getQuestionsForStudy(final Long studyId, final QuestionType type) {
 		return withTx(new Function<Session,List<Question>>() {
-			@SuppressWarnings("unchecked")
 			public List<Question> apply(Session session) {
-				return
-					session.createQuery("from Question q where q.studyId = :studyId and q.typeDB = :type")
-						.setLong("studyId", studyId)
-						.setString("type", Question.typeDB(type))
-						.list();
+				return getQuestionsForStudy(session,studyId,type);
+			}
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Interview> getInterviewsForStudy(
+			Session session, final Long studyId) 
+	{
+		return
+		session.createQuery("from Interview i where i.studyId = :studyId")
+			.setLong("studyId", studyId)
+			.list();
+	}
+	@SuppressWarnings("unchecked")
+	public static List<Answer> getAnswersForStudy(
+			Session session, final Long studyId) 
+	{
+		return
+		session.createQuery("from Answer a where a.studyId = :studyId")
+			.setLong("studyId", studyId)
+			.list();
+	}
+	@SuppressWarnings("unchecked")
+	public static List<Answer> getAnswersForStudy(
+			Session session, final Long studyId, final QuestionType questionType) 
+	{
+		return
+		session.createQuery("from Answer a where a.studyId = :studyId and a.questionTypeDB = :questionTypeDB")
+			.setLong("studyId", studyId)
+			.setString("questionTypeDB", Question.typeDB(questionType))
+			.list();
+	}
+	
+	public static Interview findOrCreateMatchingInterviewForStudy(
+			final Long studyId, final List<Answer> egoIdAnswers)
+	{
+		return withTx(new Function<Session,Interview>(){
+			public Interview apply(Session session) {
+				Multimap<Long,Answer> answersByInterview = ArrayListMultimap.create();
+				for(Answer answer : getAnswersForStudy(session,studyId,QuestionType.EGO_ID)) {
+					answersByInterview.put(answer.getInterviewId(), answer);
+				}
+				for(Long interviewId : answersByInterview.keySet()) {
+					Collection<Answer> interviewAnswers = answersByInterview.get(interviewId);
+					if(answersMatch(egoIdAnswers,interviewAnswers)) {
+						return getInterview(session, interviewId);
+					}
+				}
+				// If reach this point without finding a match, time to start a new interview.
+				Interview interview = new Interview(getStudy(studyId));
+				Long interviewId = (Long) session.save(interview);
+				interview.setId(interviewId);
+				List<Question> egoIdQuestions = 
+					getQuestionsForStudy(session, studyId, QuestionType.EGO_ID);
+				for(Question question : egoIdQuestions) {
+					for(Answer answer : egoIdAnswers) {
+						if(answer.getQuestionId().equals(question.getId())) {
+							save(new Answer(interview,question,answer.getValue()));
+						}
+					}
+				}
+				return interview;
+			}
+			private Boolean answersMatch(Collection<Answer> ego1Answers, Collection<Answer> ego2Answers) {
+				for(Answer ego1Answer : ego1Answers) {
+					for(Answer ego2Answer : ego2Answers) {
+						if(ego1Answer.getQuestionId().equals(ego2Answer.getQuestionId()) &&
+								! ego1Answer.getValue().equals(ego2Answer.getValue())) {
+							return false;
+						}
+					}
+				}
+				return true;
 			}
 		});
 	}
