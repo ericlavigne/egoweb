@@ -53,8 +53,8 @@ public class Main extends WebApplication
 		return IndexPage.class;
 	}
 
-	// Mostly copied from http://www.codecommit.com/blog/java/so-long-wtp-embedded-jetty-for-me
-	public static void main(String[] args) throws Exception {
+	public static Server createAndConfigureServer() {
+
         Server server = new Server(8080); // TODO: Restrict access to localhost: 0.0.0.0 -> 192.168.1.1?
 
 		/*
@@ -74,7 +74,15 @@ public class Main extends WebApplication
 				"net.sf.egonet.web.Main");
 		servletHolder.setInitOrder(1);
 		context.addServlet(servletHolder, "/*");
+		
+		return server;
+	}
+	
+	// Mostly copied from http://www.codecommit.com/blog/java/so-long-wtp-embedded-jetty-for-me
+	public static void main(String[] args) throws Exception {
 
+		Server server = createAndConfigureServer();
+		
 		server.start();
 		server.join();
 	}
