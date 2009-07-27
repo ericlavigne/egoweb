@@ -1,12 +1,8 @@
 package net.sf.egonet.web.page;
 
-import com.google.common.collect.Lists;
-
-import java.util.List;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -19,7 +15,6 @@ import net.sf.egonet.web.panel.StudyListPanel;
 public class AuthoringPage extends EgonetPage
 {
 	private TextField studyField;
-	private Model studyActiveModel;
 
 	public AuthoringPage()
 	{
@@ -32,12 +27,6 @@ public class AuthoringPage extends EgonetPage
 		studyField.setRequired(true);
 		form.add(studyField);
 
-		List<String> studyActiveOptions = Lists.newArrayList();
-		studyActiveOptions.add("Active");
-		studyActiveOptions.add("Inactive");
-		studyActiveModel = new Model(studyActiveOptions.get(0)); // Could also leave this null.
-		form.add(new DropDownChoice("studyActiveField",studyActiveModel,studyActiveOptions));
-
 		form.add(
 			new Button("createStudy")
             {
@@ -45,13 +34,10 @@ public class AuthoringPage extends EgonetPage
 				public void onSubmit()
                 {
 					String name = (String) studyField.getModelObject();
-					String activity = (String) studyActiveModel.getObject();
-                    Boolean active = activity.equalsIgnoreCase("active");
 
 					studyField.setModelObject("");
 
                     Study newStudy = new Study(name);
-                    newStudy.setActive(active);
                     DB.save(newStudy);
                 }
             }
