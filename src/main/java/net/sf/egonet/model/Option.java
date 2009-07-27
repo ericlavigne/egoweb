@@ -14,26 +14,13 @@ public class Option extends Entity
 		this.name = name;
 	}
 
-	public Long getQuestionId() {
-		return questionId;
-	}
-	
-	public String getName()
-	{
-		return name;
-	}
+	public Long   getQuestionId() { return questionId; }
+	public String getName()       { return name;       }
 
-	// For Hibernate use only
-	protected Option() {
-		
-	}
-	// For Hibernate use only
-	protected void setQuestionId(Long questionId) {
-		this.questionId = questionId;
-	}
-	// For Hibernate use only
-	protected void setName(String name)
-	{
-		this.name = name;
-	}
+	// For Hibernate use only -----------------
+
+	protected Option() {}
+
+	protected void setQuestionId(Long val) { this.questionId = val; }
+	protected void setName(String val)     { this.name       = val; }
 }

@@ -26,7 +26,7 @@ public class Question extends Entity
 		answerType = AnswerType.TEXTUAL;
 		type = QuestionType.EGO;
 	}
-	
+
 	public String toString() {
 		return "<Question | id="+getId()+" study="+studyId+" prompt="+prompt+">";
 	}
@@ -40,7 +40,7 @@ public class Question extends Entity
 	public Long         getStudyId()      { return this.studyId;        }
 	public String       getAnswerTypeDB() { return getAnswerType().name(); }
 	public String       getTypeDB()       { return typeDB(getType());       }
-	
+
 	public static String typeDB(QuestionType type) { return type.name(); }
 	/**
 	 * @return

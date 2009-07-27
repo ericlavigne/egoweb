@@ -22,7 +22,7 @@ public class Study extends Entity
 			+", active="+isActive()
 			+", alterPrompt="+getAlterPrompt()+">";
 	}
-	
+
 	public Boolean isActive()
 	{
 		return active;
