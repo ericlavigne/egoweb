@@ -10,7 +10,7 @@
 		</id>
 		<property name="randomKey" column="random_key" />
 		
-		<property name="name" column="name" />
+		<property name="name" column="name" lazy="false" />
 		<property name="active" column="active" />
 		
 	</class>

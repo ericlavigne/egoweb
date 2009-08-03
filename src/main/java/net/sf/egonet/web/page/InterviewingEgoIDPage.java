@@ -34,7 +34,7 @@ public class InterviewingEgoIDPage extends EgonetPage {
 		this.studyId = study.getId();
 		
 		questions = Lists.newArrayList(Lists.transform(
-			DB.getQuestionsForStudy(study.getId(), QuestionType.EGO_ID),
+			DB.getQuestionsForStudy(studyId, QuestionType.EGO_ID),
 			new Function<Question,QuestionWrapper>() {
 				public QuestionWrapper apply(Question question) {
 					return new QuestionWrapper(question);
@@ -55,6 +55,8 @@ public class InterviewingEgoIDPage extends EgonetPage {
 				Interview interview = DB.findOrCreateMatchingInterviewForStudy(studyId, answers);
 				newMessage += " interview id is "+interview.getId();
 				message.setObject(newMessage);
+				
+				setResponsePage(new InterviewingEgoPage(interview.getId()));
             }
         };
 		

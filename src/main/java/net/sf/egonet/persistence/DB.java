@@ -15,7 +15,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 public class DB {
@@ -39,7 +41,11 @@ public class DB {
 	}
 
 	public static Study getStudy(Session session, final Long id) {
-		return (Study) session.load(Study.class, id);
+		// Yes, this is different from session.load(Study.class, id),
+		// which triggers a lazy initialization exception when any 
+		// field of Study is requested after the session is closed.
+		return (Study) session.createQuery("from Study where id = :id")
+		.setParameter("id", id).uniqueResult();
 	}
 	public static Study getStudy(final Long id) {
 		return withTx(new Function<Session,Study>(){
@@ -157,7 +163,48 @@ public class DB {
 			}
 		});
 	}
-
+	
+	public static Study getStudyForInterview(Session session, Long interviewId) {
+		return getStudy(session,getInterview(session,interviewId).getStudyId());
+	}
+	
+	public static Study getStudyForInterview(final Long interviewId) {
+		return withTx(new Function<Session,Study>() {
+			public Study apply(Session session) {
+				return getStudyForInterview(session,interviewId);
+			}
+		});
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<Answer> getAnswersForInterview(
+			Session session, final Long interviewId, final QuestionType questionType) 
+	{
+		return
+		session.createQuery("from Answer a where a.interviewId = :interviewId and a.questionTypeDB = :questionTypeDB")
+			.setLong("interviewId", interviewId)
+			.setString("questionTypeDB", Question.typeDB(questionType))
+			.list();
+	}
+	
+	public static String getEgoNameForInterview(Session session, Long interviewId) {
+		return Joiner.on(" ").join(
+				Lists.transform(getAnswersForInterview(session,interviewId,QuestionType.EGO_ID),
+						new Function<Answer,String>(){
+							public String apply(Answer answer) {
+								return answer.getValue();
+							}
+						}));
+	}
+	
+	public static String getEgoNameForInterview(final Long interviewId) {
+		return withTx(new Function<Session,String>() {
+			public String apply(Session session) {
+				return getEgoNameForInterview(session,interviewId);
+			}
+		});
+	}
+	
 	//----------------------------------------
 
 	private static <E> E withTx(Function<Session,E> f) {
