@@ -4,7 +4,8 @@ import java.util.List;
 
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
-import net.sf.egonet.persistence.DB;
+import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.persistence.Studies;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -30,11 +31,11 @@ public class EditStudyQuestionsPanel extends Panel {
 	}
 	
 	public Study getStudy() {
-		return DB.getStudy(studyId);
+		return Studies.getStudy(studyId);
 	}
 
 	public List<Question> getQuestions() {
-		return DB.getQuestionsForStudy(studyId,questionType);
+		return Questions.getQuestionsForStudy(studyId,questionType);
 	}
 	
 	private void build()

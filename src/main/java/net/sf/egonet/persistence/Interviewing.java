@@ -1,0 +1,63 @@
+package net.sf.egonet.persistence;
+
+import java.util.Collection;
+import java.util.List;
+
+import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Interview;
+import net.sf.egonet.model.Question;
+import net.sf.egonet.model.Question.QuestionType;
+
+import org.hibernate.Session;
+
+import com.google.common.base.Function;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+public class Interviewing {
+
+	public static Interview findOrCreateMatchingInterviewForStudy(
+			final Long studyId, final List<Answer> egoIdAnswers)
+	{
+		return DB.withTx(new Function<Session,Interview>(){
+			public Interview apply(Session session) {
+				Multimap<Long,Answer> answersByInterview = ArrayListMultimap.create();
+				for(Answer answer : Answers.getAnswersForStudy(session,studyId,QuestionType.EGO_ID)) {
+					answersByInterview.put(answer.getInterviewId(), answer);
+				}
+				for(Long interviewId : answersByInterview.keySet()) {
+					Collection<Answer> interviewAnswers = answersByInterview.get(interviewId);
+					if(answersMatch(egoIdAnswers,interviewAnswers)) {
+						return Interviews.getInterview(session, interviewId);
+					}
+				}
+				// If reach this point without finding a match, time to start a new interview.
+				Interview interview = new Interview(Studies.getStudy(studyId));
+				Long interviewId = (Long) session.save(interview);
+				interview.setId(interviewId);
+				List<Question> egoIdQuestions = 
+					Questions.getQuestionsForStudy(session, studyId, QuestionType.EGO_ID);
+				for(Question question : egoIdQuestions) {
+					for(Answer answer : egoIdAnswers) {
+						if(answer.getQuestionId().equals(question.getId())) {
+							DB.save(new Answer(interview,question,answer.getValue()));
+						}
+					}
+				}
+				return interview;
+			}
+			private Boolean answersMatch(Collection<Answer> ego1Answers, Collection<Answer> ego2Answers) {
+				for(Answer ego1Answer : ego1Answers) {
+					for(Answer ego2Answer : ego2Answers) {
+						if(ego1Answer.getQuestionId().equals(ego2Answer.getQuestionId()) &&
+								! ego1Answer.getValue().equals(ego2Answer.getValue())) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		});
+	}
+	
+}

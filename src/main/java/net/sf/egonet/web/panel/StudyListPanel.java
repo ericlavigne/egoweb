@@ -3,7 +3,7 @@ package net.sf.egonet.web.panel;
 import java.util.List;
 
 import net.sf.egonet.model.Study;
-import net.sf.egonet.persistence.DB;
+import net.sf.egonet.persistence.Studies;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.basic.Label;
@@ -46,6 +46,6 @@ public class StudyListPanel extends Panel {
 
 	public static List<Study> getStudies()
     {
-		return DB.getStudies();
+		return Studies.getStudies();
 	}
 }

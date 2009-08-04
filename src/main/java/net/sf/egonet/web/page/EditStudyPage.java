@@ -11,7 +11,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
-import net.sf.egonet.persistence.DB;
+import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.EditStudyQuestionsPanel;
 
 public class EditStudyPage extends EgonetPage
@@ -39,7 +39,7 @@ public class EditStudyPage extends EgonetPage
 						Panel newPanel = 
 							new EditStudyQuestionsPanel(
 									"questionEditor", 
-									DB.getStudy(studyId),
+									Studies.getStudy(studyId),
 									questionType);
 						questionEditorPanel.replaceWith(newPanel);
 						questionEditorPanel = newPanel;
