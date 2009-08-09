@@ -2,15 +2,12 @@
 	<form wicket:id="form">
 		<fieldset>
 			<legend>Please identify yourself</legend>
-			<table>
-				<tr wicket:id="questions">
-					<td><span wicket:id="questionPrompt">First name</span></td>
-					<td><input wicket:id="answerField" type="text" /></td>
-				</tr>
-				<tr>
-					<td><input type="submit" value="Start or continue interview"/></td>
-				</tr>
-			</table>
+			<div wicket:id="questions">
+				<div wicket:id="question"></div>
+			</div>
+			<div>
+				<input type="submit" value="Start or continue interview"/>
+			</div>
 		</fieldset>
 	</form>
 	<span wicket:id="message">Message</span>
