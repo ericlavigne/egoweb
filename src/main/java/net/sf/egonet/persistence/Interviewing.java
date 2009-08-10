@@ -59,5 +59,32 @@ public class Interviewing {
 			}
 		});
 	}
+
+	public static Question nextUnansweredEgoQuestionForInterview(final Long interviewId) {
+		return DB.withTx(new Function<Session,Question>() {
+			public Question apply(Session session) {
+				return nextUnansweredEgoQuestionForInterview(session,interviewId);
+			}
+		});
+	}
 	
+	public static Question nextUnansweredEgoQuestionForInterview(Session session, Long interviewId) {
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.EGO);
+		List<Answer> answers = 
+			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
+		for(Question question : questions) {
+			Boolean foundAnswer = false;
+			for(Answer answer : answers) {
+				if(answer.getQuestionId().equals(question.getId())) {
+					foundAnswer = true;
+				}
+			}
+			if(! foundAnswer) {
+				return question;
+			}
+		}
+		return null;
+	}
 }
