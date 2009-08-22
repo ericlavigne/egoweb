@@ -7,6 +7,8 @@ public class Option extends Entity
 {
 	private Long questionId;
 	private String name;
+	
+	private Long ordering;
 
 	public Option(Long questionId, String name)
 	{
@@ -17,6 +19,9 @@ public class Option extends Entity
 	public Long   getQuestionId() { return questionId; }
 	public String getName()       { return name;       }
 
+	public Long getOrdering() { return ordering; }
+	public void setOrdering(Long ordering) { this.ordering = ordering; }
+	
 	// For Hibernate use only -----------------
 
 	protected Option() {}

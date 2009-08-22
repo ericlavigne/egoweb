@@ -53,9 +53,16 @@ public class EditStudyQuestionsPanel extends Panel {
 						editQuestion(question);
 					}
 				};
+				Link questionOptionsLink = new Link("questionOptionsLink") {
+					public void onClick() {
+						editQuestionOptions(question);
+					}
+				};
 
 				questionLink.add(new Label("questionTitle", question.getTitle()));
 				item.add(questionLink);
+				questionOptionsLink.add(new Label("questionOptionsLabel", "Options (0)"));
+				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
 			}
@@ -73,6 +80,11 @@ public class EditStudyQuestionsPanel extends Panel {
 	}
 	private void editQuestion(Question question) {
 		Panel newPanel = new EditQuestionPanel("editQuestionPanel", question, questionType, studyId);
+		editQuestionPanel.replaceWith(newPanel);
+		editQuestionPanel = newPanel;
+	}
+	private void editQuestionOptions(Question question) {
+		Panel newPanel = new EditQuestionOptionsPanel("editQuestionPanel",question);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}
