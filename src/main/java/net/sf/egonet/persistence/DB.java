@@ -18,6 +18,15 @@ public class DB {
 			}
 		});
 	}
+	
+	public static void delete(final Entity e) {
+		withTx(new Function<Session,Object>(){
+			public Object apply(Session s) {
+				s.delete(e);
+				return null;
+			}
+		});
+	}
 
 	static <E> E withTx(Function<Session,E> f) {
 		Session session = Main.getDBSessionFactory().openSession();

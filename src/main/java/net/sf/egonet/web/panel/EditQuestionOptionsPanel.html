@@ -6,9 +6,13 @@
 			<tr>
 				<td>
 					<table>
-						<tr><td>Dog</td><td>Delete</td><td>Move up</td></tr>
-						<tr><td>Cat</td><td>Delete</td><td>Move up</td></tr>
-						<tr><td>Bird</td><td>Delete</td><td>Move up</td></tr>
+						<tr wicket:id="options">
+							<td wicket:id="optionTitle">Dog</td>
+							<td>
+								<a href="#" wicket:id="optionDelete">Delete</a>
+								<a href="#" wicket:id="optionMoveUp">Move up</a>
+							</td>
+						</tr>
 					</table>
 				</td>
 				
@@ -16,15 +20,17 @@
 					<form wicket:id="optionForm">
     	 				<input wicket:id="optionTitleField" id="optionTitleField" type="text" /><br />
 						<input wicket:id="addOption" type="submit" value="Add option"/>
-						<fieldset>
-							<legend>Presets</legend>
-							<ul>
-								<li>YesNo</li>
-								<li>Kin</li>
-								<li>States</li>
-							</ul>
-						</fieldset>
 					</form>
+					<fieldset>
+						<legend>Presets</legend>
+						<ul>
+							<li wicket:id="presets">
+								<a href="#" wicket:id="presetLink">
+									<span wicket:id="presetName">Gender</span>
+								</a>
+							</li>
+						</ul>
+					</fieldset>
 				</td>
 			</tr>
 		</table>
