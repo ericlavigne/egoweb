@@ -30,4 +30,15 @@ public class DB {
 
 		return result;
 	}
+	
+	static abstract class Action<R> implements Function<Session,R> {
+		protected Session session;
+		
+		public R apply(Session session) {
+			this.session = session;
+			return get();
+		}
+		
+		public abstract R get();
+	}
 }

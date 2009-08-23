@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 
@@ -61,7 +62,8 @@ public class EditStudyQuestionsPanel extends Panel {
 
 				questionLink.add(new Label("questionTitle", question.getTitle()));
 				item.add(questionLink);
-				questionOptionsLink.add(new Label("questionOptionsLabel", "Options (0)"));
+				questionOptionsLink.add(
+						new Label("questionOptionsLabel", "Options ("+Options.getOptionsForQuestion(question.getId()).size()+")"));
 				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));

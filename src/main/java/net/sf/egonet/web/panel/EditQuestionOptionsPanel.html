@@ -1,7 +1,7 @@
 <wicket:panel>
 
 	<fieldset>
-		<legend>pet_type options</legend>
+		<legend><span wicket:id="questionTitle">pet_type</span> options</legend>
 		<table>
 			<tr>
 				<td>
@@ -13,10 +13,9 @@
 				</td>
 				
 				<td>
-					<form>
-						<div>Feedback</div>
-						<input type="text" /><br />
-						<input type="submit" value="Add option"/>
+					<form wicket:id="optionForm">
+    	 				<input wicket:id="optionTitleField" id="optionTitleField" type="text" /><br />
+						<input wicket:id="addOption" type="submit" value="Add option"/>
 						<fieldset>
 							<legend>Presets</legend>
 							<ul>

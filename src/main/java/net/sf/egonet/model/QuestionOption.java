@@ -3,14 +3,14 @@ package net.sf.egonet.model;
 /**
  * Value object representing an item of a drop-down, listbox, or similar widget
  */
-public class Option extends Entity
+public class QuestionOption extends Entity
 {
 	private Long questionId;
 	private String name;
 	
 	private Long ordering;
 
-	public Option(Long questionId, String name)
+	public QuestionOption(Long questionId, String name)
 	{
 		this.questionId = questionId;
 		this.name = name;
@@ -24,7 +24,7 @@ public class Option extends Entity
 	
 	// For Hibernate use only -----------------
 
-	protected Option() {}
+	protected QuestionOption() {}
 
 	protected void setQuestionId(Long val) { this.questionId = val; }
 	protected void setName(String val)     { this.name       = val; }
