@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="net.sf.egonet.model.Expression" table="expression">
+		<id name="id" column="id">
+			<generator class="increment" />
+		</id>
+		<property name="randomKey" column="random_key" />
+
+		<property name="name" column="name" />
+		<property name="typeDB" column="expression_type" />
+		<property name="operatorDB" column="operator" />
+		<property name="valueDB" column="value" />
+	</class>
+</hibernate-mapping>
