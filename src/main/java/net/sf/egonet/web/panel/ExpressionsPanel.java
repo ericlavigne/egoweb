@@ -3,7 +3,9 @@ package net.sf.egonet.web.panel;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
+import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.persistence.Studies;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -35,6 +37,7 @@ public class ExpressionsPanel extends Panel {
 	
 	private Form form;
 	private Panel editExpressionPanel;
+	private String panelId = "editExpressionPanel";
 	private Model questionSelectionModel;
 	
 	private void build() {
@@ -71,21 +74,45 @@ public class ExpressionsPanel extends Panel {
 				"questionField",
 				questionSelectionModel,
 				Questions.getQuestionsForStudy(studyId, null)));
-		
+
 		form.add(
 			new Button("newSimpleExpression")
             {
 				@Override
 				public void onSubmit()
                 {
-					// TODO: Open up an expression editor panel (which doesn't yet exist... hint, hint)
+					Question question = (Question) questionSelectionModel.getObject();
+					if(question != null) {
+						replaceExpressionEditorWith(getExpressionEditor(
+								new Expression(question)));
+					}
 				}
 			}
         );
+		form.add(
+				new Button("newCompoundExpression")
+	            {
+					@Override
+					public void onSubmit()
+	                {
+						replaceExpressionEditorWith(getExpressionEditor(
+								new Expression(Studies.getStudy(studyId))));
+					}
+				}
+	        );
 		
 		add(form);
 		
-		editExpressionPanel = new EmptyPanel("editExpressionPanel");
+		editExpressionPanel = new EmptyPanel(panelId);
 		add(editExpressionPanel);
+	}
+
+	private void replaceExpressionEditorWith(Panel panel) {
+		editExpressionPanel.replaceWith(panel);
+		editExpressionPanel = panel;
+	}
+	
+	private Panel getExpressionEditor(Expression expression) {
+		return new EmptyPanel(panelId);
 	}
 }

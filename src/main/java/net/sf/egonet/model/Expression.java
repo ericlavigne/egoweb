@@ -3,6 +3,8 @@ package net.sf.egonet.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.egonet.model.Answer.AnswerType;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -17,11 +19,45 @@ public class Expression extends Entity {
 	private Type type;
 	private Operator operator;
 	private String valueString;
+	private Long studyId;
+	private Long questionId;
 	
-	public Expression(Type type) {
+	public Expression(Study study) {
+		type = Type.Compound;
+		operator = Operator.Some;
+		studyId = study.getId();
+		setDefaultValues();
+	}
+	public Expression(Question question) {
+		type = typeOfQuestion(question);
+		studyId = question.getStudyId();
+		questionId = question.getId();
+		setDefaultValues();
+	}
+	public static Type typeOfQuestion(AnswerType answerType) {
+		if(answerType.equals(AnswerType.NUMERICAL)) {
+			return Type.Number;
+		}
+		if(answerType.equals(AnswerType.TEXTUAL)) {
+			return Type.Text;
+		}
+		return Type.Selection;
+	}
+	public static Type typeOfQuestion(Question question) {
+		return typeOfQuestion(question.getAnswerType());
+	}
+	
+	private void setDefaultValues() {
 		this.name = "";
-		this.type = type;
 		this.valueString = type.equals(Type.Number) ? "0" : "";
+	}
+	
+	public Long getStudyId() {
+		return studyId;
+	}
+	
+	public Long getQuestionId() {
+		return questionId;
 	}
 	
 	public Type getType() {
@@ -121,5 +157,11 @@ public class Expression extends Entity {
 	}
 	protected String getValueDB() {
 		return valueString;
+	}
+	protected void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+	protected void setQuestionId(Long questionId) {
+		this.questionId = questionId;
 	}
 }

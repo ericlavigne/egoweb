@@ -14,5 +14,7 @@
 		<property name="typeDB" column="expression_type" />
 		<property name="operatorDB" column="operator" />
 		<property name="valueDB" column="value" />
+		<property name="studyId" column="study_id" />
+		<property name="questionId" column="question_id" />
 	</class>
 </hibernate-mapping>
