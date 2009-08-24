@@ -13,6 +13,7 @@ import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.EditStudyQuestionsPanel;
+import net.sf.egonet.web.panel.ExpressionsPanel;
 
 public class EditStudyPage extends EgonetPage
 {
@@ -28,6 +29,12 @@ public class EditStudyPage extends EgonetPage
 
 	private void build()
     {
+		add(new Link("settingsLink") {
+			public void onClick() {
+				// TODO
+			}
+		});
+		
 		ListView questionTypes = new ListView("questionTypes", Arrays.asList(QuestionType.values()))
         {
 			protected void populateItem(ListItem item) {
@@ -36,13 +43,11 @@ public class EditStudyPage extends EgonetPage
 				Link questionLink = new Link("questionTypeLink")
                 {
 					public void onClick() {
-						Panel newPanel = 
-							new EditStudyQuestionsPanel(
+						setSubPanel(
+								new EditStudyQuestionsPanel(
 									"questionEditor", 
 									Studies.getStudy(studyId),
-									questionType);
-						questionEditorPanel.replaceWith(newPanel);
-						questionEditorPanel = newPanel;
+									questionType));
 					}
 				};
 
@@ -51,8 +56,19 @@ public class EditStudyPage extends EgonetPage
 			}
 		};
 		add(questionTypes);
+		
+		add(new Link("expressionLink") {
+			public void onClick() {
+				setSubPanel(new ExpressionsPanel("questionEditor",studyId));
+			}
+		});
 
 		questionEditorPanel = new EmptyPanel("questionEditor");
 		add(questionEditorPanel);
+	}
+	
+	private void setSubPanel(Panel panel) {
+		questionEditorPanel.replaceWith(panel);
+		questionEditorPanel = panel;
 	}
 }

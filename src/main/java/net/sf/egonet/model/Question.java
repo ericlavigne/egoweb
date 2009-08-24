@@ -28,7 +28,7 @@ public class Question extends Entity
 	}
 
 	public String toString() {
-		return "<Question | id="+getId()+" study="+studyId+" prompt="+prompt+">";
+		return (title == null ? "Untitled question" : title)+" ("+type+")";
 	}
 
 	public AnswerType   getAnswerType()   { return this.answerType;   }

@@ -1,0 +1,26 @@
+<wicket:panel>
+	
+	<form wicket:id="form">
+		<fieldset>
+			<legend>Expressions (for skip-logic or linking alters)</legend>
+			<table>
+    			<tr><th>Name</th><th>Description</th><th>Commands</th></tr>
+    			<tr wicket:id="expressions">
+    				<td><a href="#" wicket:id="editExpressionLink"><span wicket:id="expressionName">elligible</span></a></td>
+    				<td wicket:id="expressionDescription">Simple(age): GreaterThan 21</td>
+    				<td><a href="#" wicket:id="deleteExpressionLink">Delete</a></td>
+    			</tr>
+    			<tr>
+    				<td colspan="3">
+    					<input wicket:id="newSimpleExpression" type="submit" value="New simple expression"/>
+    					about
+    	 				<select wicket:id="questionField" id="questionField" />
+    				</td>
+    			</tr>
+    		</table>
+    	</fieldset>
+    </form>
+    
+    <div wicket:id="editExpressionPanel">Edit Expression Panel</div>
+
+</wicket:panel>
