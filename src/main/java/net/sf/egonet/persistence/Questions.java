@@ -12,6 +12,23 @@ import com.google.common.base.Function;
 
 public class Questions {
 
+
+	public static Question getQuestion(Session session, final Long id) {
+		// Yes, this is different from session.load(Study.class, id),
+		// which triggers a lazy initialization exception when any 
+		// field of Study is requested after the session is closed.
+		return (Question) session.createQuery("from Question where id = :id")
+		.setParameter("id", id).uniqueResult();
+	}
+	
+	public static Question getQuestion(final Long id) {
+		return DB.withTx(new Function<Session,Question>(){
+			public Question apply(Session session) {
+				return getQuestion(session, id);
+			}
+		});
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static List<Question> getQuestionsForStudy(
 			Session session, final Long studyId, final QuestionType type) 

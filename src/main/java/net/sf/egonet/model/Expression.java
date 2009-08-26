@@ -74,8 +74,9 @@ public class Expression extends Entity {
 	public void setOperator(Operator operator) {
 		if(allowedOperators().contains(operator)) {
 			this.operator = operator;
+		} else {
+			throw new IllegalArgumentException("Operator "+operator+" not allowed for type "+type);
 		}
-		throw new IllegalArgumentException("Operator "+operator+" not allowed for type "+type);
 	}
 	public Operator getOperator() {
 		return operator;
@@ -88,9 +89,10 @@ public class Expression extends Entity {
 				this.valueString = Joiner.on(",").join((List<Long>) value);
 			} else if(type.equals(Type.Number) || type.equals(Type.Text)) {
 				this.valueString = value.toString();
+			} else {
+				throw new RuntimeException("Can't setValue("+value+") for Expression " +
+						"because no case provided for type "+type);
 			}
-			throw new RuntimeException("Can't setValue("+value+") for Expression " +
-					"because no case provided for type "+type);
 		}
 	}
 	public Object getValue() {

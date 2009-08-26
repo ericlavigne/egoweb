@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 
@@ -19,8 +20,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import com.google.common.collect.Lists;
-
 public class ExpressionsPanel extends Panel {
 	
 	private Long studyId;
@@ -32,7 +31,7 @@ public class ExpressionsPanel extends Panel {
 	}
 	
 	public List<Expression> getExpressions() {
-		return Lists.newArrayList(); // TODO: expressions for this studyId
+		return Expressions.forStudy(studyId); 
 	}
 	
 	private Form form;
@@ -113,6 +112,9 @@ public class ExpressionsPanel extends Panel {
 	}
 	
 	private Panel getExpressionEditor(Expression expression) {
+		if(expression.getType().equals(Expression.Type.Text)) {
+			return new TextExpressionEditorPanel(panelId,expression);
+		}
 		return new EmptyPanel(panelId);
 	}
 }
