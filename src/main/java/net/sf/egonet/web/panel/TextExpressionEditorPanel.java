@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.validation.validator.PatternValidator;
 
 public class TextExpressionEditorPanel extends Panel {
 	
@@ -25,9 +26,10 @@ public class TextExpressionEditorPanel extends Panel {
 	public TextExpressionEditorPanel(String id, Expression expression) {
 		super(id);
 		this.expression = expression;
-		if(! expression.getType().equals(Expression.Type.Text)) {
+		if(! (expression.getType().equals(Expression.Type.Text) 
+				|| expression.getType().equals(Expression.Type.Number))) {
 			throw new RuntimeException(
-					"Trying to use a text expression editor for an expression of type "+
+					"Trying to use a text/number expression editor for an expression of type "+
 					expression.getType());
 		}
 		build();
@@ -45,7 +47,7 @@ public class TextExpressionEditorPanel extends Panel {
 		expressionNameField.setRequired(true);
 		form.add(expressionNameField);
 		
-		expressionOperatorModel = new Model(Expression.Operator.Equals);
+		expressionOperatorModel = new Model(); // Expression.Operator.Equals ?
 		DropDownChoice expressionOperatorField = new DropDownChoice(
 				"expressionOperatorField",
 				expressionOperatorModel,
@@ -53,7 +55,15 @@ public class TextExpressionEditorPanel extends Panel {
 		expressionOperatorField.setRequired(true);
 		form.add(expressionOperatorField);
 		
-		expressionValueField = new TextField("expressionValueField", new Model((String) expression.getValue()));
+		expressionValueField = new TextField("expressionValueField", new Model(
+				expression.getType().equals(Expression.Type.Text) ? 
+						(String) expression.getValue() :
+							(expression.getValue() == null ? "" : expression.getValue()+""))
+		);
+		if(expression.getType().equals(Expression.Type.Number)) {
+			expressionValueField.setRequired(true);
+			expressionValueField.add(new PatternValidator("[0-9]+"));
+		}
 		form.add(expressionValueField);
 		
 		form.add(
@@ -65,7 +75,7 @@ public class TextExpressionEditorPanel extends Panel {
 					expression.setName(expressionNameField.getModelObjectAsString());
 					expression.setOperator((Expression.Operator) expressionOperatorModel.getObject());
 					String value = expressionValueField.getModelObjectAsString();
-					expression.setValue(value == null ? "" : value);
+						expression.setValue(value == null ? "" : value);
 					DB.save(expression);
 					form.setVisible(false);
 				}

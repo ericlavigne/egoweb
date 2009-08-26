@@ -112,7 +112,8 @@ public class ExpressionsPanel extends Panel {
 	}
 	
 	private Panel getExpressionEditor(Expression expression) {
-		if(expression.getType().equals(Expression.Type.Text)) {
+		if(expression.getType().equals(Expression.Type.Text) 
+				|| expression.getType().equals(Expression.Type.Number)) {
 			return new TextExpressionEditorPanel(panelId,expression);
 		}
 		return new EmptyPanel(panelId);
