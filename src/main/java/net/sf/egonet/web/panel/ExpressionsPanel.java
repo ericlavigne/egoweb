@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
@@ -50,7 +51,7 @@ public class ExpressionsPanel extends Panel {
 				Link editExpressionLink = new Link("editExpressionLink")
                 {
 					public void onClick() {
-						// TODO
+						editExpression(expression);
 					}
 				};
 				editExpressionLink.add(new Label("expressionName", expression.getName()));
@@ -60,7 +61,8 @@ public class ExpressionsPanel extends Panel {
 				
 				item.add(new Link("deleteExpressionLink") {
 					public void onClick() {
-						// TODO: delete this expression
+						DB.delete(expression);
+						replaceExpressionEditorWith(new EmptyPanel(panelId));
 					}
 				});
 			}
@@ -82,8 +84,7 @@ public class ExpressionsPanel extends Panel {
                 {
 					Question question = (Question) questionSelectionModel.getObject();
 					if(question != null) {
-						replaceExpressionEditorWith(getExpressionEditor(
-								new Expression(question)));
+						editExpression(new Expression(question));
 					}
 				}
 			}
@@ -94,8 +95,7 @@ public class ExpressionsPanel extends Panel {
 					@Override
 					public void onSubmit()
 	                {
-						replaceExpressionEditorWith(getExpressionEditor(
-								new Expression(Studies.getStudy(studyId))));
+						editExpression(new Expression(Studies.getStudy(studyId)));
 					}
 				}
 	        );
@@ -117,5 +117,9 @@ public class ExpressionsPanel extends Panel {
 			return new TextExpressionEditorPanel(panelId,expression);
 		}
 		return new EmptyPanel(panelId);
+	}
+	
+	private void editExpression(Expression expression) {
+		replaceExpressionEditorWith(getExpressionEditor(expression));
 	}
 }

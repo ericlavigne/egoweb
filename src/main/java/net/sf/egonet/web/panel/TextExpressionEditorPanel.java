@@ -22,12 +22,15 @@ public class TextExpressionEditorPanel extends Panel {
 	private TextField expressionNameField;
 	private TextField expressionValueField;
 	private Model expressionOperatorModel;
+	private Boolean textual;
+	private Boolean numerical;
 	
 	public TextExpressionEditorPanel(String id, Expression expression) {
 		super(id);
 		this.expression = expression;
-		if(! (expression.getType().equals(Expression.Type.Text) 
-				|| expression.getType().equals(Expression.Type.Number))) {
+		this.textual = expression.getType().equals(Expression.Type.Text);
+		this.numerical = expression.getType().equals(Expression.Type.Number);
+		if(! (textual || numerical)) {
 			throw new RuntimeException(
 					"Trying to use a text/number expression editor for an expression of type "+
 					expression.getType());
@@ -39,7 +42,10 @@ public class TextExpressionEditorPanel extends Panel {
 		
 		form = new Form("form");
 		
-		form.add(new Label("questionName",Questions.getQuestion(expression.getQuestionId()).getTitle()));
+		form.add(new Label("editorLegend",
+				"Expression about " +
+				(numerical ? "numerical" : "textual") + " question: " +
+				Questions.getQuestion(expression.getQuestionId()).getTitle()));
 		
 		form.add(new FeedbackPanel("feedback"));
 		
@@ -47,7 +53,7 @@ public class TextExpressionEditorPanel extends Panel {
 		expressionNameField.setRequired(true);
 		form.add(expressionNameField);
 		
-		expressionOperatorModel = new Model(); // Expression.Operator.Equals ?
+		expressionOperatorModel = new Model(expression.getOperator());
 		DropDownChoice expressionOperatorField = new DropDownChoice(
 				"expressionOperatorField",
 				expressionOperatorModel,
@@ -56,11 +62,11 @@ public class TextExpressionEditorPanel extends Panel {
 		form.add(expressionOperatorField);
 		
 		expressionValueField = new TextField("expressionValueField", new Model(
-				expression.getType().equals(Expression.Type.Text) ? 
-						(String) expression.getValue() :
-							(expression.getValue() == null ? "" : expression.getValue()+""))
+				textual ? 
+					(String) expression.getValue() :
+					(expression.getValue() == null ? "" : expression.getValue()+""))
 		);
-		if(expression.getType().equals(Expression.Type.Number)) {
+		if(numerical) {
 			expressionValueField.setRequired(true);
 			expressionValueField.add(new PatternValidator("[0-9]+"));
 		}
