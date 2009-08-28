@@ -97,7 +97,7 @@ public class Expression extends Entity {
 	}
 	public Object getValue() {
 		if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
-			if(valueString == null) {
+			if(valueString == null || valueString.isEmpty()) {
 				return new ArrayList<Long>();
 			}
 			return Lists.transform(Lists.newArrayList(valueString.split(",")), new Function<String,Long>() {

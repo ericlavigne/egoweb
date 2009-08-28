@@ -116,6 +116,9 @@ public class ExpressionsPanel extends Panel {
 				|| expression.getType().equals(Expression.Type.Number)) {
 			return new TextExpressionEditorPanel(panelId,expression);
 		}
+		if(expression.getType().equals(Expression.Type.Selection)) {
+			return new SelectionExpressionEditorPanel(panelId,expression);
+		}
 		return new EmptyPanel(panelId);
 	}
 	
