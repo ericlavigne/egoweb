@@ -3,7 +3,6 @@ package net.sf.egonet.persistence;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
-import net.sf.egonet.model.Question;
 
 import org.hibernate.Session;
 
