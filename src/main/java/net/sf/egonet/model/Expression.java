@@ -34,6 +34,9 @@ public class Expression extends Entity {
 		questionId = question.getId();
 		setDefaultValues();
 	}
+	public String toString() {
+		return name == null || name.isEmpty() ? "Untitled expression" : name;
+	}
 	public static Type typeOfQuestion(AnswerType answerType) {
 		if(answerType.equals(AnswerType.NUMERICAL)) {
 			return Type.Number;

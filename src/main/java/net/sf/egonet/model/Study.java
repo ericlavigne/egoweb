@@ -21,6 +21,10 @@ public class Study extends Entity
 
 	public Study(String name) {
 		this.name = name;
+		this.egoIdPrompt = "Please identify yourself to start or continue an interview.";
+		this.alterPrompt = "Please list some people that you know.";
+		this.conclusion = "Thank you for completing this interview.";
+		this.minAlters = 0;
 	}
 
 	public String toString() {

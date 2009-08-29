@@ -1,9 +1,9 @@
 package net.sf.egonet.web.panel;
 
-import java.util.ArrayList;
-
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.persistence.DB;
+import net.sf.egonet.persistence.Expressions;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -66,15 +66,55 @@ public class StudySettingsPanel extends Panel {
 		form.add(maxAltersField);
 		
 		adjacencyModel = new Model();
-		form.add(new DropDownChoice("adjacencyField",adjacencyModel,new ArrayList<Expression>()));
+		form.add(new DropDownChoice("adjacencyField",adjacencyModel,Expressions.forStudy(study.getId())));
 		
 		Button button = new Button("saveButton") {
 			@Override
 			public void onSubmit() {
-				
+				setStudyFieldsFromForm();
+				DB.save(study);
+				form.setVisible(false);
 			}
 		};
 		form.add(button);
+		setFormFieldsFromStudy();
 		add(form);
+	}
+	
+	private void setFormFieldsFromStudy() {
+		introductionField.setModelObject(study.getIntroduction());
+		egoIdField.setModelObject(study.getEgoIdPrompt());
+		alterPromptField.setModelObject(study.getAlterPrompt());
+		conclusionField.setModelObject(study.getConclusion());
+
+		minAltersField.setModelObject(study.getMinAlters() == null ? "0" : study.getMinAlters().toString());
+		maxAltersField.setModelObject(study.getMaxAlters() == null ? "" : study.getMaxAlters().toString());
+
+		Long adjacencyId = study.getAdjacencyExpressionId();
+		if(adjacencyId != null) {
+			adjacencyModel.setObject(Expressions.get(adjacencyId));
+		}
+	}
+	
+	private void setStudyFieldsFromForm() {
+		study.setIntroduction(introductionField.getModelObjectAsString());
+		study.setEgoIdPrompt(egoIdField.getModelObjectAsString());
+		study.setAlterPrompt(alterPromptField.getModelObjectAsString());
+		study.setConclusion(conclusionField.getModelObjectAsString());
+
+		String minAltersString = minAltersField.getModelObjectAsString();
+		String maxAltersString = maxAltersField.getModelObjectAsString();
+
+		study.setMinAlters(
+				minAltersString == null || minAltersString.isEmpty() ? 0 : 
+					Integer.parseInt(minAltersString));
+		study.setMaxAlters(
+				maxAltersString == null || maxAltersString.isEmpty() ? null : 
+					Integer.parseInt(maxAltersString));
+		
+		Expression adjacencyReason = (Expression) adjacencyModel.getObject();
+		if(adjacencyReason != null) {
+			study.setAdjacencyExpressionId(adjacencyReason.getId());
+		}
 	}
 }

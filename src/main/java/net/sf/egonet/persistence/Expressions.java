@@ -23,4 +23,17 @@ public class Expressions {
 		return session.createQuery("from Expression e where e.studyId = :studyId")
 				.setLong("studyId", studyId).list();
 	}
+	
+	public static Expression get(final Long expressionId) {
+		return DB.withTx(new Function<Session,Expression>() {
+			public Expression apply(Session session) {
+				return get(session,expressionId);
+			}
+		});
+	}
+
+	public static Expression get(Session session, Long expressionId) {
+		return (Expression) session.createQuery("from Expression e where e.id = :id")
+				.setLong("id", expressionId).list().get(0);
+	}
 }
