@@ -1,0 +1,54 @@
+<wicket:panel>
+
+    <div wicket:id="feedback"/>
+    	
+    <form wicket:id="form">
+    	<fieldset>
+    		<legend>Study Settings</legend>
+    		<table>
+    			<tr>
+    				<th><label for="introductionField">Introduction (optional)</label></th>
+    				<th><label for="egoIdField">EgoId prompt</label></th>
+    			</tr>
+    			<tr>
+    				<td>
+    					<textarea wicket:id="introductionField" id="introductionField"></textarea>
+    				</td>
+    				<td>
+    					<textarea wicket:id="egoIdField" id="egoIdField"></textarea>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th><label for="alterpromptField">Alter prompt</label></th>
+    				<th><label for="conclusionField">Conclusion</label></th>
+    			</tr>
+    			<tr>
+    				<td>
+    					<textarea wicket:id="alterPromptField" id="alterpromptField"></textarea>
+    				</td>
+    				<td>
+    					<textarea wicket:id="conclusionField" id="conclusionField"></textarea>
+    				</td>
+    			</tr>
+    	 		<tr>
+    	 			<td>
+    	 				<label for="minAltersField">Min alters:</label>
+    	 				<input wicket:id="minAltersField" id="minAltersField" type="text" />
+    	 				<br />
+    	 				<label for="maxAltersField">Max alters:</label>
+    	 				<input wicket:id="maxAltersField" id="maxAltersField" type="text" />
+    	 			</td>
+    	 			<td>
+    	 				<label for="adjacencyField">Alters are adjacent when:</label>
+    	 				<select wicket:id="adjacencyField" id="adjacencyField" />
+    	 				<p>(Use an expression, created in the Expressions menu, as an adjacency reason)</p>
+    	 			</td>
+    	 		</tr>
+    		</table>
+    		
+    		<input wicket:id="saveButton" type="submit" value="Save"/>
+    	</fieldset>
+    </form>
+    
+</wicket:panel>
+    
