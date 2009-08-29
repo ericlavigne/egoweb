@@ -11,8 +11,14 @@
 		<property name="randomKey" column="random_key" />
 		
 		<property name="name" column="name" lazy="false" />
-		<property name="active" column="active" />
 		
+		<property name="introduction" column="introduction" />
+		<property name="egoIdPrompt" column="ego_id_prompt" />
+		<property name="alterPrompt" column="alter_prompt" />
+		<property name="conclusion" column="conclusion" />
+		<property name="minAlters" column="min_alters" />
+		<property name="maxAlters" column="max_alters" />
+		<property name="adjacencyExpressionId" column="adjacency_expression_id" />
 	</class>
 </hibernate-mapping>
 

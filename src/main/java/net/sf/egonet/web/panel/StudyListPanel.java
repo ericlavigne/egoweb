@@ -34,7 +34,6 @@ public class StudyListPanel extends Panel {
 				};
 				studyLink.add(new Label("name", s.getName()));
 				item.add(studyLink);
-				item.add(new Label("active", s.isActive() ? "ACTIVE" : "INACTIVE"));
 			}
 		};
 		add(studyView);
