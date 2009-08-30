@@ -32,6 +32,35 @@ public class Options {
 		});
 	}
 
+
+	@SuppressWarnings("unchecked")
+	public static void delete(Session session, final QuestionOption option) {
+		for(QuestionOption dbOption : matchingOptionsFor(session,option)) {
+			// TODO: Delete single-selection answers to the same question that reference this option
+			// TODO: Remove references to this option from multiple-selection answers
+			List<Expression> expressions = 
+				Expressions.getSimpleExpressionsForQuestion(session, dbOption.getQuestionId());
+			for(Expression expression : expressions) {
+				if(expression.getType().equals(Expression.Type.Selection)) {
+					List<Long> optionIds = (List<Long>) expression.getValue();
+					optionIds.remove(dbOption.getId());
+					expression.setValue(optionIds);
+					DB.save(expression);
+				}
+			}
+			DB.delete(dbOption);
+		}
+	}
+	public static void delete(final QuestionOption option) {
+		DB.withTx(new Function<Session,Object>(){
+			public Object apply(Session session) {
+				delete(session,option);
+				return null;
+			}
+		});
+	}
+	
+	
 	public static void moveEarlier(Session session, final QuestionOption option) {
 		List<QuestionOption> options = getOptionsForQuestion(session,option.getQuestionId());
 		Integer i = null;
@@ -59,4 +88,16 @@ public class Options {
 			}
 		});
 	}
+
+	@SuppressWarnings("unchecked")
+	public static List<QuestionOption> matchingOptionsFor(Session session, final QuestionOption option) {
+		return 
+			session.createQuery(
+					"from QuestionOption where id = :id and name = :name and questionId = :questionId")
+			.setParameter("id", option.getId())
+			.setParameter("name", option.getName())
+			.setParameter("questionId", option.getQuestionId())
+			.list();
+	}
+
 }

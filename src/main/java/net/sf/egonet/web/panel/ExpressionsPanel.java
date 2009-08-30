@@ -61,7 +61,7 @@ public class ExpressionsPanel extends Panel {
 				
 				item.add(new Link("deleteExpressionLink") {
 					public void onClick() {
-						DB.delete(expression);
+						Expressions.delete(expression);
 						replaceExpressionEditorWith(new EmptyPanel(panelId));
 					}
 				});

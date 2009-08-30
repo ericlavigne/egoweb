@@ -21,6 +21,17 @@ public class Answers {
 			.list();
 	}
 
+
+	@SuppressWarnings("unchecked")
+	public static List<Answer> getAnswersForQuestion(
+			Session session, final Long questionId) 
+	{
+		return
+		session.createQuery("from Answer a where a.questionId = :questionId")
+			.setLong("questionId", questionId)
+			.list();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static List<Answer> getAnswersForStudy(
 			Session session, final Long studyId) 

@@ -19,7 +19,7 @@ public class DB {
 		});
 	}
 	
-	public static void delete(final Entity e) {
+	static void delete(final Entity e) {
 		withTx(new Function<Session,Object>(){
 			public Object apply(Session s) {
 				s.delete(e);

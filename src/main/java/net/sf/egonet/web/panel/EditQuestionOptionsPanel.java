@@ -54,7 +54,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				Link deleteLink = new Link("optionDelete")
                 {
 					public void onClick() {
-						DB.delete(option);
+						Options.delete(option);
 					}
 				};
 				item.add(deleteLink);
@@ -96,7 +96,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				Link presetLink = new Link("presetLink") {
 					public void onClick() {
 						for(QuestionOption option : getOptions()) {
-							DB.delete(option);
+							Options.delete(option);
 						}
 						for(String preset : Presets.get().get(presetName)) {
 							DB.save(new QuestionOption(question.getId(),preset));

@@ -75,7 +75,7 @@ public class EditStudyQuestionsPanel extends Panel {
 				});
 				item.add(new Link("questionDelete") {
 					public void onClick() {
-						DB.delete(question);
+						Questions.delete(question);
 					}
 				});
 			}
