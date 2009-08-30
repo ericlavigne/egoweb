@@ -8,6 +8,8 @@ import net.sf.egonet.model.QuestionOption;
 
 import org.hibernate.Session;
 
+import com.google.common.base.Function;
+
 public class Options {
 
 	@SuppressWarnings("unchecked")
@@ -16,7 +18,7 @@ public class Options {
 	{
 		new ArrayList<Expression>(session.createQuery("from Expression").list());
 		return 
-		session.createQuery("from QuestionOption o where o.questionId = :questionId")
+		session.createQuery("from QuestionOption o where o.questionId = :questionId order by o.ordering")
 			.setLong("questionId", questionId)
 			.list();
 	}
@@ -26,6 +28,34 @@ public class Options {
 		return DB.withTx(new DB.Action<List<QuestionOption>>() {
 			public List<QuestionOption> get() {
 				return getOptionsForQuestion(session,questionId);
+			}
+		});
+	}
+
+	public static void moveEarlier(Session session, final QuestionOption option) {
+		List<QuestionOption> options = getOptionsForQuestion(session,option.getQuestionId());
+		Integer i = null;
+		for(Integer j = 0; j < options.size(); j++) {
+			if(options.get(j).getId().equals(option.getId())) {
+				i = j;
+			}
+		}
+		if(i != null && i > 0) {
+			QuestionOption swap = options.get(i);
+			options.set(i, options.get(i-1));
+			options.set(i-1, swap);
+		}
+		for(Integer j = 0; j < options.size(); j++) {
+			options.get(j).setOrdering(j);
+			DB.save(options.get(j));
+		}
+	}
+
+	public static void moveEarlier(final QuestionOption option) {
+		DB.withTx(new Function<Session,Object>() {
+			public Object apply(Session session) {
+				moveEarlier(session,option);
+				return null;
 			}
 		});
 	}

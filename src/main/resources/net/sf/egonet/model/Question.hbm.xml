@@ -16,6 +16,7 @@
 		<property name="citation" column="citation" />
 		<property name="typeDB" column="subject_type" />
 		<property name="answerTypeDB" column="response_type" />
+		<property name="ordering" column="ordering" />
 
 		<property name="studyId" column="study_id" />
 		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />

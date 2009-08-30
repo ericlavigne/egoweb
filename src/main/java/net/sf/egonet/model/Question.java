@@ -15,6 +15,7 @@ public class Question extends Entity
 	private QuestionType type;
 	private boolean isRequired;
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
+	private Integer ordering; // Just controls order in which questions are asked
 
 	public Question(String prompt, AnswerType answerType, QuestionType type, boolean isRequired)
 	{
@@ -96,5 +97,13 @@ public class Question extends Entity
 
 	public Long getAnswerReasonExpressionId() {
 		return answerReasonExpressionId;
+	}
+
+	public void setOrdering(Integer ordering) {
+		this.ordering = ordering;
+	}
+
+	public Integer getOrdering() {
+		return ordering;
 	}
 }

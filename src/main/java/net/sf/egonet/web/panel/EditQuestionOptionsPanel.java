@@ -62,7 +62,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				Link moveLink = new Link("optionMoveUp")
                 {
 					public void onClick() {
-						// TODO: Move option up
+						Options.moveEarlier(option);
 					}
 				};
 				item.add(moveLink);

@@ -34,7 +34,7 @@ public class Questions {
 			Session session, final Long studyId, final QuestionType type) 
 	{
 		Query query = session.createQuery("from Question q where q.studyId = :studyId " +
-				(type == null ? "" : "and q.typeDB = :type"))
+				(type == null ? "" : "and q.typeDB = :type")+ " order by q.ordering")
 				.setLong("studyId", studyId);
 		if(type != null) {
 			query.setString("type", Question.typeDB(type));
@@ -50,4 +50,31 @@ public class Questions {
 		});
 	}
 
+	public static void moveEarlier(Session session, final Question question) {
+		List<Question> questions = getQuestionsForStudy(session,question.getStudyId(),question.getType());
+		Integer i = null;
+		for(Integer j = 0; j < questions.size(); j++) {
+			if(questions.get(j).getId().equals(question.getId())) {
+				i = j;
+			}
+		}
+		if(i != null && i > 0) {
+			Question swap = questions.get(i);
+			questions.set(i, questions.get(i-1));
+			questions.set(i-1, swap);
+		}
+		for(Integer j = 0; j < questions.size(); j++) {
+			questions.get(j).setOrdering(j);
+			DB.save(questions.get(j));
+		}
+	}
+
+	public static void moveEarlier(final Question question) {
+		DB.withTx(new Function<Session,Object>() {
+			public Object apply(Session session) {
+				moveEarlier(session,question);
+				return null;
+			}
+		});
+	}
 }
