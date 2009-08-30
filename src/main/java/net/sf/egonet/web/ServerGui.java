@@ -1,7 +1,9 @@
 package net.sf.egonet.web;
 
+import java.awt.Desktop;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URI;
 
 import javax.swing.JFrame;
 
@@ -29,7 +31,9 @@ public class ServerGui extends JFrame {
 			}
 		});
 		
-		setSize(500,500);
+		Desktop.getDesktop().browse(new URI("http://localhost:8080"));
+		
+		setSize(800,150);
 		setVisible(true);
 	}
 	
