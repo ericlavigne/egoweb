@@ -10,21 +10,28 @@
     	 			<td>
     	 				<label for="questionTitleField">Title:</label>
     	 				<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
-    	 			</td>
-    	 			<td>
+    	 				<br />
     	 				<label for="questionResponseTypeField">Response type:</label>
     	 				<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
+    	 				<br />
+    	 				<label for="questionAnswerReasonField">When to answer question:</label>
+    	 				<select wicket:id="questionAnswerReasonField" id="questionAnswerReasonField" />
+    	 			</td>
+    	 			<td>
+    					<label for="questionPromptField">Prompt</label>
+    					<br />
+    					<textarea wicket:id="questionPromptField" id="questionPromptField"></textarea>
     	 			</td>
     	 		</tr>
     			<tr>
-    				<th><label for="questionPromptField">Prompt</label></th>
-    				<th><label for="questionCitationField">Citation</label></th>
-    			</tr>
-    			<tr>
     				<td>
-    					<textarea wicket:id="questionPromptField" id="questionPromptField"></textarea>
+    					<label for="questionPrefaceField">Preface</label>
+    					<br />
+    					<textarea wicket:id="questionPrefaceField" id="questionPrefaceField"></textarea>
     				</td>
     				<td>
+    					<label for="questionCitationField">Citation</label>
+    					<br />
     					<textarea wicket:id="questionCitationField" id="questionCitationField"></textarea>
     				</td>
     			</tr>

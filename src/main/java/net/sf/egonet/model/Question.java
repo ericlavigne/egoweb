@@ -10,9 +10,11 @@ public class Question extends Entity
 	private String title;    // Gender
 	private String citation; // This question originally written by Dr. X from the Institute of Advanced Research.
 	private String prompt;   // Are you male or female?
+	private String preface;   // The following questions relate to...
 	private AnswerType answerType;
 	private QuestionType type;
 	private boolean isRequired;
+	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
 
 	public Question(String prompt, AnswerType answerType, QuestionType type, boolean isRequired)
 	{
@@ -79,4 +81,20 @@ public class Question extends Entity
 	public boolean needsNumericalResponse()      { return getAnswerType() == AnswerType.NUMERICAL;          }
 	public boolean needsSelectionResponse()      { return getAnswerType() == AnswerType.SELECTION;          }
 	public boolean needsMultiSelectionResponse() { return getAnswerType() == AnswerType.MULTIPLE_SELECTION; }
+
+	public void setPreface(String preface) {
+		this.preface = preface;
+	}
+
+	public String getPreface() {
+		return preface;
+	}
+
+	public void setAnswerReasonExpressionId(Long answerReasonExpressionId) {
+		this.answerReasonExpressionId = answerReasonExpressionId;
+	}
+
+	public Long getAnswerReasonExpressionId() {
+		return answerReasonExpressionId;
+	}
 }

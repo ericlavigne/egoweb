@@ -12,10 +12,12 @@
 
 		<property name="title" column="title" />
 		<property name="prompt" column="prompt" />
+		<property name="preface" column="preface" />
 		<property name="citation" column="citation" />
 		<property name="typeDB" column="subject_type" />
 		<property name="answerTypeDB" column="response_type" />
 
 		<property name="studyId" column="study_id" />
+		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />
 	</class>
 </hibernate-mapping>

@@ -1,11 +1,15 @@
 package net.sf.egonet.web.panel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.DB;
+import net.sf.egonet.persistence.Expressions;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -24,8 +28,11 @@ public class EditQuestionPanel extends Panel {
 	private Form form;
 	private TextField questionTitleField;
 	private TextArea questionPromptField;
+	private TextArea questionPrefaceField;
 	private TextArea questionCitationField;
 	private Model questionResponseTypeModel;
+	private Model questionAnswerReasonModel;
+	private static final String answerAlways = "Always";
 
 	public EditQuestionPanel(String id, Question question) {
 		super(id);
@@ -56,6 +63,9 @@ public class EditQuestionPanel extends Panel {
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
 
+		questionPrefaceField = new TextArea("questionPrefaceField", new Model(""));
+		form.add(questionPrefaceField);
+
 		questionCitationField = new TextArea("questionCitationField", new Model(""));
 		form.add(questionCitationField);
 
@@ -65,6 +75,17 @@ public class EditQuestionPanel extends Panel {
 				questionResponseTypeModel,
 				Arrays.asList(Answer.AnswerType.values())));
 
+		questionAnswerReasonModel = new Model(answerAlways);
+		List<Object> answerChoices = new ArrayList<Object>();
+		answerChoices.add(answerAlways);
+		for(Expression expression : Expressions.forStudy(question.getStudyId())) {
+			answerChoices.add(expression);
+		}
+		form.add(new DropDownChoice(
+				"questionAnswerReasonField",
+				questionAnswerReasonModel,
+				answerChoices));
+		
 		form.add(
 			new Button("submitQuestion")
             {
@@ -85,15 +106,25 @@ public class EditQuestionPanel extends Panel {
 	private void setFormFieldsFromQuestion(Question question) {
 		questionTitleField.setModelObject(question.getTitle());
 		questionPromptField.setModelObject(question.getPrompt());
+		questionPrefaceField.setModelObject(question.getPreface());
 		questionCitationField.setModelObject(question.getCitation());
 		questionResponseTypeModel.setObject(question.getAnswerType());
+		Long answerReasonId = question.getAnswerReasonExpressionId();
+		questionAnswerReasonModel.setObject(
+				answerReasonId == null ? 
+						answerAlways : Expressions.get(answerReasonId));
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
 		question.setTitle((String) questionTitleField.getModelObject());
 		question.setPrompt((String) questionPromptField.getModelObject());
+		question.setPreface((String) questionPrefaceField.getModelObject());
 		question.setCitation((String) questionCitationField.getModelObject());
 		question.setAnswerType((Answer.AnswerType) questionResponseTypeModel.getObject());
+		Object answerReason = questionAnswerReasonModel.getObject();
+		question.setAnswerReasonExpressionId(
+				answerReason == null || answerReason.equals(answerAlways) ?
+						null : ((Expression) answerReason).getId());
 	}
 	
 }
