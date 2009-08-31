@@ -59,18 +59,18 @@
 			<zipfileset src="${lib.dir}/commons-collections-3.1.jar" />
 			<zipfileset src="${lib.dir}/derby-10.5.1.1.jar" />
 			<zipfileset src="${lib.dir}/dom4j-1.6.1.jar" />
+			<zipfileset src="${lib.dir}/google-collect-1.0-rc2.jar" />
 			<zipfileset src="${lib.dir}/hibernate-3.3.2.GA.jar" />
 			<zipfileset src="${lib.dir}/javassist-3.9.0.GA.jar" />
+			<zipfileset src="${lib.dir}/jcl-over-slf4j-1.5.2.jar" />
 			<zipfileset src="${lib.dir}/jetty-6.1.18.jar" />
 			<zipfileset src="${lib.dir}/jetty-util-6.1.18.jar" />
 			<zipfileset src="${lib.dir}/jta-1.1.jar" />
+			<zipfileset src="${lib.dir}/logback-classic-0.9.9.jar" />
+			<zipfileset src="${lib.dir}/logback-core-0.9.9.jar" />
 			<zipfileset src="${lib.dir}/servlet-api-2.5-20081211.jar" />
 			<zipfileset src="${lib.dir}/slf4j-api-1.5.8.jar" />
 			<zipfileset src="${lib.dir}/wicket-1.3.6.jar" />
-			<zipfileset src="${lib.dir}/google-collect-1.0-rc2.jar" />
-			<zipfileset src="${lib.dir}/jcl-over-slf4j-1.5.2.jar" />
-			<zipfileset src="${lib.dir}/logback-classic-0.9.9.jar" />
-			<zipfileset src="${lib.dir}/logback-core-0.9.9.jar" />
 
 		</jar>
 	</target>
