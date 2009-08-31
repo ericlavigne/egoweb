@@ -1,9 +1,7 @@
 package net.sf.egonet.web.panel;
 
-import java.util.ArrayList;
-
-import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
+import static net.sf.egonet.model.Answer.AnswerType;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
@@ -19,8 +17,22 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	}
 
 	public static AnswerFormFieldPanel getInstance(String id, Question question) { //, ArrayList<Alter> alters) {
-		// TODO: Needs to return different subclass depending on question.answerType
-		return new TextAnswerFormFieldPanel(id,question); //,alters);
+		
+		AnswerType type = question.getAnswerType();
+		
+		if(type.equals(AnswerType.TEXTUAL)) {
+			return new TextAnswerFormFieldPanel(id,question);
+		}
+		if(type.equals(AnswerType.NUMERICAL)) {
+			return new NumberAnswerFormFieldPanel(id,question);
+		}
+		if(type.equals(AnswerType.SELECTION)) {
+			return new SelectionAnswerFormFieldPanel(id,question);
+		}
+		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
+			// TODO: return new MultipleSelectionAnswerFormFieldPanel(id,question);
+		}
+		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
 	
 	public Question getQuestion() {

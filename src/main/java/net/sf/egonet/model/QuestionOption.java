@@ -15,6 +15,10 @@ public class QuestionOption extends Entity
 		this.questionId = questionId;
 		this.name = name;
 	}
+	
+	public String toString() {
+		return name == null || name.isEmpty() ? "<unnamed option>" : name;
+	}
 
 	public Long   getQuestionId() { return questionId; }
 	public String getName()       { return name;       }

@@ -20,7 +20,6 @@ import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
-import net.sf.egonet.web.panel.TextAnswerFormFieldPanel;
 
 public class InterviewingEgoIDPage extends EgonetPage {
 	
@@ -64,7 +63,7 @@ public class InterviewingEgoIDPage extends EgonetPage {
         {
 			protected void populateItem(ListItem item)
             {
-				TextAnswerFormFieldPanel wrapper = (TextAnswerFormFieldPanel) item.getModelObject();
+				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
 				item.add(wrapper);
             }
         };
