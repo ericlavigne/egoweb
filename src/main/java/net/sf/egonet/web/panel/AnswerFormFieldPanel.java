@@ -30,7 +30,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 			return new SelectionAnswerFormFieldPanel(id,question);
 		}
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
-			// TODO: return new MultipleSelectionAnswerFormFieldPanel(id,question);
+			return new MultipleSelectionAnswerFormFieldPanel(id,question);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
