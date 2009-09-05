@@ -35,6 +35,25 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
 	
+	public static AnswerFormFieldPanel getInstance(String id, Question question, String answer) { //, ArrayList<Alter> alters) {
+		
+		AnswerType type = question.getAnswerType();
+		
+		if(type.equals(AnswerType.TEXTUAL)) {
+			return new TextAnswerFormFieldPanel(id,question,answer);
+		}
+		if(type.equals(AnswerType.NUMERICAL)) {
+			return new NumberAnswerFormFieldPanel(id,question,answer);
+		}
+		if(type.equals(AnswerType.SELECTION)) {
+			return new SelectionAnswerFormFieldPanel(id,question,answer);
+		}
+		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
+			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer);
+		}
+		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
+	}
+	
 	public Question getQuestion() {
 		return question;
 	}

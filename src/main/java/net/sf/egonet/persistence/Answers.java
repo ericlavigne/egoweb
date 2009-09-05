@@ -3,6 +3,7 @@ package net.sf.egonet.persistence;
 import java.util.List;
 
 import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 
@@ -51,5 +52,30 @@ public class Answers {
 			.setString("questionTypeDB", Question.typeDB(questionType))
 			.list();
 	}
+
+	@SuppressWarnings("unchecked")
+	public static Answer getAnswerForInterviewAndQuestion(Session session, Interview interview, Question question) 
+	{
+		List<Answer> answers = session.createQuery(
+				"from Answer a where a.interviewId = :interviewId and a.questionId = :questionId")
+			.setLong("interviewId", interview.getId())
+			.setLong("questionId", question.getId())
+			.list();
+		if(answers.isEmpty()) {
+			return null;
+		}
+		return answers.get(0);
+	}
 	
+	public static void setAnswerForInterviewAndQuestion(
+			Session session, Interview interview, Question question, String answerString) 
+	{
+		Answer answer = getAnswerForInterviewAndQuestion(session,interview,question);
+		if(answer == null) {
+			answer = new Answer(interview,question,answerString);
+		} else {
+			answer.setValue(answerString);
+		}
+		DB.save(answer);
+	}
 }
