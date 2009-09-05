@@ -3,6 +3,7 @@ package net.sf.egonet.web.page;
 import org.apache.wicket.markup.html.form.Form;
 
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
@@ -24,10 +25,12 @@ public class InterviewingEgoPage extends EgonetPage {
 	}
 
 	private void build() {
-		// form: prompt, question
 		Form form = new Form("form") {
 			public void onSubmit() {
-				
+				String answerString = field.getAnswer();
+				if(answerString != null) {
+					Answers.setAnswerForInterviewAndQuestion(interviewId, question, answerString);
+				}
 			}
 		};
 		field = AnswerFormFieldPanel.getInstance("question",question);

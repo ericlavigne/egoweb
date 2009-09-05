@@ -53,6 +53,8 @@ public class Answers {
 			.list();
 	}
 
+	// TODO: Only works for ego questions. Needs extra parameter with list of alters. Check that question type
+	// matches the number of alters provided.
 	@SuppressWarnings("unchecked")
 	public static Answer getAnswerForInterviewAndQuestion(Session session, Interview interview, Question question) 
 	{
@@ -77,5 +79,18 @@ public class Answers {
 			answer.setValue(answerString);
 		}
 		DB.save(answer);
+	}
+	
+	public static void setAnswerForInterviewAndQuestion(
+			final Long interviewId, final Question question, final String answerString) {
+		DB.withTx(new DB.Action<Object>() {
+			public Object get() {
+				setAnswerForInterviewAndQuestion(
+						session,
+						Interviews.getInterview(session, interviewId),
+						question,answerString);
+				return null;
+			}
+		});
 	}
 }
