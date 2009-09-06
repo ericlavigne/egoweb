@@ -1,0 +1,31 @@
+<wicket:extend>
+	<fieldset>
+		<legend>Alter prompt</legend>
+		<table>
+			<tr>
+				<td>
+					<p wicket:id="alterPrompt">Please list 10 people.</p>
+					<form wicket:id="form">
+						<div>
+							<input wicket:id="addAlterField" type="text" />
+							<br />
+							<input type="submit" value="Add alter"/>
+						</div>
+						<p>Min alters:</p>
+						<p>Max alters:</p>
+					</form>
+				</td>
+				<td>
+					<table>
+						<tr wicket:id="alters">
+							<td wicket:id="alterName">Joe</td>
+							<td>
+								<a href="#" wicket:id="alterDelete">Delete</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</fieldset>
+</wicket:extend>

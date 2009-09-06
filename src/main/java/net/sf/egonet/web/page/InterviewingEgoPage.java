@@ -31,6 +31,7 @@ public class InterviewingEgoPage extends EgonetPage {
 				if(answerString != null) {
 					Answers.setAnswerForInterviewAndQuestion(interviewId, question, answerString);
 				}
+				setResponsePage(askNextUnanswered(interviewId));
 			}
 		};
 		field = AnswerFormFieldPanel.getInstance("question",question);
@@ -39,8 +40,10 @@ public class InterviewingEgoPage extends EgonetPage {
 	}
 	
 	public static EgonetPage askNextUnanswered(Long interviewId) {
-		return new InterviewingEgoPage(
-				interviewId,
-				Interviewing.nextUnansweredEgoQuestionForInterview(interviewId));
+		Question nextEgoQuestion = Interviewing.nextUnansweredEgoQuestionForInterview(interviewId);
+		if(nextEgoQuestion != null) {
+			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
+		}
+		return new InterviewingAlterPromptPage(interviewId);
 	}
 }

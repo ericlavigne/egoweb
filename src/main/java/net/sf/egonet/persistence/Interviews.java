@@ -15,7 +15,16 @@ import com.google.common.collect.Lists;
 public class Interviews {
 
 	public static Interview getInterview(Session session, final Long id) {
-		return (Interview) session.load(Interview.class, id);
+		return (Interview) session.createQuery("from Interview where id = :id")
+			.setParameter("id", id).list().get(0);
+	}
+	
+	public static Interview getInterview(final Long id) {
+		return DB.withTx(new DB.Action<Interview>() {
+			public Interview get() {
+				return getInterview(session,id);
+			}
+		});
 	}
 
 	public static String getEgoNameForInterview(Session session, Long interviewId) {
