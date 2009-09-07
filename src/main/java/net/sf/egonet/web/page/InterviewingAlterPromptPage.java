@@ -15,6 +15,7 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Alters;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
@@ -35,15 +36,21 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		return Alters.getForInterview(interview.getId());
 	}
 	
+	public Integer getCurrentAlters() {
+		return getAlters().size();
+	}
+	
 	public Study getStudy() {
 		return Studies.getStudy(interview.getStudyId());
 	}
 	
 	private void build() {
-		add(new Label("alterPrompt",getStudy().getAlterPrompt())); 
+		Study study = getStudy();
+		
+		add(new Label("alterPrompt",study.getAlterPrompt())); 
 		Form form = new Form("form") {
 			public void onSubmit() {
-				// TODO: add alter based on addAlterField
+				DB.save(new Alter(interview,addAlterField.getModelObjectAsString()));
 			}
 		};
 
@@ -52,6 +59,12 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		form.add(addAlterField);
 		
 		add(form);
+		
+		add(new Label("currentAlters", new PropertyModel(this,"currentAlters")));
+		Integer minAlters = study.getMinAlters();
+		add(new Label("minAlters", minAlters == null ? "-" : minAlters+""));
+		Integer maxAlters = study.getMaxAlters();
+		add(new Label("maxAlters", maxAlters == null ? "-" : maxAlters+""));
 		
 		ListView alters = new ListView("alters", new PropertyModel(this,"alters"))
         {

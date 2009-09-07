@@ -4,7 +4,7 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="net.sf.egonet.model.Alter" table="interview_alter">
+	<class name="net.sf.egonet.model.Alter" table="alters">
 		<id name="id" column="id">
 			<generator class="increment" />
 		</id>
