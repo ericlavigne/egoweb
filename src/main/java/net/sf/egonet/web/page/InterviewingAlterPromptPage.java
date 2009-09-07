@@ -45,12 +45,14 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 	}
 	
 	private void build() {
-		Study study = getStudy();
+		final Study study = getStudy();
 		
 		add(new Label("alterPrompt",study.getAlterPrompt())); 
 		Form form = new Form("form") {
 			public void onSubmit() {
-				DB.save(new Alter(interview,addAlterField.getModelObjectAsString()));
+				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
+					DB.save(new Alter(interview,addAlterField.getModelObjectAsString()));
+				}
 			}
 		};
 
