@@ -11,10 +11,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
-import com.google.common.collect.Lists;
-
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
+import net.sf.egonet.model.Study;
+import net.sf.egonet.persistence.Alters;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
@@ -32,11 +32,15 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 	}
 	
 	public List<Alter> getAlters() {
-		return Lists.newArrayList();
+		return Alters.getForInterview(interview.getId());
+	}
+	
+	public Study getStudy() {
+		return Studies.getStudy(interview.getStudyId());
 	}
 	
 	private void build() {
-		add(new Label("alterPrompt",Studies.getStudy(interview.getStudyId()).getAlterPrompt())); 
+		add(new Label("alterPrompt",getStudy().getAlterPrompt())); 
 		Form form = new Form("form") {
 			public void onSubmit() {
 				// TODO: add alter based on addAlterField

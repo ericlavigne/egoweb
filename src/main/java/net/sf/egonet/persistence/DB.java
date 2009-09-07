@@ -49,5 +49,9 @@ public class DB {
 		}
 		
 		public abstract R get();
+		
+		public R execute() {
+			return withTx(this);
+		}
 	}
 }
