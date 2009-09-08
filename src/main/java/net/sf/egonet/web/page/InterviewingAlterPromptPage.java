@@ -3,6 +3,7 @@ package net.sf.egonet.web.page;
 import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
@@ -63,10 +64,20 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		add(form);
 		
 		add(new Label("currentAlters", new PropertyModel(this,"currentAlters")));
-		Integer minAlters = study.getMinAlters();
+		final Integer minAlters = study.getMinAlters();
 		add(new Label("minAlters", minAlters == null ? "-" : minAlters+""));
 		Integer maxAlters = study.getMaxAlters();
 		add(new Label("maxAlters", maxAlters == null ? "-" : maxAlters+""));
+		
+		Form nextQuestionForm = new Form("nextQuestionForm");
+		nextQuestionForm.add(new Button("nextQuestionButton") {
+			public void onSubmit() {
+				if(minAlters == null || ! (getCurrentAlters() < minAlters)) {
+					setResponsePage(new InterviewingAlterPage(interview.getId(),null));
+				}
+			}
+		});
+		add(nextQuestionForm);
 		
 		ListView alters = new ListView("alters", new PropertyModel(this,"alters"))
         {
