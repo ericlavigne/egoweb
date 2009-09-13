@@ -1,11 +1,13 @@
 package net.sf.egonet.web.panel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.Model;
 
+import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
@@ -14,14 +16,14 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	private Model answer;
 	
-	public SelectionAnswerFormFieldPanel(String id, Question question) {
-		super(id,question);
+	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
+		super(id,question,alters);
 		this.answer = new Model();
 		build();
 	}
 	
-	public SelectionAnswerFormFieldPanel(String id, Question question, String answer) {
-		super(id,question);
+	public SelectionAnswerFormFieldPanel(String id, Question question, String answer, ArrayList<Alter> alters) {
+		super(id,question,alters);
 		this.answer = new Model();
 		try {
 			Long optionId = Long.parseLong(answer);
@@ -37,7 +39,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	private void build() {
-		add(new Label("prompt",question.getPrompt()));
+		add(new Label("prompt",getPrompt()));
 		add(new DropDownChoice("answer",answer,getOptions()));
 	}
 

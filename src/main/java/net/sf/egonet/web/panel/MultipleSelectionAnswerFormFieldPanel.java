@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
+import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
@@ -17,14 +18,14 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	private CheckboxesPanel<QuestionOption> answerField;
 	private ArrayList<QuestionOption> originallySelectedOptions;
 	
-	public MultipleSelectionAnswerFormFieldPanel(String id, Question question) {
-		super(id,question);
+	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
+		super(id,question,alters);
 		originallySelectedOptions = Lists.newArrayList();
 		build();
 	}
 	
-	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, String answer) {
-		super(id,question);
+	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, String answer, ArrayList<Alter> alters) {
+		super(id,question,alters);
 		originallySelectedOptions = Lists.newArrayList();
 		try {
 			for(String answerIdString : answer.split(",")) {
@@ -42,7 +43,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	}
 	
 	private void build() {
-		add(new Label("prompt",question.getPrompt()));
+		add(new Label("prompt",getPrompt()));
 		answerField = new CheckboxesPanel<QuestionOption>("answer",getOptions(),originallySelectedOptions) 
 		{
 			protected String showItem(QuestionOption option) {

@@ -39,7 +39,7 @@ public class InterviewingAlterPage extends EgonetPage {
 		for(Alter alter : Alters.getForInterview(interviewId)) {
 			// TODO: check if question already answered for this alter
 			// TODO: answer form field panel needs the alter info, too
-			questions.add(AnswerFormFieldPanel.getInstance("question", question));
+			questions.add(AnswerFormFieldPanel.getInstance("question", question, Lists.newArrayList(alter)));
 		}
 		
 		Form form = new Form("form") {
