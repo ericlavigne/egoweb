@@ -44,6 +44,6 @@ public class InterviewingEgoPage extends EgonetPage {
 		if(nextEgoQuestion != null) {
 			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
 		}
-		return new InterviewingAlterPromptPage(interviewId);
+		return InterviewingAlterPromptPage.askNextUnanswered(interviewId);
 	}
 }

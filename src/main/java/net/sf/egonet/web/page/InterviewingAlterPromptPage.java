@@ -73,7 +73,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		nextQuestionForm.add(new Button("nextQuestionButton") {
 			public void onSubmit() {
 				if(minAlters == null || ! (getCurrentAlters() < minAlters)) {
-					setResponsePage(new InterviewingAlterPage(interview.getId(),null));
+					setResponsePage(askNextUnanswered(interview.getId()));
 				}
 			}
 		});
@@ -97,5 +97,20 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		};
 		add(alters);
 		
+	}
+
+	public static EgonetPage askNextUnanswered(Long interviewId) {
+		Study study = Studies.getStudyForInterview(interviewId);
+		Integer alters = Alters.getForInterview(interviewId).size();
+		Boolean altersMeetRequirements = 
+			(study.getMinAlters() == null || ! (alters < study.getMinAlters())) &&
+			(study.getMaxAlters() == null || ! (alters > study.getMaxAlters()));
+		if(! altersMeetRequirements) {
+			return new InterviewingAlterPromptPage(interviewId);
+		}
+		if(alters < 1 && (study.getMaxAlters() == null || study.getMaxAlters() > 0)) {
+			return new InterviewingAlterPromptPage(interviewId);
+		}
+		return InterviewingAlterPage.askNextUnanswered(interviewId);
 	}
 }

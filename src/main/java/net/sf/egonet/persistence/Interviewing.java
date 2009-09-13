@@ -2,7 +2,10 @@ package net.sf.egonet.persistence;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
@@ -12,7 +15,9 @@ import org.hibernate.Session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public class Interviewing {
 
@@ -83,6 +88,41 @@ public class Interviewing {
 			}
 			if(! foundAnswer) {
 				return question;
+			}
+		}
+		return null;
+	}
+
+	public static Question nextUnansweredAlterQuestionForInterview(final Long interviewId) {
+		return DB.withTx(new Function<Session,Question>() {
+			public Question apply(Session session) {
+				return nextUnansweredAlterQuestionForInterview(session,interviewId);
+			}
+		});
+	}
+	
+	public static Question nextUnansweredAlterQuestionForInterview(Session session, Long interviewId) {
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		Map<Long,Question> idToQuestion = Maps.newHashMap();
+		for(Question question : questions) {
+			idToQuestion.put(question.getId(), question);
+		}
+		Multimap<Question,Answer> questionToAnswers = ArrayListMultimap.create();
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO)) {
+			questionToAnswers.put(idToQuestion.get(answer.getQuestionId()), answer);
+		}
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		for(Question question : questions) {
+			Set<Long> answeredAlterIds = Sets.newHashSet();
+			for(Answer answer : questionToAnswers.get(question)) {
+				answeredAlterIds.add(answer.getAlterId1());
+			}
+			for(Alter alter : alters) {
+				if(! answeredAlterIds.contains(alter.getId())) {
+					return question;
+				}
 			}
 		}
 		return null;
