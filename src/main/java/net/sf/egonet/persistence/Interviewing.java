@@ -109,14 +109,14 @@ public class Interviewing {
 		for(Question question : questions) {
 			idToQuestion.put(question.getId(), question);
 		}
-		Multimap<Question,Answer> questionToAnswers = ArrayListMultimap.create();
-		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO)) {
-			questionToAnswers.put(idToQuestion.get(answer.getQuestionId()), answer);
+		Multimap<Long,Answer> questionIdToAnswers = ArrayListMultimap.create();
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER)) {
+			questionIdToAnswers.put(answer.getQuestionId(), answer);
 		}
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
 		for(Question question : questions) {
 			Set<Long> answeredAlterIds = Sets.newHashSet();
-			for(Answer answer : questionToAnswers.get(question)) {
+			for(Answer answer : questionIdToAnswers.get(question.getId())) {
 				answeredAlterIds.add(answer.getAlterId1());
 			}
 			for(Alter alter : alters) {

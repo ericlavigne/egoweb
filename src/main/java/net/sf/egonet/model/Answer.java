@@ -73,7 +73,7 @@ public class Answer extends Entity
 		// TODO: Should have different methods depending on answer type, and provide deserialization
 	}
 
-	protected void setAlterId1(Long alterId1) {
+	public void setAlterId1(Long alterId1) {
 		this.alterId1 = alterId1;
 	}
 
@@ -81,7 +81,7 @@ public class Answer extends Entity
 		return alterId1;
 	}
 
-	protected void setAlterId2(Long alterId2) {
+	public void setAlterId2(Long alterId2) {
 		this.alterId2 = alterId2;
 	}
 

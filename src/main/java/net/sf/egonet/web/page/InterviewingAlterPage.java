@@ -9,8 +9,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Alters;
+import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
@@ -21,7 +23,7 @@ public class InterviewingAlterPage extends EgonetPage {
 	private Long interviewId;
 	private Question question;
 
-	public ArrayList<AnswerFormFieldPanel> questions;
+	public ArrayList<AnswerFormFieldPanel> answerFields;
 	
 	private ListView questionsView;
 	
@@ -35,19 +37,31 @@ public class InterviewingAlterPage extends EgonetPage {
 	}
 	
 	private void build() {
-		questions = Lists.newArrayList();
+		answerFields = Lists.newArrayList();
 		for(Alter alter : Alters.getForInterview(interviewId)) {
-			// TODO: check if question already answered for this alter
-			// TODO: answer form field panel needs the alter info, too
-			questions.add(AnswerFormFieldPanel.getInstance("question", question, Lists.newArrayList(alter)));
+			ArrayList<Alter> alters = Lists.newArrayList(alter);
+			Answer answer = Answers.getAnswerForInterviewQuestionAlters(Interviews.getInterview(interviewId), 
+					question, alters);
+			if(answer == null) {
+				answerFields.add(AnswerFormFieldPanel.getInstance("question", question, alters));
+			} else {
+				answerFields.add(AnswerFormFieldPanel.getInstance("question", question, answer.getValue(), alters));
+			}
 		}
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
-				// TODO: submit the answers
+				for(AnswerFormFieldPanel answerField : answerFields) {
+					String answerString = answerField.getAnswer();
+					if(answerString != null) {
+						Answers.setAnswerForInterviewQuestionAlters(
+								interviewId, question, answerField.getAlters(), answerString);
+					}
+				}
+				setResponsePage(askNextUnanswered(interviewId));
 			}
 		};
-		questionsView = new ListView("questions",questions) {
+		questionsView = new ListView("questions",answerFields) {
 			protected void populateItem(ListItem item) {
 				item.add((AnswerFormFieldPanel) item.getModelObject());
 			}
