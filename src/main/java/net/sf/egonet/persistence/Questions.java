@@ -19,7 +19,7 @@ public class Questions {
 			deleteSimpleExpressionsFor(session,dbQuestion);
 			deleteAllAnswersForQuestion(session, question.getId());
 			deleteOptionsFor(session,dbQuestion);
-			session.delete(dbQuestion);
+			DB.delete(session, dbQuestion);
 		}
 	}
 	public static void delete(final Question question) {
@@ -32,7 +32,7 @@ public class Questions {
 	}
 	
 	private static void deleteAllAnswersForQuestion(Session session, final Long questionId) {
-		session.createQuery("delete from Answer a where a.questionId = :questionId")
+		session.createQuery("update Answer a set active = 0 where a.questionId = :questionId")
 		.setParameter("questionId", questionId)
 		.executeUpdate();
 	}
@@ -40,7 +40,7 @@ public class Questions {
 	@SuppressWarnings("unchecked")
 	public static List<Question> matchingQuestionsFor(Session session, final Question question) {
 		return 
-			session.createQuery("from Question where id = :id and title = :title and studyId = :studyId")
+			session.createQuery("from Question where id = :id and title = :title and studyId = :studyId and active = 1")
 			.setParameter("id", question.getId())
 			.setParameter("title", question.getTitle())
 			.setParameter("studyId", question.getStudyId())
@@ -66,7 +66,7 @@ public class Questions {
 		// Yes, this is different from session.load(Study.class, id),
 		// which triggers a lazy initialization exception when any 
 		// field of Study is requested after the session is closed.
-		return (Question) session.createQuery("from Question where id = :id")
+		return (Question) session.createQuery("from Question where id = :id and active = 1")
 		.setParameter("id", id).list().get(0);
 	}
 	
@@ -82,7 +82,7 @@ public class Questions {
 	public static List<Question> getQuestionsForStudy(
 			Session session, final Long studyId, final QuestionType type) 
 	{
-		Query query = session.createQuery("from Question q where q.studyId = :studyId " +
+		Query query = session.createQuery("from Question q where q.active = 1 and q.studyId = :studyId " +
 				(type == null ? "" : "and q.typeDB = :type")+ " order by q.ordering")
 				.setLong("studyId", studyId);
 		if(type != null) {

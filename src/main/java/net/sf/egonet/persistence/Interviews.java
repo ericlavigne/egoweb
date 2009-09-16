@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 public class Interviews {
 
 	public static Interview getInterview(Session session, final Long id) {
-		return (Interview) session.createQuery("from Interview where id = :id")
+		return (Interview) session.createQuery("from Interview where id = :id and active = 1")
 			.setParameter("id", id).list().get(0);
 	}
 	
@@ -50,7 +50,7 @@ public class Interviews {
 			Session session, final Long studyId) 
 	{
 		return
-		session.createQuery("from Interview i where i.studyId = :studyId")
+		session.createQuery("from Interview i where i.studyId = :studyId and active = 1")
 			.setLong("studyId", studyId)
 			.list();
 	}

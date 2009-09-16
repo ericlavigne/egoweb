@@ -18,7 +18,8 @@ public class Options {
 	{
 		new ArrayList<Expression>(session.createQuery("from Expression").list());
 		return 
-		session.createQuery("from QuestionOption o where o.questionId = :questionId order by o.ordering")
+		session.createQuery("from QuestionOption o where o.active = 1 and " +
+				"o.questionId = :questionId order by o.ordering")
 			.setLong("questionId", questionId)
 			.list();
 	}
@@ -93,7 +94,7 @@ public class Options {
 	public static List<QuestionOption> matchingOptionsFor(Session session, final QuestionOption option) {
 		return 
 			session.createQuery(
-					"from QuestionOption where id = :id and name = :name and questionId = :questionId")
+					"from QuestionOption where id = :id and name = :name and questionId = :questionId and active = 1")
 			.setParameter("id", option.getId())
 			.setParameter("name", option.getName())
 			.setParameter("questionId", option.getQuestionId())

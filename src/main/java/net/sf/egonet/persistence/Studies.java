@@ -15,7 +15,7 @@ public class Studies {
 	@SuppressWarnings("unchecked")
 	public static List<Study> getStudies(Session session) {
 		return
-			session.createQuery("from Study s order by s.name")
+			session.createQuery("from Study s where active = 1 order by s.name")
 				.list();
 	}
 
@@ -23,7 +23,7 @@ public class Studies {
 		// Yes, this is different from session.load(Study.class, id),
 		// which triggers a lazy initialization exception when any 
 		// field of Study is requested after the session is closed.
-		return (Study) session.createQuery("from Study where id = :id")
+		return (Study) session.createQuery("from Study where id = :id and active = 1")
 		.setParameter("id", id).uniqueResult();
 	}
 	

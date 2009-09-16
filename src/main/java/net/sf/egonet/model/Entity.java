@@ -6,9 +6,15 @@ public abstract class Entity implements java.io.Serializable
 {
     private Long id;
 
+    private Boolean active;
+    
 	private static Random random;
 	private Long randomKey;
 
+	public Entity() {
+		setActive(true);
+	}
+	
     public Long getId()
     {
         return id;
@@ -56,5 +62,13 @@ public abstract class Entity implements java.io.Serializable
 			random = new Random();
 		}
 		return random.nextLong();
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public Boolean getActive() {
+		return active;
 	}
 }

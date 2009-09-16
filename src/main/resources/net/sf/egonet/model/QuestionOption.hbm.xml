@@ -9,6 +9,7 @@
 			<generator class="increment" />
 		</id>
 		<property name="randomKey" column="random_key" />
+		<property name="active" column="active" />
 
 		<property name="questionId" column="question_id" />
 		<property name="name" column="name" />

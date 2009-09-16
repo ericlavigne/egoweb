@@ -10,19 +10,28 @@ import com.google.common.base.Function;
 
 public class DB {
 
+	static void save(Session session, Entity e) {
+		session.saveOrUpdate(e);
+	}
+	
 	public static void save(final Entity e) {
 		withTx(new Function<Session,Object>(){
 			public Object apply(Session s) {
-				s.saveOrUpdate(e);
+				save(s,e);
 				return null;
 			}
 		});
 	}
 	
+	static void delete(Session s, Entity e) {
+		e.setActive(false);
+		s.saveOrUpdate(e);
+	}
+	
 	static void delete(final Entity e) {
 		withTx(new Function<Session,Object>(){
 			public Object apply(Session s) {
-				s.delete(e);
+				delete(s,e);
 				return null;
 			}
 		});
@@ -53,5 +62,20 @@ public class DB {
 		public R execute() {
 			return withTx(this);
 		}
+	}
+	
+	public static void migrate() {
+		new Action<Object>() {
+			public Object get() {
+				for(String entity : new String[]{
+						"Alter","Answer","Expression","Interview","Question","QuestionOption","Study"}) 
+				{
+					this.session.createQuery(
+							"update "+entity+" set active = 1 where active is null")
+							.executeUpdate();
+				}
+				return null;
+			}
+		}.execute();
 	}
 }

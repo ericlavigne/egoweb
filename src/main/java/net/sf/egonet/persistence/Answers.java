@@ -19,7 +19,8 @@ public class Answers {
 			Session session, final Long interviewId, final QuestionType questionType) 
 	{
 		return
-		session.createQuery("from Answer a where a.interviewId = :interviewId and a.questionTypeDB = :questionTypeDB")
+		session.createQuery("from Answer a where a.active = 1 and a.interviewId = :interviewId and " +
+				" a.questionTypeDB = :questionTypeDB")
 			.setLong("interviewId", interviewId)
 			.setString("questionTypeDB", Question.typeDB(questionType))
 			.list();
@@ -31,7 +32,7 @@ public class Answers {
 			Session session, final Long questionId) 
 	{
 		return
-		session.createQuery("from Answer a where a.questionId = :questionId")
+		session.createQuery("from Answer a where a.questionId = :questionId and a.active = 1")
 			.setLong("questionId", questionId)
 			.list();
 	}
@@ -41,7 +42,7 @@ public class Answers {
 			Session session, final Long studyId) 
 	{
 		return
-		session.createQuery("from Answer a where a.studyId = :studyId")
+		session.createQuery("from Answer a where a.studyId = :studyId and a.active = 1")
 			.setLong("studyId", studyId)
 			.list();
 	}
@@ -50,7 +51,8 @@ public class Answers {
 			Session session, final Long studyId, final QuestionType questionType) 
 	{
 		return
-		session.createQuery("from Answer a where a.studyId = :studyId and a.questionTypeDB = :questionTypeDB")
+		session.createQuery("from Answer a where a.active = 1 and a.studyId = :studyId and " +
+				" a.questionTypeDB = :questionTypeDB")
 			.setLong("studyId", studyId)
 			.setString("questionTypeDB", Question.typeDB(questionType))
 			.list();
@@ -91,7 +93,8 @@ public class Answers {
 				throw new IllegalArgumentException("Alter pair questions have two alters, not "+numAlters+".");
 			}
 		}
-		String queryString = "from Answer a where a.interviewId = :interviewId and a.questionId = :questionId";
+		String queryString = "from Answer a where a.active = 1 and a.interviewId = :interviewId" +
+				" and a.questionId = :questionId";
 		if(numAlters > 0) {
 			queryString += " and a.alterId1 = :a1";
 		}

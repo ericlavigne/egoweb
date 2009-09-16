@@ -9,7 +9,7 @@ import org.hibernate.Session;
 public class Alters {
 	@SuppressWarnings("unchecked")
 	static List<Alter> getForInterview(Session session, Long interviewId) {
-		return session.createQuery("from Alter where interviewId = :interviewId")
+		return session.createQuery("from Alter where interviewId = :interviewId and active = 1")
 		.setParameter("interviewId", interviewId)
 		.list();
 	}

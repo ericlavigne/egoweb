@@ -1,6 +1,5 @@
 package net.sf.egonet.persistence;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
@@ -23,7 +22,7 @@ public class Expressions {
 
 	@SuppressWarnings("unchecked")
 	public static List<Expression> forStudy(Session session, Long studyId) {
-		return session.createQuery("from Expression e where e.studyId = :studyId")
+		return session.createQuery("from Expression e where e.studyId = :studyId and e.active = 1")
 				.setLong("studyId", studyId).list();
 	}
 	
@@ -36,13 +35,13 @@ public class Expressions {
 	}
 
 	public static Expression get(Session session, Long expressionId) {
-		return (Expression) session.createQuery("from Expression e where e.id = :id")
+		return (Expression) session.createQuery("from Expression e where e.id = :id and e.active = 1")
 				.setLong("id", expressionId).list().get(0);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static List<Expression> getSimpleExpressionsForQuestion(Session session, Long questionId) {
-		return session.createQuery("from Expression e where e.questionId = :questionId")
+		return session.createQuery("from Expression e where e.questionId = :questionId and e.active = 1")
 				.setLong("questionId", questionId).list();
 	}
 	
