@@ -89,7 +89,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 				Link deleteLink = new Link("alterDelete")
                 {
 					public void onClick() {
-						// DB.delete(alter); // TODO
+						Alters.delete(alter);
 					}
 				};
 				item.add(deleteLink);

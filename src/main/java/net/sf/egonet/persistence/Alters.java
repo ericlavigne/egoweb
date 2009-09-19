@@ -3,8 +3,12 @@ package net.sf.egonet.persistence;
 import java.util.List;
 
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Question;
 
 import org.hibernate.Session;
+
+import com.google.common.collect.Lists;
 
 public class Alters {
 	@SuppressWarnings("unchecked")
@@ -20,5 +24,29 @@ public class Alters {
 				return getForInterview(session,interviewId);
 			}
 		}.execute();
+	}
+
+	public static void delete(final Alter alter) {
+		new DB.Action<Object>() {
+			public Object get() {
+				delete(session,alter);
+				return null;
+			}
+		}.execute();
+	}
+	public static void delete(Session session, Alter alter) {
+		List<Answer> answers = Lists.newArrayList();
+		answers.addAll(
+				Answers.getAnswersForInterview(session, alter.getInterviewId(), Question.QuestionType.ALTER));
+		answers.addAll(
+				Answers.getAnswersForInterview(session, alter.getInterviewId(), Question.QuestionType.ALTER_PAIR));
+		for(Answer answer : answers) {
+			if((answer.getAlterId1() != null && answer.getAlterId1().equals(alter.getId())) ||
+					(answer.getAlterId2() != null && answer.getAlterId2().equals(alter.getId()))) 
+			{
+				DB.delete(session, answer);
+			}
+		}
+		DB.delete(session, alter);
 	}
 }
