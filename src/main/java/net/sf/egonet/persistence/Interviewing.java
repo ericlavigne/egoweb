@@ -2,7 +2,6 @@ package net.sf.egonet.persistence;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.sf.egonet.model.Alter;
@@ -10,12 +9,13 @@ import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.functionalj.tuple.Pair;
+import net.sf.functionalj.tuple.PairUni;
 
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -105,10 +105,6 @@ public class Interviewing {
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
-		Map<Long,Question> idToQuestion = Maps.newHashMap();
-		for(Question question : questions) {
-			idToQuestion.put(question.getId(), question);
-		}
 		Multimap<Long,Answer> questionIdToAnswers = ArrayListMultimap.create();
 		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER)) {
 			questionIdToAnswers.put(answer.getQuestionId(), answer);
@@ -122,6 +118,41 @@ public class Interviewing {
 			for(Alter alter : alters) {
 				if(! answeredAlterIds.contains(alter.getId())) {
 					return question;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public static Pair<Question,Alter> nextUnansweredAlterPairQuestionForInterview(final Long interviewId) {
+		return DB.withTx(new Function<Session,Pair<Question,Alter>>() {
+			public Pair<Question,Alter> apply(Session session) {
+				return nextUnansweredAlterPairQuestionForInterview(session,interviewId);
+			}
+		});
+	}
+	
+	public static Pair<Question,Alter> nextUnansweredAlterPairQuestionForInterview(Session session, Long interviewId) {
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
+		Multimap<PairUni<Long>,Answer> questionAndAlter1ToAnswers = ArrayListMultimap.create();
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER_PAIR)) {
+			questionAndAlter1ToAnswers.put(
+					new PairUni<Long>(answer.getQuestionId(),answer.getAlterId1()), answer);
+		}
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		for(Question question : questions) {
+			for(Alter alter1 : alters) {
+				Set<Long> answeredAlter2Ids = Sets.newHashSet();
+				for(Answer answer : questionAndAlter1ToAnswers.get(new PairUni<Long>(question.getId(),alter1.getId())))
+				{
+					answeredAlter2Ids.add(answer.getAlterId2());
+				}
+				for(Alter alter2 : alters) {
+					if(! answeredAlter2Ids.contains(alter2.getId())) {
+						return new Pair<Question,Alter>(question,alter1);
+					}
 				}
 			}
 		}
