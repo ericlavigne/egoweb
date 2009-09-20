@@ -11,35 +11,39 @@ import com.google.common.collect.Lists;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.persistence.Alters;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
+import net.sf.functionalj.tuple.Pair;
+import net.sf.functionalj.tuple.PairUni;
 
-public class InterviewingAlterPage extends EgonetPage {
+public class InterviewingAlterPairPage extends EgonetPage {
 	
 	private Long interviewId;
 	private Question question;
+	private ArrayList<PairUni<Alter>> alterpairs;
 
 	public ArrayList<AnswerFormFieldPanel> answerFields;
 	
 	private ListView questionsView;
 	
-	public InterviewingAlterPage(Long interviewId, Question question) {
+	public InterviewingAlterPairPage(Long interviewId, Question question, ArrayList<PairUni<Alter>> alterpairs) 
+	{
 		super(Studies.getStudyForInterview(interviewId).getName()+ " - Interviewing "
 				+Interviews.getEgoNameForInterview(interviewId)
 				+" (respondent #"+interviewId+")");
 		this.interviewId = interviewId;
 		this.question = question;
+		this.alterpairs = alterpairs;
 		build();
 	}
 	
 	private void build() {
 		answerFields = Lists.newArrayList();
-		for(Alter alter : Alters.getForInterview(interviewId)) {
-			ArrayList<Alter> alters = Lists.newArrayList(alter);
+		for(PairUni<Alter> alterPair : alterpairs) {
+			ArrayList<Alter> alters = Lists.newArrayList(alterPair.getFirst(),alterPair.getSecond());
 			Answer answer = Answers.getAnswerForInterviewQuestionAlters(Interviews.getInterview(interviewId), 
 					question, alters);
 			if(answer == null) {
@@ -72,10 +76,12 @@ public class InterviewingAlterPage extends EgonetPage {
 	}
 
 	public static EgonetPage askNextUnanswered(Long interviewId) {
-		Question nextAlterQuestion = Interviewing.nextUnansweredAlterQuestionForInterview(interviewId);
-		if(nextAlterQuestion != null) {
-			return new InterviewingAlterPage(interviewId, nextAlterQuestion);
+		Pair<Question,ArrayList<PairUni<Alter>>> 
+		questionAndAlterPairs = Interviewing.nextUnansweredAlterPairQuestionForInterview(interviewId);
+		if(questionAndAlterPairs != null) {
+			return new InterviewingAlterPairPage(interviewId, 
+					questionAndAlterPairs.getFirst(),questionAndAlterPairs.getSecond());
 		}
-		return InterviewingAlterPairPage.askNextUnanswered(interviewId);
+		return new InterviewingConclusionPage(interviewId);
 	}
 }

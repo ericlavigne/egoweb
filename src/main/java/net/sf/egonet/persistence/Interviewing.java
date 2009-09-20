@@ -1,5 +1,6 @@
 package net.sf.egonet.persistence;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.hibernate.Session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -124,15 +126,17 @@ public class Interviewing {
 		return null;
 	}
 	
-	public static Pair<Question,Alter> nextUnansweredAlterPairQuestionForInterview(final Long interviewId) {
-		return DB.withTx(new Function<Session,Pair<Question,Alter>>() {
-			public Pair<Question,Alter> apply(Session session) {
+	public static Pair<Question,ArrayList<PairUni<Alter>>> 
+	nextUnansweredAlterPairQuestionForInterview(final Long interviewId) {
+		return DB.withTx(new Function<Session,Pair<Question,ArrayList<PairUni<Alter>>>>() {
+			public Pair<Question,ArrayList<PairUni<Alter>>> apply(Session session) {
 				return nextUnansweredAlterPairQuestionForInterview(session,interviewId);
 			}
 		});
 	}
 	
-	public static Pair<Question,Alter> nextUnansweredAlterPairQuestionForInterview(Session session, Long interviewId) {
+	public static Pair<Question,ArrayList<PairUni<Alter>>> 
+	nextUnansweredAlterPairQuestionForInterview(Session session, Long interviewId) {
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
@@ -143,6 +147,7 @@ public class Interviewing {
 		}
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
 		for(Question question : questions) {
+			ArrayList<PairUni<Alter>> unansweredPairs = Lists.newArrayList();
 			for(Alter alter1 : alters) {
 				Set<Long> answeredAlter2Ids = Sets.newHashSet();
 				for(Answer answer : questionAndAlter1ToAnswers.get(new PairUni<Long>(question.getId(),alter1.getId())))
@@ -150,10 +155,18 @@ public class Interviewing {
 					answeredAlter2Ids.add(answer.getAlterId2());
 				}
 				for(Alter alter2 : alters) {
-					if(! answeredAlter2Ids.contains(alter2.getId())) {
-						return new Pair<Question,Alter>(question,alter1);
+					if(alter1.getId() < alter2.getId()) { // To avoid repeats, convention that lower ID is first
+						if(! answeredAlter2Ids.contains(alter2.getId())) {
+							unansweredPairs.add(new PairUni<Alter>(alter1,alter2));
+							if(unansweredPairs.size() > 9) {
+								return new Pair<Question,ArrayList<PairUni<Alter>>>(question,unansweredPairs);
+							}
+						}
 					}
 				}
+			}
+			if(! unansweredPairs.isEmpty()) {
+				return new Pair<Question,ArrayList<PairUni<Alter>>>(question,unansweredPairs);
 			}
 		}
 		return null;
