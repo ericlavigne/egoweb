@@ -1,16 +1,20 @@
 package net.sf.egonet.persistence;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Expression;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.model.Question.QuestionType;
 
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 public class Expressions {
 
@@ -83,14 +87,43 @@ public class Expressions {
 		DB.delete(expression);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Boolean evaluate(Session session, Expression expression, Question question, Collection<Alter> alters) 
+	private Boolean aggregateResultsForCompoundOrSelectionExpression(
+			Expression.Operator operator, Integer trues, Integer falses, Integer nulls) 
 	{
+		if(operator.equals(Expression.Operator.All)) {
+			if(falses > 0) {
+				return false;
+			} else {
+				return nulls > 0 ? null : true;
+			}
+		} else if(operator.equals(Expression.Operator.Some)) {
+			if(trues > 0) {
+				return true;
+			} else {
+				return nulls > 0 ? null : false;
+			}
+		} else if(operator.equals(Expression.Operator.None)) {
+			if(trues > 0) {
+				return false;
+			} else {
+				return nulls > 0 ? null : true;
+			}
+		}
+		throw new RuntimeException("Unable to aggregate parts of compound or selection expression" +
+				" with operator "+operator+" and trues= "+trues+", falses="+falses+", nulls="+nulls);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Boolean evaluate(Session session, 
+			Expression expression, Question question, Interview interview, ArrayList<Alter> alters) 
+	{
+		Expression.Operator operator = expression.getOperator();
+		Expression.Type eType = expression.getType();
 		Integer nulls = 0, trues = 0, falses = 0;
-		if(expression.getType().equals(Expression.Type.Compound)) {
+		if(eType.equals(Expression.Type.Compound)) {
 			for(Long id : (List<Long>) expression.getValue()) {
-				// TODO: If subexpression is simple, for alter question, and two alters, evaluate twice.
-				Boolean result = evaluate(session, Expressions.get(session, id),question,alters);
+				// TODO: If subexpression is simple, for alter question, and two alters, evaluate (and increment) twice.
+				Boolean result = evaluate(session, Expressions.get(session, id),question,interview,alters);
 				if(result == null) {
 					nulls++;
 				} else if(result) {
@@ -98,30 +131,81 @@ public class Expressions {
 				} else {
 					falses++;
 				}
-				if(expression.getOperator().equals(Expression.Operator.All)) {
-					if(falses > 0) {
-						return false;
-					} else {
-						return nulls > 0 ? null : true;
-					}
-				} else if(expression.getOperator().equals(Expression.Operator.Some)) {
-					if(trues > 0) {
-						return true;
-					} else {
-						return nulls > 0 ? null : false;
-					}
-				} else if(expression.getOperator().equals(Expression.Operator.None)) {
-					if(trues > 0) {
-						return false;
-					} else {
-						return nulls > 0 ? null : true;
-					}
+			}
+			return aggregateResultsForCompoundOrSelectionExpression(
+					operator,trues,falses,nulls);
+		}
+		QuestionType qType = question.getType();
+		// Handle case where you have wrong number of alters
+		if((qType.equals(QuestionType.EGO) || qType.equals(QuestionType.EGO_ID)) && ! alters.isEmpty()) {
+			return evaluate(session, expression,question,interview, new ArrayList<Alter>());
+		}
+		if((qType.equals(QuestionType.ALTER_PAIR) && alters.size() < 2) ||
+				(qType.equals(QuestionType.ALTER) && alters.isEmpty())) {
+			return null;
+		}
+		if(qType.equals(QuestionType.ALTER) && alters.size() > 1) {
+			Boolean result = null;
+			for(Alter alter : alters) {
+				Boolean next = evaluate(session, expression,question,interview, Lists.newArrayList(alter));
+				if(next == null || (result != null && ! next.equals(result))) {
+					return null;
+				}
+				result = next;
+			}
+			return result;
+		}
+		
+		Answer answer = Answers.getAnswerForInterviewQuestionAlters(session,interview,question,alters);
+		// Selection (lots of similarity to compound)
+		if(eType.equals(Expression.Type.Selection)) {
+			List<String> selectedStrings = Lists.newArrayList(answer.getValue().split(","));
+			for(Long id : (List<Long>) expression.getValue()) {
+				if(selectedStrings.contains(id.toString())) {
+					trues++;
+				} else {
+					falses++;
 				}
 			}
+			return aggregateResultsForCompoundOrSelectionExpression(
+					operator,trues,falses,nulls);
 		}
-		// TODO: Selection (lots of similarity to compound)
-		// TODO: Textual
-		// TODO: Numerical
+		// Textual
+		if(eType.equals(Expression.Type.Text)) {
+			if(answer.getValue() == null) {
+				return null;
+			}
+			if(operator.equals(Expression.Operator.Equals)) {
+				return answer.getValue().equals((String) expression.getValue());
+			}
+			if(operator.equals(Expression.Operator.Contains)) {
+				return answer.getValue().contains((String) expression.getValue());
+			}
+		}
+		// Numerical
+		if(eType.equals(Expression.Type.Number)) {
+			Long answerNumber = null;
+			Long expressionNumber = (Long) expression.getValue();
+			try {
+				answerNumber = Long.parseLong(answer.getValue());
+			} catch(Exception ex) {
+				return null;
+			}
+			if(answerNumber > expressionNumber) {
+				return 
+					operator.equals(Expression.Operator.Greater) || 
+					operator.equals(Expression.Operator.GreaterOrEqual);
+			}
+			if(answerNumber < expressionNumber) {
+				return 
+					operator.equals(Expression.Operator.Less) || 
+					operator.equals(Expression.Operator.LessOrEqual);
+			}
+			return
+				operator.equals(Expression.Operator.Equals) ||
+				operator.equals(Expression.Operator.GreaterOrEqual) ||
+				operator.equals(Expression.Operator.LessOrEqual);
+		}
 		throw new RuntimeException("Unable to evaluate expression "+expression+
 				" for question "+question);
 	}
