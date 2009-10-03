@@ -113,6 +113,19 @@ public class Expressions {
 				" with operator "+operator+" and trues= "+trues+", falses="+falses+", nulls="+nulls);
 	}
 	
+	public Boolean evaluate(
+			final Expression expression, 
+			final Question question, 
+			final Interview interview, 
+			final ArrayList<Alter> alters) 
+	{
+		return new DB.Action<Boolean>() {
+			public Boolean get() {
+				return evaluate(session,expression,question,interview,alters);
+			}
+		}.execute();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Boolean evaluate(Session session, 
 			Expression expression, Question question, Interview interview, ArrayList<Alter> alters) 
@@ -121,15 +134,26 @@ public class Expressions {
 		Expression.Type eType = expression.getType();
 		Integer nulls = 0, trues = 0, falses = 0;
 		if(eType.equals(Expression.Type.Compound)) {
-			for(Long id : (List<Long>) expression.getValue()) {
-				// TODO: If subexpression is simple, for alter question, and two alters, evaluate (and increment) twice.
-				Boolean result = evaluate(session, Expressions.get(session, id),question,interview,alters);
-				if(result == null) {
-					nulls++;
-				} else if(result) {
-					trues++;
+			for(Long expressionId : (List<Long>) expression.getValue()) {
+				Expression subExpression = Expressions.get(session, expressionId);
+				ArrayList<ArrayList<Alter>> alterGroups = Lists.newArrayList();
+				Boolean simple = ! subExpression.getType().equals(Expression.Type.Compound);
+				if(simple && Questions.getQuestion(session, subExpression.getQuestionId()).isAboutAlter()) {
+					for(Alter alter : alters) { // If alter question, needs one alter at a time.
+						alterGroups.add(Lists.newArrayList(alter));
+					}
 				} else {
-					falses++;
+					alterGroups.add(alters);
+				}
+				for(ArrayList<Alter> alterGroup : alterGroups) {
+					Boolean result = evaluate(session, subExpression,question,interview,alterGroup);
+					if(result == null) {
+						nulls++;
+					} else if(result) {
+						trues++;
+					} else {
+						falses++;
+					}
 				}
 			}
 			return aggregateResultsForCompoundOrSelectionExpression(
