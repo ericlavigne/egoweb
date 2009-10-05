@@ -87,7 +87,7 @@ public class Expressions {
 		DB.delete(expression);
 	}
 	
-	private Boolean aggregateResultsForCompoundOrSelectionExpression(
+	private static Boolean aggregateResultsForCompoundOrSelectionExpression(
 			Expression.Operator operator, Integer trues, Integer falses, Integer nulls) 
 	{
 		if(operator.equals(Expression.Operator.All)) {
@@ -115,20 +115,19 @@ public class Expressions {
 	
 	public Boolean evaluate(
 			final Expression expression, 
-			final Question question, 
 			final Interview interview, 
 			final ArrayList<Alter> alters) 
 	{
 		return new DB.Action<Boolean>() {
 			public Boolean get() {
-				return evaluate(session,expression,question,interview,alters);
+				return evaluate(session,expression,interview,alters);
 			}
 		}.execute();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Boolean evaluate(Session session, 
-			Expression expression, Question question, Interview interview, ArrayList<Alter> alters) 
+	public static Boolean evaluate(Session session, 
+			Expression expression, Interview interview, ArrayList<Alter> alters) 
 	{
 		Expression.Operator operator = expression.getOperator();
 		Expression.Type eType = expression.getType();
@@ -146,7 +145,7 @@ public class Expressions {
 					alterGroups.add(alters);
 				}
 				for(ArrayList<Alter> alterGroup : alterGroups) {
-					Boolean result = evaluate(session, subExpression,question,interview,alterGroup);
+					Boolean result = evaluate(session, subExpression,interview,alterGroup);
 					if(result == null) {
 						nulls++;
 					} else if(result) {
@@ -159,10 +158,11 @@ public class Expressions {
 			return aggregateResultsForCompoundOrSelectionExpression(
 					operator,trues,falses,nulls);
 		}
+		Question question = Questions.getQuestion(session, expression.getQuestionId());
 		QuestionType qType = question.getType();
 		// Handle case where you have wrong number of alters
 		if((qType.equals(QuestionType.EGO) || qType.equals(QuestionType.EGO_ID)) && ! alters.isEmpty()) {
-			return evaluate(session, expression,question,interview, new ArrayList<Alter>());
+			return evaluate(session, expression,interview, new ArrayList<Alter>());
 		}
 		if((qType.equals(QuestionType.ALTER_PAIR) && alters.size() < 2) ||
 				(qType.equals(QuestionType.ALTER) && alters.isEmpty())) {
@@ -171,7 +171,7 @@ public class Expressions {
 		if(qType.equals(QuestionType.ALTER) && alters.size() > 1) {
 			Boolean result = null;
 			for(Alter alter : alters) {
-				Boolean next = evaluate(session, expression,question,interview, Lists.newArrayList(alter));
+				Boolean next = evaluate(session, expression,interview, Lists.newArrayList(alter));
 				if(next == null || (result != null && ! next.equals(result))) {
 					return null;
 				}
@@ -181,6 +181,9 @@ public class Expressions {
 		}
 		
 		Answer answer = Answers.getAnswerForInterviewQuestionAlters(session,interview,question,alters);
+		if(answer == null) {
+			return null;
+		}
 		// Selection (lots of similarity to compound)
 		if(eType.equals(Expression.Type.Selection)) {
 			List<String> selectedStrings = Lists.newArrayList(answer.getValue().split(","));
@@ -230,7 +233,6 @@ public class Expressions {
 				operator.equals(Expression.Operator.GreaterOrEqual) ||
 				operator.equals(Expression.Operator.LessOrEqual);
 		}
-		throw new RuntimeException("Unable to evaluate expression "+expression+
-				" for question "+question);
+		throw new RuntimeException("Unable to evaluate expression "+expression);
 	}
 }

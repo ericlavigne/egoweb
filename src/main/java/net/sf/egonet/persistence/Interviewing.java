@@ -7,6 +7,7 @@ import java.util.Set;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
@@ -87,9 +88,37 @@ public class Interviewing {
 				if(answer.getQuestionId().equals(question.getId())) {
 					foundAnswer = true;
 				}
-			}
-			if(! foundAnswer) {
-				return question;
+			} 
+			Long reasonId = question.getAnswerReasonExpressionId();
+			if(! foundAnswer) { // unanswered
+				if(reasonId == null) { // null means always answer question
+					return question;
+				} else { // should this question be answered?
+					Expression answerReason = Expressions.get(session, reasonId);
+					if(session == null || answerReason == null || question == null || interview == null) {
+						throw new RuntimeException(
+								"Null found: session="+session+
+								", answerReason="+answerReason+
+								", question="+question+
+								", interview="+interview);
+					}
+					try {
+					Boolean shouldAnswer = nullOrTrue( // if uncertain, err on side of answering
+							answerReason == null ? true :
+							Expressions.evaluate(session, 
+									answerReason, interview, 
+									new ArrayList<Alter>()));
+					if(shouldAnswer) {
+						return question;
+					}
+					} catch(NullPointerException ex) {
+						throw new RuntimeException(
+								"Null found: session="+session+
+								", answerReason="+answerReason+
+								", question="+question+
+								", interview="+interview);
+					}
+				}
 			}
 		}
 		return null;
@@ -170,5 +199,9 @@ public class Interviewing {
 			}
 		}
 		return null;
+	}
+	
+	private static Boolean nullOrTrue(Boolean b) {
+		return b == null || b;
 	}
 }
