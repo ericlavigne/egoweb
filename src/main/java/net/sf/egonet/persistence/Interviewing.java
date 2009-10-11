@@ -2,6 +2,7 @@ package net.sf.egonet.persistence;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -68,6 +69,57 @@ public class Interviewing {
 		});
 	}
 
+	public static Question nextEgoQuestionForInterview(
+			final Long interviewId, final Question current, 
+			final Boolean forward, final Boolean unansweredOnly) 
+	{
+		return DB.withTx(new Function<Session,Question>() {
+			public Question apply(Session session) {
+				return nextEgoQuestionForInterview(session,interviewId,current,forward,unansweredOnly);
+			}
+		});
+	}
+	
+	public static Question nextEgoQuestionForInterview(
+			Session session, Long interviewId, Question current, Boolean forward, Boolean unansweredOnly)
+	{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.EGO);
+		if(! forward) {
+			Collections.reverse(questions);
+		}
+		List<Answer> answers = 
+			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
+		Boolean passedCurrent = current == null;
+		for(Question question : questions) {
+			Boolean foundAnswer = false;
+			for(Answer answer : answers) {
+				if(answer.getQuestionId().equals(question.getId())) {
+					foundAnswer = true;
+				}
+			}
+			if(unansweredOnly && foundAnswer) {
+				// Looking for unanswered. This one is answered. Not the question we're looking for.
+			} else if(passedCurrent) { 
+				Long reasonId = question.getAnswerReasonExpressionId();
+				Boolean shouldAnswer = 
+					reasonId == null || 
+					Expressions.evaluate(session, 
+							Expressions.get(session, reasonId), 
+							interview, 
+							new ArrayList<Alter>());
+				if(shouldAnswer) {
+					return question;
+				}
+			}
+			if(current != null && question.getId().equals(current.getId())) {
+				passedCurrent = true;
+			}
+		}
+		return null;
+	}
+	@Deprecated
 	public static Question nextUnansweredEgoQuestionForInterview(final Long interviewId) {
 		return DB.withTx(new Function<Session,Question>() {
 			public Question apply(Session session) {
@@ -75,7 +127,7 @@ public class Interviewing {
 			}
 		});
 	}
-	
+	@Deprecated
 	public static Question nextUnansweredEgoQuestionForInterview(Session session, Long interviewId) {
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 

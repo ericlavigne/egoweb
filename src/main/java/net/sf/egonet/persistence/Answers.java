@@ -58,6 +58,17 @@ public class Answers {
 			.list();
 	}
 
+	public static Answer getAnswerForInterviewAndQuestion(
+			final Long interviewId, final Question question) 
+	{
+		return new DB.Action<Answer>() {
+			public Answer get() {
+				Interview interview = Interviews.getInterview(session, interviewId);
+				return getAnswerForInterviewAndQuestion(session,interview,question);
+			}
+		}.execute();
+	}
+	
 	public static Answer getAnswerForInterviewAndQuestion(Session session, Interview interview, Question question) {
 		return getAnswerForInterviewQuestionAlters(session,interview,question,new ArrayList<Alter>());
 	}

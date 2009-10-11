@@ -1,7 +1,9 @@
 package net.sf.egonet.web.page;
 
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
@@ -30,21 +32,61 @@ public class InterviewingEgoPage extends EgonetPage {
 				String answerString = field.getAnswer();
 				if(answerString != null) {
 					Answers.setAnswerForInterviewAndQuestion(interviewId, question, answerString);
+					setResponsePage(askNextUnanswered(interviewId,question));
 				}
-				setResponsePage(askNextUnanswered(interviewId));
 			}
 		};
-		field = AnswerFormFieldPanel.getInstance("question",question);
+		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
+		if(answer == null) {
+
+			field = AnswerFormFieldPanel.getInstance("question",question);
+		} else {
+			field = AnswerFormFieldPanel.getInstance("question",question,answer.getValue());
+		}
 		// TODO: If question already answered, push that answer into field.
 		form.add(field);
 		add(form);
+
+		add(new Link("backwardLink") {
+			public void onClick() {
+				EgonetPage page = askPrevious(interviewId,question);
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
+		add(new Link("forwardLink") {
+			public void onClick() {
+				EgonetPage page = askNext(interviewId,question);
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
 	}
-	
-	public static EgonetPage askNextUnanswered(Long interviewId) {
-		Question nextEgoQuestion = Interviewing.nextUnansweredEgoQuestionForInterview(interviewId);
+
+	public static EgonetPage askNextUnanswered(Long interviewId,Question currentQuestion) {
+		Question nextEgoQuestion = 
+			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,true,true);
 		if(nextEgoQuestion != null) {
 			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
 		}
 		return InterviewingAlterPromptPage.askNextUnanswered(interviewId);
+	}
+	public static EgonetPage askNext(Long interviewId,Question currentQuestion) {
+		Question nextEgoQuestion = 
+			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,true,false);
+		if(nextEgoQuestion != null) {
+			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
+		}
+		return InterviewingAlterPromptPage.askNextUnanswered(interviewId); // TODO: Shouldn't limit to unanswered
+	}
+	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion) {
+		Question previousEgoQuestion = 
+			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,false,false);
+		if(previousEgoQuestion != null) {
+			return new InterviewingEgoPage(interviewId, previousEgoQuestion);
+		}
+		return null; 
 	}
 }
