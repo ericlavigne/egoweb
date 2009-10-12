@@ -14,6 +14,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
+import net.sf.functionalj.tuple.TripleUni;
 
 import org.hibernate.Session;
 
@@ -176,6 +177,96 @@ public class Interviewing {
 		return null;
 	}
 
+
+	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
+			final Long interviewId, 
+			final Question currentQuestion, final Alter currentAlter, 
+			final Boolean forward, final Boolean unansweredOnly, final Integer maxAlters)
+	{
+		return new DB.Action<Pair<Question,ArrayList<Alter>>>() {
+			public Pair<Question, ArrayList<Alter>> get() {
+				return nextAlterQuestionForInterview(
+						session, interviewId, currentQuestion, currentAlter, 
+						forward, unansweredOnly, maxAlters);
+			}
+		}.execute();
+	}
+	
+	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
+			Session session, Long interviewId, Question currentQuestion, Alter currentAlter, 
+			Boolean forward, Boolean unansweredOnly, Integer maxAlters)
+	{
+		ArrayList<Pair<Question,ArrayList<Alter>>> questions =
+			alterQuestionsForInterview(session,interviewId,forward,unansweredOnly);
+		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
+		for(Pair<Question,ArrayList<Alter>> questionAlters : questions) {
+			Question question = questionAlters.getFirst();
+			ArrayList<Alter> results = Lists.newArrayList();
+			for(Alter alter : questionAlters.getSecond()) {
+				if(passedCurrent && (maxAlters == null || results.size() < maxAlters)) {
+					results.add(alter);
+				}
+				if(currentQuestion != null && 
+						currentQuestion.getId().equals(question.getId()) && 
+						currentAlter.getId().equals(alter.getId())) 
+				{
+					passedCurrent = true;
+				}
+			}
+			if(! results.isEmpty()) {
+				return new Pair<Question,ArrayList<Alter>>(question,results);
+			}
+		}
+		return null;
+	}
+	
+	public static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
+			Session session, Long interviewId, Boolean forward, Boolean unansweredOnly) 
+	{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		Multimap<Long,Answer> questionIdToAnswers = ArrayListMultimap.create();
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER)) {
+			questionIdToAnswers.put(answer.getQuestionId(), answer);
+		}
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		if(! forward) {
+			Collections.reverse(questions);
+			Collections.reverse(alters);
+		}
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		for(Question question : questions) {
+			Set<Long> answeredAlterIds = Sets.newHashSet();
+			for(Answer answer : questionIdToAnswers.get(question.getId())) {
+				answeredAlterIds.add(answer.getAlterId1());
+			}
+			ArrayList<Alter> resultAlters = Lists.newArrayList();
+			for(Alter alter : alters) {
+				Boolean answered = answeredAlterIds.contains(alter.getId());
+				if(answered && unansweredOnly) {
+					// Answered, but we only want unanswered. Ignore it.
+				} else {
+					Long reasonId = question.getAnswerReasonExpressionId();
+					Boolean shouldAnswer =
+						reasonId == null ||
+						Expressions.evaluate(session, 
+								Expressions.get(session, reasonId), 
+								interview, 
+								Lists.newArrayList(alter));
+					if(shouldAnswer) {
+						resultAlters.add(alter);
+					}
+				}
+			}
+			if(! resultAlters.isEmpty()) {
+				results.add(new Pair<Question,ArrayList<Alter>>(question,resultAlters));
+			}
+		}
+		return results;
+	}
+	
+	@Deprecated
 	public static Question nextUnansweredAlterQuestionForInterview(final Long interviewId) {
 		return DB.withTx(new Function<Session,Question>() {
 			public Question apply(Session session) {
@@ -183,7 +274,7 @@ public class Interviewing {
 			}
 		});
 	}
-	
+	@Deprecated
 	public static Question nextUnansweredAlterQuestionForInterview(Session session, Long interviewId) {
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
@@ -206,7 +297,104 @@ public class Interviewing {
 		}
 		return null;
 	}
+
+	public static Pair<Question,ArrayList<PairUni<Alter>>> nextAlterPairQuestionForInterview(
+			final Long interviewId, 
+			final Question currentQuestion, final PairUni<Alter> currentAlterPair, 
+			final Boolean forward, final Boolean unansweredOnly, final Integer maxAlterPairs)
+	{
+		return new DB.Action<Pair<Question,ArrayList<PairUni<Alter>>>>() {
+			public Pair<Question, ArrayList<PairUni<Alter>>> get() {
+				return nextAlterPairQuestionForInterview(
+						session, interviewId, currentQuestion, currentAlterPair, 
+						forward, unansweredOnly, maxAlterPairs);
+			}
+		}.execute();
+	}
 	
+	public static Pair<Question,ArrayList<PairUni<Alter>>> nextAlterPairQuestionForInterview(
+			Session session, Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair, 
+			Boolean forward, Boolean unansweredOnly, Integer maxAlterPairs)
+	{
+		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> questions =
+			alterPairQuestionsForInterview(session,interviewId,forward,unansweredOnly);
+		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
+		for(Pair<Question,ArrayList<PairUni<Alter>>> questionAlters : questions) {
+			Question question = questionAlters.getFirst();
+			ArrayList<PairUni<Alter>> results = Lists.newArrayList();
+			for(PairUni<Alter> alters : questionAlters.getSecond()) {
+				if(passedCurrent && (maxAlterPairs == null || results.size() < maxAlterPairs)) {
+					results.add(alters);
+				}
+				if(currentQuestion != null && 
+						currentQuestion.getId().equals(question.getId()) && 
+						currentAlterPair.getFirst().getId().equals(alters.getFirst().getId()) &&
+						currentAlterPair.getSecond().getId().equals(alters.getSecond().getId()) )
+				{
+					passedCurrent = true;
+				}
+			}
+			if(! results.isEmpty()) {
+				return new Pair<Question,ArrayList<PairUni<Alter>>>(question,results);
+			}
+		}
+		return null;
+	}
+	
+	public static ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> alterPairQuestionsForInterview(
+			Session session, Long interviewId, Boolean forward, Boolean unansweredOnly) 
+	{
+		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> results = Lists.newArrayList();
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
+		Set<TripleUni<Long>> answeredQuestionAlterPair = Sets.newHashSet();
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER_PAIR)) {
+			answeredQuestionAlterPair.add(
+					new TripleUni<Long>(
+							answer.getQuestionId(),
+							answer.getAlterId1(),
+							answer.getAlterId2()));
+		}
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		if(! forward) {
+			Collections.reverse(questions);
+		}
+		for(Question question : questions) {
+			ArrayList<PairUni<Alter>> resultPairs = Lists.newArrayList();
+			for(Alter alter1 : alters) {
+				for(Alter alter2 : alters) {
+					if(alter1.getId() < alter2.getId()) { // To avoid repeats, convention that lower ID is first
+						Boolean answered = answeredQuestionAlterPair.contains(
+								new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()));
+						if(answered && unansweredOnly) {
+							// Answered, but we only want unanswered. Ignore it.
+						} else {
+							Long reasonId = question.getAnswerReasonExpressionId();
+							Boolean shouldAnswer =
+								reasonId == null ||
+								Expressions.evaluate(session, 
+										Expressions.get(session, reasonId), 
+										interview, 
+										Lists.newArrayList(alter1,alter2));
+							if(shouldAnswer) {
+								resultPairs.add(new PairUni<Alter>(alter1,alter2));
+							}
+						}
+					}
+				}
+			}
+			if(! resultPairs.isEmpty()) {
+				if(! forward) {
+					Collections.reverse(resultPairs);
+				}
+				results.add(new Pair<Question,ArrayList<PairUni<Alter>>>(question,resultPairs));
+			}
+		}
+		return results;
+	}
+	
+	@Deprecated
 	public static Pair<Question,ArrayList<PairUni<Alter>>> 
 	nextUnansweredAlterPairQuestionForInterview(final Long interviewId) {
 		return DB.withTx(new Function<Session,Pair<Question,ArrayList<PairUni<Alter>>>>() {
@@ -216,6 +404,7 @@ public class Interviewing {
 		});
 	}
 	
+	@Deprecated
 	public static Pair<Question,ArrayList<PairUni<Alter>>> 
 	nextUnansweredAlterPairQuestionForInterview(Session session, Long interviewId) {
 		Interview interview = Interviews.getInterview(session, interviewId);
