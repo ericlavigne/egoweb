@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;

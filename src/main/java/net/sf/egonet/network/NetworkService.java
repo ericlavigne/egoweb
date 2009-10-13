@@ -3,10 +3,7 @@ package net.sf.egonet.network;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
-import edu.uci.ics.jung.visualization.BasicVisualizationServer;
 import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
@@ -18,7 +15,6 @@ import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
-import java.util.Set;
 
 import org.apache.commons.collections15.Transformer;
 

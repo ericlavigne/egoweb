@@ -1,7 +1,6 @@
 package net.sf.egonet.network;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 
 import java.util.Collections;
 import java.util.Set;

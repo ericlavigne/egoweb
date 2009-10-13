@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.link.Link;
 
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
@@ -79,7 +80,12 @@ public class InterviewingEgoPage extends EgonetPage {
 		if(nextEgoQuestion != null) {
 			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
 		}
-		return InterviewingAlterPromptPage.askNextUnanswered(interviewId); // TODO: Shouldn't limit to unanswered
+		Study study = Studies.getStudyForInterview(interviewId);
+		Integer max = study.getMaxAlters();
+		if(max != null && max > 0) {
+			return new InterviewingAlterPromptPage(interviewId);
+		}
+		return InterviewingAlterPage.askNext(interviewId,null,null);
 	}
 	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion) {
 		Question previousEgoQuestion = 

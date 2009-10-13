@@ -3,6 +3,7 @@ package net.sf.egonet.web.page;
 import java.util.ArrayList;
 
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 
@@ -62,7 +63,7 @@ public class InterviewingAlterPairPage extends EgonetPage {
 								interviewId, question, answerField.getAlters(), answerString);
 					}
 				}
-				setResponsePage(askNextUnanswered(interviewId));
+				setResponsePage(askNextUnanswered(interviewId,question,getLastAlterPair()));
 			}
 		};
 		questionsView = new ListView("questions",answerFields) {
@@ -73,15 +74,65 @@ public class InterviewingAlterPairPage extends EgonetPage {
 		questionsView.setReuseItems(true);
 		form.add(questionsView);
 		add(form);
+		
+		add(new Link("backwardLink") {
+			public void onClick() {
+				EgonetPage page = askPrevious(interviewId,question,getFirstAlterPair());
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
+		add(new Link("forwardLink") {
+			public void onClick() {
+				EgonetPage page = askNext(interviewId,question,getLastAlterPair());
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
 	}
 
-	public static EgonetPage askNextUnanswered(Long interviewId) {
-		Pair<Question,ArrayList<PairUni<Alter>>> 
-		questionAndAlterPairs = Interviewing.nextUnansweredAlterPairQuestionForInterview(interviewId);
-		if(questionAndAlterPairs != null) {
+	public PairUni<Alter> getFirstAlterPair() {
+		return alterpairs.get(0);
+	}
+	public PairUni<Alter> getLastAlterPair() {
+		return alterpairs.get(alterpairs.size()-1);
+	}
+	
+	private static final Integer alterPairsPerPage = 5;
+	
+	public static EgonetPage askNextUnanswered(Long interviewId,Question currentQuestion, PairUni<Alter> currentAlterPair) {
+		Pair<Question,ArrayList<PairUni<Alter>>> nextQuestionAndAlterPairs =
+			Interviewing.nextAlterPairQuestionForInterview(
+					interviewId, currentQuestion, currentAlterPair, true, true, alterPairsPerPage);
+		if(nextQuestionAndAlterPairs != null) {
 			return new InterviewingAlterPairPage(interviewId, 
-					questionAndAlterPairs.getFirst(),questionAndAlterPairs.getSecond());
+					nextQuestionAndAlterPairs.getFirst(), 
+					nextQuestionAndAlterPairs.getSecond());
 		}
 		return new InterviewingConclusionPage(interviewId);
+	}
+	public static EgonetPage askNext(Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair) {
+		Pair<Question,ArrayList<PairUni<Alter>>> nextQuestionAndAlterPairs =
+			Interviewing.nextAlterPairQuestionForInterview(
+					interviewId, currentQuestion, currentAlterPair, true, false, alterPairsPerPage);
+		if(nextQuestionAndAlterPairs != null) {
+			return new InterviewingAlterPairPage(interviewId, 
+					nextQuestionAndAlterPairs.getFirst(), 
+					nextQuestionAndAlterPairs.getSecond());
+		}
+		return new InterviewingConclusionPage(interviewId);
+	}
+	public static EgonetPage askPrevious(Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair) {
+		Pair<Question,ArrayList<PairUni<Alter>>> previousQuestionAndAlterPairs =
+			Interviewing.nextAlterPairQuestionForInterview(
+					interviewId, currentQuestion, currentAlterPair, false, false, alterPairsPerPage);
+		if(previousQuestionAndAlterPairs != null) {
+			return new InterviewingAlterPairPage(interviewId, 
+					previousQuestionAndAlterPairs.getFirst(), 
+					previousQuestionAndAlterPairs.getSecond());
+		}
+		return InterviewingAlterPage.askPrevious(interviewId, null, null);
 	}
 }

@@ -8,7 +8,6 @@ import java.util.Set;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
-import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
@@ -120,63 +119,6 @@ public class Interviewing {
 		}
 		return null;
 	}
-	@Deprecated
-	public static Question nextUnansweredEgoQuestionForInterview(final Long interviewId) {
-		return DB.withTx(new Function<Session,Question>() {
-			public Question apply(Session session) {
-				return nextUnansweredEgoQuestionForInterview(session,interviewId);
-			}
-		});
-	}
-	@Deprecated
-	public static Question nextUnansweredEgoQuestionForInterview(Session session, Long interviewId) {
-		Interview interview = Interviews.getInterview(session, interviewId);
-		List<Question> questions = 
-			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.EGO);
-		List<Answer> answers = 
-			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
-		for(Question question : questions) {
-			Boolean foundAnswer = false;
-			for(Answer answer : answers) {
-				if(answer.getQuestionId().equals(question.getId())) {
-					foundAnswer = true;
-				}
-			} 
-			Long reasonId = question.getAnswerReasonExpressionId();
-			if(! foundAnswer) { // unanswered
-				if(reasonId == null) { // null means always answer question
-					return question;
-				} else { // should this question be answered?
-					Expression answerReason = Expressions.get(session, reasonId);
-					if(session == null || answerReason == null || question == null || interview == null) {
-						throw new RuntimeException(
-								"Null found: session="+session+
-								", answerReason="+answerReason+
-								", question="+question+
-								", interview="+interview);
-					}
-					try {
-					Boolean shouldAnswer = nullOrTrue( // if uncertain, err on side of answering
-							answerReason == null ? true :
-							Expressions.evaluate(session, 
-									answerReason, interview, 
-									new ArrayList<Alter>()));
-					if(shouldAnswer) {
-						return question;
-					}
-					} catch(NullPointerException ex) {
-						throw new RuntimeException(
-								"Null found: session="+session+
-								", answerReason="+answerReason+
-								", question="+question+
-								", interview="+interview);
-					}
-				}
-			}
-		}
-		return null;
-	}
-
 
 	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
 			final Long interviewId, 
@@ -214,6 +156,9 @@ public class Interviewing {
 				}
 			}
 			if(! results.isEmpty()) {
+				if(! forward) { // Want to return alters in normal order.
+					Collections.reverse(results);
+				}
 				return new Pair<Question,ArrayList<Alter>>(question,results);
 			}
 		}
@@ -266,38 +211,6 @@ public class Interviewing {
 		return results;
 	}
 	
-	@Deprecated
-	public static Question nextUnansweredAlterQuestionForInterview(final Long interviewId) {
-		return DB.withTx(new Function<Session,Question>() {
-			public Question apply(Session session) {
-				return nextUnansweredAlterQuestionForInterview(session,interviewId);
-			}
-		});
-	}
-	@Deprecated
-	public static Question nextUnansweredAlterQuestionForInterview(Session session, Long interviewId) {
-		Interview interview = Interviews.getInterview(session, interviewId);
-		List<Question> questions = 
-			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
-		Multimap<Long,Answer> questionIdToAnswers = ArrayListMultimap.create();
-		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER)) {
-			questionIdToAnswers.put(answer.getQuestionId(), answer);
-		}
-		List<Alter> alters = Alters.getForInterview(session, interviewId);
-		for(Question question : questions) {
-			Set<Long> answeredAlterIds = Sets.newHashSet();
-			for(Answer answer : questionIdToAnswers.get(question.getId())) {
-				answeredAlterIds.add(answer.getAlterId1());
-			}
-			for(Alter alter : alters) {
-				if(! answeredAlterIds.contains(alter.getId())) {
-					return question;
-				}
-			}
-		}
-		return null;
-	}
-
 	public static Pair<Question,ArrayList<PairUni<Alter>>> nextAlterPairQuestionForInterview(
 			final Long interviewId, 
 			final Question currentQuestion, final PairUni<Alter> currentAlterPair, 
@@ -335,6 +248,9 @@ public class Interviewing {
 				}
 			}
 			if(! results.isEmpty()) {
+				if(! forward) { // Want to return alter pairs in normal order.
+					Collections.reverse(results);
+				}
 				return new Pair<Question,ArrayList<PairUni<Alter>>>(question,results);
 			}
 		}
@@ -392,57 +308,5 @@ public class Interviewing {
 			}
 		}
 		return results;
-	}
-	
-	@Deprecated
-	public static Pair<Question,ArrayList<PairUni<Alter>>> 
-	nextUnansweredAlterPairQuestionForInterview(final Long interviewId) {
-		return DB.withTx(new Function<Session,Pair<Question,ArrayList<PairUni<Alter>>>>() {
-			public Pair<Question,ArrayList<PairUni<Alter>>> apply(Session session) {
-				return nextUnansweredAlterPairQuestionForInterview(session,interviewId);
-			}
-		});
-	}
-	
-	@Deprecated
-	public static Pair<Question,ArrayList<PairUni<Alter>>> 
-	nextUnansweredAlterPairQuestionForInterview(Session session, Long interviewId) {
-		Interview interview = Interviews.getInterview(session, interviewId);
-		List<Question> questions = 
-			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
-		Multimap<PairUni<Long>,Answer> questionAndAlter1ToAnswers = ArrayListMultimap.create();
-		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER_PAIR)) {
-			questionAndAlter1ToAnswers.put(
-					new PairUni<Long>(answer.getQuestionId(),answer.getAlterId1()), answer);
-		}
-		List<Alter> alters = Alters.getForInterview(session, interviewId);
-		for(Question question : questions) {
-			ArrayList<PairUni<Alter>> unansweredPairs = Lists.newArrayList();
-			for(Alter alter1 : alters) {
-				Set<Long> answeredAlter2Ids = Sets.newHashSet();
-				for(Answer answer : questionAndAlter1ToAnswers.get(new PairUni<Long>(question.getId(),alter1.getId())))
-				{
-					answeredAlter2Ids.add(answer.getAlterId2());
-				}
-				for(Alter alter2 : alters) {
-					if(alter1.getId() < alter2.getId()) { // To avoid repeats, convention that lower ID is first
-						if(! answeredAlter2Ids.contains(alter2.getId())) {
-							unansweredPairs.add(new PairUni<Alter>(alter1,alter2));
-							if(unansweredPairs.size() > 9) {
-								return new Pair<Question,ArrayList<PairUni<Alter>>>(question,unansweredPairs);
-							}
-						}
-					}
-				}
-			}
-			if(! unansweredPairs.isEmpty()) {
-				return new Pair<Question,ArrayList<PairUni<Alter>>>(question,unansweredPairs);
-			}
-		}
-		return null;
-	}
-	
-	private static Boolean nullOrTrue(Boolean b) {
-		return b == null || b;
 	}
 }

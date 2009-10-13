@@ -96,7 +96,23 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 			}
 		};
 		add(alters);
-		
+
+		add(new Link("backwardLink") {
+			public void onClick() {
+				EgonetPage page = InterviewingEgoPage.askPrevious(interview.getId(),null);
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
+		add(new Link("forwardLink") {
+			public void onClick() {
+				EgonetPage page = InterviewingAlterPage.askNext(interview.getId(),null,null);
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		});
 	}
 
 	public static EgonetPage askNextUnanswered(Long interviewId) {
@@ -111,6 +127,6 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		if(alters < 1 && (study.getMaxAlters() == null || study.getMaxAlters() > 0)) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		return InterviewingAlterPage.askNextUnanswered(interviewId);
+		return InterviewingAlterPage.askNextUnanswered(interviewId,null,null);
 	}
 }
