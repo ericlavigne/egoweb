@@ -1,0 +1,85 @@
+<wicket:extend>
+	
+	<fieldset>
+		<legend>Import modified study</legend>
+		<form>
+			<p>
+				<input type="file" />
+			</p>
+			<p>
+				<input type="submit" value="Import" />
+			</p>
+		</form>
+	</fieldset>
+	
+	<fieldset>
+		<legend>Import interviews</legend>
+		<form>
+			<p>
+				<input type="file" />
+			</p>
+			<p>
+				<input type="submit" value="Import" />
+			</p>
+		</form>
+	</fieldset>
+	
+	<hr />
+	
+	<form>
+	
+		<p>
+			<input type="submit" value="Export study" />
+		</p>
+	
+		<p>
+			<input type="submit" value="Export all interviews" />
+		</p>
+	
+		<hr />
+	
+		<p>You can temporarily change adjacency settings for analysis.</p>
+	
+		<p>
+			<label for="adjacency">Alters are adjacent when:</label>
+			<select id="adjacency">
+				<option value="helpeachother">helpeachother</option>
+				<option value="communicateoften">communicateoften</option>
+			</select>
+		</p>
+	
+		<hr />
+	
+		<p>
+			<input type="submit" value="Statistics for all interviews" />
+		</p>
+	
+		<hr />
+	
+		<table>
+			<tr>
+				<td>Interview1</td>
+				<td><input type="submit" value="Review" /></td>
+				<td><input type="submit" value="Visualize" /></td>
+				<td><input type="submit" value="Statistics" /></td>
+				<td><input type="submit" value="Export" /></td>
+			</tr>
+			<tr>
+				<td>Interview2</td>
+				<td><input type="submit" value="Review" /></td>
+				<td><input type="submit" value="Visualize" /></td>
+				<td><input type="submit" value="Statistics" /></td>
+				<td><input type="submit" value="Export" /></td>
+			</tr>
+			<tr>
+				<td>Interview3</td>
+				<td><input type="submit" value="Review" /></td>
+				<td><input type="submit" value="Visualize" /></td>
+				<td><input type="submit" value="Statistics" /></td>
+				<td><input type="submit" value="Export" /></td>
+			</tr>
+		</table>
+	
+	</form>
+	
+</wicket:extend>

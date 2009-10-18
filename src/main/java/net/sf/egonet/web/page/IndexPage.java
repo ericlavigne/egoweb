@@ -32,7 +32,7 @@ public class IndexPage extends EgonetPage
 	            {
 	                public void onClick()
 	                {
-	                    // setResponsePage(new AnalysisPage());
+	                    setResponsePage(new AnalysisPage());
 	                }
 	            }
 	        );
