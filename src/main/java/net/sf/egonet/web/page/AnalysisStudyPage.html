@@ -2,7 +2,7 @@
 	
 	<fieldset>
 		<legend>Import modified study</legend>
-		<form>
+		<form wicket:id="studyImportForm">
 			<p>
 				<input type="file" />
 			</p>
@@ -14,7 +14,7 @@
 	
 	<fieldset>
 		<legend>Import interviews</legend>
-		<form>
+		<form wicket:id="interviewImportForm">
 			<p>
 				<input type="file" />
 			</p>
@@ -26,7 +26,7 @@
 	
 	<hr />
 	
-	<form>
+	<form wicket:id="analysisForm">
 	
 		<p>
 			<input type="submit" value="Export study" />
@@ -51,7 +51,7 @@
 		<hr />
 	
 		<p>
-			<input type="submit" value="Statistics for all interviews" />
+			<input wicket:id="statisticsButton" type="submit" value="Statistics for all interviews" />
 		</p>
 	
 		<hr />
