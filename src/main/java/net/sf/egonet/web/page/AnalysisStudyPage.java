@@ -1,9 +1,16 @@
 package net.sf.egonet.web.page;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
+import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.StringResourceStream;
 
 import net.sf.egonet.model.Study;
@@ -24,11 +31,23 @@ public class AnalysisStudyPage extends EgonetPage {
 	}
 	
 	private void build() {
+		final FileUploadField studyImportField = new FileUploadField("studyImportField");
 		Form studyImportForm = new Form("studyImportForm") {
 			public void onSubmit() {
-				
+				try {
+					String uploadText = uploadText(studyImportField);
+					if(uploadText != null) {
+						downloadFile("Uploaded-file.txt","text/plain",
+								"Uploaded file contents: \n\n"+uploadText);
+					}
+				} catch(Exception ex) {
+					throw new RuntimeException("Exception while trying to import study.",ex);
+				}
 			}
 		};
+		studyImportForm.setMultiPart(true);
+		studyImportForm.add(studyImportField);
+		studyImportForm.setMaxSize(Bytes.megabytes(100));
 		add(studyImportForm);
 		
 		Form interviewImportForm = new Form("interviewImportForm") {
@@ -57,6 +76,20 @@ public class AnalysisStudyPage extends EgonetPage {
 					new StringResourceStream(contents, mimeType));
 		target.setFileName(name);
 		RequestCycle.get().setRequestTarget(target);
+	}
+	
+	private static String uploadText(FileUploadField field) throws IOException {
+		FileUpload upload = field.getFileUpload();
+		if(upload != null) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(upload.getInputStream()));
+			StringBuffer buffer = new StringBuffer();
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				buffer.append(line+"\n");
+			}
+			return buffer.toString();
+		}
+		return null;
 	}
 }
 
