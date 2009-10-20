@@ -3,17 +3,24 @@ package net.sf.egonet.web.page;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.apache.wicket.RequestCycle;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.StringResourceStream;
 
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
 public class AnalysisStudyPage extends EgonetPage {
@@ -66,6 +73,20 @@ public class AnalysisStudyPage extends EgonetPage {
 						"statistics csv for all interviews in study "+getStudy().getName());
 			}
 		});
+		analysisForm.add(new ListView("interviews", new PropertyModel(this, "interviews")) {
+			protected void populateItem(ListItem item) {
+				final Interview interview = (Interview) item.getModelObject();
+				item.add(new Label("interviewName",
+						Interviews.getEgoNameForInterview(interview.getId())));
+				item.add(new Button("interviewReview") {
+					public void onSubmit() {
+						EgonetPage page = InterviewingEgoPage.askNext(interview.getId(), null);
+						if(page != null) {
+							setResponsePage(page);
+						}
+					}
+				});
+			}});
 		add(analysisForm);
 	}
 	
@@ -90,6 +111,10 @@ public class AnalysisStudyPage extends EgonetPage {
 			return buffer.toString();
 		}
 		return null;
+	}
+	
+	public List<Interview> getInterviews() {
+		return Interviews.getInterviewsForStudy(studyId);
 	}
 }
 

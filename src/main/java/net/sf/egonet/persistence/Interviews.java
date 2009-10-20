@@ -45,6 +45,14 @@ public class Interviews {
 		});
 	}
 
+	public static List<Interview> getInterviewsForStudy(final Long studyId) {
+		return new DB.Action<List<Interview>>() {
+			public List<Interview> get() {
+				return getInterviewsForStudy(session,studyId);
+			}
+		}.execute();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static List<Interview> getInterviewsForStudy(
 			Session session, final Long studyId) 

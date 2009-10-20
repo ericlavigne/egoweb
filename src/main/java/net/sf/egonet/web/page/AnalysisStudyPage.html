@@ -57,23 +57,9 @@
 		<hr />
 	
 		<table>
-			<tr>
-				<td>Interview1</td>
-				<td><input type="submit" value="Review" /></td>
-				<td><input type="submit" value="Visualize" /></td>
-				<td><input type="submit" value="Statistics" /></td>
-				<td><input type="submit" value="Export" /></td>
-			</tr>
-			<tr>
-				<td>Interview2</td>
-				<td><input type="submit" value="Review" /></td>
-				<td><input type="submit" value="Visualize" /></td>
-				<td><input type="submit" value="Statistics" /></td>
-				<td><input type="submit" value="Export" /></td>
-			</tr>
-			<tr>
-				<td>Interview3</td>
-				<td><input type="submit" value="Review" /></td>
+			<tr wicket:id="interviews">
+				<td wicket:id="interviewName">Interview name</td>
+				<td><input wicket:id="interviewReview" type="submit" value="Review" /></td>
 				<td><input type="submit" value="Visualize" /></td>
 				<td><input type="submit" value="Statistics" /></td>
 				<td><input type="submit" value="Export" /></td>
