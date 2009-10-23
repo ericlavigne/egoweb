@@ -289,10 +289,11 @@ public class Interviewing {
 							Long reasonId = question.getAnswerReasonExpressionId();
 							Boolean shouldAnswer =
 								reasonId == null ||
-								Expressions.evaluate(session, 
-										Expressions.get(session, reasonId), 
-										interview, 
-										Lists.newArrayList(alter1,alter2));
+								trueOrNull( // Not sure? Err on the side of asking the question.
+										Expressions.evaluate(session, 
+												Expressions.get(session, reasonId), 
+												interview, 
+												Lists.newArrayList(alter1,alter2)));
 							if(shouldAnswer) {
 								resultPairs.add(new PairUni<Alter>(alter1,alter2));
 							}
@@ -308,5 +309,9 @@ public class Interviewing {
 			}
 		}
 		return results;
+	}
+	
+	private static boolean trueOrNull(Boolean maybe) {
+		return maybe == null || maybe;
 	}
 }
