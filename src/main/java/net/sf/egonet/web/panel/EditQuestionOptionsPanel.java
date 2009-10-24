@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Presets;
@@ -20,6 +21,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.collect.Lists;
 
 public class EditQuestionOptionsPanel extends Panel {
 
@@ -40,6 +43,21 @@ public class EditQuestionOptionsPanel extends Panel {
 	
 	public List<String> getPresetKeys() {
 		return new ArrayList<String>(Presets.get().keySet());
+	}
+	
+	public List<Question> getOtherQuestionsWithOptions() {
+		List<Question> questionsWithOptions = Lists.newArrayList();
+		for(QuestionType type : QuestionType.values()) {
+			List<Question> questions = 
+				Questions.getQuestionsForStudy(question.getStudyId(), type);
+			for(Question question : questions) {
+				if(! (this.question.getId().equals(question.getId()) || 
+						Options.getOptionsForQuestion(question.getId()).isEmpty())) {
+					questionsWithOptions.add(question);
+				}
+			}
+		}
+		return questionsWithOptions;
 	}
 	
 	private void build() {
@@ -95,7 +113,7 @@ public class EditQuestionOptionsPanel extends Panel {
         );
 		
 		add(form);
-		
+
 		ListView presets = new ListView("presets", new PropertyModel(this,"presetKeys"))
 		{
 			protected void populateItem(ListItem item) {
@@ -115,5 +133,25 @@ public class EditQuestionOptionsPanel extends Panel {
 			}
 		};
 		add(presets);
+		
+		ListView otherQuestions = new ListView("otherQuestions", new PropertyModel(this,"otherQuestionsWithOptions"))
+		{
+			protected void populateItem(ListItem item) {
+				final Question otherQuestion = (Question)  item.getModelObject();
+				Link link = new Link("copyFromOtherQuestion") {
+					public void onClick() {
+						for(QuestionOption option : getOptions()) {
+							Options.delete(option);
+						}
+						for(QuestionOption option : Options.getOptionsForQuestion(otherQuestion.getId())) {
+							Options.addOption(question.getId(), option.getName());
+						}
+					}
+				};
+				link.add(new Label("otherQuestionName",otherQuestion.getTitle()));
+				item.add(link);
+			}
+		};
+		add(otherQuestions);
 	}
 }
