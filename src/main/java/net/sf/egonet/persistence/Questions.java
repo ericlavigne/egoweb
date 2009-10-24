@@ -47,6 +47,15 @@ public class Questions {
 			.list();
 	}
 
+	public static void deleteOptionsFor(final Question question) {
+		new DB.Action<Object>() {
+			public Object get() {
+				deleteOptionsFor(session,question);
+				return null;
+			}
+		}.execute();
+	}
+	
 	public static void deleteOptionsFor(Session session, final Question question) {
 		for(Question dbQuestion : matchingQuestionsFor(session,question)) {
 			for(QuestionOption option : Options.getOptionsForQuestion(session, dbQuestion.getId())) {

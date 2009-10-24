@@ -8,6 +8,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Presets;
+import net.sf.egonet.persistence.Questions;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -69,6 +70,12 @@ public class EditQuestionOptionsPanel extends Panel {
 			}
 		};
 		add(options);
+		
+		add(new Link("optionDeleteAll") {
+			public void onClick() {
+				Questions.deleteOptionsFor(question);
+			}
+		});
 		
 		form = new Form("optionForm");
 
