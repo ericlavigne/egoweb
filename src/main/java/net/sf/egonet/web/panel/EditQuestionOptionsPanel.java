@@ -82,7 +82,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				@Override
 				public void onSubmit()
                 {
-					DB.save(new QuestionOption(question.getId(),optionTitleField.getModelObjectAsString()));
+					Options.addOption(question.getId(), optionTitleField.getModelObjectAsString());
 				}
 			}
         );

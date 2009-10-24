@@ -61,6 +61,23 @@ public class Options {
 		});
 	}
 	
+	public static void addOption(final Long questionId, final String optionName) {
+		new DB.Action<Object>() {
+			public Object get() {
+				addOption(session, questionId, optionName);
+				return null;
+			}
+		}.execute();
+	}
+	
+	public static void addOption(Session session, Long questionId, String optionName) {
+		List<QuestionOption> options = getOptionsForQuestion(session,questionId);
+		options.add(new QuestionOption(questionId,optionName));
+		for(Integer i = 0; i < options.size(); i++) {
+			options.get(i).setOrdering(i);
+			DB.save(session, options.get(i));
+		}
+	}
 	
 	public static void moveEarlier(Session session, final QuestionOption option) {
 		List<QuestionOption> options = getOptionsForQuestion(session,option.getQuestionId());

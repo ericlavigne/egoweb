@@ -10,6 +10,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
+import net.sf.egonet.persistence.Questions;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -93,7 +94,17 @@ public class EditQuestionPanel extends Panel {
 				public void onSubmit()
                 {
 					insertFormFieldsIntoQuestion(question);
-					DB.save(question);
+					if(question.getId() == null) {
+						List<Question> questions = 
+							Questions.getQuestionsForStudy(question.getStudyId(), question.getType());
+						questions.add(question);
+						for(Integer i = 0; i < questions.size(); i++) {
+							questions.get(i).setOrdering(i);
+							DB.save(questions.get(i));
+						}
+					} else {
+						DB.save(question);
+					}
 					form.setVisible(false);
 				}
 			}
