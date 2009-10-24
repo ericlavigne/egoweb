@@ -52,7 +52,7 @@ public class EditStudyPage extends EgonetPage
 					}
 				};
 
-				questionLink.add(new Label("questionTypeName", questionType.toString()));
+				questionLink.add(new Label("questionTypeName", questionType.toString()+" Questions"));
 				item.add(questionLink);
 			}
 		};

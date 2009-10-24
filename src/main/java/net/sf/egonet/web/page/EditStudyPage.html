@@ -1,14 +1,19 @@
 
 <wicket:extend>
-	<ul>
-		<li><a href="#" wicket:id="settingsLink">Study Settings</a></li>
-		<li wicket:id="questionTypes">
-			<a href="#" wicket:id="questionTypeLink">
-				<span wicket:id="questionTypeName">Ego Questions</span>
-			</a>
-		</li>
-		<li><a href="#" wicket:id="expressionLink">Expressions</a> (for skip-logic or linking alters)</li>
-	</ul>
+	<table border="1">
+		<tr>
+			<td><a href="#" wicket:id="settingsLink">Study Settings</a></td>
+			<td wicket:id="questionTypes">
+				<a href="#" wicket:id="questionTypeLink">
+					<span wicket:id="questionTypeName">Ego Questions</span>
+				</a>
+			</td>
+			<td>
+				<a href="#" wicket:id="expressionLink">Expressions</a> 
+				(for skip-logic or linking alters)
+			</td>
+		</tr>
+	</table>
 	
 	<div wicket:id="questionEditor">Question Editor</div>	
 </wicket:extend>
