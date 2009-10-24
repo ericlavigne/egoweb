@@ -12,9 +12,12 @@
 		<property name="active" column="active" />
 
 		<property name="title" column="title" />
-		<property name="prompt" column="prompt" />
-		<property name="preface" column="preface" />
-		<property name="citation" column="citation" />
+		<property name="prompt" column="prompt_text" type="text" length="32672" />
+		<property name="promptOld" column="prompt" />
+		<property name="preface" column="preface_text" type="text" length="32672" />
+		<property name="prefaceOld" column="preface" />
+		<property name="citation" column="citation_text" type="text" length="32672" />
+		<property name="citationOld" column="citation" />
 		<property name="typeDB" column="subject_type" />
 		<property name="answerTypeDB" column="response_type" />
 		<property name="ordering" column="ordering" />

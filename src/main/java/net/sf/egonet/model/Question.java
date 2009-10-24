@@ -8,9 +8,12 @@ public class Question extends Entity
 
 	private Long studyId;
 	private String title;    // Gender
-	private String citation; // This question originally written by Dr. X from the Institute of Advanced Research.
-	private String prompt;   // Are you male or female?
-	private String preface;   // The following questions relate to...
+	protected String citation; // This question originally written by Dr. X from the Institute of Advanced Research.
+	protected String citationOld;
+	protected String prompt;   // Are you male or female?
+	protected String promptOld;
+	protected String preface;   // The following questions relate to...
+	protected String prefaceOld;
 	private AnswerType answerType;
 	private QuestionType type;
 	private boolean isRequired;
@@ -35,8 +38,8 @@ public class Question extends Entity
 	}
 
 	public AnswerType   getAnswerType()   { return this.answerType;   }
-	public String       getCitation()     { return this.citation;     }
-	public String       getPrompt()       { return this.prompt;       }
+	
+	
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }
 	public boolean      isRequired()      { return this.isRequired;   }
@@ -52,8 +55,6 @@ public class Question extends Entity
 	 *  otherwise null
 	 */
 	public void setAnswerType(AnswerType val) { this.answerType = val; }
-	public void setCitation(String       val) { this.citation   = val; }
-	public void setPrompt(String         val) { this.prompt     = val; }
 	public void setTitle(String          val) { this.title      = val; }
 	public void setType(QuestionType     val) { this.type       = val; }
 	public void setRequired(boolean      val) { this.isRequired = val; }
@@ -83,14 +84,6 @@ public class Question extends Entity
 	public boolean needsSelectionResponse()      { return getAnswerType() == AnswerType.SELECTION;          }
 	public boolean needsMultiSelectionResponse() { return getAnswerType() == AnswerType.MULTIPLE_SELECTION; }
 
-	public void setPreface(String preface) {
-		this.preface = preface;
-	}
-
-	public String getPreface() {
-		return preface;
-	}
-
 	public void setAnswerReasonExpressionId(Long answerReasonExpressionId) {
 		this.answerReasonExpressionId = answerReasonExpressionId;
 	}
@@ -105,5 +98,47 @@ public class Question extends Entity
 
 	public Integer getOrdering() {
 		return ordering;
+	}
+	
+	// ---------------------------------
+
+	protected String getPromptOld() {
+		return null;
+	}
+	public String getPrompt() {
+		return migrateToText(this,"prompt");
+	}
+	public void setPrompt(String val) {
+		this.prompt = val; 
+	}
+	protected void setPromptOld(String val) {
+		this.promptOld  = val;
+	}
+	
+
+	public void setPreface(String preface) {
+		this.preface = preface;
+	}
+	public String getPreface() {
+		return migrateToText(this,"preface");
+	}
+	protected void setPrefaceOld(String preface) {
+		this.prefaceOld = preface;
+	}
+	protected String getPrefaceOld() {
+		return null;
+	}
+	
+	public String getCitation() { 
+		return migrateToText(this,"citation");
+	}
+	public void setCitation(String val) {
+		this.citation   = val;
+	}
+	protected String getCitationOld() { 
+		return null;
+	}
+	protected void setCitationOld(String val) {
+		this.citationOld = val;
 	}
 }

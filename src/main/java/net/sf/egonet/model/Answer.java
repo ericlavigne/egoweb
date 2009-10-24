@@ -20,7 +20,8 @@ public class Answer extends Entity
 	// Or null to indicate the question was skipped.
 	// Methods for getting the deserialized value will need to include the matching
 	// question as an argument.
-	private String value;
+	protected String value;
+	protected String valueOld;
 
 	protected Answer() {
 
@@ -61,16 +62,6 @@ public class Answer extends Entity
 
 	public Long getQuestionId() {
 		return questionId;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-		// TODO: Should need to pass the question as argument, so I can check if value has correct answer type
-	}
-
-	public String getValue() {
-		return value;
-		// TODO: Should have different methods depending on answer type, and provide deserialization
 	}
 
 	public void setAlterId1(Long alterId1) {
@@ -127,4 +118,21 @@ public class Answer extends Entity
 
 	protected void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
 	protected void setQuestionTypeDB(String val) { this.setQuestionType(QuestionType.valueOf(val)); }
+
+	// ---------------------------------
+	
+	public void setValue(String value) {
+		this.value = value;
+		// TODO: Should need to pass the question as argument, so I can check if value has correct answer type
+	}
+	protected void setValueOld(String value) {
+		this.valueOld = value;
+	}
+	public String getValue() {
+		return migrateToText(this,"value");
+		// TODO: Should have different methods depending on answer type, and provide deserialization
+	}
+	protected String getValueOld() {
+		return null;
+	}
 }

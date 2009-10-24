@@ -3,11 +3,15 @@ package net.sf.egonet.model;
 public class Study extends Entity
 {
 	private String name;
-	
-	private String introduction;
-	private String egoIdPrompt;
-	private String alterPrompt;
-	private String conclusion;
+
+	protected String introduction;
+	protected String introductionOld;
+	protected String egoIdPrompt;
+	protected String egoIdPromptOld;
+	protected String alterPrompt;
+	protected String alterPromptOld;
+	protected String conclusion;
+	protected String conclusionOld;
 	
 	private Integer minAlters;
 	private Integer maxAlters;
@@ -21,9 +25,9 @@ public class Study extends Entity
 
 	public Study(String name) {
 		this.name = name;
-		this.egoIdPrompt = "Please identify yourself to start or continue an interview.";
-		this.alterPrompt = "Please list some people that you know.";
-		this.conclusion = "Thank you for completing this interview.";
+		setEgoIdPrompt("Please identify yourself to start or continue an interview.");
+		setAlterPrompt("Please list some people that you know.");
+		setConclusion("Thank you for completing this interview.");
 		this.minAlters = 0;
 	}
 
@@ -40,38 +44,6 @@ public class Study extends Entity
 
 	public String getName() { 
 		return name;
-	}
-
-	public void setIntroduction(String introduction) {
-		this.introduction = introduction;
-	}
-
-	public String getIntroduction() {
-		return introduction;
-	}
-
-	public void setEgoIdPrompt(String egoIdPrompt) {
-		this.egoIdPrompt = egoIdPrompt;
-	}
-
-	public String getEgoIdPrompt() {
-		return egoIdPrompt;
-	}
-
-	public void setAlterPrompt(String alterPrompt) {
-		this.alterPrompt = alterPrompt;
-	}
-
-	public String getAlterPrompt() {
-		return alterPrompt;
-	}
-
-	public void setConclusion(String conclusion) {
-		this.conclusion = conclusion;
-	}
-
-	public String getConclusion() {
-		return conclusion;
 	}
 
 	public void setMinAlters(Integer minAlters) {
@@ -98,4 +70,57 @@ public class Study extends Entity
 		return adjacencyExpressionId;
 	}
 
+	// --------------------------------------
+	
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+	public void setIntroductionOld(String introduction) {
+		this.introductionOld = introduction;
+	}
+	public String getIntroduction() {
+		return migrateToText(this,"introduction");
+	}
+	public String getIntroductionOld() {
+		return null;
+	}
+
+	public void setEgoIdPrompt(String egoIdPrompt) {
+		this.egoIdPrompt = egoIdPrompt;
+	}
+	public void setEgoIdPromptOld(String egoIdPrompt) {
+		this.egoIdPromptOld = egoIdPrompt;
+	}
+	public String getEgoIdPrompt() {
+		return migrateToText(this,"egoIdPrompt");
+	}
+	public String getEgoIdPromptOld() {
+		return null;
+	}
+
+	public void setAlterPrompt(String alterPrompt) {
+		this.alterPrompt = alterPrompt;
+	}
+	public void setAlterPromptOld(String alterPrompt) {
+		this.alterPromptOld = alterPrompt;
+	}
+	public String getAlterPrompt() {
+		return migrateToText(this,"alterPrompt");
+	}
+	public String getAlterPromptOld() {
+		return null;
+	}
+
+	public void setConclusion(String conclusion) {
+		this.conclusion = conclusion;
+	}
+	public void setConclusionOld(String conclusion) {
+		this.conclusionOld = conclusion;
+	}
+	public String getConclusion() {
+		return migrateToText(this,"conclusion");
+	}
+	public String getConclusionOld() {
+		return null;
+	}
 }

@@ -13,10 +13,16 @@
 		
 		<property name="name" column="name" lazy="false" />
 		
-		<property name="introduction" column="introduction" />
-		<property name="egoIdPrompt" column="ego_id_prompt" />
-		<property name="alterPrompt" column="alter_prompt" />
-		<property name="conclusion" column="conclusion" />
+		<property name="introduction" column="introduction_text" type="text" length="32672" />
+		<property name="introductionOld" column="introduction" />
+		<property name="egoIdPrompt" column="ego_id_prompt_text" type="text" length="32672" />
+		<property name="egoIdPromptOld" column="ego_id_prompt" />
+		<property name="alterPrompt" column="alter_prompt_text" type="text" length="32672" />
+		<property name="alterPromptOld" column="alter_prompt" />
+		<property name="conclusion" column="conclusion_text" type="text" length="32672" />
+		<property name="conclusionOld" column="conclusion" />
+		
+		
 		<property name="minAlters" column="min_alters" />
 		<property name="maxAlters" column="max_alters" />
 		<property name="adjacencyExpressionId" column="adjacency_expression_id" />

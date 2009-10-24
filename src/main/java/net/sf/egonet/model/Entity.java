@@ -1,5 +1,6 @@
 package net.sf.egonet.model;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 public abstract class Entity implements java.io.Serializable
@@ -70,5 +71,24 @@ public abstract class Entity implements java.io.Serializable
 
 	public Boolean getActive() {
 		return active;
+	}
+	
+	// -------------------------------------------
+	
+	protected String migrateToText(Entity entity, String fieldname) {
+		try {
+			Class<?> c = entity.getClass();
+			Field oldField = c.getDeclaredField(fieldname+"Old");
+			Field newField = c.getDeclaredField(fieldname);
+			String oldVal = (String) oldField.get(entity);
+			String newVal = (String) newField.get(entity);
+			if((newVal == null || newVal.isEmpty()) && oldVal != null && ! oldVal.isEmpty()) {
+				newField.set(entity, oldVal);
+				oldField.set(entity, "");
+			}
+			return (String) newField.get(entity);
+		} catch(Exception ex) {
+			throw new RuntimeException("migrateToText failed",ex);
+		}
 	}
 }

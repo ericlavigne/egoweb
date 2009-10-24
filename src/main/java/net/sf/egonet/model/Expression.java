@@ -18,7 +18,8 @@ public class Expression extends Entity {
 	private String name;
 	private Type type;
 	private Operator operator;
-	private String valueString;
+	protected String valueDB;
+	protected String valueDBOld;
 	private Long studyId;
 	private Long questionId;
 	
@@ -52,7 +53,7 @@ public class Expression extends Entity {
 	
 	private void setDefaultValues() {
 		this.name = "";
-		this.valueString = type.equals(Type.Number) ? "0" : "";
+		setValueDB(type.equals(Type.Number) ? "0" : "");
 	}
 	
 	public Long getStudyId() {
@@ -89,9 +90,9 @@ public class Expression extends Entity {
 	public void setValue(Object value) {
 		if(value != null) {
 			if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
-				this.valueString = Joiner.on(",").join((List<Long>) value);
+				setValueDB(Joiner.on(",").join((List<Long>) value));
 			} else if(type.equals(Type.Number) || type.equals(Type.Text)) {
-				this.valueString = value.toString();
+				setValueDB(value.toString());
 			} else {
 				throw new RuntimeException("Can't setValue("+value+") for Expression " +
 						"because no case provided for type "+type);
@@ -100,20 +101,20 @@ public class Expression extends Entity {
 	}
 	public Object getValue() {
 		if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
-			if(valueString == null || valueString.isEmpty()) {
+			if(getValueDB() == null || getValueDB().isEmpty()) {
 				return new ArrayList<Long>();
 			}
-			return Lists.transform(Lists.newArrayList(valueString.split(",")), new Function<String,Long>() {
+			return Lists.transform(Lists.newArrayList(getValueDB().split(",")), new Function<String,Long>() {
 				public Long apply(String string) {
 					return Long.parseLong(string);
 				}
 			});
 		}
 		if(type.equals(Type.Number)) {
-			return valueString == null ? null : Integer.parseInt(valueString);
+			return getValueDB() == null ? null : Integer.parseInt(getValueDB());
 		}
 		if(type.equals(Type.Text)) {
-			return valueString;
+			return getValueDB();
 		}
 		throw new RuntimeException("Can't getValue() for Expression because no case provided for type "+type);
 	}
@@ -157,16 +158,25 @@ public class Expression extends Entity {
 	protected String getOperatorDB() {
 		return operator.name();
 	}
-	protected void setValueDB(String valueString) {
-		this.valueString = valueString;
-	}
-	protected String getValueDB() {
-		return valueString;
-	}
 	protected void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
 	protected void setQuestionId(Long questionId) {
 		this.questionId = questionId;
+	}
+	
+	// -----------------------------------------
+
+	protected void setValueDB(String valueString) {
+		this.valueDB = valueString;
+	}
+	protected void setValueDBOld(String valueString) {
+		this.valueDBOld = valueString;
+	}
+	protected String getValueDB() {
+		return migrateToText(this,"valueDB");
+	}
+	protected String getValueDBOld() {
+		return null;
 	}
 }
