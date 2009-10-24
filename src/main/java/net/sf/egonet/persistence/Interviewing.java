@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sf.egonet.model.Alter;
@@ -19,6 +20,7 @@ import org.hibernate.Session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -163,6 +165,90 @@ public class Interviewing {
 			}
 		}
 		return null;
+	}
+
+	public static ArrayList<Pair<Question,ArrayList<Alter>>> 
+	alterQuestionsForInterview(Session session, Long interviewId)
+	{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		for(Question question : questions) {
+			results.add(new Pair<Question,ArrayList<Alter>>(
+					question, new ArrayList<Alter>(alters)));
+		}
+		return results;
+	}
+	
+	private static ArrayList<Pair<Question,ArrayList<Alter>>>
+	afterCurrent(Question currentQuestion, Alter currentAlter,
+			ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters)
+	{
+		if(currentQuestion == null) {
+			return questionsAndAlters;
+		}
+		Boolean passedCurrent = false;
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionsAndAlters) {
+			Question question = questionAndAlters.getFirst();
+			ArrayList<Alter> alters = Lists.newArrayList();
+			for(Alter alter : questionAndAlters.getSecond()) {
+				if(passedCurrent) {
+					alters.add(alter);
+				}
+				if(question.getId().equals(currentQuestion.getId()) && 
+						alter.getId().equals(currentAlter.getId()))
+				{
+					passedCurrent = true;
+				}
+			}
+			if(! alters.isEmpty()) {
+				results.add(new Pair<Question,ArrayList<Alter>>(question,alters));
+			}
+		}
+		return results;
+	}
+	
+	private static ArrayList<Pair<Question,ArrayList<Alter>>>
+	unansweredOnly(
+			ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters,
+			Map<PairUni<Long>,Answer> questionAndAlterToAnswer)
+	{
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionsAndAlters) {
+			ArrayList<Alter> alters = Lists.newArrayList();
+			for(Alter alter : questionAndAlters.getSecond()) {
+				if(questionAndAlterToAnswer.containsKey(
+						new PairUni<Long>(
+								questionAndAlters.getFirst().getId(),
+								alter.getId()))) 
+				{
+					alters.add(alter);
+				}
+			}
+			if(! alters.isEmpty()) {
+				results.add(new Pair<Question,ArrayList<Alter>>(
+						questionAndAlters.getFirst(),
+						alters));
+			}
+		}
+		return results;
+	}
+	
+	private static ArrayList<Pair<Question,ArrayList<Alter>>>
+	reverseQuestionsAndAlters(ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters) 
+	{
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		for(Pair<Question,ArrayList<Alter>> questionAndAlters : 
+			Iterables.reverse(questionsAndAlters)) 
+		{
+			results.add(new Pair<Question,ArrayList<Alter>>(
+					questionAndAlters.getFirst(),
+					Lists.newArrayList(Iterables.reverse(questionAndAlters.getSecond()))));
+		}
+		return results;
 	}
 	
 	public static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
