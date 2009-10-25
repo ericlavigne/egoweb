@@ -28,6 +28,7 @@ public class SelectionExpressionEditorPanel extends Panel {
 	private TextField expressionNameField;
 	private CheckboxesPanel<QuestionOption> expressionValueField;
 	private Model expressionOperatorModel;
+	private Model expressionUnansweredModel;
 	
 	public SelectionExpressionEditorPanel(String id, Expression expression) {
 		super(id);
@@ -79,8 +80,16 @@ public class SelectionExpressionEditorPanel extends Panel {
 				return option.getName();
 			}
 		};
-		
 		form.add(expressionValueField);
+
+		expressionUnansweredModel = new Model(expression.getResultForUnanswered());
+		List<Boolean> expressionUnansweredOptions = Lists.newArrayList(false,true);
+		DropDownChoice expressionUnansweredField = new DropDownChoice(
+				"expressionUnansweredField",
+				expressionUnansweredModel,
+				expressionUnansweredOptions);
+		expressionUnansweredField.setRequired(true);
+		form.add(expressionUnansweredField);
 		
 		form.add(
 			new Button("saveExpression")
@@ -98,6 +107,7 @@ public class SelectionExpressionEditorPanel extends Panel {
 						}
 					});
 					expression.setValue(selectedIds);
+					expression.setResultForUnanswered((Boolean) expressionUnansweredModel.getObject());
 					DB.save(expression);
 					form.setVisible(false);
 				}

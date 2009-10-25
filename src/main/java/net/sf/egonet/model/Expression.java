@@ -22,6 +22,7 @@ public class Expression extends Entity {
 	protected String valueDBOld;
 	private Long studyId;
 	private Long questionId;
+	private Boolean resultForUnanswered;
 	
 	public Expression(Study study) {
 		type = Type.Compound;
@@ -38,6 +39,15 @@ public class Expression extends Entity {
 	public String toString() {
 		return name == null || name.isEmpty() ? "Untitled expression" : name;
 	}
+	
+	public Boolean getResultForUnanswered() {
+		return resultForUnanswered == null ? false : resultForUnanswered;
+	}
+	
+	public void setResultForUnanswered(Boolean resultForUnanswered) {
+		this.resultForUnanswered = resultForUnanswered;
+	}
+	
 	public static Type typeOfQuestion(AnswerType answerType) {
 		if(answerType.equals(AnswerType.NUMERICAL)) {
 			return Type.Number;

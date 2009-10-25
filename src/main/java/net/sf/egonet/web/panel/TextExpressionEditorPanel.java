@@ -1,5 +1,7 @@
 package net.sf.egonet.web.panel;
 
+import java.util.List;
+
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Questions;
@@ -14,6 +16,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.validator.PatternValidator;
 
+import com.google.common.collect.Lists;
+
 public class TextExpressionEditorPanel extends Panel {
 	
 	private Expression expression;
@@ -22,6 +26,7 @@ public class TextExpressionEditorPanel extends Panel {
 	private TextField expressionNameField;
 	private TextField expressionValueField;
 	private Model expressionOperatorModel;
+	private Model expressionUnansweredModel;
 	private Boolean textual;
 	private Boolean numerical;
 	
@@ -53,6 +58,10 @@ public class TextExpressionEditorPanel extends Panel {
 		expressionNameField.setRequired(true);
 		form.add(expressionNameField);
 		
+
+		form.add(new Label("expressionOperatorPreface", 
+				"Expression is true for an answer that"+(numerical ? " is" : "")));
+		
 		expressionOperatorModel = new Model(expression.getOperator());
 		DropDownChoice expressionOperatorField = new DropDownChoice(
 				"expressionOperatorField",
@@ -72,6 +81,15 @@ public class TextExpressionEditorPanel extends Panel {
 		}
 		form.add(expressionValueField);
 		
+		expressionUnansweredModel = new Model(expression.getResultForUnanswered());
+		List<Boolean> expressionUnansweredOptions = Lists.newArrayList(false,true);
+		DropDownChoice expressionUnansweredField = new DropDownChoice(
+				"expressionUnansweredField",
+				expressionUnansweredModel,
+				expressionUnansweredOptions);
+		expressionUnansweredField.setRequired(true);
+		form.add(expressionUnansweredField);
+		
 		form.add(
 			new Button("saveExpression")
             {
@@ -81,7 +99,8 @@ public class TextExpressionEditorPanel extends Panel {
 					expression.setName(expressionNameField.getModelObjectAsString());
 					expression.setOperator((Expression.Operator) expressionOperatorModel.getObject());
 					String value = expressionValueField.getModelObjectAsString();
-						expression.setValue(value == null ? "" : value);
+					expression.setValue(value == null ? "" : value);
+					expression.setResultForUnanswered((Boolean) expressionUnansweredModel.getObject());
 					DB.save(expression);
 					form.setVisible(false);
 				}

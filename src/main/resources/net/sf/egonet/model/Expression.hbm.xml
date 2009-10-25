@@ -18,6 +18,8 @@
 		<property name="valueDB" column="value_text" type="text" length="32672" />
 		<property name="valueDBOld" column="value" />
 		
+		<property name="resultForUnanswered" column="result_for_unanswered" />
+		
 		<property name="studyId" column="study_id" />
 		<property name="questionId" column="question_id" />
 	</class>

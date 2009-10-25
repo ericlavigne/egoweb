@@ -75,7 +75,6 @@ public class CompoundExpressionEditorPanel extends Panel {
 				return expression.getName();
 			}
 		};
-		
 		form.add(expressionValueField);
 		
 		form.add(

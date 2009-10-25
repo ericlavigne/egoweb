@@ -9,8 +9,14 @@
 			<label for="expressionNameField">Name:</label>
     	 	<input wicket:id="expressionNameField" id="expressionNameField" type="text" />
     	 	<br />
+    	 	<br />
+    	 	Expression is true for an answer that contains
     	 	<select wicket:id="expressionOperatorField" />
+    	 	of the selected options below:
     	 	<div wicket:id="expressionValueField">List of question option checkboxes</div>
+    	 	<br />
+    	 	Expression is <select wicket:id="expressionUnansweredField" /> if the question is unanswered.
+    	 	<br />
     	 	<br />
     		<input wicket:id="saveExpression" type="submit" value="Save"/>
 		</fieldset>
