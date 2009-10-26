@@ -320,14 +320,25 @@ public class Interviewing {
 			Boolean forward, Boolean unansweredOnly, Integer maxAlterPairs)
 	{
 		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> questions =
-			alterPairQuestionsForInterview(session,interviewId,forward,unansweredOnly);
+			alterPairQuestionsForInterview(session,interviewId,forward);
 		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
+		Interview interview = Interviews.getInterview(interviewId);
+		EvaluationContext context = Expressions.getContext(session, interview);
 		for(Pair<Question,ArrayList<PairUni<Alter>>> questionAlters : questions) {
 			Question question = questionAlters.getFirst();
 			ArrayList<PairUni<Alter>> results = Lists.newArrayList();
 			for(PairUni<Alter> alters : questionAlters.getSecond()) {
 				if(passedCurrent && (maxAlterPairs == null || results.size() < maxAlterPairs)) {
-					results.add(alters);
+					Boolean answered = context.qidA1idA2idToAlterPairAnswer.containsKey(
+							new TripleUni<Long>(
+									question.getId(),
+									alters.getFirst().getId(),
+									alters.getSecond().getId()));
+					if(unansweredOnly && answered) {
+						// Answered, but we only want unanswered. Skip it.
+					} else {
+						results.add(alters);
+					}
 				}
 				if(currentQuestion != null && 
 						currentQuestion.getId().equals(question.getId()) && 
@@ -348,20 +359,12 @@ public class Interviewing {
 	}
 	
 	public static ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> alterPairQuestionsForInterview(
-			Session session, Long interviewId, Boolean forward, Boolean unansweredOnly) 
+			Session session, Long interviewId, Boolean forward) 
 	{
 		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> results = Lists.newArrayList();
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
-		Set<TripleUni<Long>> answeredQuestionAlterPair = Sets.newHashSet();
-		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, QuestionType.ALTER_PAIR)) {
-			answeredQuestionAlterPair.add(
-					new TripleUni<Long>(
-							answer.getQuestionId(),
-							answer.getAlterId1(),
-							answer.getAlterId2()));
-		}
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
 		if(! forward) {
 			Collections.reverse(questions);
@@ -372,21 +375,15 @@ public class Interviewing {
 			for(Alter alter1 : alters) {
 				for(Alter alter2 : alters) {
 					if(alter1.getId() < alter2.getId()) { // To avoid repeats, convention that lower ID is first
-						Boolean answered = answeredQuestionAlterPair.contains(
-								new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()));
-						if(answered && unansweredOnly) {
-							// Answered, but we only want unanswered. Ignore it.
-						} else {
-							Long reasonId = question.getAnswerReasonExpressionId();
-							Boolean shouldAnswer =
-								reasonId == null ||
-									Expressions.evaluate(
-											context.eidToExpression.get(reasonId), 
-											Lists.newArrayList(alter1,alter2), 
-											context);
-							if(shouldAnswer) {
-								resultPairs.add(new PairUni<Alter>(alter1,alter2));
-							}
+						Long reasonId = question.getAnswerReasonExpressionId();
+						Boolean shouldAnswer =
+							reasonId == null ||
+								Expressions.evaluate(
+										context.eidToExpression.get(reasonId), 
+										Lists.newArrayList(alter1,alter2), 
+										context);
+						if(shouldAnswer) {
+							resultPairs.add(new PairUni<Alter>(alter1,alter2));
 						}
 					}
 				}
