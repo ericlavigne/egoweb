@@ -12,6 +12,7 @@ import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.TripleUni;
@@ -94,6 +95,7 @@ public class Interviewing {
 		List<Answer> answers = 
 			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
 		Boolean passedCurrent = current == null;
+		EvaluationContext context = Expressions.getContext(session, interview);
 		for(Question question : questions) {
 			Boolean foundAnswer = false;
 			for(Answer answer : answers) {
@@ -107,10 +109,10 @@ public class Interviewing {
 				Long reasonId = question.getAnswerReasonExpressionId();
 				Boolean shouldAnswer = 
 					reasonId == null || 
-					Expressions.evaluate(session, 
-							Expressions.get(session, reasonId), 
-							interview, 
-							new ArrayList<Alter>());
+					Expressions.evaluate(
+							context.eidToExpression.get(reasonId), 
+							new ArrayList<Alter>(), 
+							context);
 				if(shouldAnswer) {
 					return question;
 				}
@@ -266,6 +268,7 @@ public class Interviewing {
 			Collections.reverse(questions);
 			Collections.reverse(alters);
 		}
+		EvaluationContext context = Expressions.getContext(session, interview);
 		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
 		for(Question question : questions) {
 			Set<Long> answeredAlterIds = Sets.newHashSet();
@@ -281,10 +284,10 @@ public class Interviewing {
 					Long reasonId = question.getAnswerReasonExpressionId();
 					Boolean shouldAnswer =
 						reasonId == null ||
-						Expressions.evaluate(session, 
-								Expressions.get(session, reasonId), 
-								interview, 
-								Lists.newArrayList(alter));
+							Expressions.evaluate(
+									context.eidToExpression.get(reasonId), 
+									Lists.newArrayList(alter), 
+									context);
 					if(shouldAnswer) {
 						resultAlters.add(alter);
 					}
@@ -362,6 +365,7 @@ public class Interviewing {
 		if(! forward) {
 			Collections.reverse(questions);
 		}
+		EvaluationContext context = Expressions.getContext(session, interview);
 		for(Question question : questions) {
 			ArrayList<PairUni<Alter>> resultPairs = Lists.newArrayList();
 			for(Alter alter1 : alters) {
@@ -375,11 +379,10 @@ public class Interviewing {
 							Long reasonId = question.getAnswerReasonExpressionId();
 							Boolean shouldAnswer =
 								reasonId == null ||
-								trueOrNull( // Not sure? Err on the side of asking the question.
-										Expressions.evaluate(session, 
-												Expressions.get(session, reasonId), 
-												interview, 
-												Lists.newArrayList(alter1,alter2)));
+									Expressions.evaluate(
+											context.eidToExpression.get(reasonId), 
+											Lists.newArrayList(alter1,alter2), 
+											context);
 							if(shouldAnswer) {
 								resultPairs.add(new PairUni<Alter>(alter1,alter2));
 							}
@@ -395,9 +398,5 @@ public class Interviewing {
 			}
 		}
 		return results;
-	}
-	
-	private static boolean trueOrNull(Boolean maybe) {
-		return maybe == null || maybe;
 	}
 }
