@@ -143,13 +143,19 @@ public class Interviewing {
 			Boolean forward, Boolean unansweredOnly, Integer maxAlters)
 	{
 		ArrayList<Pair<Question,ArrayList<Alter>>> questions =
-			alterQuestionsForInterview(session,interviewId,forward,unansweredOnly);
+			alterQuestionsForInterview(session,interviewId,forward);
 		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
+		Interview interview = Interviews.getInterview(interviewId);
+		EvaluationContext context = Expressions.getContext(session, interview);
 		for(Pair<Question,ArrayList<Alter>> questionAlters : questions) {
 			Question question = questionAlters.getFirst();
 			ArrayList<Alter> results = Lists.newArrayList();
 			for(Alter alter : questionAlters.getSecond()) {
-				if(passedCurrent && (maxAlters == null || results.size() < maxAlters)) {
+				Boolean answered = 
+					context.qidAidToAlterAnswer.containsKey(
+							new PairUni<Long>(question.getId(),alter.getId()));
+				if(passedCurrent && (maxAlters == null || results.size() < maxAlters) &&
+						! (unansweredOnly && answered)) {
 					results.add(alter);
 				}
 				if(currentQuestion != null && 
@@ -254,7 +260,7 @@ public class Interviewing {
 	}
 	
 	public static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
-			Session session, Long interviewId, Boolean forward, Boolean unansweredOnly) 
+			Session session, Long interviewId, Boolean forward) 
 	{
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
@@ -277,20 +283,15 @@ public class Interviewing {
 			}
 			ArrayList<Alter> resultAlters = Lists.newArrayList();
 			for(Alter alter : alters) {
-				Boolean answered = answeredAlterIds.contains(alter.getId());
-				if(answered && unansweredOnly) {
-					// Answered, but we only want unanswered. Ignore it.
-				} else {
-					Long reasonId = question.getAnswerReasonExpressionId();
-					Boolean shouldAnswer =
-						reasonId == null ||
-							Expressions.evaluate(
-									context.eidToExpression.get(reasonId), 
-									Lists.newArrayList(alter), 
-									context);
-					if(shouldAnswer) {
-						resultAlters.add(alter);
-					}
+				Long reasonId = question.getAnswerReasonExpressionId();
+				Boolean shouldAnswer =
+					reasonId == null ||
+						Expressions.evaluate(
+								context.eidToExpression.get(reasonId), 
+								Lists.newArrayList(alter), 
+								context);
+				if(shouldAnswer) {
+					resultAlters.add(alter);
 				}
 			}
 			if(! resultAlters.isEmpty()) {
