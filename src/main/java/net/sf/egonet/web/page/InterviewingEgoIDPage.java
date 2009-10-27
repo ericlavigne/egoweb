@@ -3,6 +3,7 @@ package net.sf.egonet.web.page;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -19,6 +20,7 @@ import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 
 public class InterviewingEgoIDPage extends EgonetPage {
@@ -28,9 +30,17 @@ public class InterviewingEgoIDPage extends EgonetPage {
 	private ListView questionsView;
 	private Long studyId;
 	
+	public InterviewingEgoIDPage(PageParameters parameters) {
+		this(Studies.getStudy(Long.parseLong(parameters.getString("studyId"))));
+	}
+	
 	public InterviewingEgoIDPage(Study study) {
 		super(study.getName());
 		this.studyId = study.getId();
+		build();
+	}
+	
+	private void build() {
 		
 		questions = Lists.newArrayList(Lists.transform(
 			Questions.getQuestionsForStudy(studyId, QuestionType.EGO_ID),

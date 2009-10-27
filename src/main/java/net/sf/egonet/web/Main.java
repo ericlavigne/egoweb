@@ -48,14 +48,20 @@ public class Main extends WebApplication
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
 	@Override
-	public Class<IndexPage> getHomePage()
+	public Class<?> getHomePage()
     {
 		return IndexPage.class;
 	}
 
+	protected String applicationClassName = "net.sf.egonet.web.Main";
+	
 	public static Server createAndConfigureServer() {
+		return createAndConfigureServer("net.sf.egonet.web.Main",8080);
+	}
+	
+	public static Server createAndConfigureServer(String applicationClassName, Integer port) {
 
-        Server server = new Server(8080); // TODO: Restrict access to localhost: 0.0.0.0 -> 192.168.1.1?
+        Server server = new Server(port); // TODO: Restrict access to localhost: 0.0.0.0 -> 192.168.1.1?
 
 		/*
 		Context staticContext = new Context(server,"/static",0);
@@ -71,7 +77,7 @@ public class Main extends WebApplication
 		Context context = new Context(server, "/", Context.SESSIONS);
 		ServletHolder servletHolder = new ServletHolder(new WicketServlet());
 		servletHolder.setInitParameter("applicationClassName",
-				"net.sf.egonet.web.Main");
+				applicationClassName);
 		servletHolder.setInitOrder(1);
 		context.addServlet(servletHolder, "/*");
 		
