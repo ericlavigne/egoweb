@@ -1,5 +1,6 @@
 package net.sf.egonet.web.page;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,8 +19,11 @@ import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.util.resource.StringResourceStream;
 
+import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.persistence.Analysis;
+import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
@@ -86,8 +90,24 @@ public class AnalysisStudyPage extends EgonetPage {
 						}
 					}
 				});
+				item.add(new Button("interviewVisualize") {
+					public void onSubmit() {
+						// TODO: Should change connection reason according to dropdown (select id="adjacency" in html).
+						// TODO: Would be better as embedded image with size/color/adjacency controls. See p233 of Wicket in Action.
+						Expression connection = Expressions.get(getStudy().getAdjacencyExpressionId());
+						downloadImage(interview.getId()+".jpg", Analysis.getImageForInterview(interview, connection));
+					}
+				});
 			}});
 		add(analysisForm);
+	}
+	
+	private void downloadImage(String name, BufferedImage image) {
+		ResourceStreamRequestTarget target =
+			new ResourceStreamRequestTarget(
+					new Analysis.ImageResourceStream(image));
+		target.setFileName(name);
+		RequestCycle.get().setRequestTarget(target);
 	}
 	
 	private void downloadFile(String name, String mimeType, CharSequence contents) {
