@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -69,6 +70,8 @@ public class InterviewingEgoIDPage extends EgonetPage {
             }
         };
 		
+        form.add(new MultiLineLabel("prompt", Studies.getStudy(studyId).getEgoIdPrompt()));
+        
 		questionsView = new ListView("questions", questions)
         {
 			protected void populateItem(ListItem item)
