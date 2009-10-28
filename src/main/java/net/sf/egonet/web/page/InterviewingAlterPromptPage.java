@@ -3,6 +3,7 @@ package net.sf.egonet.web.page;
 import java.util.List;
 
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -48,7 +49,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 	private void build() {
 		final Study study = getStudy();
 		
-		add(new Label("alterPrompt",study.getAlterPrompt())); 
+		add(new MultiLineLabel("alterPrompt",study.getAlterPrompt())); 
 		Form form = new Form("form") {
 			public void onSubmit() {
 				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
