@@ -11,8 +11,9 @@ import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Presets;
 import net.sf.egonet.persistence.Questions;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
@@ -28,7 +29,8 @@ public class EditQuestionOptionsPanel extends Panel {
 
 	private Question question;
 	
-	private Form form;
+	private Form addOptionForm;
+	private Form optionsForm;
 	private TextField optionTitleField;
 	
 	public EditQuestionOptionsPanel(String id, Question question) {
@@ -52,7 +54,8 @@ public class EditQuestionOptionsPanel extends Panel {
 				Questions.getQuestionsForStudy(question.getStudyId(), type);
 			for(Question question : questions) {
 				if(! (this.question.getId().equals(question.getId()) || 
-						Options.getOptionsForQuestion(question.getId()).isEmpty())) {
+						Options.getOptionsForQuestion(question.getId()).isEmpty())) 
+				{
 					questionsWithOptions.add(question);
 				}
 			}
@@ -63,6 +66,13 @@ public class EditQuestionOptionsPanel extends Panel {
 	private void build() {
 		add(new Label("questionTitle",question.getTitle()));
 
+		optionsForm = new Form("optionsForm") {
+			public void onSubmit() {
+				// TODO: save changes to option text and value
+			}
+		};
+		optionsForm.setOutputMarkupId(true);
+		
 		ListView options = new ListView("options", new PropertyModel(this,"options"))
         {
 			protected void populateItem(ListItem item) {
@@ -87,33 +97,36 @@ public class EditQuestionOptionsPanel extends Panel {
 				item.add(moveLink);
 			}
 		};
-		add(options);
+		optionsForm.add(options);
 		
-		add(new Link("optionDeleteAll") {
+		optionsForm.add(new Link("optionDeleteAll") {
 			public void onClick() {
 				Questions.deleteOptionsFor(question);
 			}
 		});
+
+		add(optionsForm);
 		
-		form = new Form("optionForm");
+		addOptionForm = new Form("addOptionForm");
 
 		optionTitleField = new TextField("optionTitleField", new Model(""));
 		optionTitleField.setRequired(true);
-		form.add(optionTitleField);
+		optionTitleField.setOutputMarkupId(true);
+		addOptionForm.add(optionTitleField);
 		
-		form.add(
-			new Button("addOption")
+		addOptionForm.add(
+			new AjaxFallbackButton("addOption",addOptionForm)
             {
-				@Override
-				public void onSubmit()
-                {
+				protected void onSubmit(AjaxRequestTarget target, Form f) {
 					Options.addOption(question.getId(), optionTitleField.getModelObjectAsString());
 					optionTitleField.setModelObject("");
+					target.addComponent(optionsForm);
+					target.addChildren(f, TextField.class);
 				}
 			}
         );
 		
-		add(form);
+		add(addOptionForm);
 
 		ListView presets = new ListView("presets", new PropertyModel(this,"presetKeys"))
 		{

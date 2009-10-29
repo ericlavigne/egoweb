@@ -5,25 +5,27 @@
 		<table>
 			<tr>
 				<td>
-					<table>
-						<tr wicket:id="options">
-							<td wicket:id="optionTitle">Dog</td>
-							<td>
-								<a href="#" wicket:id="optionDelete">Delete</a>
-								<a href="#" wicket:id="optionMoveUp">Move up</a>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<a href="#" wicket:id="optionDeleteAll">Delete all</a>
-							</td>
-						</tr>
-					</table>
+					<form wicket:id="optionsForm">
+						<table>
+							<tr wicket:id="options">
+								<td wicket:id="optionTitle">Dog</td>
+								<td>
+									<a href="#" wicket:id="optionDelete">Delete</a>
+									<a href="#" wicket:id="optionMoveUp">Move up</a>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<a href="#" wicket:id="optionDeleteAll">Delete all</a>
+								</td>
+							</tr>
+						</table>
+					</form>
 				</td>
 				
 				<td>
-					<form wicket:id="optionForm">
-    	 				<input wicket:id="optionTitleField" id="optionTitleField" type="text" /><br />
+					<form wicket:id="addOptionForm">
+    	 				<input wicket:id="optionTitleField" type="text" /><br />
 						<input wicket:id="addOption" type="submit" value="Add option"/>
 					</form>
 					<fieldset>
