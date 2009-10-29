@@ -8,7 +8,11 @@ import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -21,6 +25,8 @@ public class EditStudyQuestionsPanel extends Panel {
 	private Long studyId;
 	private Question.QuestionType questionType;
 	
+	private Form questionsContainer;
+	private Form editQuestionPanelContainer;
 	private Panel editQuestionPanel;
 	
 	
@@ -41,17 +47,22 @@ public class EditStudyQuestionsPanel extends Panel {
 	
 	private void build()
     {
-		add(new Label("caption",questionType+" Questions"));
+
+		questionsContainer = new Form("questionsContainer");
+		questionsContainer.setOutputMarkupId(true);
+		
+		questionsContainer.add(new Label("caption",questionType+" Questions"));
 
 		ListView questions = new ListView("questions", new PropertyModel(this,"questions"))
         {
-			protected void populateItem(ListItem item) {
+			protected void populateItem(final ListItem item) {
 				final Question question = (Question) item.getModelObject();
 
-				Link questionLink = new Link("questionLink")
+				Link questionLink = new AjaxFallbackLink("questionLink")
                 {
-					public void onClick() {
-						editQuestion(question);
+					public void onClick(AjaxRequestTarget target) {
+						editQuestion(question,questionsContainer);
+						target.addComponent(editQuestionPanelContainer);
 					}
 				};
 				Link questionOptionsLink = new Link("questionOptionsLink") {
@@ -79,19 +90,27 @@ public class EditStudyQuestionsPanel extends Panel {
 				});
 			}
 		};
-		add(questions);
+		questionsContainer.add(questions);
 
-		add(new Link("newQuestion") {
-			public void onClick() {
-				editQuestion(new Question());
+		questionsContainer.add(new AjaxFallbackLink("newQuestion") {
+			public void onClick(AjaxRequestTarget target) {
+				editQuestion(new Question(),questionsContainer);
+				target.addComponent(editQuestionPanelContainer);
 			}
 		});
 		
+		add(questionsContainer);
+		
+		editQuestionPanelContainer = new Form("editQuestionPanelContainer");
+		editQuestionPanelContainer.setOutputMarkupId(true);
+		
 		editQuestionPanel = new EmptyPanel("editQuestionPanel");
-		add(editQuestionPanel);
+		editQuestionPanelContainer.add(editQuestionPanel);
+		
+		add(editQuestionPanelContainer);
 	}
-	private void editQuestion(Question question) {
-		Panel newPanel = new EditQuestionPanel("editQuestionPanel", question, questionType, studyId);
+	private void editQuestion(Question question, Component parentThatNeedsUpdating) {
+		Panel newPanel = new EditQuestionPanel("editQuestionPanel", parentThatNeedsUpdating, question, questionType, studyId);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}

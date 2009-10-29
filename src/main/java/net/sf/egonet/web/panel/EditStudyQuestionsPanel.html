@@ -1,5 +1,6 @@
 <wicket:panel>
 	
+	<form wicket:id="questionsContainer">
 	<table border="1">
     	<caption wicket:id="caption">Questions</caption>
     	<tr><th>Title</th><th>Prompt</th><th>Response Type</th><th>Options</th></tr>
@@ -15,7 +16,10 @@
     		<td><a href="#" wicket:id="newQuestion">New question</a></td>
     	</tr>
     </table>
+    </form>
     
-    <div wicket:id="editQuestionPanel">Edit Question Panel</div>
+    <form wicket:id="editQuestionPanelContainer">
+    	<div wicket:id="editQuestionPanel">Edit Question Panel</div>
+    </form>
 
 </wicket:panel>

@@ -12,7 +12,9 @@ import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 
-import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -34,18 +36,24 @@ public class EditQuestionPanel extends Panel {
 	private Model questionResponseTypeModel;
 	private Model questionAnswerReasonModel;
 	private static final String answerAlways = "Always";
+	
+	private Component parentThatNeedsUpdating;
 
-	public EditQuestionPanel(String id, Question question) {
+	public EditQuestionPanel(String id, Component parentThatNeedsUpdating, Question question) {
 		super(id);
 		this.question = question;
+		this.parentThatNeedsUpdating = parentThatNeedsUpdating;
 		build();
 	}
 	
-	public EditQuestionPanel(String id, Question question, QuestionType questionType, Long studyId) {
+	public EditQuestionPanel(String id, Component parentThatNeedsUpdating, 
+			Question question, QuestionType questionType, Long studyId) 
+	{
 		super(id);
 		this.question = question;
 		question.setType(questionType);
 		question.setStudyId(studyId);
+		this.parentThatNeedsUpdating = parentThatNeedsUpdating;
 		build();
 	}
 	
@@ -55,6 +63,7 @@ public class EditQuestionPanel extends Panel {
 		add(feedbackPanel);
 		
 		form = new Form("questionForm");
+		form.setOutputMarkupId(true);
 		
 		questionTitleField = new TextField("questionTitleField", new Model(""));
 		questionTitleField.setRequired(true);
@@ -88,10 +97,10 @@ public class EditQuestionPanel extends Panel {
 				answerChoices));
 		
 		form.add(
-			new Button("submitQuestion")
+			new AjaxFallbackButton("submitQuestion",form)
             {
 				@Override
-				public void onSubmit()
+				public void onSubmit(AjaxRequestTarget target, Form form)
                 {
 					insertFormFieldsIntoQuestion(question);
 					if(question.getId() == null) {
@@ -106,6 +115,8 @@ public class EditQuestionPanel extends Panel {
 						DB.save(question);
 					}
 					form.setVisible(false);
+					target.addComponent(parentThatNeedsUpdating);
+					target.addComponent(form);
 				}
 			}
         );
