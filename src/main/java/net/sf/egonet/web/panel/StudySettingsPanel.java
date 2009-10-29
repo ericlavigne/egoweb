@@ -97,7 +97,7 @@ public class StudySettingsPanel extends Panel {
 	}
 	
 	private void setStudyFieldsFromForm() {
-		study.setIntroduction(introductionField.getModelObjectAsString());
+		study.setIntroduction(introductionField.getModelObjectAsString() /* .replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&") */ );
 		study.setEgoIdPrompt(egoIdField.getModelObjectAsString());
 		study.setAlterPrompt(alterPromptField.getModelObjectAsString());
 		study.setConclusion(conclusionField.getModelObjectAsString());

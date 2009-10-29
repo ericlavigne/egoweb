@@ -108,6 +108,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				public void onSubmit()
                 {
 					Options.addOption(question.getId(), optionTitleField.getModelObjectAsString());
+					optionTitleField.setModelObject("");
 				}
 			}
         );
