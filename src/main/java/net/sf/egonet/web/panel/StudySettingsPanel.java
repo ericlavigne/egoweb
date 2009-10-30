@@ -4,11 +4,11 @@ import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
+import net.sf.egonet.web.component.TextArea;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -97,10 +97,10 @@ public class StudySettingsPanel extends Panel {
 	}
 	
 	private void setStudyFieldsFromForm() {
-		study.setIntroduction(introductionField.getModelObjectAsString() /* .replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&") */ );
-		study.setEgoIdPrompt(egoIdField.getModelObjectAsString());
-		study.setAlterPrompt(alterPromptField.getModelObjectAsString());
-		study.setConclusion(conclusionField.getModelObjectAsString());
+		study.setIntroduction(introductionField.getText());
+		study.setEgoIdPrompt(egoIdField.getText());
+		study.setAlterPrompt(alterPromptField.getText());
+		study.setConclusion(conclusionField.getText());
 
 		String minAltersString = minAltersField.getModelObjectAsString();
 		String maxAltersString = maxAltersField.getModelObjectAsString();

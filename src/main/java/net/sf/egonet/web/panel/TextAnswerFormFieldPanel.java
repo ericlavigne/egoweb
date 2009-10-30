@@ -8,6 +8,7 @@ import org.apache.wicket.model.Model;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.web.component.TextArea;
 
 public class TextAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
@@ -31,6 +32,7 @@ public class TextAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 
 	public String getAnswer() {
-		return (String) answer.getObject();
+		String result = (String) answer.getObject();
+		return result == null ? null : TextArea.unescapeText(result);
 	}
 }

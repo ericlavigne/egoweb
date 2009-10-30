@@ -2,11 +2,12 @@ package net.sf.egonet.web.page;
 
 import java.util.List;
 
+import net.sf.egonet.web.component.TextField;
+
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -53,7 +54,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		Form form = new Form("form") {
 			public void onSubmit() {
 				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
-					DB.save(new Alter(interview,addAlterField.getModelObjectAsString()));
+					DB.save(new Alter(interview,addAlterField.getText()));
 				}
 			}
 		};

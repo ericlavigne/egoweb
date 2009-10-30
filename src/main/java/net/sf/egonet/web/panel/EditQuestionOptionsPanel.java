@@ -3,6 +3,8 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.egonet.web.component.TextField;
+
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
@@ -17,7 +19,6 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -130,7 +131,7 @@ public class EditQuestionOptionsPanel extends Panel {
 			new AjaxFallbackButton("addOption",addOptionForm)
             {
 				protected void onSubmit(AjaxRequestTarget target, Form f) {
-					Options.addOption(question.getId(), optionTitleField.getModelObjectAsString());
+					Options.addOption(question.getId(), optionTitleField.getText());
 					optionTitleField.setModelObject("");
 					updateOptionsAndParent(target);
 					target.addChildren(f, TextField.class);

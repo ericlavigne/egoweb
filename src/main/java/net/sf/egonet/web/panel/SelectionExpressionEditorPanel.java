@@ -7,12 +7,12 @@ import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -97,7 +97,7 @@ public class SelectionExpressionEditorPanel extends Panel {
 				@Override
 				public void onSubmit()
                 {
-					expression.setName(expressionNameField.getModelObjectAsString());
+					expression.setName(expressionNameField.getText());
 					expression.setOperator((Expression.Operator) expressionOperatorModel.getObject());
 					List<QuestionOption> selectedOptions = expressionValueField.getSelected();
 					List<Long> selectedIds = Lists.transform(selectedOptions,

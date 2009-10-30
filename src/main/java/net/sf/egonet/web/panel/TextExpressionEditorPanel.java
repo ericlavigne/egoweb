@@ -5,12 +5,12 @@ import java.util.List;
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -96,9 +96,9 @@ public class TextExpressionEditorPanel extends Panel {
 				@Override
 				public void onSubmit()
                 {
-					expression.setName(expressionNameField.getModelObjectAsString());
+					expression.setName(expressionNameField.getText());
 					expression.setOperator((Expression.Operator) expressionOperatorModel.getObject());
-					String value = expressionValueField.getModelObjectAsString();
+					String value = expressionValueField.getText();
 					expression.setValue(value == null ? "" : value);
 					expression.setResultForUnanswered((Boolean) expressionUnansweredModel.getObject());
 					DB.save(expression);
