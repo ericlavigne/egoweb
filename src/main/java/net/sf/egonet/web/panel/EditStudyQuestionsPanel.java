@@ -8,7 +8,6 @@ import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.basic.Label;
@@ -61,13 +60,14 @@ public class EditStudyQuestionsPanel extends Panel {
 				Link questionLink = new AjaxFallbackLink("questionLink")
                 {
 					public void onClick(AjaxRequestTarget target) {
-						editQuestion(question,questionsContainer);
+						editQuestion(question);
 						target.addComponent(editQuestionPanelContainer);
 					}
 				};
-				Link questionOptionsLink = new Link("questionOptionsLink") {
-					public void onClick() {
+				Link questionOptionsLink = new AjaxFallbackLink("questionOptionsLink") {
+					public void onClick(AjaxRequestTarget target) {
 						editQuestionOptions(question);
+						target.addComponent(editQuestionPanelContainer);
 					}
 				};
 
@@ -78,14 +78,20 @@ public class EditStudyQuestionsPanel extends Panel {
 				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
-				item.add(new Link("questionMoveUp") {
-					public void onClick() {
+				item.add(new AjaxFallbackLink("questionMoveUp") {
+					public void onClick(AjaxRequestTarget target) {
 						Questions.moveEarlier(question);
+						target.addComponent(questionsContainer);
 					}
 				});
-				item.add(new Link("questionDelete") {
-					public void onClick() {
+				item.add(new AjaxFallbackLink("questionDelete") {
+					public void onClick(AjaxRequestTarget target) {
 						Questions.delete(question);
+						EmptyPanel empty = new EmptyPanel("editQuestionPanel");
+						editQuestionPanel.replaceWith(empty);
+						editQuestionPanel = empty;
+						target.addComponent(questionsContainer);
+						target.addComponent(editQuestionPanelContainer);
 					}
 				});
 			}
@@ -94,7 +100,7 @@ public class EditStudyQuestionsPanel extends Panel {
 
 		questionsContainer.add(new AjaxFallbackLink("newQuestion") {
 			public void onClick(AjaxRequestTarget target) {
-				editQuestion(new Question(),questionsContainer);
+				editQuestion(new Question());
 				target.addComponent(editQuestionPanelContainer);
 			}
 		});
@@ -109,13 +115,13 @@ public class EditStudyQuestionsPanel extends Panel {
 		
 		add(editQuestionPanelContainer);
 	}
-	private void editQuestion(Question question, Component parentThatNeedsUpdating) {
-		Panel newPanel = new EditQuestionPanel("editQuestionPanel", parentThatNeedsUpdating, question, questionType, studyId);
+	private void editQuestion(Question question) {
+		Panel newPanel = new EditQuestionPanel("editQuestionPanel", questionsContainer, question, questionType, studyId);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}
 	private void editQuestionOptions(Question question) {
-		Panel newPanel = new EditQuestionOptionsPanel("editQuestionPanel",question);
+		Panel newPanel = new EditQuestionOptionsPanel("editQuestionPanel",questionsContainer,question);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}

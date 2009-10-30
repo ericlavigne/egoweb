@@ -11,7 +11,9 @@ import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Presets;
 import net.sf.egonet.persistence.Questions;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -32,11 +34,18 @@ public class EditQuestionOptionsPanel extends Panel {
 	private Form addOptionForm;
 	private Form optionsForm;
 	private TextField optionTitleField;
+	private Component parentThatNeedsUpdating;
 	
-	public EditQuestionOptionsPanel(String id, Question question) {
+	public EditQuestionOptionsPanel(String id, Component parentThatNeedsUpdating, Question question) {
 		super(id);
 		this.question = question;
+		this.parentThatNeedsUpdating = parentThatNeedsUpdating;
 		build();
+	}
+	
+	private void updateOptionsAndParent(AjaxRequestTarget target) {
+		target.addComponent(parentThatNeedsUpdating);
+		target.addComponent(optionsForm);
 	}
 
 	public List<QuestionOption> getOptions() {
@@ -80,18 +89,20 @@ public class EditQuestionOptionsPanel extends Panel {
 
 				item.add(new Label("optionTitle", option.getName()));
 
-				Link deleteLink = new Link("optionDelete")
+				Link deleteLink = new AjaxFallbackLink("optionDelete")
                 {
-					public void onClick() {
+					public void onClick(AjaxRequestTarget target) {
 						Options.delete(option);
+						updateOptionsAndParent(target);
 					}
 				};
 				item.add(deleteLink);
 				
-				Link moveLink = new Link("optionMoveUp")
+				Link moveLink = new AjaxFallbackLink("optionMoveUp")
                 {
-					public void onClick() {
+					public void onClick(AjaxRequestTarget target) {
 						Options.moveEarlier(option);
+						updateOptionsAndParent(target);
 					}
 				};
 				item.add(moveLink);
@@ -99,9 +110,10 @@ public class EditQuestionOptionsPanel extends Panel {
 		};
 		optionsForm.add(options);
 		
-		optionsForm.add(new Link("optionDeleteAll") {
-			public void onClick() {
+		optionsForm.add(new AjaxFallbackLink("optionDeleteAll") {
+			public void onClick(AjaxRequestTarget target) {
 				Questions.deleteOptionsFor(question);
+				updateOptionsAndParent(target);
 			}
 		});
 
@@ -120,7 +132,7 @@ public class EditQuestionOptionsPanel extends Panel {
 				protected void onSubmit(AjaxRequestTarget target, Form f) {
 					Options.addOption(question.getId(), optionTitleField.getModelObjectAsString());
 					optionTitleField.setModelObject("");
-					target.addComponent(optionsForm);
+					updateOptionsAndParent(target);
 					target.addChildren(f, TextField.class);
 				}
 			}
@@ -132,14 +144,15 @@ public class EditQuestionOptionsPanel extends Panel {
 		{
 			protected void populateItem(ListItem item) {
 				final String presetName = item.getModelObjectAsString();
-				Link presetLink = new Link("presetLink") {
-					public void onClick() {
+				Link presetLink = new AjaxFallbackLink("presetLink") {
+					public void onClick(AjaxRequestTarget target) {
 						for(QuestionOption option : getOptions()) {
 							Options.delete(option);
 						}
 						for(String preset : Presets.get().get(presetName)) {
 							DB.save(new QuestionOption(question.getId(),preset));
 						}
+						updateOptionsAndParent(target);
 					}
 				};
 				presetLink.add(new Label("presetName",presetName));
@@ -152,14 +165,15 @@ public class EditQuestionOptionsPanel extends Panel {
 		{
 			protected void populateItem(ListItem item) {
 				final Question otherQuestion = (Question)  item.getModelObject();
-				Link link = new Link("copyFromOtherQuestion") {
-					public void onClick() {
+				Link link = new AjaxFallbackLink("copyFromOtherQuestion") {
+					public void onClick(AjaxRequestTarget target) {
 						for(QuestionOption option : getOptions()) {
 							Options.delete(option);
 						}
 						for(QuestionOption option : Options.getOptionsForQuestion(otherQuestion.getId())) {
 							Options.addOption(question.getId(), option.getName());
 						}
+						updateOptionsAndParent(target);
 					}
 				};
 				link.add(new Label("otherQuestionName",otherQuestion.getTitle()));
