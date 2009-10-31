@@ -11,10 +11,12 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	private Model answer;
+	private DropDownChoice dropDownChoice;
 	
 	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
 		super(id,question,alters);
@@ -40,7 +42,8 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	private void build() {
 		add(new Label("prompt",getPrompt()));
-		add(new DropDownChoice("answer",answer,getOptions()));
+		dropDownChoice = new DropDownChoice("answer",answer,getOptions());
+		add(dropDownChoice);
 	}
 
 	public String getAnswer() {
@@ -50,5 +53,9 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	public List<QuestionOption> getOptions() {
 		return Options.getOptionsForQuestion(getQuestion().getId());
+	}
+
+	public void setAutoFocus() {
+		dropDownChoice.add(new FocusOnLoadBehavior());
 	}
 }

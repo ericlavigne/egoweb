@@ -3,6 +3,7 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
 import net.sf.egonet.model.QuestionOption;
@@ -125,6 +126,7 @@ public class EditQuestionOptionsPanel extends Panel {
 		optionTitleField = new TextField("optionTitleField", new Model(""));
 		optionTitleField.setRequired(true);
 		optionTitleField.setOutputMarkupId(true);
+		optionTitleField.add(new FocusOnLoadBehavior());
 		addOptionForm.add(optionTitleField);
 		
 		addOptionForm.add(

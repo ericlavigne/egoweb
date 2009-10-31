@@ -7,6 +7,7 @@ import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -54,6 +55,7 @@ public class SelectionExpressionEditorPanel extends Panel {
 		
 		expressionNameField = new TextField("expressionNameField", new Model(expression.getName()));
 		expressionNameField.setRequired(true);
+		expressionNameField.add(new FocusOnLoadBehavior());
 		form.add(expressionNameField);
 		
 		expressionOperatorModel = new Model(expression.getOperator());

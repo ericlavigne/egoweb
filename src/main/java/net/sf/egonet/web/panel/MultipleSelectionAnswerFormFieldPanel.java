@@ -64,4 +64,8 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	public List<QuestionOption> getOptions() {
 		return Options.getOptionsForQuestion(getQuestion().getId());
 	}
+	
+	public void setAutoFocus() {
+		answerField.setAutoFocus();
+	}
 }

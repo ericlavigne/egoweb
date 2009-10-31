@@ -4,6 +4,7 @@ import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextArea;
 
 import org.apache.wicket.markup.html.form.Button;
@@ -46,6 +47,8 @@ public class StudySettingsPanel extends Panel {
 		egoIdField = new TextArea("egoIdField", new Model(""));
 		alterPromptField = new TextArea("alterPromptField", new Model(""));
 		conclusionField = new TextArea("conclusionField", new Model(""));
+		
+		introductionField.add(new FocusOnLoadBehavior());
 		
 		egoIdField.setRequired(true);
 		alterPromptField.setRequired(true);

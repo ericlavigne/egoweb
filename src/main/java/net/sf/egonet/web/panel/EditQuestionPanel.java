@@ -11,6 +11,7 @@ import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -67,6 +68,7 @@ public class EditQuestionPanel extends Panel {
 		
 		questionTitleField = new TextField("questionTitleField", new Model(""));
 		questionTitleField.setRequired(true);
+		questionTitleField.add(new FocusOnLoadBehavior());
 		form.add(questionTitleField);
 
 		questionPromptField = new TextArea("questionPromptField", new Model(""));

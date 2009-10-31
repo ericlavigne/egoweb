@@ -6,6 +6,7 @@ import net.sf.egonet.model.Expression;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -50,6 +51,7 @@ public class CompoundExpressionEditorPanel extends Panel {
 		
 		expressionNameField = new TextField("expressionNameField", new Model(expression.getName()));
 		expressionNameField.setRequired(true);
+		expressionNameField.add(new FocusOnLoadBehavior());
 		form.add(expressionNameField);
 		
 		expressionOperatorModel = new Model(expression.getOperator());

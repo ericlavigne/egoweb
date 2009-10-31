@@ -2,6 +2,7 @@ package net.sf.egonet.web.page;
 
 import java.util.List;
 
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -61,6 +62,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 
 		addAlterField = new TextField("addAlterField", new Model(""));
 		addAlterField.setRequired(true);
+		addAlterField.add(new FocusOnLoadBehavior());
 		form.add(addAlterField);
 		
 		add(form);

@@ -101,4 +101,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public String getPrompt() {
 		return individualizeQuestionPrompt(question,alters);
 	}
+
+	public void setAutoFocus() {
+		
+	}
 }

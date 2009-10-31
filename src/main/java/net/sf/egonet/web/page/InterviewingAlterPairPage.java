@@ -52,6 +52,9 @@ public class InterviewingAlterPairPage extends EgonetPage {
 			} else {
 				answerFields.add(AnswerFormFieldPanel.getInstance("question", question, answer.getValue(), alters));
 			}
+			if(! answerFields.isEmpty()) {
+				answerFields.get(0).setAutoFocus();
+			}
 		}
 		
 		Form form = new Form("form") {

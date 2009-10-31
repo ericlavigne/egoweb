@@ -77,6 +77,9 @@ public class InterviewingEgoIDPage extends EgonetPage {
 			protected void populateItem(ListItem item)
             {
 				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
+				if(wrapper.getQuestion().getId().equals(questions.get(0).getQuestion().getId())) {
+					wrapper.setAutoFocus();
+				}
 				item.add(wrapper);
             }
         };

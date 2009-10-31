@@ -39,12 +39,11 @@ public class InterviewingEgoPage extends EgonetPage {
 		};
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
 		if(answer == null) {
-
 			field = AnswerFormFieldPanel.getInstance("question",question);
 		} else {
 			field = AnswerFormFieldPanel.getInstance("question",question,answer.getValue());
 		}
-		// TODO: If question already answered, push that answer into field.
+		field.setAutoFocus();
 		form.add(field);
 		add(form);
 

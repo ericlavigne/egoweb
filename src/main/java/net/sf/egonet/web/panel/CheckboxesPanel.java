@@ -3,6 +3,8 @@ package net.sf.egonet.web.panel;
 import java.io.Serializable;
 import java.util.List;
 
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
+
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -40,12 +42,22 @@ public class CheckboxesPanel<T> extends Panel {
 		build();
 	}
 	
+	private Boolean autoFocus = false;
+	
 	private void build() {
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
 				item.add(new Label("checkLabel",wrapper.getName()));
-				item.add(new CheckBox("checkField", new PropertyModel(wrapper, "selected")));
+				CheckBox checkBox = new CheckBox("checkField", new PropertyModel(wrapper, "selected"));
+				if(autoFocus) {
+					if(wrapper.getName() != null && items.get(0).getName() != null &&
+							wrapper.getName().equals(items.get(0).getName()))
+					{
+						checkBox.add(new FocusOnLoadBehavior());
+					}
+				}
+				item.add(checkBox);
 			}
 		};
 		checkboxes.setReuseItems(true);
@@ -73,5 +85,10 @@ public class CheckboxesPanel<T> extends Panel {
 		public String getName() {
 			return showItem(item);
 		}
+	}
+	
+	public void setAutoFocus() {
+		this.autoFocus = true;
+		
 	}
 }
