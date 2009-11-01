@@ -7,6 +7,7 @@ public class QuestionOption extends Entity
 {
 	private Long questionId;
 	private String name;
+	private String value;
 	
 	private Integer ordering;
 
@@ -22,6 +23,10 @@ public class QuestionOption extends Entity
 
 	public Long   getQuestionId() { return questionId; }
 	public String getName()       { return name;       }
+	public void setName(String val)     { this.name       = val; }
+	
+	public String getValue() { return this.value; }
+	public void setValue(String value) { this.value = value; }
 
 	public Integer getOrdering() { return ordering; }
 	public void setOrdering(Integer ordering) { this.ordering = ordering; }
@@ -31,5 +36,4 @@ public class QuestionOption extends Entity
 	protected QuestionOption() {}
 
 	protected void setQuestionId(Long val) { this.questionId = val; }
-	protected void setName(String val)     { this.name       = val; }
 }

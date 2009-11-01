@@ -37,4 +37,8 @@ public class IndexPage extends EgonetPage
 	            }
 	        );
 	}
+	
+	public boolean isBookmarkable() {
+		return false;
+	}
 }

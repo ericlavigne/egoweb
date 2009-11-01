@@ -13,6 +13,7 @@
 
 		<property name="questionId" column="question_id" />
 		<property name="name" column="name" />
+		<property name="value" column="value" />
 		<property name="ordering" column="ordering" />
 	</class>
 </hibernate-mapping>

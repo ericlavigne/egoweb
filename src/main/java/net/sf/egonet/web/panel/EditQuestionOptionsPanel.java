@@ -18,6 +18,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -36,7 +37,14 @@ public class EditQuestionOptionsPanel extends Panel {
 	private Form addOptionForm;
 	private Form optionsForm;
 	private TextField optionTitleField;
+	private TextField optionValueField;
 	private Component parentThatNeedsUpdating;
+	private WebMarkupContainer editOptionContainer;
+	private Form editOptionForm;
+	private QuestionOption currentlyEditing;
+	private Label editOptionFormLegend;
+	private TextField editOptionTitleField;
+	private TextField editOptionValueField;
 	
 	public EditQuestionOptionsPanel(String id, Component parentThatNeedsUpdating, Question question) {
 		super(id);
@@ -48,6 +56,7 @@ public class EditQuestionOptionsPanel extends Panel {
 	private void updateOptionsAndParent(AjaxRequestTarget target) {
 		target.addComponent(parentThatNeedsUpdating);
 		target.addComponent(optionsForm);
+		target.addComponent(editOptionContainer);
 	}
 
 	public List<QuestionOption> getOptions() {
@@ -77,11 +86,7 @@ public class EditQuestionOptionsPanel extends Panel {
 	private void build() {
 		add(new Label("questionTitle",question.getTitle()));
 
-		optionsForm = new Form("optionsForm") {
-			public void onSubmit() {
-				// TODO: save changes to option text and value
-			}
-		};
+		optionsForm = new Form("optionsForm");
 		optionsForm.setOutputMarkupId(true);
 		
 		ListView options = new ListView("options", new PropertyModel(this,"options"))
@@ -89,12 +94,15 @@ public class EditQuestionOptionsPanel extends Panel {
 			protected void populateItem(ListItem item) {
 				final QuestionOption option = (QuestionOption) item.getModelObject();
 
-				item.add(new Label("optionTitle", option.getName()));
+				item.add(new Label("optionTitle", option.getName()+
+						(option.getValue() == null || option.getValue().isEmpty() ? 
+								"" : " ("+option.getValue()+")")));
 
 				Link deleteLink = new AjaxFallbackLink("optionDelete")
                 {
 					public void onClick(AjaxRequestTarget target) {
 						Options.delete(option);
+						editOptionForm.setVisible(false);
 						updateOptionsAndParent(target);
 					}
 				};
@@ -104,10 +112,19 @@ public class EditQuestionOptionsPanel extends Panel {
                 {
 					public void onClick(AjaxRequestTarget target) {
 						Options.moveEarlier(option);
+						editOptionForm.setVisible(false);
 						updateOptionsAndParent(target);
 					}
 				};
 				item.add(moveLink);
+				
+				Link editLink = new AjaxFallbackLink("optionEdit")
+                {
+					public void onClick(AjaxRequestTarget target) {
+						editOption(target,option);
+					}
+				};
+				item.add(editLink);
 			}
 		};
 		optionsForm.add(options);
@@ -115,6 +132,7 @@ public class EditQuestionOptionsPanel extends Panel {
 		optionsForm.add(new AjaxFallbackLink("optionDeleteAll") {
 			public void onClick(AjaxRequestTarget target) {
 				Questions.deleteOptionsFor(question);
+				editOptionForm.setVisible(false);
 				updateOptionsAndParent(target);
 			}
 		});
@@ -129,12 +147,20 @@ public class EditQuestionOptionsPanel extends Panel {
 		optionTitleField.add(new FocusOnLoadBehavior());
 		addOptionForm.add(optionTitleField);
 		
+		optionValueField = new TextField("optionValueField", new Model(""));
+		optionValueField.setOutputMarkupId(true);
+		addOptionForm.add(optionValueField);
+		
 		addOptionForm.add(
 			new AjaxFallbackButton("addOption",addOptionForm)
             {
 				protected void onSubmit(AjaxRequestTarget target, Form f) {
-					Options.addOption(question.getId(), optionTitleField.getText());
+					Options.addOption(question.getId(), 
+							optionTitleField.getText(), 
+							optionValueField.getText());
 					optionTitleField.setModelObject("");
+					optionValueField.setModelObject("");
+					editOptionForm.setVisible(false);
 					updateOptionsAndParent(target);
 					target.addChildren(f, TextField.class);
 				}
@@ -143,6 +169,48 @@ public class EditQuestionOptionsPanel extends Panel {
 		
 		add(addOptionForm);
 
+		editOptionContainer = new WebMarkupContainer("editOptionContainer");
+		editOptionContainer.setOutputMarkupId(true);
+		
+		editOptionForm = new Form("editOptionForm");
+		editOptionForm.setOutputMarkupId(true);
+		
+		editOptionFormLegend = new Label("editOptionLegend", new Model(""));
+		editOptionForm.add(editOptionFormLegend);
+		
+		editOptionTitleField = new TextField("editOptionTitleField", new Model(""));
+		editOptionTitleField.setRequired(true);
+		editOptionTitleField.add(new FocusOnLoadBehavior());
+		editOptionForm.add(editOptionTitleField);
+		
+		editOptionValueField = new TextField("editOptionValueField", new Model(""));
+		editOptionValueField.setRequired(true);
+		editOptionForm.add(editOptionValueField);
+
+		editOptionForm.add(
+			new AjaxFallbackButton("editOption",editOptionForm)
+            {
+				protected void onSubmit(AjaxRequestTarget target, Form f) {
+					QuestionOption option = currentlyEditing;
+					if(option != null) {
+						option.setName(editOptionTitleField.getText());
+						String value = editOptionValueField.getText();
+						if(value != null && ! value.isEmpty()) {
+							option.setValue(value);
+						}
+						DB.save(option);
+					}
+					currentlyEditing = null;
+					editOptionForm.setVisible(false);
+					updateOptionsAndParent(target);
+				}
+			}
+        );
+		
+		editOptionContainer.add(editOptionForm);
+		add(editOptionContainer);
+		editOptionForm.setVisible(false);
+		
 		ListView presets = new ListView("presets", new PropertyModel(this,"presetKeys"))
 		{
 			protected void populateItem(ListItem item) {
@@ -155,6 +223,7 @@ public class EditQuestionOptionsPanel extends Panel {
 						for(String preset : Presets.get().get(presetName)) {
 							DB.save(new QuestionOption(question.getId(),preset));
 						}
+						editOptionForm.setVisible(false);
 						updateOptionsAndParent(target);
 					}
 				};
@@ -174,8 +243,9 @@ public class EditQuestionOptionsPanel extends Panel {
 							Options.delete(option);
 						}
 						for(QuestionOption option : Options.getOptionsForQuestion(otherQuestion.getId())) {
-							Options.addOption(question.getId(), option.getName());
+							Options.addOption(question.getId(), option.getName(), option.getValue());
 						}
+						editOptionForm.setVisible(false);
 						updateOptionsAndParent(target);
 					}
 				};
@@ -184,5 +254,15 @@ public class EditQuestionOptionsPanel extends Panel {
 			}
 		};
 		add(otherQuestions);
+	}
+	
+	private void editOption(AjaxRequestTarget target, QuestionOption option) {
+		this.currentlyEditing = option;
+		this.editOptionTitleField.setModelObject(option.getName());
+		this.editOptionValueField.setModelObject(option.getValue() == null ? "" : option.getValue());
+		this.editOptionFormLegend.setModelObject(
+				"Editing option: "+option.getName()+" ("+option.getValue()+")");
+		this.editOptionForm.setVisible(true);
+		updateOptionsAndParent(target);
 	}
 }

@@ -1,6 +1,5 @@
 package net.sf.egonet.persistence;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
@@ -16,7 +15,8 @@ public class Options {
 	public static List<QuestionOption> 
 	getOptionsForQuestion(Session session, final Long questionId) 
 	{
-		new ArrayList<Expression>(session.createQuery("from Expression").list());
+		// TODO: Add values to those that don't have them (null or "").
+		// If any changed by this process, then save.
 		return 
 		session.createQuery("from QuestionOption o where o.active = 1 and " +
 				"o.questionId = :questionId order by o.ordering")
@@ -61,18 +61,34 @@ public class Options {
 		});
 	}
 	
-	public static void addOption(final Long questionId, final String optionName) {
+	public static void addOption(final Long questionId, final String optionName, final String optionValue) {
 		new DB.Action<Object>() {
 			public Object get() {
-				addOption(session, questionId, optionName);
+				addOption(session, questionId, optionName, optionValue);
 				return null;
 			}
 		}.execute();
 	}
 	
-	public static void addOption(Session session, Long questionId, String optionName) {
+	public static void addOption(Session session, Long questionId, String optionName, String optionValue) {
 		List<QuestionOption> options = getOptionsForQuestion(session,questionId);
-		options.add(new QuestionOption(questionId,optionName));
+		QuestionOption newOption = new QuestionOption(questionId,optionName);
+		if(optionValue == null || optionValue.isEmpty()) {
+			for(Integer possibleValue = options.size()+1; possibleValue > 0; possibleValue--) {
+				Boolean foundMatch = false;
+				for(QuestionOption option : options) {
+					if(option.getValue() != null && option.getValue().equals(possibleValue.toString())) {
+						foundMatch = true;
+					}
+				}
+				if(! foundMatch) {
+					newOption.setValue(possibleValue.toString());
+				}
+			}
+		} else {
+			newOption.setValue(optionValue);
+		}
+		options.add(newOption);
 		for(Integer i = 0; i < options.size(); i++) {
 			options.get(i).setOrdering(i);
 			DB.save(session, options.get(i));
