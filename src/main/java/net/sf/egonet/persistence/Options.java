@@ -15,13 +15,29 @@ public class Options {
 	public static List<QuestionOption> 
 	getOptionsForQuestion(Session session, final Long questionId) 
 	{
-		// TODO: Add values to those that don't have them (null or "").
-		// If any changed by this process, then save.
-		return 
-		session.createQuery("from QuestionOption o where o.active = 1 and " +
+		List<QuestionOption> options = 
+			session.createQuery("from QuestionOption o where o.active = 1 and " +
 				"o.questionId = :questionId order by o.ordering")
 			.setLong("questionId", questionId)
 			.list();
+		// Add values to those that don't have them (null or "").
+		for(QuestionOption option : options) {
+			if(option.getValue() == null || option.getValue().isEmpty()) {
+				for(Integer possibleValue = options.size()+1; possibleValue > 0; possibleValue--) {
+					Boolean foundMatch = false;
+					for(QuestionOption otherOption : options) {
+						if(otherOption.getValue() != null && otherOption.getValue().equals(possibleValue.toString())) {
+							foundMatch = true;
+						}
+					}
+					if(! foundMatch) {
+						option.setValue(possibleValue.toString());
+					}
+				}
+				DB.save(session, option);
+			}
+		}
+		return options;
 	}
 	
 
