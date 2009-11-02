@@ -69,6 +69,14 @@ public class AnalysisStudyPage extends EgonetPage {
 		add(interviewImportForm);
 		
 		Form analysisForm = new Form("analysisForm");
+		analysisForm.add(new Button("csvExport") {
+			public void onSubmit() {
+				downloadFile(
+						getStudy().getName()+"-respondent-data.csv",
+						"text/plain",
+						Analysis.getRawDataCSVForStudy(getStudy()));
+			}
+		});
 		analysisForm.add(new Button("statisticsButton") {
 			public void onSubmit() {
 				downloadFile(
