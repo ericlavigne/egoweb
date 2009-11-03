@@ -14,6 +14,8 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.validator.AbstractValidator;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
@@ -56,11 +58,13 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 			public void onSubmit() {
 				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
 					DB.save(new Alter(interview,addAlterField.getText()));
+					addAlterField.setModelObject("");
 				}
 			}
 		};
 
 		addAlterField = new TextField("addAlterField", new Model(""));
+		addAlterField.add(new AlterUniquenessValidator());
 		addAlterField.setRequired(true);
 		addAlterField.add(new FocusOnLoadBehavior());
 		form.add(addAlterField);
@@ -132,5 +136,17 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
 		return InterviewingAlterPage.askNextUnanswered(interviewId,null,null);
+	}
+	
+	private class AlterUniquenessValidator extends AbstractValidator {
+		@Override
+		protected void onValidate(IValidatable validatable) {
+			String alterName = (String) validatable.getValue();
+			for(Alter alter : getAlters()) {
+				if(alter.getName().equalsIgnoreCase(alterName)) {
+					error(validatable);
+				}
+			}
+		}
 	}
 }

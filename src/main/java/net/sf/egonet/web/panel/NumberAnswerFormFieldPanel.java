@@ -27,6 +27,8 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	private void build(String previousAnswer) {
 		add(new Label("prompt",getPrompt()));
+		// TODO: The textfield could be given an integer rather than string as a model, see Wicket in Action p 163
+		// new TextField("age", new Model(), Integer.class)
 		textField = new TextField("answer", new Model(previousAnswer));
 		textField.add(new PatternValidator("[0-9]*"));
 		add(textField);
