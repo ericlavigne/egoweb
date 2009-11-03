@@ -16,6 +16,7 @@ import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -71,6 +72,14 @@ public class EditQuestionPanel extends Panel {
 		questionTitleField.add(new FocusOnLoadBehavior());
 		form.add(questionTitleField);
 
+		if(question.getType().equals(Question.QuestionType.ALTER)) {
+			form.add(new Label("promptHelpText", "(Refer to the alter as $$)"));
+		} else if(question.getType().equals(Question.QuestionType.ALTER_PAIR)) {
+			form.add(new Label("promptHelpText", "(Refer to the alters as $$1 and $$2)"));
+		} else {
+			form.add(new Label("promptHelpText", ""));
+		}
+		
 		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
