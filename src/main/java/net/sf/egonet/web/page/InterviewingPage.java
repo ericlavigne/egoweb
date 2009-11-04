@@ -14,7 +14,10 @@ public class InterviewingPage extends EgonetPage {
 			protected Pair<Class<?>,PageParameters> getStudyBookmark(Study s) {
 				PageParameters pars = new PageParameters();
 				pars.add("studyId", s.getId().toString());
-				return new Pair<Class<?>,PageParameters>(InterviewingEgoIDPage.class,pars);
+				return new Pair<Class<?>,PageParameters>(
+						s.getIntroduction() == null || s.getIntroduction().isEmpty() ? 
+								InterviewingEgoIDPage.class : InterviewingIntroductionPage.class,
+						pars);
 			}
 		});	
 	}
