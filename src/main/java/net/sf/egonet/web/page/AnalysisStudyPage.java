@@ -9,11 +9,13 @@ import java.util.List;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.lang.Bytes;
@@ -30,6 +32,7 @@ import net.sf.egonet.persistence.Studies;
 public class AnalysisStudyPage extends EgonetPage {
 	
 	private Long studyId;
+	private Model adjacencyReason;
 	
 	public AnalysisStudyPage(Study study) {
 		super("Analysis for "+study.getName());
@@ -69,6 +72,7 @@ public class AnalysisStudyPage extends EgonetPage {
 		add(interviewImportForm);
 		
 		Form analysisForm = new Form("analysisForm");
+		
 		analysisForm.add(new Button("csvExport") {
 			public void onSubmit() {
 				downloadFile(
@@ -77,6 +81,12 @@ public class AnalysisStudyPage extends EgonetPage {
 						Analysis.getRawDataCSVForStudy(getStudy()));
 			}
 		});
+		
+		Long adjacencyExpressionId = getStudy().getAdjacencyExpressionId();
+		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
+			new Model(Expressions.get(adjacencyExpressionId));
+		analysisForm.add(new DropDownChoice("adjacency",adjacencyReason,Expressions.forStudy(getStudy().getId())));
+		
 		analysisForm.add(new Button("statisticsButton") {
 			public void onSubmit() {
 				downloadFile(
@@ -85,6 +95,7 @@ public class AnalysisStudyPage extends EgonetPage {
 						"statistics csv for all interviews in study "+getStudy().getName());
 			}
 		});
+		
 		analysisForm.add(new ListView("interviews", new PropertyModel(this, "interviews")) {
 			protected void populateItem(ListItem item) {
 				final Interview interview = (Interview) item.getModelObject();
@@ -102,11 +113,16 @@ public class AnalysisStudyPage extends EgonetPage {
 					public void onSubmit() {
 						// TODO: Should change connection reason according to dropdown (select id="adjacency" in html).
 						// TODO: Would be better as embedded image with size/color/adjacency controls. See p233 of Wicket in Action.
-						Expression connection = Expressions.get(getStudy().getAdjacencyExpressionId());
-						downloadImage(interview.getId()+".jpg", Analysis.getImageForInterview(interview, connection));
+						
+						Expression connectionReason = (Expression) adjacencyReason.getObject();
+						if(connectionReason != null) {
+							downloadImage(interview.getId()+".jpg", 
+									Analysis.getImageForInterview(interview, connectionReason));
+						}
 					}
 				});
 			}});
+		
 		add(analysisForm);
 	}
 	
