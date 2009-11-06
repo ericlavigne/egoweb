@@ -47,15 +47,16 @@
 		</java>
 	</target>
 	
-	<target name="jar" depends="compile">
+	<target name="dist" depends="compile">
 		<jar jarfile="${dist.dir}/egonet-web.jar" duplicate="preserve">
 			<manifest>
 				<attribute name="Main-Class" value="${main.class.web}" />
 			</manifest>
 			
 			<zipfileset dir="${build.dir}" />
-			
+
 			<zipfileset src="${lib.dir}/antlr-2.7.6.jar" />
+			<zipfileset src="${lib.dir}/collections-generic-4.01.jar" />
 			<zipfileset src="${lib.dir}/commons-collections-3.1.jar" />
 			<zipfileset src="${lib.dir}/derby-10.5.1.1.jar" />
 			<zipfileset src="${lib.dir}/dom4j-1.6.1.jar" />
@@ -67,6 +68,10 @@
 			<zipfileset src="${lib.dir}/jetty-6.1.18.jar" />
 			<zipfileset src="${lib.dir}/jetty-util-6.1.18.jar" />
 			<zipfileset src="${lib.dir}/jta-1.1.jar" />
+			<zipfileset src="${lib.dir}/jung-algorithms-2.0.jar" />
+			<zipfileset src="${lib.dir}/jung-api-2.0.jar" />
+			<zipfileset src="${lib.dir}/jung-graph-impl-2.0.jar" />
+			<zipfileset src="${lib.dir}/jung-visualization-2.0.jar" />
 			<zipfileset src="${lib.dir}/logback-classic-0.9.9.jar" />
 			<zipfileset src="${lib.dir}/logback-core-0.9.9.jar" />
 			<zipfileset src="${lib.dir}/opencsv-2.0.jar" />
