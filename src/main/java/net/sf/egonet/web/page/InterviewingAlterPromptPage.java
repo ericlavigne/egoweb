@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.IValidatable;
@@ -54,6 +55,9 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		final Study study = getStudy();
 		
 		add(new MultiLineLabel("alterPrompt",study.getAlterPrompt())); 
+		
+		add(new FeedbackPanel("feedback"));
+		
 		Form form = new Form("form") {
 			public void onSubmit() {
 				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
@@ -147,6 +151,10 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 					error(validatable);
 				}
 			}
+		}
+		@Override
+		protected String resourceKey() {
+			return "AlterUniquenessValidator";
 		}
 	}
 }

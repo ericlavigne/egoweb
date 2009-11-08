@@ -5,6 +5,9 @@
 			<tr>
 				<td>
 					<b><span wicket:id="alterPrompt">Please list 10 people.</span></b>
+					
+    				<div wicket:id="feedback"/>
+					
 					<form wicket:id="form">
 						<div>
 							<input wicket:id="addAlterField" type="text" />
@@ -12,6 +15,9 @@
 							<input type="submit" value="Add alter"/>
 						</div>
 					</form>
+					
+					<br />
+					<br />
 					
 					<div>Current alters: <span wicket:id="currentAlters">10</span></div>
 					<div>Min alters: <span wicket:id="minAlters">20</span></div>
