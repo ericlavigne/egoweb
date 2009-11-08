@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
@@ -64,17 +65,24 @@ public class EditStudyQuestionsPanel extends Panel {
 						target.addComponent(editQuestionPanelContainer);
 					}
 				};
+				
+				final Boolean selectionQuestion = 
+					question.getAnswerType().equals(AnswerType.SELECTION) || 
+					question.getAnswerType().equals(AnswerType.MULTIPLE_SELECTION);
+				
 				Link questionOptionsLink = new AjaxFallbackLink("questionOptionsLink") {
 					public void onClick(AjaxRequestTarget target) {
-						editQuestionOptions(question);
-						target.addComponent(editQuestionPanelContainer);
+						if(selectionQuestion) {
+							editQuestionOptions(question);
+							target.addComponent(editQuestionPanelContainer);
+						}
 					}
 				};
 
 				questionLink.add(new Label("questionTitle", question.getTitle()));
 				item.add(questionLink);
 				questionOptionsLink.add(
-						new Label("questionOptionsLabel", "Options ("+Options.getOptionsForQuestion(question.getId()).size()+")"));
+						new Label("questionOptionsLabel", selectionQuestion ? "Options ("+Options.getOptionsForQuestion(question.getId()).size()+")" : ""));
 				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
