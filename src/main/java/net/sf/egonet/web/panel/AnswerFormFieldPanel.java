@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.model.Question.QuestionType;
 import static net.sf.egonet.model.Answer.AnswerType;
 
 import org.apache.wicket.markup.html.panel.Panel;
@@ -80,26 +79,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		return alters;
 	}
 	
-	public static String individualizeQuestionPrompt(Question question, ArrayList<Alter> alters) {
-		String questionText = question.getPrompt();
-		String dd = "\\$\\$";
-		String dd1 = dd+"1";
-		String dd2 = dd+"2";
-		if(question.getType().equals(QuestionType.ALTER)) {
-			questionText = questionText.replaceAll(dd1, alters.get(0).getName());
-			questionText = questionText.replaceAll(dd, alters.get(0).getName());
-		}
-		if(question.getType().equals(QuestionType.ALTER_PAIR)) {
-			questionText = questionText.replaceAll(dd1, alters.get(0).getName());
-			questionText = questionText.replaceAll(dd2, alters.get(1).getName());
-			questionText = questionText.replaceFirst(dd, alters.get(0).getName());
-			questionText = questionText.replaceFirst(dd, alters.get(1).getName());
-		}
-		return questionText;
-	}
-	
 	public String getPrompt() {
-		return individualizeQuestionPrompt(question,alters);
+		return question.individualizePrompt(alters);
 	}
 
 	public void setAutoFocus() {

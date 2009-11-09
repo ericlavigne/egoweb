@@ -81,6 +81,7 @@ public class InterviewingEgoIDPage extends EgonetPage {
 					wrapper.setAutoFocus();
 				}
 				item.add(wrapper);
+				item.add(new MultiLineLabel("questionPrompt", wrapper.getQuestion().getPrompt()));
             }
         };
         questionsView.setReuseItems(true);

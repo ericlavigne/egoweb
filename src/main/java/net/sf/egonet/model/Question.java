@@ -1,5 +1,7 @@
 package net.sf.egonet.model;
 
+import java.util.ArrayList;
+
 import net.sf.egonet.model.Answer.AnswerType;
 
 public class Question extends Entity
@@ -37,8 +39,28 @@ public class Question extends Entity
 		return (title == null ? "Untitled question" : title)+" ("+type+")";
 	}
 
-	public AnswerType   getAnswerType()   { return this.answerType;   }
+	public String individualizePrompt(ArrayList<Alter> alters) {
+		String questionText = getPrompt();
+		String dd = "\\$\\$";
+		String dd1 = dd+"1";
+		String dd2 = dd+"2";
+		String blank = "_____";
+		String alter1Name = alters.size() > 0 ? alters.get(0).getName() : blank;
+		String alter2Name = alters.size() > 1 ? alters.get(1).getName() : blank;
+		if(getType().equals(QuestionType.ALTER)) {
+			questionText = questionText.replaceAll(dd1, alter1Name);
+			questionText = questionText.replaceAll(dd, alter1Name);
+		}
+		if(getType().equals(QuestionType.ALTER_PAIR)) {
+			questionText = questionText.replaceAll(dd1, alter1Name);
+			questionText = questionText.replaceAll(dd2, alter2Name);
+			questionText = questionText.replaceFirst(dd, alter1Name);
+			questionText = questionText.replaceFirst(dd, alter2Name);
+		}
+		return questionText;
+	}
 	
+	public AnswerType   getAnswerType()   { return this.answerType;   }
 	
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }

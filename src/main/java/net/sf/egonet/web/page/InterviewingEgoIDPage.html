@@ -2,11 +2,20 @@
 	<form wicket:id="form">
 		<fieldset>
 			
-			<b><span wicket:id="prompt">Please enter your name.</span></b>
+			<b><span wicket:id="prompt">Please identify yourself.</span></b>
 			
-			<div wicket:id="questions">
-				<div wicket:id="question"></div>
-			</div>
+			<table>
+				<tr wicket:id="questions">
+					<td align="right">
+						<span wicket:id="questionPrompt">Name</span>
+					</td>
+					<td align="left">
+						<div wicket:id="question"></div>
+					</td>
+				</tr>
+			
+			</table>
+			
 			<div>
 				<input type="submit" value="Start or continue interview"/>
 			</div>

@@ -2,6 +2,7 @@ package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -41,6 +42,12 @@ public class InterviewingAlterPage extends EgonetPage {
 	}
 	
 	private void build() {
+		
+		ArrayList<Alter> promptAlters = 
+			new Integer(1).equals(alters.size()) ?
+					Lists.newArrayList(alters.get(0)) : new ArrayList<Alter>();
+		add(new MultiLineLabel("prompt", question.individualizePrompt(promptAlters)));
+		
 		answerFields = Lists.newArrayList();
 		for(Alter alter : alters) {
 			ArrayList<Alter> alters = Lists.newArrayList(alter);

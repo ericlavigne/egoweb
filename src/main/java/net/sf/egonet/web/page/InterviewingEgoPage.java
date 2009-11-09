@@ -1,5 +1,6 @@
 package net.sf.egonet.web.page;
 
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 
@@ -28,6 +29,9 @@ public class InterviewingEgoPage extends EgonetPage {
 	}
 
 	private void build() {
+		
+		add(new MultiLineLabel("prompt", question.getPrompt()));
+		
 		Form form = new Form("form") {
 			public void onSubmit() {
 				String answerString = field.getAnswer();
@@ -37,6 +41,7 @@ public class InterviewingEgoPage extends EgonetPage {
 				}
 			}
 		};
+		
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
 		if(answer == null) {
 			field = AnswerFormFieldPanel.getInstance("question",question);
