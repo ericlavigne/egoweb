@@ -1,14 +1,22 @@
 <wicket:extend>
+
+	<b><span wicket:id="prompt">How often do _____ and _____ speak with each other?</span></b>
+
 	<form wicket:id="form">
-		<fieldset>
-			<legend>Questions about alter pairs</legend>
-			<div wicket:id="questions">
-				<div wicket:id="question"></div>
-			</div>
-			<div>
-				<input type="submit" value="Next question"/>
-			</div>
-		</fieldset>
+		<table>
+			<tr wicket:id="questions">
+				<td align="right">
+					<span wicket:id="alter">Alex</span>
+				</td>
+				<td align="left">
+					<div wicket:id="question"></div>
+				</td>
+			</tr>
+		</table>
+	
+		<div>
+			<input type="submit" value="Next question"/>
+		</div>
 	</form>
 	
 	<a href="#" wicket:id="backwardLink">&lt;&lt;</a>

@@ -2,6 +2,7 @@ package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -77,7 +78,9 @@ public class InterviewingAlterPage extends EgonetPage {
 		};
 		questionsView = new ListView("questions",answerFields) {
 			protected void populateItem(ListItem item) {
-				item.add((AnswerFormFieldPanel) item.getModelObject());
+				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
+				item.add(wrapper);
+				item.add(new Label("alter",wrapper.getAlters().get(0).getName()));
 			}
 		};
 		questionsView.setReuseItems(true);

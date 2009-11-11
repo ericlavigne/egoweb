@@ -2,6 +2,8 @@ package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -57,6 +59,8 @@ public class InterviewingAlterPairPage extends EgonetPage {
 			}
 		}
 		
+		add(new MultiLineLabel("prompt", question.individualizePrompt(new ArrayList<Alter>())));
+		
 		Form form = new Form("form") {
 			public void onSubmit() {
 				for(AnswerFormFieldPanel answerField : answerFields) {
@@ -71,7 +75,11 @@ public class InterviewingAlterPairPage extends EgonetPage {
 		};
 		questionsView = new ListView("questions",answerFields) {
 			protected void populateItem(ListItem item) {
-				item.add((AnswerFormFieldPanel) item.getModelObject());
+				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
+				item.add(wrapper);
+				item.add(new Label("alter",
+						wrapper.getAlters().get(0).getName()+" and "+
+						wrapper.getAlters().get(1).getName()));
 			}
 		};
 		questionsView.setReuseItems(true);
