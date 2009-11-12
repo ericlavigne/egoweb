@@ -6,6 +6,7 @@ import java.net.URL;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketServlet;
 
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.web.page.IndexPage;
 
 import org.hibernate.SessionFactory;
@@ -90,6 +91,7 @@ public class Main extends WebApplication
 		Server server = createAndConfigureServer();
 		
 		server.start();
+		DB.migrate();
 		server.join();
 	}
 

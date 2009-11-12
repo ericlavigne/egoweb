@@ -3,7 +3,6 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.Model;
 
@@ -41,7 +40,6 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	private void build() {
-		add(new Label("prompt",getPrompt()));
 		dropDownChoice = new DropDownChoice("answer",answer,getOptions());
 		add(dropDownChoice);
 	}

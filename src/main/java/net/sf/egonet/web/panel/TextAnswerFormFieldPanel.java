@@ -2,7 +2,6 @@ package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 
 import net.sf.egonet.model.Alter;
@@ -27,7 +26,6 @@ public class TextAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	private void build() {
-		add(new Label("prompt",getPrompt()));
 		add(textField);
 	}
 

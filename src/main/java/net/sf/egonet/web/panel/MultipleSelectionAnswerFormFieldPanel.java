@@ -3,8 +3,6 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.basic.Label;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
@@ -43,7 +41,6 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	}
 	
 	private void build() {
-		add(new Label("prompt",getPrompt()));
 		answerField = new CheckboxesPanel<QuestionOption>("answer",getOptions(),originallySelectedOptions) 
 		{
 			protected String showItem(QuestionOption option) {

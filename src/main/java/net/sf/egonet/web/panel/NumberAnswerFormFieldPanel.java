@@ -2,7 +2,6 @@ package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.validator.PatternValidator;
 
@@ -26,7 +25,6 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	private void build(String previousAnswer) {
-		add(new Label("prompt",getPrompt()));
 		// TODO: The textfield could be given an integer rather than string as a model, see Wicket in Action p 163
 		// new TextField("age", new Model(), Integer.class)
 		textField = new TextField("answer", new Model(previousAnswer));

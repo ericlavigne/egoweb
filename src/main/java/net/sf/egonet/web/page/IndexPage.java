@@ -1,14 +1,11 @@
 package net.sf.egonet.web.page;
 
-import net.sf.egonet.persistence.DB;
-
 import org.apache.wicket.markup.html.link.Link;
 
 public class IndexPage extends EgonetPage
 {
 	public IndexPage()
 	{
-		DB.migrate();
 		add(
 	            new Link("authoringLink")
 	            {

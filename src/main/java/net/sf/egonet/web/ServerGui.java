@@ -7,6 +7,8 @@ import java.net.URI;
 
 import javax.swing.JFrame;
 
+import net.sf.egonet.persistence.DB;
+
 import org.mortbay.jetty.Server;
 
 public class ServerGui extends JFrame {
@@ -30,7 +32,7 @@ public class ServerGui extends JFrame {
 				}
 			}
 		});
-		
+		DB.migrate();
 		Desktop.getDesktop().browse(new URI("http://localhost:8080"));
 		
 		setSize(800,150);
