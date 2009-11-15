@@ -19,34 +19,36 @@ import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
-import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
+import net.sf.functionalj.tuple.Triple;
 
 public class InterviewingAlterPairPage extends EgonetPage {
 	
 	private Long interviewId;
 	private Question question;
-	private ArrayList<PairUni<Alter>> alterpairs;
+	private Alter firstAlter;
+	private ArrayList<Alter> secondAlters;
 
 	public ArrayList<AnswerFormFieldPanel> answerFields;
 	
 	private ListView questionsView;
 	
-	public InterviewingAlterPairPage(Long interviewId, Question question, ArrayList<PairUni<Alter>> alterpairs) 
+	public InterviewingAlterPairPage(Long interviewId, Question question, Alter firstAlter, ArrayList<Alter> secondAlters) 
 	{
 		super(Studies.getStudyForInterview(interviewId).getName()+ " - Interviewing "
 				+Interviews.getEgoNameForInterview(interviewId)
 				+" (respondent #"+interviewId+")");
 		this.interviewId = interviewId;
 		this.question = question;
-		this.alterpairs = alterpairs;
+		this.firstAlter = firstAlter;
+		this.secondAlters = secondAlters;
 		build();
 	}
 	
 	private void build() {
 		answerFields = Lists.newArrayList();
-		for(PairUni<Alter> alterPair : alterpairs) {
-			ArrayList<Alter> alters = Lists.newArrayList(alterPair.getFirst(),alterPair.getSecond());
+		for(Alter secondAlter : secondAlters) {
+			ArrayList<Alter> alters = Lists.newArrayList(firstAlter,secondAlter);
 			Answer answer = Answers.getAnswerForInterviewQuestionAlters(Interviews.getInterview(interviewId), 
 					question, alters);
 			if(answer == null) {
@@ -59,7 +61,10 @@ public class InterviewingAlterPairPage extends EgonetPage {
 			}
 		}
 		
-		add(new MultiLineLabel("prompt", question.individualizePrompt(new ArrayList<Alter>())));
+		ArrayList<Alter> altersInPrompt = 
+			secondAlters.size() < 2 ? 
+					Lists.newArrayList(firstAlter,secondAlters.get(0)) : Lists.newArrayList(firstAlter);
+		add(new MultiLineLabel("prompt", question.individualizePrompt(altersInPrompt)));
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
@@ -78,8 +83,8 @@ public class InterviewingAlterPairPage extends EgonetPage {
 				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
 				item.add(wrapper);
 				item.add(new Label("alter",
-						wrapper.getAlters().get(0).getName()+" and "+
-						wrapper.getAlters().get(1).getName()));
+						secondAlters.size() < 2 ? 
+								"" : wrapper.getAlters().get(1).getName()));
 			}
 		};
 		questionsView.setReuseItems(true);
@@ -105,44 +110,47 @@ public class InterviewingAlterPairPage extends EgonetPage {
 	}
 
 	public PairUni<Alter> getFirstAlterPair() {
-		return alterpairs.get(0);
+		return new PairUni<Alter>(firstAlter,secondAlters.get(0));
 	}
 	public PairUni<Alter> getLastAlterPair() {
-		return alterpairs.get(alterpairs.size()-1);
+		return new PairUni<Alter>(firstAlter,secondAlters.get(secondAlters.size()-1));
 	}
 	
-	private static final Integer alterPairsPerPage = 5;
+	private static final Integer alterPairsPerPage = 20;
 	
 	public static EgonetPage askNextUnanswered(Long interviewId,Question currentQuestion, PairUni<Alter> currentAlterPair) {
-		Pair<Question,ArrayList<PairUni<Alter>>> nextQuestionAndAlterPairs =
+		Triple<Question,Alter,ArrayList<Alter>> nextQuestionAndAlterPairs =
 			Interviewing.nextAlterPairQuestionForInterview(
 					interviewId, currentQuestion, currentAlterPair, true, true, alterPairsPerPage);
 		if(nextQuestionAndAlterPairs != null) {
 			return new InterviewingAlterPairPage(interviewId, 
 					nextQuestionAndAlterPairs.getFirst(), 
-					nextQuestionAndAlterPairs.getSecond());
+					nextQuestionAndAlterPairs.getSecond(), 
+					nextQuestionAndAlterPairs.getThird());
 		}
 		return new InterviewingConclusionPage(interviewId);
 	}
 	public static EgonetPage askNext(Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair) {
-		Pair<Question,ArrayList<PairUni<Alter>>> nextQuestionAndAlterPairs =
+		Triple<Question,Alter,ArrayList<Alter>> nextQuestionAndAlterPairs =
 			Interviewing.nextAlterPairQuestionForInterview(
 					interviewId, currentQuestion, currentAlterPair, true, false, alterPairsPerPage);
 		if(nextQuestionAndAlterPairs != null) {
 			return new InterviewingAlterPairPage(interviewId, 
 					nextQuestionAndAlterPairs.getFirst(), 
-					nextQuestionAndAlterPairs.getSecond());
+					nextQuestionAndAlterPairs.getSecond(), 
+					nextQuestionAndAlterPairs.getThird());
 		}
 		return new InterviewingConclusionPage(interviewId);
 	}
 	public static EgonetPage askPrevious(Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair) {
-		Pair<Question,ArrayList<PairUni<Alter>>> previousQuestionAndAlterPairs =
+		Triple<Question,Alter,ArrayList<Alter>> previousQuestionAndAlterPairs =
 			Interviewing.nextAlterPairQuestionForInterview(
 					interviewId, currentQuestion, currentAlterPair, false, false, alterPairsPerPage);
 		if(previousQuestionAndAlterPairs != null) {
 			return new InterviewingAlterPairPage(interviewId, 
 					previousQuestionAndAlterPairs.getFirst(), 
-					previousQuestionAndAlterPairs.getSecond());
+					previousQuestionAndAlterPairs.getSecond(), 
+					previousQuestionAndAlterPairs.getThird());
 		}
 		return InterviewingAlterPage.askPrevious(interviewId, null, null);
 	}

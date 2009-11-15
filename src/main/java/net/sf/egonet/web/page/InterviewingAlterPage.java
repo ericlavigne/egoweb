@@ -112,7 +112,7 @@ public class InterviewingAlterPage extends EgonetPage {
 		return alters.get(alters.size()-1);
 	}
 	
-	private static final Integer altersPerPage = 5;
+	private static final Integer altersPerPage = 20;
 	
 	public static EgonetPage askNextUnanswered(Long interviewId,Question currentQuestion, Alter currentAlter) {
 		Pair<Question,ArrayList<Alter>> nextQuestionAndAlters =

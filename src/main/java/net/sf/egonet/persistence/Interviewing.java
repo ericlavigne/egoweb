@@ -15,6 +15,7 @@ import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
+import net.sf.functionalj.tuple.Triple;
 import net.sf.functionalj.tuple.TripleUni;
 
 import org.hibernate.Session;
@@ -301,13 +302,13 @@ public class Interviewing {
 		return results;
 	}
 	
-	public static Pair<Question,ArrayList<PairUni<Alter>>> nextAlterPairQuestionForInterview(
+	public static Triple<Question,Alter,ArrayList<Alter>> nextAlterPairQuestionForInterview(
 			final Long interviewId, 
 			final Question currentQuestion, final PairUni<Alter> currentAlterPair, 
 			final Boolean forward, final Boolean unansweredOnly, final Integer maxAlterPairs)
 	{
-		return new DB.Action<Pair<Question,ArrayList<PairUni<Alter>>>>() {
-			public Pair<Question, ArrayList<PairUni<Alter>>> get() {
+		return new DB.Action<Triple<Question,Alter,ArrayList<Alter>>>() {
+			public Triple<Question,Alter,ArrayList<Alter>> get() {
 				return nextAlterPairQuestionForInterview(
 						session, interviewId, currentQuestion, currentAlterPair, 
 						forward, unansweredOnly, maxAlterPairs);
@@ -315,7 +316,7 @@ public class Interviewing {
 		}.execute();
 	}
 	
-	public static Pair<Question,ArrayList<PairUni<Alter>>> nextAlterPairQuestionForInterview(
+	public static Triple<Question,Alter,ArrayList<Alter>> nextAlterPairQuestionForInterview(
 			Session session, Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair, 
 			Boolean forward, Boolean unansweredOnly, Integer maxAlterPairs)
 	{
@@ -326,9 +327,13 @@ public class Interviewing {
 		EvaluationContext context = Expressions.getContext(session, interview);
 		for(Pair<Question,ArrayList<PairUni<Alter>>> questionAlters : questions) {
 			Question question = questionAlters.getFirst();
-			ArrayList<PairUni<Alter>> results = Lists.newArrayList();
+			Alter firstAlter = null;
+			ArrayList<Alter> secondAlters = Lists.newArrayList();
 			for(PairUni<Alter> alters : questionAlters.getSecond()) {
-				if(passedCurrent && (maxAlterPairs == null || results.size() < maxAlterPairs)) {
+				if(firstAlter != null && ! firstAlter.getId().equals(alters.getFirst().getId())) {
+					return new Triple<Question,Alter,ArrayList<Alter>>(question,firstAlter,secondAlters);
+				}
+				if(passedCurrent && (maxAlterPairs == null || secondAlters.size() < maxAlterPairs)) {
 					Boolean answered = context.qidA1idA2idToAlterPairAnswer.containsKey(
 							new TripleUni<Long>(
 									question.getId(),
@@ -337,7 +342,8 @@ public class Interviewing {
 					if(unansweredOnly && answered) {
 						// Answered, but we only want unanswered. Skip it.
 					} else {
-						results.add(alters);
+						firstAlter = alters.getFirst();
+						secondAlters.add(alters.getSecond());
 					}
 				}
 				if(currentQuestion != null && 
@@ -348,11 +354,11 @@ public class Interviewing {
 					passedCurrent = true;
 				}
 			}
-			if(! results.isEmpty()) {
+			if(! secondAlters.isEmpty()) {
 				if(! forward) { // Want to return alter pairs in normal order.
-					Collections.reverse(results);
+					Collections.reverse(secondAlters);
 				}
-				return new Pair<Question,ArrayList<PairUni<Alter>>>(question,results);
+				return new Triple<Question,Alter,ArrayList<Alter>>(question,firstAlter,secondAlters);
 			}
 		}
 		return null;
