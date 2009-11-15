@@ -26,12 +26,28 @@
 				
 				<td>
 					<form wicket:id="addOptionForm">
-						<label for="optionTitleField">Name:</label>
-    	 				<input wicket:id="optionTitleField" id="optionTitleField" type="text" /><br />
-						<label for="optionValueField">Value:</label>
-    	 				<input wicket:id="optionValueField" id="optionValueField" type="text" /><br />
-						<input wicket:id="addOption" type="submit" value="Add option"/>
+						<fieldset>
+							<legend>Add new option</legend>
+							<label for="optionTitleField">Name:</label>
+    	 					<input wicket:id="optionTitleField" id="optionTitleField" type="text" /><br />
+							<label for="optionValueField">Value:</label>
+    	 					<input wicket:id="optionValueField" id="optionValueField" type="text" /><br />
+							<input wicket:id="addOption" type="submit" value="Add option"/>
+						</fieldset>
 					</form>
+					
+					<div wicket:id="editOptionContainer">
+						<form wicket:id="editOptionForm">
+							<fieldset>
+								<legend><span wicket:id="editOptionLegend">Editing an option</span></legend>
+								<label for="editOptionTitleField">Name:</label>
+    	 						<input wicket:id="editOptionTitleField" id="editOptionTitleField" type="text" /><br />
+								<label for="editOptionValueField">Value:</label>
+    	 						<input wicket:id="editOptionValueField" id="editOptionValueField" type="text" /><br />
+								<input wicket:id="editOption" type="submit" value="Save option"/>
+							</fieldset>
+						</form>
+					</div>
 					
 					<fieldset>
 						<legend>Presets</legend>
@@ -56,18 +72,6 @@
 				</td>
 			</tr>
 		</table>
-		<div wicket:id="editOptionContainer">
-			<form wicket:id="editOptionForm">
-				<fieldset>
-					<legend><span wicket:id="editOptionLegend">Editing an option</span></legend>
-					<label for="editOptionTitleField">Name:</label>
-    	 			<input wicket:id="editOptionTitleField" id="editOptionTitleField" type="text" /><br />
-					<label for="editOptionValueField">Value:</label>
-    	 			<input wicket:id="editOptionValueField" id="editOptionValueField" type="text" /><br />
-					<input wicket:id="editOption" type="submit" value="Save option"/>
-				</fieldset>
-			</form>
-		</div>
 	</fieldset>
 
 </wicket:panel>
