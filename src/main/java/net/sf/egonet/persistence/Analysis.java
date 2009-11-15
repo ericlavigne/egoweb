@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.util.io.ByteArrayOutputStream;
@@ -20,6 +21,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
@@ -182,8 +184,26 @@ public class Analysis {
 				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO);
 			List<Question> alterQuestions = 
 				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER);
+			List<Question> alterPairQuestions = 
+				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER_PAIR);
 			
 			// TODO: collection of options so I don't have to re-fetch for each interview
+			// Passing a list of question options to showAnswer would make this code much faster.
+			Map<Long,String> optionIdToValue = Maps.newTreeMap();
+			List<Question> allQuestions = Lists.newArrayList();
+			allQuestions.addAll(egoIdQuestions);
+			allQuestions.addAll(egoQuestions);
+			allQuestions.addAll(alterQuestions);
+			allQuestions.addAll(alterPairQuestions);
+			for(Question question : allQuestions) {
+				if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) || 
+						question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+				{
+					for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
+						optionIdToValue.put(option.getId(), option.getValue());
+					}
+				}
+			}
 			
 			List<String> header = Lists.newArrayList();
 			header.add("Interview number");
@@ -209,15 +229,15 @@ public class Analysis {
 					List<String> output = Lists.newArrayList();
 					output.add(interviewIndex.toString());
 					for(Question question : egoIdQuestions) {
-						output.add(showAnswer(session,question,context.qidToEgoAnswer.get(question.getId())));
+						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
 					}
 					for(Question question : egoQuestions) {
-						output.add(showAnswer(session,question,context.qidToEgoAnswer.get(question.getId())));
+						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
 					}
 					output.add(alterIndex.toString());
 					output.add(alter.getName());
 					for(Question question : alterQuestions) {
-						output.add(showAnswer(session,question,
+						output.add(showAnswer(optionIdToValue,question,
 								context.qidAidToAlterAnswer.get(
 										new PairUni<Long>(question.getId(),alter.getId()))));
 					}
@@ -227,8 +247,6 @@ public class Analysis {
 			
 			writer.writeNext(new String[]{}); // blank line between tables
 
-			List<Question> alterPairQuestions = 
-				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER_PAIR);
 			
 
 			header = Lists.newArrayList();
@@ -256,14 +274,14 @@ public class Analysis {
 						List<String> output = Lists.newArrayList();
 						output.add(interviewIndex.toString());
 						for(Question question : egoIdQuestions) {
-							output.add(showAnswer(session,question,context.qidToEgoAnswer.get(question.getId())));
+							output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
 						}
 						output.add(alter1Index.toString());
 						output.add(alter1.getName());
 						output.add(alter2Index.toString());
 						output.add(alter2.getName());
 						for(Question question : alterPairQuestions) {
-							output.add(showAnswer(session,question,
+							output.add(showAnswer(optionIdToValue,question,
 									context.qidA1idA2idToAlterPairAnswer.get(
 											new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()))));
 						}
@@ -279,7 +297,7 @@ public class Analysis {
 		}
 	}
 	
-	private static String showAnswer(Session session, Question question, Answer answer) {
+	private static String showAnswer(Map<Long,String> optionIdToValue, Question question, Answer answer) {
 		if(answer == null) {
 			return null;
 		}
@@ -295,14 +313,12 @@ public class Analysis {
 			if(value == null || value.isEmpty()) {
 				return "";
 			}
-			List<QuestionOption> options = Options.getOptionsForQuestion(session, question.getId());
 			List<String> selectedOptions = Lists.newArrayList();
 			for(String optionIdString : value.split(",")) {
 				Long optionId = Long.parseLong(optionIdString);
-				for(QuestionOption option : options) {
-					if(option.getId().equals(optionId)) {
-						selectedOptions.add(option.getValue());
-					}
+				String optionValue = optionIdToValue.get(optionId);
+				if(optionValue != null) {
+					selectedOptions.add(optionValue);
 				}
 			}
 			return Joiner.on("; ").join(selectedOptions);
