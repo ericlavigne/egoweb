@@ -164,6 +164,138 @@ public class Analysis {
 		}
 	}
 	
+	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study) {
+
+		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
+
+		List<Question> egoIdQuestions = 
+			Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO_ID);
+		List<Question> egoQuestions = 
+			Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO);
+		List<Question> alterQuestions = 
+			Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER);
+		
+		Map<Long,String> optionIdToValue = Maps.newTreeMap();
+		List<Question> allQuestions = Lists.newArrayList();
+		allQuestions.addAll(egoIdQuestions);
+		allQuestions.addAll(egoQuestions);
+		allQuestions.addAll(alterQuestions);
+		for(Question question : allQuestions) {
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) || 
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+			{
+				for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
+					optionIdToValue.put(option.getId(), option.getValue());
+				}
+			}
+		}
+		
+		List<String> header = Lists.newArrayList();
+		header.add("Interview number");
+		for(Question question : egoIdQuestions) {
+			header.add(question.getTitle());
+		}
+		for(Question question : egoQuestions) {
+			header.add(question.getTitle());
+		}
+		header.add("Alter number");
+		header.add("Alter name");
+		for(Question question : alterQuestions) {
+			header.add(question.getTitle());
+		}
+		writer.writeNext(header.toArray(new String[]{}));
+		
+		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
+			Interview interview = interviews.get(interviewIndex-1);
+			EvaluationContext context = Expressions.getContext(session, interview);
+			List<Alter> alters = Alters.getForInterview(interview.getId());
+			for(Integer alterIndex = 1; alterIndex < alters.size()+1; alterIndex++) {
+				Alter alter = alters.get(alterIndex-1);
+				List<String> output = Lists.newArrayList();
+				output.add(interviewIndex.toString());
+				for(Question question : egoIdQuestions) {
+					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+				}
+				for(Question question : egoQuestions) {
+					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+				}
+				output.add(alterIndex.toString());
+				output.add(alter.getName());
+				for(Question question : alterQuestions) {
+					output.add(showAnswer(optionIdToValue,question,
+							context.qidAidToAlterAnswer.get(
+									new PairUni<Long>(question.getId(),alter.getId()))));
+				}
+				writer.writeNext(output.toArray(new String[]{}));
+			}
+		}
+	}
+	
+	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study) {
+
+		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
+
+		List<Question> egoIdQuestions = 
+			Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO_ID);
+		List<Question> alterPairQuestions = 
+			Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER_PAIR);
+		
+		Map<Long,String> optionIdToValue = Maps.newTreeMap();
+		List<Question> allQuestions = Lists.newArrayList();
+		allQuestions.addAll(egoIdQuestions);
+		allQuestions.addAll(alterPairQuestions);
+		for(Question question : allQuestions) {
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) || 
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+			{
+				for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
+					optionIdToValue.put(option.getId(), option.getValue());
+				}
+			}
+		}
+
+		List<String> header = Lists.newArrayList();
+		header.add("Interview number");
+		for(Question question : egoIdQuestions) {
+			header.add(question.getTitle());
+		}
+		header.add("Alter 1 number");
+		header.add("Alter 1 name");
+		header.add("Alter 2 number");
+		header.add("Alter 2 name");
+		for(Question question : alterPairQuestions) {
+			header.add(question.getTitle());
+		}
+		writer.writeNext(header.toArray(new String[]{}));
+		
+		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
+			Interview interview = interviews.get(interviewIndex-1);
+			EvaluationContext context = Expressions.getContext(session, interview);
+			List<Alter> alters = Alters.getForInterview(interview.getId());
+			for(Integer alter1Index = 1; alter1Index < alters.size()+1; alter1Index++) {
+				Alter alter1 = alters.get(alter1Index-1);
+				for(Integer alter2Index = alter1Index+1; alter2Index < alters.size()+1; alter2Index++) {
+					Alter alter2 = alters.get(alter2Index-1);
+					List<String> output = Lists.newArrayList();
+					output.add(interviewIndex.toString());
+					for(Question question : egoIdQuestions) {
+						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+					}
+					output.add(alter1Index.toString());
+					output.add(alter1.getName());
+					output.add(alter2Index.toString());
+					output.add(alter2.getName());
+					for(Question question : alterPairQuestions) {
+						output.add(showAnswer(optionIdToValue,question,
+								context.qidA1idA2idToAlterPairAnswer.get(
+										new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()))));
+					}
+					writer.writeNext(output.toArray(new String[]{}));
+				}
+			}
+		}
+	}
+
 	public static String getRawDataCSVForStudy(final Study study) {
 		return new DB.Action<String>() {
 			public String get() {
@@ -176,124 +308,59 @@ public class Analysis {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
-			List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
-
-			List<Question> egoIdQuestions = 
-				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO_ID);
-			List<Question> egoQuestions = 
-				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.EGO);
-			List<Question> alterQuestions = 
-				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER);
-			List<Question> alterPairQuestions = 
-				Questions.getQuestionsForStudy(session, study.getId(), Question.QuestionType.ALTER_PAIR);
 			
-			// TODO: collection of options so I don't have to re-fetch for each interview
-			// Passing a list of question options to showAnswer would make this code much faster.
-			Map<Long,String> optionIdToValue = Maps.newTreeMap();
-			List<Question> allQuestions = Lists.newArrayList();
-			allQuestions.addAll(egoIdQuestions);
-			allQuestions.addAll(egoQuestions);
-			allQuestions.addAll(alterQuestions);
-			allQuestions.addAll(alterPairQuestions);
-			for(Question question : allQuestions) {
-				if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) || 
-						question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
-				{
-					for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
-						optionIdToValue.put(option.getId(), option.getValue());
-					}
-				}
-			}
-			
-			List<String> header = Lists.newArrayList();
-			header.add("Interview number");
-			for(Question question : egoIdQuestions) {
-				header.add(question.getTitle());
-			}
-			for(Question question : egoQuestions) {
-				header.add(question.getTitle());
-			}
-			header.add("Alter number");
-			header.add("Alter name");
-			for(Question question : alterQuestions) {
-				header.add(question.getTitle());
-			}
-			writer.writeNext(header.toArray(new String[]{}));
-			
-			for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
-				Interview interview = interviews.get(interviewIndex-1);
-				EvaluationContext context = Expressions.getContext(session, interview);
-				List<Alter> alters = Alters.getForInterview(interview.getId());
-				for(Integer alterIndex = 1; alterIndex < alters.size()+1; alterIndex++) {
-					Alter alter = alters.get(alterIndex-1);
-					List<String> output = Lists.newArrayList();
-					output.add(interviewIndex.toString());
-					for(Question question : egoIdQuestions) {
-						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
-					}
-					for(Question question : egoQuestions) {
-						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
-					}
-					output.add(alterIndex.toString());
-					output.add(alter.getName());
-					for(Question question : alterQuestions) {
-						output.add(showAnswer(optionIdToValue,question,
-								context.qidAidToAlterAnswer.get(
-										new PairUni<Long>(question.getId(),alter.getId()))));
-					}
-					writer.writeNext(output.toArray(new String[]{}));
-				}
-			}
-			
+			writeEgoAndAlterDataForStudy(writer, session, study);
 			writer.writeNext(new String[]{}); // blank line between tables
-
-			
-
-			header = Lists.newArrayList();
-			header.add("Interview number");
-			for(Question question : egoIdQuestions) {
-				header.add(question.getTitle());
-			}
-			header.add("Alter 1 number");
-			header.add("Alter 1 name");
-			header.add("Alter 2 number");
-			header.add("Alter 2 name");
-			for(Question question : alterPairQuestions) {
-				header.add(question.getTitle());
-			}
-			writer.writeNext(header.toArray(new String[]{}));
-			
-			for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
-				Interview interview = interviews.get(interviewIndex-1);
-				EvaluationContext context = Expressions.getContext(session, interview);
-				List<Alter> alters = Alters.getForInterview(interview.getId());
-				for(Integer alter1Index = 1; alter1Index < alters.size()+1; alter1Index++) {
-					Alter alter1 = alters.get(alter1Index-1);
-					for(Integer alter2Index = alter1Index+1; alter2Index < alters.size()+1; alter2Index++) {
-						Alter alter2 = alters.get(alter2Index-1);
-						List<String> output = Lists.newArrayList();
-						output.add(interviewIndex.toString());
-						for(Question question : egoIdQuestions) {
-							output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
-						}
-						output.add(alter1Index.toString());
-						output.add(alter1.getName());
-						output.add(alter2Index.toString());
-						output.add(alter2.getName());
-						for(Question question : alterPairQuestions) {
-							output.add(showAnswer(optionIdToValue,question,
-									context.qidA1idA2idToAlterPairAnswer.get(
-											new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()))));
-						}
-						writer.writeNext(output.toArray(new String[]{}));
-					}
-				}
-			}
+			writeAlterPairDataForStudy(writer, session, study);
 			
 			writer.close();
 			return stringWriter.toString();
 		} catch(Exception ex) {
 			throw new RuntimeException("Unable to output raw data csv for study "+study.getName(),ex);
+		}
+	}
+	
+	public static String getEgoAndAlterCSVForStudy(final Study study) {
+		return new DB.Action<String>() {
+			public String get() {
+				return getEgoAndAlterCSVForStudy(session, study);
+			}
+		}.execute();
+	}
+	
+	public static String getEgoAndAlterCSVForStudy(Session session, Study study) {
+		try {
+			StringWriter stringWriter = new StringWriter();
+			CSVWriter writer = new CSVWriter(stringWriter);
+			
+			writeEgoAndAlterDataForStudy(writer, session, study);
+			
+			writer.close();
+			return stringWriter.toString();
+		} catch(Exception ex) {
+			throw new RuntimeException("Unable to output ego and alter csv for study "+study.getName(),ex);
+		}
+	}
+
+	public static String getAlterPairCSVForStudy(final Study study) {
+		return new DB.Action<String>() {
+			public String get() {
+				return getAlterPairCSVForStudy(session, study);
+			}
+		}.execute();
+	}
+	
+	public static String getAlterPairCSVForStudy(Session session, Study study) {
+		try {
+			StringWriter stringWriter = new StringWriter();
+			CSVWriter writer = new CSVWriter(stringWriter);
+			
+			writeAlterPairDataForStudy(writer, session, study);
+			
+			writer.close();
+			return stringWriter.toString();
+		} catch(Exception ex) {
+			throw new RuntimeException("Unable to output alter pair csv for study "+study.getName(),ex);
 		}
 	}
 	

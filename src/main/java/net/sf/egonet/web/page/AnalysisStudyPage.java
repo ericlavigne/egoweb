@@ -72,20 +72,29 @@ public class AnalysisStudyPage extends EgonetPage {
 		add(interviewImportForm);
 		
 		Form analysisForm = new Form("analysisForm");
-		
-		analysisForm.add(new Button("csvExport") {
-			public void onSubmit() {
-				downloadFile(
-						getStudy().getName()+"-respondent-data.csv",
-						"text/plain",
-						Analysis.getRawDataCSVForStudy(getStudy()));
-			}
-		});
-		
+
 		Long adjacencyExpressionId = getStudy().getAdjacencyExpressionId();
 		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
 			new Model(Expressions.get(adjacencyExpressionId));
 		analysisForm.add(new DropDownChoice("adjacency",adjacencyReason,Expressions.forStudy(getStudy().getId())));
+		
+		analysisForm.add(new Button("csvAlterExport") {
+			public void onSubmit() {
+				downloadFile(
+						getStudy().getName()+"-alter-data.csv",
+						"text/plain",
+						Analysis.getEgoAndAlterCSVForStudy(getStudy()));
+			}
+		});
+		
+		analysisForm.add(new Button("csvAlterPairExport") {
+			public void onSubmit() {
+				downloadFile(
+						getStudy().getName()+"-alter-pair-data.csv",
+						"text/plain",
+						Analysis.getAlterPairCSVForStudy(getStudy()));
+			}
+		});
 		
 		analysisForm.add(new Button("statisticsButton") {
 			public void onSubmit() {
@@ -111,7 +120,6 @@ public class AnalysisStudyPage extends EgonetPage {
 				});
 				item.add(new Button("interviewVisualize") {
 					public void onSubmit() {
-						// TODO: Should change connection reason according to dropdown (select id="adjacency" in html).
 						// TODO: Would be better as embedded image with size/color/adjacency controls. See p233 of Wicket in Action.
 						
 						Expression connectionReason = (Expression) adjacencyReason.getObject();

@@ -36,11 +36,6 @@
 			<input type="submit" value="Export all interviews" />
 		</p>
 	
-		<p>
-			<input wicket:id="csvExport" type="submit" 
-				value="Export interviews in CSV format (cannot re-import)" />
-		</p>
-	
 		<hr />
 	
 		<p>You can temporarily change adjacency settings for analysis.</p>
@@ -48,6 +43,18 @@
 		<p>
 			<label for="adjacency">Alters are adjacent when:</label>
 			<select id="adjacency" wicket:id="adjacency" />
+		</p>
+	
+		<hr />
+	
+		<p>
+			<input wicket:id="csvAlterExport" type="submit" 
+				value="Export ego and alter data in CSV format (cannot re-import)" />
+		</p>
+	
+		<p>
+			<input wicket:id="csvAlterPairExport" type="submit" 
+				value="Export alter pair data in CSV format (cannot re-import)" />
 		</p>
 	
 		<hr />
