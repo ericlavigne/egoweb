@@ -14,6 +14,10 @@ public class Alter extends Entity
 		return name;
 	}
 	
+	public String toString() {
+		return getName();
+	}
+	
 	public Long getInterviewId() {
 		return interviewId;
 	}

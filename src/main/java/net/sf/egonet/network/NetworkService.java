@@ -18,12 +18,11 @@ import java.awt.image.BufferedImage;
 
 import org.apache.commons.collections15.Transformer;
 
-import net.sf.egonet.network.Network.Node;
-import net.sf.egonet.network.Network.Edge;
+import net.sf.functionalj.tuple.PairUni;
 
 public class NetworkService
 {
-    public static BufferedImage createImage(Network network)
+    public static <N> BufferedImage createImage(Network<N> network)
     {
         final int width  = 1000;
         final int height = 1000;
@@ -37,49 +36,49 @@ public class NetworkService
 
         //--------------------
 
-        Graph<Node,Edge> g = graphFromNetwork(network);
+        Graph<N,PairUni<N>> g = graphFromNetwork(network);
 
         Dimension d = new Dimension(width, height);
 
-        Layout<Node,Edge> layout = new FRLayout<Node,Edge>(g);
+        Layout<N,PairUni<N>> layout = new FRLayout<N,PairUni<N>>(g);
         layout.setSize(d);
 
-        VisualizationImageServer<Node,Edge> vv = new VisualizationImageServer<Node,Edge>(layout, d);
-        vv.getRenderContext().setVertexFillPaintTransformer(newVertexPainter(nodeColor));
-        vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(edgeStroke));
+        VisualizationImageServer<N,PairUni<N>> vv = new VisualizationImageServer<N,PairUni<N>>(layout, d);
+        vv.getRenderContext().setVertexFillPaintTransformer(newVertexPainter(network, nodeColor));
+        vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(network, edgeStroke));
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-        if (labelVertices) vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<Node>());
-        if (labelEdges)    vv.getRenderContext().setEdgeLabelTransformer(  new ToStringLabeller<Edge>());
+        if (labelVertices) vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<N>());
+        if (labelEdges)    vv.getRenderContext().setEdgeLabelTransformer(  new ToStringLabeller<PairUni<N>>());
 
         return (BufferedImage) vv.getImage(center, d);
     }
 
 	// ----------------------------------------
 
-    private static Transformer<Node,Paint> newVertexPainter(final Color c)
+    private static <N> Transformer<N,Paint> newVertexPainter(Network<N> network, final Color c)
     {
         return
-            new Transformer<Node,Paint>()
+            new Transformer<N,Paint>()
 		   	{
-                public Paint transform(Node n) { return c; }
+                public Paint transform(N n) { return c; }
             };
     }
 
-    private static Transformer<Edge,Stroke> newEdgeStrokeTransformer(final Stroke edgeStroke)
+    private static <N> Transformer<PairUni<N>,Stroke> newEdgeStrokeTransformer(Network<N> network, final Stroke edgeStroke)
     {
         return
-            new Transformer<Edge, Stroke>()
+            new Transformer<PairUni<N>, Stroke>()
 		   	{
-                public Stroke transform(Edge e) { return edgeStroke; }
+                public Stroke transform(PairUni<N> e) { return edgeStroke; }
             };
     }
 
-    private static Graph<Node,Edge> graphFromNetwork(Network network)
+    private static <N> Graph<N,PairUni<N>> graphFromNetwork(Network<N> network)
     {
-        Graph<Node,Edge> g = new UndirectedSparseGraph<Node,Edge>();
+        Graph<N,PairUni<N>> g = new UndirectedSparseGraph<N,PairUni<N>>();
 
-        for (Node n : network.getNodes()) g.addVertex(n);
-        for (Edge e : network.getEdges()) g.addEdge(e, e.getNode1(), e.getNode2());
+        for (N n : network.getNodes()) g.addVertex(n);
+        for (PairUni<N> e : network.getEdges()) g.addEdge(e, e.getFirst(), e.getSecond());
 
         return g;
     }

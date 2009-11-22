@@ -5,42 +5,30 @@ import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Set;
 
-public class Network
-{
-	private Set<Node> nodes;
-	private Set<Edge> edges;
+import net.sf.functionalj.tuple.PairUni;
 
-    public Network(Set<Node> nodes, Set<Edge> edges)
+public class Network<N>
+{
+	private Set<N> nodes;
+	private Set<PairUni<N>> edges;
+
+    public Network(Set<N> nodes, Set<PairUni<N>> edges)
     {
 		ensureEdgeNodesAreIn(nodes, edges);
 		this.nodes = nodes;
         this.edges = edges;
     }
 
-	private static void ensureEdgeNodesAreIn(Set<Node> nodes, Set<Edge> edges)
+	private void ensureEdgeNodesAreIn(Set<N> nodes, Set<PairUni<N>> edges)
 	{
 		// all edges should have nodes that are in nodes
-		for (Edge edge : edges)
+		for (PairUni<N> edge : edges)
 		{
-			Preconditions.checkArgument(nodes.contains(edge.getNode1()));
-			Preconditions.checkArgument(nodes.contains(edge.getNode2()));
+			Preconditions.checkArgument(nodes.contains(edge.getFirst()));
+			Preconditions.checkArgument(nodes.contains(edge.getSecond()));
 		}
 	}
 
-    public Set<Node> getNodes() { return Collections.unmodifiableSet(this.nodes); }
-    public Set<Edge> getEdges() { return Collections.unmodifiableSet(this.edges); }
-
-	// ----------------------------------------
-
-	public interface Node
-	{
-		String toString();
-	}
-
-	public interface Edge
-	{
-		Node getNode1();
-		Node getNode2();
-		String toString();
-	}
+    public Set<N> getNodes() { return Collections.unmodifiableSet(this.nodes); }
+    public Set<PairUni<N>> getEdges() { return Collections.unmodifiableSet(this.edges); }
 }

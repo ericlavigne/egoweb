@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +53,6 @@ public class Analysis {
 	public static BufferedImage getImageForInterview(Session session, Interview interview, Expression connection) {
 		return NetworkService.createImage(getNetworkForInterview(session,interview,connection));
 	}
-	
 
 	public static class ImageResourceStream implements IResourceStream {
 
@@ -90,78 +90,22 @@ public class Analysis {
 		}
 	}
 	
-	
-	public static Network getNetworkForInterview(Session session, Interview interview, Expression connection) {
+	public static Network<Alter> getNetworkForInterview(Session session, Interview interview, Expression connection) {
 		EvaluationContext context = Expressions.getContext(session, interview);
-		Set<AlterNode> alterNodes = Sets.newHashSet();
-		for(Alter alter : Alters.getForInterview(session, interview.getId())) {
-			alterNodes.add(new AlterNode(alter));
-		}
-		Set<Network.Edge> edges = Sets.newHashSet();
-		for(AlterNode node1 : alterNodes) {
-			for(AlterNode node2 : alterNodes) {
-				Alter alter1 = node1.getAlter(), alter2 = node2.getAlter();
-				ArrayList<Alter> alters = Lists.newArrayList(alter1,alter2);
-				if(alter1.getId() < alter2.getId() && Expressions.evaluate(connection, alters, context)) {
-					edges.add(new AlterEdge(node1,node2));
+		
+		Set<Alter> alters = new HashSet<Alter>(Alters.getForInterview(session, interview.getId()));
+		
+		Set<PairUni<Alter>> edges = Sets.newHashSet();
+		for(Alter alter1 : alters) {
+			for(Alter alter2 : alters) {
+				ArrayList<Alter> altersInPair = Lists.newArrayList(alter1,alter2);
+				if(alter1.getId() < alter2.getId() && Expressions.evaluate(connection, altersInPair, context)) {
+					edges.add(new PairUni<Alter>(alter1,alter2));
 				}
 			}
 		}
-		Set<Network.Node> nodes = Sets.newHashSet();
-		for(AlterNode node : alterNodes) {
-			nodes.add(node);
-		}
-		return new Network(nodes,edges);
-	}
-	
-	public static class AlterNode implements Network.Node {
-		private Alter alter;
-		public AlterNode(Alter alter) {
-			this.alter = alter;
-		}
-		public Alter getAlter() {
-			return alter;
-		}
-		public String toString() {
-			return alter.getName();
-		}
-		public boolean equals(Object object) {
-			return object instanceof AlterNode && 
-			((AlterNode) object).alter.getId().equals(alter.getId());
-		}
-		public int hashCode() {
-			return alter.getId().hashCode();
-		}
-	}
-	
-	public static class AlterEdge implements Network.Edge {
-
-		private AlterNode alter1, alter2;
 		
-		public AlterEdge(AlterNode alter1, AlterNode alter2) {
-			this.alter1 = alter1;
-			this.alter2 = alter2;
-		}
-		public AlterNode getNode1() {
-			return alter1;
-		}
-		public AlterNode getNode2() {
-			return alter2;
-		}
-		public String toString() {
-			return alter1.toString()+"-"+alter2.toString();
-		}
-		public boolean equals(Object object) {
-			if(object instanceof AlterEdge) {
-				AlterEdge edge = (AlterEdge) object;
-				return (alter1.equals(edge.getNode1()) && alter2.equals(edge.getNode2())) ||
-					(alter2.equals(edge.getNode2()) && alter1.equals(edge.getNode1()));
-			}
-			return false;
-		}
-		public int hashCode() {
-			return alter1.hashCode()/2 + alter2.hashCode()/2;
-		}
+		return new Network<Alter>(alters,edges);
 	}
 	
 	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study) {
