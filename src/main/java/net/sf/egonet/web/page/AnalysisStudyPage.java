@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.wicket.RequestCycle;
@@ -82,7 +83,7 @@ public class AnalysisStudyPage extends EgonetPage {
 			public void onSubmit() {
 				downloadFile(
 						getStudy().getName()+"-alter-data.csv",
-						"text/plain",
+						"text/csv",
 						Analysis.getEgoAndAlterCSVForStudy(getStudy()));
 			}
 		});
@@ -91,7 +92,7 @@ public class AnalysisStudyPage extends EgonetPage {
 			public void onSubmit() {
 				downloadFile(
 						getStudy().getName()+"-alter-pair-data.csv",
-						"text/plain",
+						"text/csv",
 						Analysis.getAlterPairCSVForStudy(getStudy()));
 			}
 		});
@@ -100,7 +101,7 @@ public class AnalysisStudyPage extends EgonetPage {
 			public void onSubmit() {
 				downloadFile(
 						getStudy().getName()+"-statistics.csv",
-						"text/plain",
+						"text/csv",
 						"statistics csv for all interviews in study "+getStudy().getName());
 			}
 		});
@@ -144,9 +145,10 @@ public class AnalysisStudyPage extends EgonetPage {
 	
 	private void downloadFile(String name, String mimeType, CharSequence contents) {
 		// See example on p231 of Wicket in Action
+		StringResourceStream stream = new StringResourceStream(contents, mimeType);
+		stream.setCharset(Charset.forName("UTF-8")); // Without this, Chinese characters are converted to question marks.
 		ResourceStreamRequestTarget target =
-			new ResourceStreamRequestTarget(
-					new StringResourceStream(contents, mimeType));
+			new ResourceStreamRequestTarget(stream);
 		target.setFileName(name);
 		RequestCycle.get().setRequestTarget(target);
 	}
