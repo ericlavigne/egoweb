@@ -151,7 +151,9 @@ public class Analysis {
 		for(Question question : alterQuestions) {
 			header.add(question.getTitle());
 		}
+		header.add("Degree");
 		header.add("Closeness");
+		header.add("Betweenness");
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
@@ -178,7 +180,9 @@ public class Analysis {
 							context.qidAidToAlterAnswer.get(
 									new PairUni<Long>(question.getId(),alter.getId()))));
 				}
+				output.add(statistics.degree(alter)+"");
 				output.add(statistics.closeness(alter)+"");
+				output.add(statistics.betweenness(alter)+"");
 				writer.writeNext(output.toArray(new String[]{}));
 			}
 		}
