@@ -84,7 +84,7 @@ public class AnalysisStudyPage extends EgonetPage {
 				downloadFile(
 						getStudy().getName()+"-alter-data.csv",
 						"text/csv",
-						Analysis.getEgoAndAlterCSVForStudy(getStudy()));
+						Analysis.getEgoAndAlterCSVForStudy(getStudy(),getConnectionReason()));
 			}
 		});
 		
@@ -93,7 +93,7 @@ public class AnalysisStudyPage extends EgonetPage {
 				downloadFile(
 						getStudy().getName()+"-alter-pair-data.csv",
 						"text/csv",
-						Analysis.getAlterPairCSVForStudy(getStudy()));
+						Analysis.getAlterPairCSVForStudy(getStudy(),getConnectionReason()));
 			}
 		});
 		
@@ -123,16 +123,17 @@ public class AnalysisStudyPage extends EgonetPage {
 					public void onSubmit() {
 						// TODO: Would be better as embedded image with size/color/adjacency controls. See p233 of Wicket in Action.
 						
-						Expression connectionReason = (Expression) adjacencyReason.getObject();
-						if(connectionReason != null) {
-							downloadImage(interview.getId()+".jpg", 
-									Analysis.getImageForInterview(interview, connectionReason));
-						}
+						downloadImage(interview.getId()+".jpg", 
+								Analysis.getImageForInterview(interview, getConnectionReason()));
 					}
 				});
 			}});
 		
 		add(analysisForm);
+	}
+	
+	private Expression getConnectionReason() {
+		return (Expression) adjacencyReason.getObject();
 	}
 	
 	private void downloadImage(String name, BufferedImage image) {

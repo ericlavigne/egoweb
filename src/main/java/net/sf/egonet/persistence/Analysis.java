@@ -36,6 +36,7 @@ import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.network.Network;
 import net.sf.egonet.network.NetworkService;
+import net.sf.egonet.network.Statistics;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.TripleUni;
@@ -99,7 +100,9 @@ public class Analysis {
 		for(Alter alter1 : alters) {
 			for(Alter alter2 : alters) {
 				ArrayList<Alter> altersInPair = Lists.newArrayList(alter1,alter2);
-				if(alter1.getId() < alter2.getId() && Expressions.evaluate(connection, altersInPair, context)) {
+				if(alter1.getId() < alter2.getId() && 
+						(connection == null || Expressions.evaluate(connection, altersInPair, context))) 
+				{
 					edges.add(new PairUni<Alter>(alter1,alter2));
 				}
 			}
@@ -108,7 +111,7 @@ public class Analysis {
 		return new Network<Alter>(alters,edges);
 	}
 	
-	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study) {
+	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study, Expression connection) {
 
 		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
 
@@ -147,10 +150,13 @@ public class Analysis {
 		for(Question question : alterQuestions) {
 			header.add(question.getTitle());
 		}
+		header.add("Closeness");
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
 			Interview interview = interviews.get(interviewIndex-1);
+			Network<Alter> network = getNetworkForInterview(session,interview,connection);
+			Statistics<Alter> statistics = new Statistics<Alter>(network);
 			EvaluationContext context = Expressions.getContext(session, interview);
 			List<Alter> alters = Alters.getForInterview(interview.getId());
 			for(Integer alterIndex = 1; alterIndex < alters.size()+1; alterIndex++) {
@@ -170,13 +176,14 @@ public class Analysis {
 							context.qidAidToAlterAnswer.get(
 									new PairUni<Long>(question.getId(),alter.getId()))));
 				}
+				output.add(statistics.closeness(alter)+"");
 				writer.writeNext(output.toArray(new String[]{}));
 			}
 		}
 	}
 	
-	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study) {
-
+	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study, Expression connection) 
+	{
 		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
 
 		List<Question> egoIdQuestions = 
@@ -210,11 +217,13 @@ public class Analysis {
 		for(Question question : alterPairQuestions) {
 			header.add(question.getTitle());
 		}
+		header.add("Distance");
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
 			Interview interview = interviews.get(interviewIndex-1);
 			EvaluationContext context = Expressions.getContext(session, interview);
+			Network<Alter> network = getNetworkForInterview(session,interview,connection);
 			List<Alter> alters = Alters.getForInterview(interview.getId());
 			for(Integer alter1Index = 1; alter1Index < alters.size()+1; alter1Index++) {
 				Alter alter1 = alters.get(alter1Index-1);
@@ -234,28 +243,30 @@ public class Analysis {
 								context.qidA1idA2idToAlterPairAnswer.get(
 										new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()))));
 					}
+					Integer distance = network.distance(alter1, alter2);
+					output.add(distance == null ? "Inf" : distance+"");
 					writer.writeNext(output.toArray(new String[]{}));
 				}
 			}
 		}
 	}
 
-	public static String getRawDataCSVForStudy(final Study study) {
+	public static String getRawDataCSVForStudy(final Study study, final Expression connection) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getRawDataCSVForStudy(session, study);
+				return getRawDataCSVForStudy(session, study, connection);
 			}
 		}.execute();
 	}
 	
-	public static String getRawDataCSVForStudy(Session session, Study study) {
+	public static String getRawDataCSVForStudy(Session session, Study study, Expression connection) {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeEgoAndAlterDataForStudy(writer, session, study);
+			writeEgoAndAlterDataForStudy(writer, session, study, connection);
 			writer.writeNext(new String[]{}); // blank line between tables
-			writeAlterPairDataForStudy(writer, session, study);
+			writeAlterPairDataForStudy(writer, session, study, connection);
 			
 			writer.close();
 			return stringWriter.toString();
@@ -264,20 +275,20 @@ public class Analysis {
 		}
 	}
 	
-	public static String getEgoAndAlterCSVForStudy(final Study study) {
+	public static String getEgoAndAlterCSVForStudy(final Study study, final Expression connection) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getEgoAndAlterCSVForStudy(session, study);
+				return getEgoAndAlterCSVForStudy(session, study, connection);
 			}
 		}.execute();
 	}
 	
-	public static String getEgoAndAlterCSVForStudy(Session session, Study study) {
+	public static String getEgoAndAlterCSVForStudy(Session session, Study study, Expression connection) {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeEgoAndAlterDataForStudy(writer, session, study);
+			writeEgoAndAlterDataForStudy(writer, session, study, connection);
 			
 			writer.close();
 			return stringWriter.toString();
@@ -286,20 +297,20 @@ public class Analysis {
 		}
 	}
 
-	public static String getAlterPairCSVForStudy(final Study study) {
+	public static String getAlterPairCSVForStudy(final Study study, final Expression connection) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getAlterPairCSVForStudy(session, study);
+				return getAlterPairCSVForStudy(session, study, connection);
 			}
 		}.execute();
 	}
 	
-	public static String getAlterPairCSVForStudy(Session session, Study study) {
+	public static String getAlterPairCSVForStudy(Session session, Study study, Expression connection) {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeAlterPairDataForStudy(writer, session, study);
+			writeAlterPairDataForStudy(writer, session, study, connection);
 			
 			writer.close();
 			return stringWriter.toString();

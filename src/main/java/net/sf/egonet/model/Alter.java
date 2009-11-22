@@ -18,6 +18,14 @@ public class Alter extends Entity
 		return getName();
 	}
 	
+	public boolean equals(Object obj) {
+		if(! (obj instanceof Alter)) {
+			return false;
+		}
+		Alter alter = (Alter) obj;
+		return (getName()+"").equals(alter.getName()+"") && super.equals(alter);
+	}
+	
 	public Long getInterviewId() {
 		return interviewId;
 	}

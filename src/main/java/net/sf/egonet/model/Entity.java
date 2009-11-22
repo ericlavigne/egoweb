@@ -37,7 +37,14 @@ public abstract class Entity implements java.io.Serializable
 
 	public boolean equals(Object obj)
 	{
-		return obj instanceof Entity && getRandomKey().equals(((Entity) obj).getRandomKey());
+		if(! (obj instanceof Entity)) {
+			return false;
+		}
+		Entity entity = (Entity) obj;
+		if(! getRandomKey().equals(entity.getRandomKey())) {
+			return false;
+		}
+		return getId() == null || entity.getId() == null || getId().equals(entity.getId());
 	}
 
 	public int hashCode()
