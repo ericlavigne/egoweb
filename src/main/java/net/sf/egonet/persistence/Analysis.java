@@ -145,6 +145,7 @@ public class Analysis {
 		for(Question question : egoQuestions) {
 			header.add(question.getTitle());
 		}
+		header.add("Density");
 		header.add("Alter number");
 		header.add("Alter name");
 		for(Question question : alterQuestions) {
@@ -169,6 +170,7 @@ public class Analysis {
 				for(Question question : egoQuestions) {
 					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
 				}
+				output.add(statistics.density()+"");
 				output.add(alterIndex.toString());
 				output.add(alter.getName());
 				for(Question question : alterQuestions) {
