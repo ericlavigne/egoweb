@@ -121,4 +121,67 @@ public class Statistics<N> {
 		}
 		return paths;
 	}
+	
+	/*
+	 * The eigenvector centrality of a node is proportional to the sum
+	 * of the eigenvector centralities of its neighbors. I compute
+	 * the eigenvector centrality iteratively, using closeness as an
+	 * initial guess.
+	 */
+	public Double eigenvectorCentrality(N n) {
+		if(eigenvectorCentralities == null) {
+			Integer tries = (network.getNodes().size()+5)*(network.getNodes().size()+5);
+			Map<N,Double> guess = initialEigenvectorGuess();
+			while(true) {
+				Map<N,Double> nextGuess = nextEigenvectorGuess(guess);
+				if(change(guess,nextGuess) < tinyNum || tries < 0) {
+					eigenvectorCentralities = nextGuess;
+					return eigenvectorCentrality(n);
+				}
+				guess = nextGuess;
+				tries--;
+			}
+		}
+		return eigenvectorCentralities.get(n) < Math.sqrt(tinyNum) ? 0.0 : eigenvectorCentralities.get(n);
+	}
+	private Map<N,Double> eigenvectorCentralities = null;
+	private Map<N,Double> nextEigenvectorGuess(Map<N,Double> guess) {
+		Map<N,Double> results = Maps.newHashMap();
+		for(N node : guess.keySet()) {
+			Double result = 0.0;
+			for(N neighbor : network.connections(node)) {
+				result += guess.get(neighbor);
+			}
+			results.put(node, result);
+		}
+		return normalize(results);
+	}
+	private Double change(Map<N,Double> vec1, Map<N,Double> vec2) {
+		Double total = 0.0;
+		for(N node : vec1.keySet()) {
+			total += Math.abs(vec1.get(node) - vec2.get(node));
+		}
+		return total;
+	}
+	private Double tinyNum = 0.0000001;
+	private Map<N,Double> normalize(Map<N,Double> vec) {
+		Double magnitudeSquared = 0.0;
+		for(Double component : vec.values()) {
+			magnitudeSquared += component * component;
+		}
+		Double magnitude = Math.sqrt(magnitudeSquared);
+		Double factor = 1 / (magnitude < tinyNum ? tinyNum : magnitude);
+		Map<N,Double> normalized = Maps.newHashMap();
+		for(N node : vec.keySet()) {
+			normalized.put(node, vec.get(node)*factor);
+		}
+		return normalized;
+	}
+	private Map<N,Double> initialEigenvectorGuess() {
+		Map<N,Double> guess = Maps.newHashMap();
+		for(N node : network.getNodes()) {
+			guess.put(node, closeness(node));
+		}
+		return guess;
+	}
 }

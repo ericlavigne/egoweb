@@ -154,6 +154,7 @@ public class Analysis {
 		header.add("Degree");
 		header.add("Closeness");
 		header.add("Betweenness");
+		header.add("Eigenvector");
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
@@ -183,6 +184,7 @@ public class Analysis {
 				output.add(statistics.degree(alter)+"");
 				output.add(statistics.closeness(alter)+"");
 				output.add(statistics.betweenness(alter)+"");
+				output.add(statistics.eigenvectorCentrality(alter)+"");
 				writer.writeNext(output.toArray(new String[]{}));
 			}
 		}
