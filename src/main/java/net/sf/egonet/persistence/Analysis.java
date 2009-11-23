@@ -146,15 +146,21 @@ public class Analysis {
 			header.add(question.getTitle());
 		}
 		header.add("Density");
+		
+		header.add("Max betweenness name");
+		header.add("Max betweenness value");
+		header.add("Betweenness mean");
+		header.add("Betweenness centralization");
+		
 		header.add("Alter number");
 		header.add("Alter name");
 		for(Question question : alterQuestions) {
 			header.add(question.getTitle());
 		}
-		header.add("Degree");
-		header.add("Closeness");
-		header.add("Betweenness");
-		header.add("Eigenvector");
+		header.add("Degree centrality");
+		header.add("Closeness centrality");
+		header.add("Betweenness centrality");
+		header.add("Eigenvector centrality");
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
@@ -174,6 +180,12 @@ public class Analysis {
 					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
 				}
 				output.add(statistics.density()+"");
+				
+				output.add(statistics.maximumBetweennessCentralityNode()+"");
+				output.add(statistics.maximumBetweennessCentrality()+"");
+				output.add(statistics.betweennessCentralityMean()+"");
+				output.add(statistics.betweennessCentralization()+"");
+				
 				output.add(alterIndex.toString());
 				output.add(alter.getName());
 				for(Question question : alterQuestions) {
@@ -183,7 +195,7 @@ public class Analysis {
 				}
 				output.add(statistics.degree(alter)+"");
 				output.add(statistics.closeness(alter)+"");
-				output.add(statistics.betweenness(alter)+"");
+				output.add(statistics.betweennessCentrality(alter)+"");
 				output.add(statistics.eigenvectorCentrality(alter)+"");
 				writer.writeNext(output.toArray(new String[]{}));
 			}

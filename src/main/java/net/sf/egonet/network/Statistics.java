@@ -70,13 +70,49 @@ public class Statistics<N> {
 	}
 	private Map<N,Double> nodeToCloseness = Maps.newHashMap();
 	
+	public Double betweennessCentralization() {
+		Double maximumCentrality = maximumBetweennessCentrality();
+		Double totalCentralityDifference = 0.0;
+		Set<N> nodes = network.getNodes();
+		for(N node : nodes) {
+			totalCentralityDifference += maximumCentrality - betweennessCentrality(node);
+		}
+		Integer n = nodes.size();
+		return n < 3 ? 0.0 : totalCentralityDifference * 2 / (n-1) / (n-1) / (n-2);
+	}
+	
+	public Double maximumBetweennessCentrality() {
+		N node = maximumBetweennessCentralityNode();
+		return node == null ? 0.0 : betweennessCentrality(node);
+	}
+	
+	public N maximumBetweennessCentralityNode() {
+		Double maxValue = null;
+		N maxNode = null;
+		for(N node : network.getNodes()) {
+			if(maxValue == null || betweennessCentrality(node) > maxValue) {
+				maxValue = betweennessCentrality(node);
+				maxNode = node;
+			}
+		}
+		return maxNode;
+	}
+	
+	public Double betweennessCentralityMean() {
+		Double total = 0.0;
+		for(N node : network.getNodes()) {
+			total += betweennessCentrality(node);
+		}
+		return network.getNodes().size() < 1 ? 0.0 : total / network.getNodes().size();
+	}
+	
 	/*
 	 * Sum over pairs of nodes a,b (such that none of a,b,n are equal)
 	 * of the number of shortest paths from a to b that pass through
 	 * n divided by the total number of shortest paths from a to b.
 	 * Disconnected networks are addressed by choosing that 0/0 => 0.
 	 */
-	public Double betweenness(N node) {
+	public Double betweennessCentrality(N node) {
 		if(! nodeToBetweenness.containsKey(node)) {
 			List<N> nodes = Lists.newArrayList(network.getNodes());
 			Double result = 0.0;
@@ -89,7 +125,7 @@ public class Statistics<N> {
 					}
 				}
 			}
-			nodeToBetweenness.put(node, result);
+			nodeToBetweenness.put(node, nodes.size() < 3 ? 0.0 : result * 2 / (nodes.size()-1) / (nodes.size()-2));
 		}
 		return nodeToBetweenness.get(node);
 	}
