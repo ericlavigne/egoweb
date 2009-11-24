@@ -193,8 +193,8 @@ public class Analysis {
 							context.qidAidToAlterAnswer.get(
 									new PairUni<Long>(question.getId(),alter.getId()))));
 				}
-				output.add(statistics.degree(alter)+"");
-				output.add(statistics.closeness(alter)+"");
+				output.add(statistics.degreeCentrality(alter)+"");
+				output.add(statistics.closenessCentrality(alter)+"");
 				output.add(statistics.betweennessCentrality(alter)+"");
 				output.add(statistics.eigenvectorCentrality(alter)+"");
 				writer.writeNext(output.toArray(new String[]{}));

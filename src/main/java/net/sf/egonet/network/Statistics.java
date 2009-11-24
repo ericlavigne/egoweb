@@ -12,7 +12,7 @@ public class Statistics<N> {
 	public Statistics(Network<N> network) {
 		this.network = network;
 	}
-	
+
 	/*
 	 * Density is the number of connections in the actual
 	 * network divided by the number of possible connections
@@ -33,13 +33,37 @@ public class Statistics<N> {
 	private Double density;
 	
 	/*
+	 * For each of these properties x, define two methods:
+	 * 1) Double xCentrality(N node)
+	 * 2) Double xCentralityMaxDifference(Integer nodes)
+	 * 
+	 * Where xMaxCentralityDifference gives the maximum possible
+	 * sum of centrality differences for that many nodes. That
+	 * maximum is typically realized for a star network, in which
+	 * one node connects to all others but none of the others connect
+	 * to each other.
+	 */
+	public String[] centralityProperties = {"degree","closeness","betweenness","eigenvector"};
+	
+	// Implement the following with reflection. See deprecated *betweenness* methods for examples.
+	// TODO: Double centrality(String property, N node)
+	// TODO: Double mean(String property)
+	// TODO: Double maxValue(String property)
+	// TODO: N maxNode(String property)
+	// TODO: Double centralization(String property)
+	// TODO: String capitalizeFirstLetter(String property)
+	
+	/*
 	 * Degree centrality is the number of direct connections
 	 * to a node divided by the number of possible direct
 	 * connections to a node in a network of that size.
 	 */
-	public Double degree(N node) {
+	public Double degreeCentrality(N node) {
 		Integer nodes = network.getNodes().size();
 		return nodes < 2 ? 0.0 : network.connections(node).size() * 1.0 / (nodes-1);
+	}
+	public Double degreeCentralityMaxDifference(Integer nodes) {
+		return nodes < 3 ? null : (nodes-1) * (1 - 1.0/(nodes-1));
 	}
 	
 	/*
@@ -48,7 +72,7 @@ public class Statistics<N> {
 	 * networks, it is the closeness within a component multiplied
 	 * by the portion of other nodes that are in that component.
 	 */
-	public Double closeness(N node) {
+	public Double closenessCentrality(N node) {
 		if(! nodeToCloseness.containsKey(node)) {
 			Integer reachable = 0;
 			Integer totalDistance = 0;
@@ -69,7 +93,11 @@ public class Statistics<N> {
 		return nodeToCloseness.get(node);
 	}
 	private Map<N,Double> nodeToCloseness = Maps.newHashMap();
+	public Double closenessCentralityMaxDifference(Integer nodes) {
+		return nodes < 3 ? null : (nodes-2) * (nodes-1) / (2*nodes - 3.0);
+	}
 	
+	@Deprecated
 	public Double betweennessCentralization() {
 		Double maximumCentrality = maximumBetweennessCentrality();
 		Double totalCentralityDifference = 0.0;
@@ -80,12 +108,12 @@ public class Statistics<N> {
 		Integer n = nodes.size();
 		return n < 3 ? 0.0 : totalCentralityDifference * 2 / (n-1) / (n-1) / (n-2);
 	}
-	
+	@Deprecated
 	public Double maximumBetweennessCentrality() {
 		N node = maximumBetweennessCentralityNode();
 		return node == null ? 0.0 : betweennessCentrality(node);
 	}
-	
+	@Deprecated
 	public N maximumBetweennessCentralityNode() {
 		Double maxValue = null;
 		N maxNode = null;
@@ -97,7 +125,7 @@ public class Statistics<N> {
 		}
 		return maxNode;
 	}
-	
+	@Deprecated
 	public Double betweennessCentralityMean() {
 		Double total = 0.0;
 		for(N node : network.getNodes()) {
@@ -130,6 +158,11 @@ public class Statistics<N> {
 		return nodeToBetweenness.get(node);
 	}
 	private Map<N,Double> nodeToBetweenness = Maps.newHashMap();
+	
+	public Double betweennessCentralityMaxDifference(Integer nodes) {
+		return nodes < 3 ? null : (nodes-1)*(nodes-1)*(nodes-2) / 2.0;
+	}
+	
 	private Double portionOfShortestPathsBetweenAandBthroughN(N a, N b, N n) {
 		Integer totalDistance = network.distance(a, b);
 		Integer distance1 = network.distance(a, n);
@@ -158,6 +191,7 @@ public class Statistics<N> {
 		return paths;
 	}
 	
+	
 	/*
 	 * The eigenvector centrality of a node is proportional to the sum
 	 * of the eigenvector centralities of its neighbors. I compute
@@ -181,6 +215,11 @@ public class Statistics<N> {
 		return eigenvectorCentralities.get(n) < Math.sqrt(tinyNum) ? 0.0 : eigenvectorCentralities.get(n);
 	}
 	private Map<N,Double> eigenvectorCentralities = null;
+	
+	public Double eigenvectorCentralityMaxDifference(Integer nodes) {
+		return nodes < 3 ? null : (nodes-1)*Math.sqrt(0.5) - Math.sqrt(0.5*(nodes-1));
+	}
+	
 	private Map<N,Double> nextEigenvectorGuess(Map<N,Double> guess) {
 		Map<N,Double> results = Maps.newHashMap();
 		for(N node : guess.keySet()) {
@@ -216,7 +255,7 @@ public class Statistics<N> {
 	private Map<N,Double> initialEigenvectorGuess() {
 		Map<N,Double> guess = Maps.newHashMap();
 		for(N node : network.getNodes()) {
-			guess.put(node, closeness(node));
+			guess.put(node, closenessCentrality(node));
 		}
 		return guess;
 	}
