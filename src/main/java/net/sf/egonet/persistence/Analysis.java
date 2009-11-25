@@ -146,9 +146,11 @@ public class Analysis {
 			header.add(question.getTitle());
 		}
 		header.add("Density");
-		
-		header.add("Max betweenness name");
-		header.add("Max betweenness value");
+
+		for(String centralityProperty : Statistics.centralityProperties) {
+			header.add("Max "+centralityProperty+" name");
+			header.add("Max "+centralityProperty+" value");
+		}
 		for(String centralityProperty : Statistics.centralityProperties) {
 			header.add(Statistics.capitalizeFirstLetter(centralityProperty)+" mean");
 		}
@@ -182,8 +184,10 @@ public class Analysis {
 				}
 				output.add(statistics.density()+"");
 				
-				output.add(statistics.maximumBetweennessCentralityNode()+"");
-				output.add(statistics.maximumBetweennessCentrality()+"");
+				for(String centralityProperty : Statistics.centralityProperties) {
+					output.add(statistics.maxCentralityNode(centralityProperty)+"");
+					output.add(statistics.maxCentrality(centralityProperty)+"");
+				}
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centralityMean(centralityProperty)+"");
 				}

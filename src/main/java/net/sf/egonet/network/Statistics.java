@@ -67,8 +67,23 @@ public class Statistics<N> {
 		return network.getNodes().size() < 1 ? 0.0 : total / network.getNodes().size();
 	}
 	
-	// TODO: Double maxValue(String property)
-	// TODO: N maxNode(String property)
+	public Double maxCentrality(String property) {
+		N node = maxCentralityNode(property);
+		return node == null ? 0.0 : centrality(property,node);
+	}
+	
+	public N maxCentralityNode(String property) {
+		Double maxValue = null;
+		N maxNode = null;
+		for(N node : network.getNodes()) {
+			if(maxValue == null || centrality(property,node) > maxValue) {
+				maxValue = centrality(property,node);
+				maxNode = node;
+			}
+		}
+		return maxNode;
+	}
+	
 	// TODO: Double centralization(String property)
 	
 	public static String capitalizeFirstLetter(String string) {
@@ -147,14 +162,6 @@ public class Statistics<N> {
 		}
 		return maxNode;
 	}
-	@Deprecated
-	public Double betweennessCentralityMean() {
-		Double total = 0.0;
-		for(N node : network.getNodes()) {
-			total += betweennessCentrality(node);
-		}
-		return network.getNodes().size() < 1 ? 0.0 : total / network.getNodes().size();
-	}
 	
 	/*
 	 * Sum over pairs of nodes a,b (such that none of a,b,n are equal)
@@ -212,7 +219,6 @@ public class Statistics<N> {
 		}
 		return paths;
 	}
-	
 	
 	/*
 	 * The eigenvector centrality of a node is proportional to the sum
