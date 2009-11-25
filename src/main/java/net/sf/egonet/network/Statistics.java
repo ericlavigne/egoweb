@@ -84,10 +84,29 @@ public class Statistics<N> {
 		return maxNode;
 	}
 	
-	// TODO: Double centralization(String property)
+	public Double centralization(String property) {
+		Double maximumCentrality = maxCentrality(property);
+		Double totalCentralityDifference = 0.0;
+		Set<N> nodes = network.getNodes();
+		for(N node : nodes) {
+			totalCentralityDifference += maximumCentrality - centrality(property,node);
+		}
+		Integer n = nodes.size();
+		return n < 3 ? 0.0 : 
+			totalCentralityDifference / centralityMaxDifference(property, n);
+	}
 	
-	public static String capitalizeFirstLetter(String string) {
-		return string.isEmpty() ? string : string.substring(0, 1).toUpperCase()+string.substring(1);
+	public static Double centralityMaxDifference(String property, Integer nodes) {
+
+		try {
+			Method centralityMethod = 
+				Statistics.class.getDeclaredMethod(
+						property+"CentralityMaxDifference", 
+						new Class[]{Integer.class});
+			return (Double) centralityMethod.invoke(null, nodes);
+		} catch (Exception ex) {
+			throw new RuntimeException("Unable to determine "+property+"CentralityMaxDifference for "+nodes+" nodes.",ex);
+		}
 	}
 	
 	/*
@@ -99,7 +118,7 @@ public class Statistics<N> {
 		Integer nodes = network.getNodes().size();
 		return nodes < 2 ? 0.0 : network.connections(node).size() * 1.0 / (nodes-1);
 	}
-	public Double degreeCentralityMaxDifference(Integer nodes) {
+	public static Double degreeCentralityMaxDifference(Integer nodes) {
 		return nodes < 3 ? null : (nodes-1) * (1 - 1.0/(nodes-1));
 	}
 	
@@ -130,37 +149,8 @@ public class Statistics<N> {
 		return nodeToCloseness.get(node);
 	}
 	private Map<N,Double> nodeToCloseness = Maps.newHashMap();
-	public Double closenessCentralityMaxDifference(Integer nodes) {
+	public static Double closenessCentralityMaxDifference(Integer nodes) {
 		return nodes < 3 ? null : (nodes-2) * (nodes-1) / (2*nodes - 3.0);
-	}
-	
-	@Deprecated
-	public Double betweennessCentralization() {
-		Double maximumCentrality = maximumBetweennessCentrality();
-		Double totalCentralityDifference = 0.0;
-		Set<N> nodes = network.getNodes();
-		for(N node : nodes) {
-			totalCentralityDifference += maximumCentrality - betweennessCentrality(node);
-		}
-		Integer n = nodes.size();
-		return n < 3 ? 0.0 : totalCentralityDifference * 2 / (n-1) / (n-1) / (n-2);
-	}
-	@Deprecated
-	public Double maximumBetweennessCentrality() {
-		N node = maximumBetweennessCentralityNode();
-		return node == null ? 0.0 : betweennessCentrality(node);
-	}
-	@Deprecated
-	public N maximumBetweennessCentralityNode() {
-		Double maxValue = null;
-		N maxNode = null;
-		for(N node : network.getNodes()) {
-			if(maxValue == null || betweennessCentrality(node) > maxValue) {
-				maxValue = betweennessCentrality(node);
-				maxNode = node;
-			}
-		}
-		return maxNode;
 	}
 	
 	/*
@@ -188,7 +178,7 @@ public class Statistics<N> {
 	}
 	private Map<N,Double> nodeToBetweenness = Maps.newHashMap();
 	
-	public Double betweennessCentralityMaxDifference(Integer nodes) {
+	public static Double betweennessCentralityMaxDifference(Integer nodes) {
 		return nodes < 3 ? null : (nodes-1)*(nodes-1)*(nodes-2) / 2.0;
 	}
 	
@@ -244,7 +234,7 @@ public class Statistics<N> {
 	}
 	private Map<N,Double> eigenvectorCentralities = null;
 	
-	public Double eigenvectorCentralityMaxDifference(Integer nodes) {
+	public static Double eigenvectorCentralityMaxDifference(Integer nodes) {
 		return nodes < 3 ? null : (nodes-1)*Math.sqrt(0.5) - Math.sqrt(0.5*(nodes-1));
 	}
 	

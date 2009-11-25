@@ -152,9 +152,11 @@ public class Analysis {
 			header.add("Max "+centralityProperty+" value");
 		}
 		for(String centralityProperty : Statistics.centralityProperties) {
-			header.add(Statistics.capitalizeFirstLetter(centralityProperty)+" mean");
+			header.add(capitalizeFirstLetter(centralityProperty)+" mean");
 		}
-		header.add("Betweenness centralization");
+		for(String centralityProperty : Statistics.centralityProperties) {
+			header.add(capitalizeFirstLetter(centralityProperty)+" centralization");
+		}
 		
 		header.add("Alter number");
 		header.add("Alter name");
@@ -162,7 +164,7 @@ public class Analysis {
 			header.add(question.getTitle());
 		}
 		for(String centralityProperty : Statistics.centralityProperties) {
-			header.add(Statistics.capitalizeFirstLetter(centralityProperty)+" centrality");
+			header.add(capitalizeFirstLetter(centralityProperty)+" centrality");
 		}
 		writer.writeNext(header.toArray(new String[]{}));
 		
@@ -191,7 +193,9 @@ public class Analysis {
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centralityMean(centralityProperty)+"");
 				}
-				output.add(statistics.betweennessCentralization()+"");
+				for(String centralityProperty : Statistics.centralityProperties) {
+					output.add(statistics.centralization(centralityProperty)+"");
+				}
 				
 				output.add(alterIndex.toString());
 				output.add(alter.getName());
@@ -206,6 +210,10 @@ public class Analysis {
 				writer.writeNext(output.toArray(new String[]{}));
 			}
 		}
+	}
+	
+	private static String capitalizeFirstLetter(String string) {
+		return string.isEmpty() ? string : string.substring(0, 1).toUpperCase()+string.substring(1);
 	}
 	
 	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study, Expression connection) 
