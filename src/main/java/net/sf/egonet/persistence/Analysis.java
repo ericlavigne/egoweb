@@ -149,7 +149,9 @@ public class Analysis {
 		
 		header.add("Max betweenness name");
 		header.add("Max betweenness value");
-		header.add("Betweenness mean");
+		for(String centralityProperty : Statistics.centralityProperties) {
+			header.add(Statistics.capitalizeFirstLetter(centralityProperty)+" mean");
+		}
 		header.add("Betweenness centralization");
 		
 		header.add("Alter number");
@@ -157,10 +159,9 @@ public class Analysis {
 		for(Question question : alterQuestions) {
 			header.add(question.getTitle());
 		}
-		header.add("Degree centrality");
-		header.add("Closeness centrality");
-		header.add("Betweenness centrality");
-		header.add("Eigenvector centrality");
+		for(String centralityProperty : Statistics.centralityProperties) {
+			header.add(Statistics.capitalizeFirstLetter(centralityProperty)+" centrality");
+		}
 		writer.writeNext(header.toArray(new String[]{}));
 		
 		for(Integer interviewIndex = 1; interviewIndex < interviews.size()+1; interviewIndex++) {
@@ -183,7 +184,9 @@ public class Analysis {
 				
 				output.add(statistics.maximumBetweennessCentralityNode()+"");
 				output.add(statistics.maximumBetweennessCentrality()+"");
-				output.add(statistics.betweennessCentralityMean()+"");
+				for(String centralityProperty : Statistics.centralityProperties) {
+					output.add(statistics.centralityMean(centralityProperty)+"");
+				}
 				output.add(statistics.betweennessCentralization()+"");
 				
 				output.add(alterIndex.toString());
@@ -193,10 +196,9 @@ public class Analysis {
 							context.qidAidToAlterAnswer.get(
 									new PairUni<Long>(question.getId(),alter.getId()))));
 				}
-				output.add(statistics.degreeCentrality(alter)+"");
-				output.add(statistics.closenessCentrality(alter)+"");
-				output.add(statistics.betweennessCentrality(alter)+"");
-				output.add(statistics.eigenvectorCentrality(alter)+"");
+				for(String centralityProperty : Statistics.centralityProperties) {
+					output.add(statistics.centrality(centralityProperty, alter)+"");
+				}
 				writer.writeNext(output.toArray(new String[]{}));
 			}
 		}

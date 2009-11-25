@@ -1,5 +1,6 @@
 package net.sf.egonet.network;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,15 +44,36 @@ public class Statistics<N> {
 	 * one node connects to all others but none of the others connect
 	 * to each other.
 	 */
-	public String[] centralityProperties = {"degree","closeness","betweenness","eigenvector"};
+	public static String[] centralityProperties = {"degree","closeness","betweenness","eigenvector"};
 	
 	// Implement the following with reflection. See deprecated *betweenness* methods for examples.
-	// TODO: Double centrality(String property, N node)
-	// TODO: Double mean(String property)
+	public Double centrality(String property, N node) {
+		try {
+			Method centralityMethod = 
+				Statistics.class.getDeclaredMethod(
+						property+"Centrality", 
+						new Class[]{Object.class}); // Would be node.getClass() except generics erased at runtime.
+			return (Double) centralityMethod.invoke(this, node);
+		} catch (Exception ex) {
+			throw new RuntimeException("Unable to determine "+property+"Centrality for "+node,ex);
+		}
+	}
+
+	public Double centralityMean(String property) {
+		Double total = 0.0;
+		for(N node : network.getNodes()) {
+			total += centrality(property,node);
+		}
+		return network.getNodes().size() < 1 ? 0.0 : total / network.getNodes().size();
+	}
+	
 	// TODO: Double maxValue(String property)
 	// TODO: N maxNode(String property)
 	// TODO: Double centralization(String property)
-	// TODO: String capitalizeFirstLetter(String property)
+	
+	public static String capitalizeFirstLetter(String string) {
+		return string.isEmpty() ? string : string.substring(0, 1).toUpperCase()+string.substring(1);
+	}
 	
 	/*
 	 * Degree centrality is the number of direct connections
