@@ -1,6 +1,7 @@
 package net.sf.egonet.network;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class Statistics<N> {
 	Network<N> network;
@@ -35,13 +37,58 @@ public class Statistics<N> {
 	}
 	private Double density;
 
-	// TODO: Cliques - tight knit group, may overlap
+	// Cliques - tight knit groups of three or more nodes, may overlap
+	private void initCliques() {
+		if(cliques == null) {
+			cliques = Sets.newHashSet();
+			subCliques = Sets.newHashSet();
+			for(N seed : network.getNodes()) {
+				Set<N> subClique = Sets.newHashSet();
+				subClique.add(seed);
+				initCliques(subClique,network.connections(seed));
+			}
+			subCliques = null; // Don't need it anymore. Free the memory.
+		}
+	}
+	private void initCliques(Set<N> subClique, Collection<N> potentialAdditions) {
+		subCliques.add(subClique);
+		Boolean ableToAdd = false;
+		for(N potentialAddition : potentialAdditions) {
+			Boolean newConnectsWithOld = true;
+			for(N oldMember : subClique) {
+				if(! (network.distance(potentialAddition, oldMember) < 2)) {
+					newConnectsWithOld = false;
+				}
+			}
+			if(newConnectsWithOld) {
+				ableToAdd = true;
+				Set<N> newSubClique = Sets.newHashSet();
+				newSubClique.add(potentialAddition);
+				newSubClique.addAll(subClique);
+				if(! subCliques.contains(newSubClique)) {
+					Set<N> remainingPotentials = new HashSet<N>(potentialAdditions);
+					remainingPotentials.remove(potentialAddition);
+					initCliques(newSubClique, remainingPotentials);
+				}
+			}
+		}
+		if((! ableToAdd) && subClique.size() > 2) {
+			cliques.add(Collections.unmodifiableSet(subClique));
+		}
+	}
+	private Set<Set<N>> cliques;
+	private Set<Set<N>> subCliques;
+	
+	public Set<Set<N>> cliques() {
+		initCliques();
+		return Collections.unmodifiableSet(cliques);
+	}
 	
 	private void initComponents() {
 		if(components == null) {
-			isolates = new HashSet<N>();
-			dyads = new HashSet<Set<N>>();
-			components = new HashSet<Set<N>>();
+			isolates = Sets.newHashSet();
+			dyads = Sets.newHashSet();
+			components = Sets.newHashSet();
 			Set<N> nodes = network.getNodes();
 			for(N seed : nodes) {
 				Boolean seedRepresentsNewComponent = true;

@@ -151,7 +151,7 @@ public class Analysis {
 			header.add("Max "+centralityProperty+" name");
 			header.add("Max "+centralityProperty+" value");
 		}
-		// TODO: header.add("Cliques");
+		header.add("Cliques");
 		header.add("Components");
 		for(String centralityProperty : Statistics.centralityProperties) {
 			header.add(capitalizeFirstLetter(centralityProperty)+" mean");
@@ -194,7 +194,7 @@ public class Analysis {
 					output.add(statistics.maxCentralityNode(centralityProperty)+"");
 					output.add(statistics.maxCentrality(centralityProperty)+"");
 				}
-				// TODO: output.add(statistics.cliques().size()+"");
+				output.add(statistics.cliques().size()+"");
 				output.add(statistics.components().size()+"");
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centralityMean(centralityProperty)+"");
