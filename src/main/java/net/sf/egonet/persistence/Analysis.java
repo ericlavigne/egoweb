@@ -151,12 +151,16 @@ public class Analysis {
 			header.add("Max "+centralityProperty+" name");
 			header.add("Max "+centralityProperty+" value");
 		}
+		// TODO: header.add("Cliques");
+		header.add("Components");
 		for(String centralityProperty : Statistics.centralityProperties) {
 			header.add(capitalizeFirstLetter(centralityProperty)+" mean");
 		}
 		for(String centralityProperty : Statistics.centralityProperties) {
 			header.add(capitalizeFirstLetter(centralityProperty)+" centralization");
 		}
+		header.add("Isolates");
+		header.add("Dyads");
 		
 		header.add("Alter number");
 		header.add("Alter name");
@@ -190,12 +194,16 @@ public class Analysis {
 					output.add(statistics.maxCentralityNode(centralityProperty)+"");
 					output.add(statistics.maxCentrality(centralityProperty)+"");
 				}
+				// TODO: output.add(statistics.cliques().size()+"");
+				output.add(statistics.components().size()+"");
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centralityMean(centralityProperty)+"");
 				}
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centralization(centralityProperty)+"");
 				}
+				output.add(statistics.isolates().size()+"");
+				output.add(statistics.dyads().size()+"");
 				
 				output.add(alterIndex.toString());
 				output.add(alter.getName());

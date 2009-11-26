@@ -1,6 +1,8 @@
 package net.sf.egonet.network;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +34,57 @@ public class Statistics<N> {
 		return density;
 	}
 	private Double density;
+
+	// TODO: Cliques - tight knit group, may overlap
+	
+	private void initComponents() {
+		if(components == null) {
+			isolates = new HashSet<N>();
+			dyads = new HashSet<Set<N>>();
+			components = new HashSet<Set<N>>();
+			Set<N> nodes = network.getNodes();
+			for(N seed : nodes) {
+				Boolean seedRepresentsNewComponent = true;
+				for(Set<N> component : components) {
+					if(component.contains(seed)) {
+						seedRepresentsNewComponent = false;
+					}
+				}
+				if(seedRepresentsNewComponent) {
+					Set<N> component = new HashSet<N>();
+					for(N node : nodes) {
+						if(network.distance(seed, node) != null) {
+							component.add(node);
+						}
+					}
+					components.add(Collections.unmodifiableSet(component));
+					if(component.size() < 2) {
+						isolates.add(seed);
+					} else if(component.size() < 3) {
+						dyads.add(Collections.unmodifiableSet(component));
+					}
+				}
+			}
+		}
+	}
+	private Set<N> isolates;
+	private Set<Set<N>> dyads;
+	private Set<Set<N>> components;
+	
+	public Set<N> isolates() {
+		initComponents();
+		return isolates;
+	}
+	
+	public Set<Set<N>> dyads() {
+		initComponents();
+		return dyads;
+	}
+	
+	public Set<Set<N>> components() {
+		initComponents();
+		return components;
+	}
 	
 	/*
 	 * For each of these properties x, define two methods:
