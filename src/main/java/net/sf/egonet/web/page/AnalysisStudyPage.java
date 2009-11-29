@@ -77,8 +77,8 @@ public class AnalysisStudyPage extends EgonetPage {
 		analysisForm.add(new Button("studyExport") {
 			public void onSubmit() {
 				downloadFile(
-						getStudy().getName()+"-study.xml",
-						"text/xml",
+						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
+						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
 						Analysis.getStudyXML(getStudy()));
 			}
 		});
