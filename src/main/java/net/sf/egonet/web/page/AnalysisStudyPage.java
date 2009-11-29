@@ -1,26 +1,15 @@
 package net.sf.egonet.web.page;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.List;
 
-import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
-import org.apache.wicket.util.lang.Bytes;
-import org.apache.wicket.util.resource.StringResourceStream;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
@@ -46,43 +35,8 @@ public class AnalysisStudyPage extends EgonetPage {
 	}
 	
 	private void build() {
-		final FileUploadField studyImportField = new FileUploadField("studyImportField");
-		Form studyImportForm = new Form("studyImportForm") {
-			public void onSubmit() {
-				try {
-					String uploadText = uploadText(studyImportField);
-					if(uploadText != null) {
-						downloadFile("Uploaded-file.txt","text/plain",
-								"Uploaded file contents: \n\n"+uploadText);
-					}
-				} catch(Exception ex) {
-					throw new RuntimeException("Exception while trying to import study.",ex);
-				}
-			}
-		};
-		studyImportForm.setMultiPart(true);
-		studyImportForm.add(studyImportField);
-		studyImportForm.setMaxSize(Bytes.megabytes(100));
-		add(studyImportForm);
-		
-		Form interviewImportForm = new Form("interviewImportForm") {
-			public void onSubmit() {
-				
-			}
-		};
-		add(interviewImportForm);
-		
 		Form analysisForm = new Form("analysisForm");
 
-		analysisForm.add(new Button("studyExport") {
-			public void onSubmit() {
-				downloadFile(
-						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
-						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
-						Analysis.getStudyXML(getStudy()));
-			}
-		});
-		
 		Long adjacencyExpressionId = getStudy().getAdjacencyExpressionId();
 		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
 			new Model(Expressions.get(adjacencyExpressionId));
@@ -90,7 +44,7 @@ public class AnalysisStudyPage extends EgonetPage {
 		
 		analysisForm.add(new Button("csvAlterExport") {
 			public void onSubmit() {
-				downloadFile(
+				downloadText(
 						getStudy().getName()+"-alter-data.csv",
 						"text/csv",
 						Analysis.getEgoAndAlterCSVForStudy(getStudy(),getConnectionReason()));
@@ -99,19 +53,10 @@ public class AnalysisStudyPage extends EgonetPage {
 		
 		analysisForm.add(new Button("csvAlterPairExport") {
 			public void onSubmit() {
-				downloadFile(
+				downloadText(
 						getStudy().getName()+"-alter-pair-data.csv",
 						"text/csv",
 						Analysis.getAlterPairCSVForStudy(getStudy(),getConnectionReason()));
-			}
-		});
-		
-		analysisForm.add(new Button("statisticsButton") {
-			public void onSubmit() {
-				downloadFile(
-						getStudy().getName()+"-statistics.csv",
-						"text/csv",
-						"statistics csv for all interviews in study "+getStudy().getName());
 			}
 		});
 		
@@ -143,38 +88,6 @@ public class AnalysisStudyPage extends EgonetPage {
 	
 	private Expression getConnectionReason() {
 		return (Expression) adjacencyReason.getObject();
-	}
-	
-	private void downloadImage(String name, BufferedImage image) {
-		ResourceStreamRequestTarget target =
-			new ResourceStreamRequestTarget(
-					new Analysis.ImageResourceStream(image));
-		target.setFileName(name);
-		RequestCycle.get().setRequestTarget(target);
-	}
-	
-	private void downloadFile(String name, String mimeType, CharSequence contents) {
-		// See example on p231 of Wicket in Action
-		StringResourceStream stream = new StringResourceStream(contents, mimeType);
-		stream.setCharset(Charset.forName("UTF-8")); // Without this, Chinese characters are converted to question marks.
-		ResourceStreamRequestTarget target =
-			new ResourceStreamRequestTarget(stream);
-		target.setFileName(name);
-		RequestCycle.get().setRequestTarget(target);
-	}
-	
-	private static String uploadText(FileUploadField field) throws IOException {
-		FileUpload upload = field.getFileUpload();
-		if(upload != null) {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(upload.getInputStream()));
-			StringBuffer buffer = new StringBuffer();
-			String line = null;
-			while((line = reader.readLine()) != null) {
-				buffer.append(line+"\n");
-			}
-			return buffer.toString();
-		}
-		return null;
 	}
 	
 	public List<Interview> getInterviews() {

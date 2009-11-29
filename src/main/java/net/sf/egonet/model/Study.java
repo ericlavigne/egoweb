@@ -32,8 +32,7 @@ public class Study extends Entity
 	}
 
 	public String toString() {
-		return "<Study | id = "+getId()
-			+", name = "+getName()+">";
+		return getName();
 	}
 
 	// Below here is just getters and setters.

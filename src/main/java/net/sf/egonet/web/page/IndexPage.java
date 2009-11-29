@@ -33,6 +33,15 @@ public class IndexPage extends EgonetPage
 	                }
 	            }
 	        );
+		add(
+	            new Link("importExportLink")
+	            {
+	                public void onClick()
+	                {
+	                    setResponsePage(new ImportExportPage());
+	                }
+	            }
+	        );
 	}
 	
 	public boolean isBookmarkable() {

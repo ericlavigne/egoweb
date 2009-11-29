@@ -1,42 +1,6 @@
 <wicket:extend>
 	
-	<fieldset>
-		<legend>Import modified study</legend>
-		<form wicket:id="studyImportForm">
-			<p>
-				<input wicket:id="studyImportField" type="file" />
-			</p>
-			<p>
-				<input type="submit" value="Import" />
-			</p>
-		</form>
-	</fieldset>
-	
-	<fieldset>
-		<legend>Import interviews</legend>
-		<form wicket:id="interviewImportForm">
-			<p>
-				<input type="file" />
-			</p>
-			<p>
-				<input type="submit" value="Import" />
-			</p>
-		</form>
-	</fieldset>
-	
-	<hr />
-	
 	<form wicket:id="analysisForm">
-	
-		<p>
-			<input wicket:id="studyExport" type="submit" value="Export study" />
-		</p>
-	
-		<p>
-			<input type="submit" value="Export all interviews" />
-		</p>
-	
-		<hr />
 	
 		<p>You can temporarily change adjacency settings for analysis.</p>
 	
@@ -59,19 +23,13 @@
 	
 		<hr />
 	
-		<p>
-			<input wicket:id="statisticsButton" type="submit" value="Statistics for all interviews" />
-		</p>
-	
-		<hr />
-	
 		<table>
 			<tr wicket:id="interviews">
 				<td wicket:id="interviewName">Interview name</td>
 				<td><input wicket:id="interviewReview" type="submit" value="Review" /></td>
 				<td><input wicket:id="interviewVisualize" type="submit" value="Visualize" /></td>
-				<td><input type="submit" value="Statistics" /></td>
-				<td><input type="submit" value="Export" /></td>
+				<td><!-- input type="submit" value="Statistics"  --></td>
+				<td><!-- input type="submit" value="Export" --></td>
 			</tr>
 		</table>
 	

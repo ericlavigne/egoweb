@@ -1,0 +1,43 @@
+<wicket:extend>
+
+	<fieldset>
+		<legend>Import modified study</legend>
+		<form wicket:id="studyImportForm">
+			<p>
+				<input wicket:id="studyImportField" type="file" />
+			</p>
+			<p>
+				<input type="submit" value="Import" />
+			</p>
+		</form>
+	</fieldset>
+	
+	<fieldset>
+		<legend>Import interviews</legend>
+		<form wicket:id="respondentDataImportForm">
+			<p>
+				<input wicket:id="respondentDataImportField" type="file" />
+			</p>
+			<p>
+				<input type="submit" value="Import" />
+			</p>
+		</form>
+	</fieldset>
+
+	<fieldset>
+		<legend>Export</legend>
+		<form wicket:id="exportForm">
+			<p>
+				<label for="study">Study:</label>
+				<select id="study" wicket:id="studyDropdown" />
+			</p>
+			<p>
+				<input wicket:id="studyExport" type="submit" value="Export study" />
+			</p>
+			<p>
+				<input wicket:id="respondentDataExport" type="submit" value="Export respondent data" />
+			</p>
+		</form>
+	</fieldset>
+		
+</wicket:extend>
