@@ -52,18 +52,19 @@ public abstract class Entity implements java.io.Serializable
 		return getRandomKey().hashCode();
 	}
 
+	public Long getRandomKey() {
+		if(randomKey == null) {
+			randomKey = generateRandom();
+		}
+		return randomKey;
+	}
+	
 	// ----------------------------------------
 
 	protected void setRandomKey(Long randomKey) {
 		this.randomKey = randomKey;
 	}
 
-	protected Long getRandomKey() {
-		if(randomKey == null) {
-			randomKey = generateRandom();
-		}
-		return randomKey;
-	}
 
 	private static Long generateRandom() {
 		if(random == null) {

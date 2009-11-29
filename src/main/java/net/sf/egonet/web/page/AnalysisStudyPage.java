@@ -74,6 +74,15 @@ public class AnalysisStudyPage extends EgonetPage {
 		
 		Form analysisForm = new Form("analysisForm");
 
+		analysisForm.add(new Button("studyExport") {
+			public void onSubmit() {
+				downloadFile(
+						getStudy().getName()+"-study.xml",
+						"text/xml",
+						Analysis.getStudyXML(getStudy()));
+			}
+		});
+		
 		Long adjacencyExpressionId = getStudy().getAdjacencyExpressionId();
 		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
 			new Model(Expressions.get(adjacencyExpressionId));
