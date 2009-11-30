@@ -82,8 +82,8 @@ public class Question extends Entity
 	public void setRequired(boolean      val) { this.isRequired = val; }
 	public void setStudyId(Long          val) { this.studyId      = val; }
 
-	protected void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
-	protected void setTypeDB(String val) { this.setType(QuestionType.valueOf(val)); }
+	public void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
+	public void setTypeDB(String val) { this.setType(QuestionType.valueOf(val)); }
 
 	/** Whether the question identifies the interviewee
 	  */

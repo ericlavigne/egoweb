@@ -22,19 +22,38 @@ public class Archiving {
 		}.execute();
 	}
 	
+	private static void addText(Element root, String elementName, String elementText) {
+		root.addElement(elementName).addText(elementText == null ? "" : elementText);
+	}
+	
 	public static String getStudyXML(Session session, Study study, Boolean includeInterviews) {
 		try {
 			Document document = DocumentHelper.createDocument();
 			Element studyNode = document.addElement("study")
 				.addAttribute("id", study.getId()+"")
 				.addAttribute("name", study.getName())
-				.addAttribute("key", study.getRandomKey()+"");
+				.addAttribute("key", study.getRandomKey()+"")
+				.addAttribute("minAlters", study.getMinAlters()+"")
+				.addAttribute("maxAlters", study.getMaxAlters()+"")
+				.addAttribute("adjacencyExpressionId", study.getAdjacencyExpressionId()+"");
+			addText(studyNode,"introduction",study.getIntroduction());
+			addText(studyNode,"egoIdPrompt",study.getEgoIdPrompt());
+			addText(studyNode,"alterPrompt",study.getAlterPrompt());
+			studyNode.addElement("conclusion").addText(study.getConclusion());
 			Element questionsNode = studyNode.addElement("questions");
 			for(Question question : Questions.getQuestionsForStudy(session, study.getId(), null)) {
 				org.dom4j.Element questionNode = questionsNode.addElement("question")
 					.addAttribute("id", question.getId()+"")
-					.addAttribute("key", question.getRandomKey()+"");
-				questionNode.addElement("prompt").addText(question.getPrompt());
+					.addAttribute("title", question.getTitle())
+					.addAttribute("key", question.getRandomKey()+"")
+					.addAttribute("answerType", question.getAnswerTypeDB())
+					.addAttribute("subjectType", question.getTypeDB())
+					.addAttribute("required", question.isRequired()+"")
+					.addAttribute("ordering", question.getOrdering()+"")
+					.addAttribute("answerReasonExpressionId", question.getAnswerReasonExpressionId()+"");
+				addText(questionNode,"preface",question.getPreface());
+				addText(questionNode,"prompt",question.getPrompt());
+				addText(questionNode,"citation",question.getCitation());
 			}
 			
 			StringWriter stringWriter = new StringWriter();
