@@ -3,7 +3,7 @@ package net.sf.egonet.web.page;
 import java.util.List;
 
 import net.sf.egonet.model.Study;
-import net.sf.egonet.persistence.Analysis;
+import net.sf.egonet.persistence.Archiving;
 import net.sf.egonet.persistence.Studies;
 
 import org.apache.wicket.markup.html.form.Button;
@@ -84,7 +84,7 @@ public class ImportExportPage extends EgonetPage {
 				downloadText(
 						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
 						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
-						Analysis.getStudyXML(getStudy()));
+						Archiving.getStudyXML(getStudy()));
 			}
 		};
 	}

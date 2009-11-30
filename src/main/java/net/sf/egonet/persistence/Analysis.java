@@ -12,16 +12,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.wicket.util.io.ByteArrayOutputStream;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 import org.apache.wicket.util.time.Time;
 import org.hibernate.Session;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -31,8 +26,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
@@ -395,46 +388,5 @@ public class Analysis {
 			return Joiner.on("; ").join(selectedOptions);
 		}
 		throw new RuntimeException("Unable to answer for answer type: "+question.getAnswerType());
-	}
-
-	public static String getStudyXML(final Study study) {
-		return new DB.Action<String>() {
-			public String get() {
-				return getStudyXML(session, study);
-			}
-		}.execute();
-	}
-	
-	public static String getStudyXML(Session session, Study study) {
-		// Using http://www.totheriver.com/learn/xml/xmltutorial.html as example of how to write/parse XML.
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document dom = db.newDocument();
-			Element studyNode = dom.createElement("study");
-			studyNode.setAttribute("id", study.getId()+"");
-			studyNode.setAttribute("name", study.getName());
-			studyNode.setAttribute("key", study.getRandomKey()+"");
-			dom.appendChild(studyNode);
-			Element questionsNode = dom.createElement("questions");
-			studyNode.appendChild(questionsNode);
-			for(Question question : Questions.getQuestionsForStudy(session, study.getId(), null)) {
-				Element questionNode = dom.createElement("question");
-				questionNode.setAttribute("id", question.getId()+"");
-				questionNode.setAttribute("key", question.getRandomKey()+"");
-				Element promptNode = dom.createElement("prompt");
-				promptNode.appendChild(dom.createTextNode(question.getPrompt()));
-				questionNode.appendChild(promptNode);
-				questionNode.setAttribute("promptAsAttribute", question.getPrompt());
-				questionsNode.appendChild(questionNode);
-			}
-			OutputFormat format = new OutputFormat(dom);
-			StringWriter stringWriter = new StringWriter();
-			XMLSerializer serializer = new XMLSerializer(stringWriter, format);
-			serializer.serialize(dom);
-			return stringWriter.toString();
-		} catch(Exception ex) {
-			throw new RuntimeException("Failure while creating study XML file.",ex);
-		}
 	}
 }
