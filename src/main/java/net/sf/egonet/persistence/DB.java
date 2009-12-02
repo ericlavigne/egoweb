@@ -67,6 +67,8 @@ public class DB {
 	public static void migrate() {
 		new Action<Object>() {
 			public Object get() {
+				// TODO: Need to store schema version so each migration can be applied exactly once.
+				/*
 				for(String entity : new String[]{
 						"Alter","Answer","Expression","Interview","Question","QuestionOption","Study"}) 
 				{
@@ -74,6 +76,7 @@ public class DB {
 							"update "+entity+" set active = 1 where active is null")
 							.executeUpdate();
 				}
+				*/
 				return null;
 			}
 		}.execute();

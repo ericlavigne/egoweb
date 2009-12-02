@@ -3,6 +3,8 @@ package net.sf.egonet.model;
 import java.lang.reflect.Field;
 import java.util.Random;
 
+import org.uncommons.maths.random.MersenneTwisterRNG;
+
 public abstract class Entity implements java.io.Serializable
 {
     private Long id;
@@ -65,10 +67,9 @@ public abstract class Entity implements java.io.Serializable
 		this.randomKey = randomKey;
 	}
 
-
 	private static Long generateRandom() {
 		if(random == null) {
-			random = new Random();
+			random = new MersenneTwisterRNG();
 		}
 		return random.nextLong();
 	}
