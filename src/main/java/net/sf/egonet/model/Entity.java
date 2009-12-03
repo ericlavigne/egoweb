@@ -30,12 +30,10 @@ public abstract class Entity implements java.io.Serializable
 
 	// ----------------------------------------
 
-	// XXX Add citation of hibernate being fussy without these methods
-
-	// pp 396-400 of Java Persistence with Hibernate discuss this issue.
+	// pp 396-400 of Java Persistence with Hibernate discuss the importance of
+	// providing equals and hashCode for persistence classes.
 	// If we avoid (sets or (detached and unsaved entities)) and cascade save
-	// then we won't need to worry about equals and hashCode. We've already
-	// given up cascade save, so if we just avoid sets then we're in good shape.
+	// then we won't need to worry about equals and hashCode.
 
 	public boolean equals(Object obj)
 	{
