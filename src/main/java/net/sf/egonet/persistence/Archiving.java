@@ -2,6 +2,10 @@ package net.sf.egonet.persistence;
 
 import java.io.StringWriter;
 
+import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Expression;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
@@ -24,6 +28,13 @@ public class Archiving {
 		return new DB.Action<String>() {
 			public String get() {
 				return getStudyXML(session, study,false);
+			}
+		}.execute();
+	}
+	public static String getRespondentDataXML(final Study study) {
+		return new DB.Action<String>() {
+			public String get() {
+				return getStudyXML(session, study,true);
 			}
 		}.execute();
 	}
@@ -69,10 +80,51 @@ public class Archiving {
 					Integer optionsSoFar = 0;
 					for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
 						questionNode.addElement("option")
+							.addAttribute("id", option.getId()+"")
 							.addAttribute("name", option.getName())
+							.addAttribute("key", option.getRandomKey()+"")
 							.addAttribute("value", option.getValue())
 							.addAttribute("ordering", optionsSoFar+"");
 						optionsSoFar++; // would prefer to use ordering, but it might be null
+					}
+				}
+			}
+			Element expressionsNode = studyNode.addElement("expressions");
+			for(Expression expression : Expressions.forStudy(session, study.getId())) {
+				Element expressionNode = expressionsNode.addElement("expression")
+					.addAttribute("id", expression.getId()+"")
+					.addAttribute("name", expression.getName())
+					.addAttribute("key", expression.getRandomKey()+"")
+					.addAttribute("questionId", expression.getQuestionId()+"")
+					.addAttribute("resultForUnanswered", expression.getResultForUnanswered()+"")
+					.addAttribute("type", expression.getTypeDB()+"")
+					.addAttribute("operator", expression.getOperatorDB()+"");
+				addText(expressionNode,"value",expression.getValueDB());
+			}
+			if(includeInterviews) {
+				Element interviewsNode = studyNode.addElement("interviews");
+				for(Interview interview : Interviews.getInterviewsForStudy(session, study.getId())) {
+					Element interviewNode = interviewsNode.addElement("interview")
+						.addAttribute("id", interview.getId()+"")
+						.addAttribute("key", interview.getRandomKey()+"");
+					Element altersNode = interviewNode.addElement("alters");
+					for(Alter alter : Alters.getForInterview(session, interview.getId())) {
+						altersNode.addElement("alter")
+							.addAttribute("id", alter.getId()+"")
+							.addAttribute("name", alter.getName())
+							.addAttribute("key", alter.getRandomKey()+"");
+					}
+					Element answersNode = interviewNode.addElement("answers");
+					for(Answer answer : Answers.getAnswersForInterview(session, interview.getId())) {
+						Element answerNode = answersNode.addElement("answer")
+							.addAttribute("id", answer.getId()+"")
+							.addAttribute("key", answer.getRandomKey()+"")
+							.addAttribute("questionId", answer.getQuestionId()+"")
+							.addAttribute("questionType", answer.getQuestionTypeDB())
+							.addAttribute("answerType", answer.getAnswerTypeDB())
+							.addAttribute("alterId1", answer.getAlterId1()+"")
+							.addAttribute("alterId2", answer.getAlterId2()+"");
+						addText(answerNode,"value",answer.getValue());
 					}
 				}
 			}

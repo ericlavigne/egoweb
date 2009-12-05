@@ -159,13 +159,13 @@ public class Expression extends Entity {
 	protected void setTypeDB(String typeString) {
 		this.type = Type.valueOf(typeString);
 	}
-	protected String getTypeDB() {
+	public String getTypeDB() {
 		return type.name();
 	}
 	protected void setOperatorDB(String operatorString) {
 		this.operator = Operator.valueOf(operatorString);
 	}
-	protected String getOperatorDB() {
+	public String getOperatorDB() {
 		return operator.name();
 	}
 	protected void setStudyId(Long studyId) {
@@ -183,7 +183,7 @@ public class Expression extends Entity {
 	protected void setValueDBOld(String valueString) {
 		this.valueDBOld = valueString;
 	}
-	protected String getValueDB() {
+	public String getValueDB() {
 		return migrateToText(this,"valueDB");
 	}
 	protected String getValueDBOld() {

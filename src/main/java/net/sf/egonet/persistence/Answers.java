@@ -26,6 +26,16 @@ public class Answers {
 			.list();
 	}
 
+	@SuppressWarnings("unchecked")
+	public static List<Answer> getAnswersForInterview(
+			Session session, final Long interviewId) 
+	{
+		return
+		session.createQuery("from Answer a where a.active = 1 and a.interviewId = :interviewId")
+			.setLong("interviewId", interviewId)
+			.list();
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public static List<Answer> getAnswersForQuestion(

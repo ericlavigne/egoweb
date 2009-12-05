@@ -80,7 +80,6 @@ public class ImportExportPage extends EgonetPage {
 	private Button buildStudyExportButton() {
 		return new Button("studyExport") {
 			public void onSubmit() {
-				// TODO: Finish implementing Analysis.getStudyXML(Study) 
 				downloadText(
 						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
 						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
@@ -92,11 +91,10 @@ public class ImportExportPage extends EgonetPage {
 	private Button buildRespondentDataExportButton() {
 		return new Button("respondentDataExport") {
 			public void onSubmit() {
-				// TODO: Implement Analysis.getRespondentDataXML(Study) 
-				//downloadText(
-				//		getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
-				//		"application/octet-stream", // "text/xml", changed to prefer save rather than open.
-				//		Analysis.getRespondentDataXML(getStudy()));
+				downloadText(
+						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
+						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
+						Archiving.getRespondentDataXML(getStudy()));
 			}
 		};
 	}
