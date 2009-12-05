@@ -81,8 +81,8 @@ public class ImportExportPage extends EgonetPage {
 		return new Button("studyExport") {
 			public void onSubmit() {
 				downloadText(
-						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
-						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
+						getStudy().getName()+".study",
+						"application/octet-stream",
 						Archiving.getStudyXML(getStudy()));
 			}
 		};
@@ -92,8 +92,8 @@ public class ImportExportPage extends EgonetPage {
 		return new Button("respondentDataExport") {
 			public void onSubmit() {
 				downloadText(
-						getStudy().getName()+".study", // changed .xml -> .study to prefer save rather than open.
-						"application/octet-stream", // "text/xml", changed to prefer save rather than open.
+						getStudy().getName()+".responses",
+						"application/octet-stream",
 						Archiving.getRespondentDataXML(getStudy()));
 			}
 		};
