@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="run" name="egonet" basedir=".">
 
-	<property name="src.dir" value="src/main/java"/>
-	<property name="resources.dir" value="src/main/resources"/>
+	<property name="src.dir" value="src"/>
 	<property name="lib.dir" value="lib"/>
-	<property name="static.dir" value="src/main/webapp/static"/>
+	<property name="static.dir" value="static"/>
 	<property name="build.dir" value="build"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="main.class.web" value="net.sf.egonet.web.ServerGui" />
@@ -30,9 +29,6 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.*"/>
 				<exclude name="**/*.java"/>
-			</fileset>
-			<fileset dir="${resources.dir}">
-				<include name="**/*.*"/>
 			</fileset>
 			<fileset dir="${static.dir}" />
 		</copy>
