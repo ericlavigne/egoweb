@@ -18,7 +18,7 @@ public class Study extends Entity
 	
 	private Long adjacencyExpressionId;
 
-	protected Study()
+	public Study()
 	{
 		this("");
 	}

@@ -61,7 +61,7 @@ public abstract class Entity implements java.io.Serializable
 	
 	// ----------------------------------------
 
-	protected void setRandomKey(Long randomKey) {
+	public void setRandomKey(Long randomKey) {
 		this.randomKey = randomKey;
 	}
 
