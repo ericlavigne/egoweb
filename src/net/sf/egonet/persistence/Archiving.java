@@ -26,6 +26,7 @@ import org.dom4j.io.XMLWriter;
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
@@ -109,26 +110,26 @@ public class Archiving {
 				}
 			}
 			
-			List<Expression> expressions = Expressions.forStudy(session, study.getId());
-			Map<Long,Expression> localIdToExpression = indexById(expressions);
 			List<Element> expressionElements = studyElement.element("expressions").elements("expression");
 			Map<Long,Long> remoteToLocalExpressionId = createRemoteToLocalMap(
-					expressions, expressionElements, updateStudy, updateStudy,
+					Expressions.forStudy(session, study.getId()), 
+					expressionElements, updateStudy, updateStudy,
 					fnCreateExpression(), fnDeleteExpression(session));
 			
 			if(updateStudy) {
 				updateStudyFromNode(study,studyElement,remoteToLocalExpressionId);
 			}
 			
-			List<Question> questions = Questions.getQuestionsForStudy(session, study.getId(), null);
-			Map<Long,Question> localIdToQuestion = indexById(questions);
 			List<Element> questionElements = studyElement.element("questions").elements("question");
 			Map<Long,Long> remoteToLocalQuestionId = createRemoteToLocalMap(
-					questions, questionElements, updateStudy, updateStudy,
+					Questions.getQuestionsForStudy(session, study.getId(), null), 
+					questionElements, updateStudy, updateStudy,
 					fnCreateQuestion(), fnDeleteQuestion(session));
 			
 			Map<Long,Long> remoteToLocalOptionId = Maps.newTreeMap();
-			
+
+			List<Question> questions = Questions.getQuestionsForStudy(session, study.getId(), null);
+			Map<Long,Question> localIdToQuestion = indexById(questions);
 			for(Element questionElement : questionElements) {
 				Long remoteQuestionId = attrId(questionElement);
 				Long localQuestionId = remoteToLocalQuestionId.get(remoteQuestionId);
@@ -158,7 +159,17 @@ public class Archiving {
 				}
 			}
 			
-			// TODO: Import expressions
+			if(updateStudy) {
+				Map<Long,Expression> localIdToExpression = indexById(Expressions.forStudy(session, study.getId()));
+				for(Element expressionElement : expressionElements) {
+					Long localExpressionId = remoteToLocalExpressionId.get(attrId(expressionElement));
+					if(localExpressionId != null) {
+						Expression expression = localIdToExpression.get(localExpressionId);
+						updateExpressionFromNode(expression,expressionElement,
+								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId);
+					}
+				}
+			}
 			
 			if(updateRespondentData) {
 				// TODO: Import interviews
@@ -316,6 +327,36 @@ public class Archiving {
 			.addAttribute("operator", expression.getOperatorDB()+"");
 		addText(expressionNode,"value",expression.getValueDB());
 		return expressionNode;
+	}
+	
+	private static void updateExpressionFromNode(Expression expression, Element node,
+			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId)
+	{
+		expression.setName(attrString(node,"name"));
+		expression.setResultForUnanswered(attrBool(node,"resultForUnanswered"));
+		expression.setTypeDB(attrString(node,"type"));
+		expression.setOperatorDB(attrString(node,"operator"));
+		
+		// questionId
+		Long remoteQuestionId = attrLong(node,"answerReasonExpressionId");
+		expression.setQuestionId(
+				remoteQuestionId == null ? null : 
+					remoteToLocalQuestionId.get(remoteQuestionId));
+		
+		// value (first set as normal, then convert IDs)
+		expression.setValueDB(attrString(node,"value"));
+		if(expression.getType().equals(Expression.Type.Selection) || 
+				expression.getType().equals(Expression.Type.Compound))
+		{
+			List<Long> localOptionIds = Lists.newArrayList();
+			for(Long remoteOptionId : (List<Long>) expression.getValue()) {
+				Long localOptionId = remoteToLocalOptionId.get(remoteOptionId);
+				if(localOptionId != null) {
+					localOptionIds.add(localOptionId);
+				}
+			}
+			expression.setValue(localOptionIds);
+		}
 	}
 	
 	private static Element addInterviewNode(Element parent, 

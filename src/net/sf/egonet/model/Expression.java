@@ -96,7 +96,6 @@ public class Expression extends Entity {
 		return operator;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if(value != null) {
 			if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
@@ -156,13 +155,13 @@ public class Expression extends Entity {
 	public Expression() {
 		
 	}
-	protected void setTypeDB(String typeString) {
+	public void setTypeDB(String typeString) {
 		this.type = Type.valueOf(typeString);
 	}
 	public String getTypeDB() {
 		return type.name();
 	}
-	protected void setOperatorDB(String operatorString) {
+	public void setOperatorDB(String operatorString) {
 		this.operator = Operator.valueOf(operatorString);
 	}
 	public String getOperatorDB() {
@@ -171,13 +170,13 @@ public class Expression extends Entity {
 	protected void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-	protected void setQuestionId(Long questionId) {
+	public void setQuestionId(Long questionId) {
 		this.questionId = questionId;
 	}
 	
 	// -----------------------------------------
 
-	protected void setValueDB(String valueString) {
+	public void setValueDB(String valueString) {
 		this.valueDB = valueString;
 	}
 	protected void setValueDBOld(String valueString) {
