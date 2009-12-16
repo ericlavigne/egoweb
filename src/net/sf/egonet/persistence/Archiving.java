@@ -26,7 +26,6 @@ import org.dom4j.io.XMLWriter;
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
@@ -128,8 +127,7 @@ public class Archiving {
 					questions, questionElements, updateStudy, updateStudy,
 					fnCreateQuestion(), fnDeleteQuestion(session));
 			
-			List<QuestionOption> allOptionEntities = Lists.newArrayList();
-			List<Element> allOptionElements = Lists.newArrayList();
+			Map<Long,Long> remoteToLocalOptionId = Maps.newTreeMap();
 			
 			for(Element questionElement : questionElements) {
 				Long remoteQuestionId = attrId(questionElement);
@@ -137,20 +135,39 @@ public class Archiving {
 				if(localQuestionId != null) {
 					Question question = localIdToQuestion.get(localQuestionId);
 					if(updateStudy) {
-						// TODO: updateQuestionFromNode(question,questionElement,study.getId(),remoteToLocalExpressionId);
+						updateQuestionFromNode(question,questionElement,study.getId(),remoteToLocalExpressionId);
 					}
 					List<Element> optionElements = questionElement.elements("option");
-					allOptionElements.addAll(optionElements);
 					List<QuestionOption> optionEntities = Options.getOptionsForQuestion(session, question.getId());
-					allOptionEntities.addAll(optionEntities);
+					Map<Long,Long> optionIdMap = createRemoteToLocalMap(
+							optionEntities,optionElements,updateStudy,updateStudy,
+							fnCreateOption(),fnDeleteOption(session));
+					remoteToLocalOptionId.putAll(optionIdMap);
+					if(updateStudy) {
+						// re-fetch, since new options created in createRemoteToLocalMap
+						Map<Long,QuestionOption> idToOptionEntity = 
+							indexById(Options.getOptionsForQuestion(session, question.getId()));
+						for(Element optionElement : optionElements) {
+							Long localId = remoteToLocalOptionId.get(attrId(optionElement));
+							if(localId != null) {
+								QuestionOption optionEntity = idToOptionEntity.get(localId);
+								updateOptionFromNode(optionEntity,optionElement,question.getId());
+							}
+						}
+					}
 				}
 			}
 			
+			// TODO: Import expressions
 			
+			if(updateRespondentData) {
+				// TODO: Import interviews
+				// TODO: Import alters (and map remote to local id)
+				// TODO: Import answers
+			}
 			
-			throw new RuntimeException("StudyId: "+study.getId()+", Study: "+study.mediumString());
+			throw new RuntimeException("Study and respondent data import is not yet finished.");
 			
-			// TODO: Finish pulling data from XML
 			//return study;
 		} catch(Exception ex) {
 			throw new RuntimeException("Failed to load XML for study "+studyToUpdate, ex);
@@ -253,6 +270,24 @@ public class Archiving {
 		return questionNode;
 	}
 	
+	private static void updateQuestionFromNode(Question question, Element node, 
+			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
+	{
+		question.setTitle(attrString(node,"title"));
+		question.setAnswerTypeDB(attrString(node,"answerType"));
+		question.setTypeDB(attrString(node,"subjectType"));
+		question.setRequired(attrBool(node,"required"));
+		question.setOrdering(attrInt(node,"ordering"));
+		question.setPreface(attrText(node,"preface"));
+		question.setPrompt(attrText(node,"prompt"));
+		question.setCitation(attrText(node,"citation"));
+
+		Long remoteReasonId = attrLong(node,"answerReasonExpressionId");
+		question.setAnswerReasonExpressionId(
+				remoteReasonId == null ? null : 
+					remoteToLocalExpressionId.get(remoteReasonId));
+	}
+	
 	private static Element addOptionNode(Element questionNode, 
 			QuestionOption option, Integer ordering) 
 	{
@@ -262,6 +297,12 @@ public class Archiving {
 			.addAttribute("key", option.getRandomKey()+"")
 			.addAttribute("value", option.getValue())
 			.addAttribute("ordering", ordering+"");
+	}
+	
+	private static void updateOptionFromNode(QuestionOption option, Element node, Long questionId) {
+		option.setName(attrString(node,"name"));
+		option.setValue(attrString(node,"value"));
+		option.setOrdering(attrInt(node,"ordering"));
 	}
 	
 	private static Element addExpressionNode(Element parent, Expression expression) {
@@ -359,6 +400,20 @@ public class Archiving {
 	private static Integer attrInt(Element element, String name) {
 		String str = attrString(element,name);
 		return str == null ? null : Integer.parseInt(str);
+	}
+	
+	private static Boolean attrBool(Element element, String name) {
+		String str = attrString(element,name);
+		if(str == null) {
+			return null;
+		}
+		if(str.equalsIgnoreCase("true")) {
+			return true;
+		}
+		if(str.equalsIgnoreCase("false")) {
+			return false;
+		}
+		return null;
 	}
 
 	private static Function<Object,Question> fnCreateQuestion() {
