@@ -10,6 +10,6 @@ public class Interview extends Entity
 
 	public Long getStudyId() { return this.studyId; }
 
-	protected Interview() { }
+	public Interview() { }
 	protected void setStudyId(Long val) { this.studyId = val; }
 }

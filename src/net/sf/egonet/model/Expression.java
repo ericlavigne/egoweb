@@ -153,7 +153,7 @@ public class Expression extends Entity {
 	}
 	
 	// For Hibernate only
-	protected Expression() {
+	public Expression() {
 		
 	}
 	protected void setTypeDB(String typeString) {

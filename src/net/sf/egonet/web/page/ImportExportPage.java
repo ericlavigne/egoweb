@@ -48,6 +48,7 @@ public class ImportExportPage extends EgonetPage {
 				try {
 					String uploadText = uploadText(studyImportField);
 					if(uploadText != null) {
+						Archiving.loadStudyXML(null, uploadText);
 						downloadText("Uploaded-file.txt","text/plain",
 								"Uploaded file contents: \n\n"+uploadText);
 					}

@@ -34,6 +34,10 @@ public class Study extends Entity
 	public String toString() {
 		return getName();
 	}
+	
+	public String mediumString() {
+		return "["+getId()+" - "+getName()+" - alters("+getMinAlters()+","+getMaxAlters()+") ]";
+	}
 
 	// Below here is just getters and setters.
 	

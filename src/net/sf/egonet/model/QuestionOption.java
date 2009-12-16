@@ -33,7 +33,7 @@ public class QuestionOption extends Entity
 	
 	// For Hibernate use only -----------------
 
-	protected QuestionOption() {}
+	public QuestionOption() {}
 
 	protected void setQuestionId(Long val) { this.questionId = val; }
 }

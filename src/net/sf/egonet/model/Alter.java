@@ -32,7 +32,7 @@ public class Alter extends Entity
 
 	//////// Rest is Hibernate stuff
 
-	protected Alter() {
+	public Alter() {
 
 	}
 

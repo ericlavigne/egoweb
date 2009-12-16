@@ -23,7 +23,7 @@ public class Answer extends Entity
 	protected String value;
 	protected String valueOld;
 
-	protected Answer() {
+	public Answer() {
 
 	}
 
