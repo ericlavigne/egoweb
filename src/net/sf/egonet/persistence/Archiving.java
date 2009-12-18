@@ -172,14 +172,52 @@ public class Archiving {
 			}
 			
 			if(updateRespondentData) {
-				// TODO: Import interviews
-				// TODO: Import alters (and map remote to local id)
-				// TODO: Import answers
+				// Import interviews
+				List<Element> interviewElements = studyElement.element("interviews").elements("interview");
+				Map<Long,Long> remoteToLocalInterviewId = createRemoteToLocalMap(
+						Interviews.getInterviewsForStudy(session, study.getId()), 
+						interviewElements, true, false,
+						fnCreateInterview(), null);
+				Map<Long,Interview> localIdToInterview = 
+					indexById(Interviews.getInterviewsForStudy(session, study.getId()));
+				for(Element interviewElement : interviewElements) {
+					Long localInterviewId = remoteToLocalInterviewId.get(attrId(interviewElement));
+					Interview interview = localIdToInterview.get(localInterviewId);
+					updateInterviewFromNode(interview,interviewElement,study.getId());
+					
+					// Import alters
+					List<Element> alterElements = interviewElement.element("alters").elements("alter");
+					Map<Long,Long> remoteToLocalAlterId = createRemoteToLocalMap(
+							Alters.getForInterview(session, interview.getId()),
+							alterElements, true, true,
+							fnCreateAlter(), fnDeleteAlter(session));
+					Map<Long,Alter> localIdToAlter =
+						indexById(Alters.getForInterview(session, interview.getId()));
+					for(Element alterElement : alterElements) {
+						Long localAlterId = remoteToLocalAlterId.get(attrId(alterElement));
+						Alter alter = localIdToAlter.get(localAlterId);
+						updateAlterFromNode(alter,alterElement,interview.getId());
+					}
+					
+					// Import answers
+					List<Element> answerElements = interviewElement.element("answers").elements("answer");
+					Map<Long,Long> remoteToLocalAnswerId = createRemoteToLocalMap(
+							Answers.getAnswersForInterview(session, interview.getId()),
+							answerElements, true, false,
+							fnCreateAnswer(), null);
+					Map<Long,Answer> localIdToAnswer =
+						indexById(Answers.getAnswersForInterview(session, interview.getId()));
+					for(Element answerElement : answerElements) {
+						Long localAnswerId = remoteToLocalAnswerId.get(attrId(answerElement));
+						Answer answer = localIdToAnswer.get(localAnswerId);
+						updateAnswerFromNode(answer,answerElement,
+								study.getId(),interview.getId(),
+								remoteToLocalQuestionId,remoteToLocalAlterId,remoteToLocalOptionId);
+					}
+				}
 			}
 			
-			throw new RuntimeException("Study and respondent data import is not yet finished.");
-			
-			//return study;
+			return study;
 		} catch(Exception ex) {
 			throw new RuntimeException("Failed to load XML for study "+studyToUpdate, ex);
 		}
@@ -338,7 +376,7 @@ public class Archiving {
 		expression.setOperatorDB(attrString(node,"operator"));
 		
 		// questionId
-		Long remoteQuestionId = attrLong(node,"answerReasonExpressionId");
+		Long remoteQuestionId = attrLong(node,"questionId");
 		expression.setQuestionId(
 				remoteQuestionId == null ? null : 
 					remoteToLocalQuestionId.get(remoteQuestionId));
@@ -376,11 +414,20 @@ public class Archiving {
 		return interviewNode;
 	}
 	
+	private static void updateInterviewFromNode(Interview interview, Element node, Long studyId) {
+		interview.setStudyId(studyId);
+	}
+	
 	private static Element addAlterNode(Element parent, Alter alter) {
 		return parent.addElement("alter")
 			.addAttribute("id", alter.getId()+"")
 			.addAttribute("name", alter.getName())
 			.addAttribute("key", alter.getRandomKey()+"");
+	}
+	
+	private static void updateAlterFromNode(Alter alter, Element node, Long interviewId) {
+		alter.setInterviewId(interviewId);
+		alter.setName(attrString(node,"name"));
 	}
 	
 	private static Element addAnswerNode(Element parent, Answer answer) {
@@ -394,6 +441,57 @@ public class Archiving {
 			.addAttribute("alterId2", answer.getAlterId2()+"");
 		addText(answerNode,"value",answer.getValue());
 		return answerNode;
+	}
+	
+	private static void updateAnswerFromNode(Answer answer, Element node, Long studyId, Long interviewId,
+			Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalAlterId, 
+			Map<Long,Long> remoteToLocalOptionId)
+	{
+		answer.setStudyId(studyId);
+		answer.setInterviewId(interviewId);
+		answer.setQuestionTypeDB(attrString(node,"questionType"));
+		answer.setAnswerTypeDB(attrString(node,"answerType"));
+		
+		// questionId
+		Long remoteQuestionId = attrLong(node,"questionId");
+		answer.setQuestionId(
+				remoteQuestionId == null ? null : 
+					remoteToLocalQuestionId.get(remoteQuestionId));
+		
+		// alterId1
+		Long remoteAlterId1 = attrLong(node,"alterId1");
+		answer.setAlterId1(
+				remoteAlterId1 == null ? null : 
+					remoteToLocalAlterId.get(remoteAlterId1));
+		
+		// alterId2
+		Long remoteAlterId2 = attrLong(node,"alterId2");
+		answer.setAlterId1(
+				remoteAlterId2 == null ? null : 
+					remoteToLocalAlterId.get(remoteAlterId2));
+		
+		// value (requires translation - see Archiving.updateExpressionFromNode and MultipleSelectionAnswerFormFieldPanel)
+		String answerString = attrString(node,"value");
+		Answer.AnswerType answerType = answer.getAnswerType();
+		if(answerType.equals(Answer.AnswerType.SELECTION) ||
+				answerType.equals(Answer.AnswerType.MULTIPLE_SELECTION))
+		{
+			String optionIds = "";
+			try {
+				for(String optionRemoteIdString : answerString.split(",")) {
+					Long optionRemoteId = Long.parseLong(optionRemoteIdString);
+					Long optionLocalId = remoteToLocalOptionId.get(optionRemoteId);
+					if(optionLocalId != null) {
+						optionIds += (optionIds.isEmpty() ? "" : ",")+optionLocalId;
+					}
+				}
+			} catch(Exception ex) {
+				// Most likely failed to parse answer. Fall back to no existing answer.
+			}
+			answer.setValue(optionIds);
+		} else {
+			answer.setValue(answerString);
+		}
 	}
 	
 	private static String formatXMLDocument(Document document) throws IOException {
@@ -524,26 +622,10 @@ public class Archiving {
 			}
 		};
 	}
-	private static Function<Interview,Object> fnDeleteInterview(final Session session) {
-		return new Function<Interview,Object>() {
-			public Object apply(Interview interview) {
-				// Deleting interviews should not happen as part of XML import.
-				return null;
-			}
-		};
-	}
 	private static Function<Alter,Object> fnDeleteAlter(final Session session) {
 		return new Function<Alter,Object>() {
 			public Object apply(Alter alter) {
 				Alters.delete(session, alter);
-				return null;
-			}
-		};
-	}
-	private static Function<Answer,Object> fnDeleteAnswer(final Session session) {
-		return new Function<Answer,Object>() {
-			public Object apply(Answer answer) {
-				// Only delete answers when the corresponding question or alter is deleted.
 				return null;
 			}
 		};

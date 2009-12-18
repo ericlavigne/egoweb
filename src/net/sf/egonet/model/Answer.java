@@ -80,7 +80,7 @@ public class Answer extends Entity
 		return alterId2;
 	}
 
-	protected void setInterviewId(Long interviewId) {
+	public void setInterviewId(Long interviewId) {
 		this.interviewId = interviewId;
 	}
 
@@ -88,7 +88,7 @@ public class Answer extends Entity
 		return interviewId;
 	}
 
-	protected void setStudyId(Long studyId) {
+	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
 
@@ -116,8 +116,8 @@ public class Answer extends Entity
 	public String       getAnswerTypeDB() { return getAnswerType().name(); }
 	public String       getQuestionTypeDB()       { return Question.typeDB(getQuestionType());       }
 
-	protected void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
-	protected void setQuestionTypeDB(String val) { this.setQuestionType(QuestionType.valueOf(val)); }
+	public void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
+	public void setQuestionTypeDB(String val) { this.setQuestionType(QuestionType.valueOf(val)); }
 
 	// ---------------------------------
 	

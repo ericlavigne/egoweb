@@ -36,11 +36,11 @@ public class Alter extends Entity
 
 	}
 
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 	
-	protected void setInterviewId(Long interviewId) {
+	public void setInterviewId(Long interviewId) {
 		this.interviewId = interviewId;
 	}
 }
