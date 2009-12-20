@@ -156,18 +156,22 @@ public class Expression extends Entity {
 		
 	}
 	public void setTypeDB(String typeString) {
-		this.type = Type.valueOf(typeString);
+		if(typeString != null && ! typeString.isEmpty()) {
+			this.type = Type.valueOf(typeString);
+		}
 	}
 	public String getTypeDB() {
-		return type.name();
+		return type == null ? null : type.name();
 	}
 	public void setOperatorDB(String operatorString) {
-		this.operator = Operator.valueOf(operatorString);
+		if(operatorString != null && ! operatorString.isEmpty()) {
+			this.operator = Operator.valueOf(operatorString);
+		}
 	}
 	public String getOperatorDB() {
-		return operator.name();
+		return operator == null ? null : operator.name();
 	}
-	protected void setStudyId(Long studyId) {
+	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
 	public void setQuestionId(Long questionId) {

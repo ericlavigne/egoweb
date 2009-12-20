@@ -35,5 +35,5 @@ public class QuestionOption extends Entity
 
 	public QuestionOption() {}
 
-	protected void setQuestionId(Long val) { this.questionId = val; }
+	public void setQuestionId(Long val) { this.questionId = val; }
 }

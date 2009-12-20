@@ -69,7 +69,7 @@ public class Question extends Entity
 	public String       getAnswerTypeDB() { return getAnswerType().name(); }
 	public String       getTypeDB()       { return typeDB(getType());       }
 
-	public static String typeDB(QuestionType type) { return type.name(); }
+	public static String typeDB(QuestionType type) { return type == null ? null : type.name(); }
 	/**
 	 * @return
 	 *  if needsSelectionResponse returns a list of one Option,

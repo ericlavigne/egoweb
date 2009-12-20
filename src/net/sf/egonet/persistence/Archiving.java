@@ -17,6 +17,7 @@ import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
 
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -82,11 +83,19 @@ public class Archiving {
 			throw new RuntimeException("Failed to get XML for study "+study, ex);
 		}
 	}
-	
+
 	public static Study loadStudyXML(final Study study, final String studyXML) {
 		return new DB.Action<Study>() {
 			public Study get() {
 				return loadStudyXML(session, study,studyXML,true,false);
+			}
+		}.execute();
+	}
+	
+	public static Study loadRespondentXML(final Study study, final String studyXML) {
+		return new DB.Action<Study>() {
+			public Study get() {
+				return loadStudyXML(session, study,studyXML,false,true);
 			}
 		}.execute();
 	}
@@ -102,41 +111,53 @@ public class Archiving {
 			Study study = studyToUpdate;
 			if(study == null) {
 				study = new Study();
-				DB.save(session, study);
 			} else {
 				Long xmlKey = attrLong(studyElement,"key");
 				if(xmlKey == null || ! xmlKey.equals(study.getRandomKey())) {
 					throw new RuntimeException("Trying to import incompatible study.");
 				}
 			}
+			DB.save(session, study);
 			
 			List<Element> expressionElements = studyElement.element("expressions").elements("expression");
+			List<Expression> expressions = Expressions.forStudy(session, study.getId());
 			Map<Long,Long> remoteToLocalExpressionId = createRemoteToLocalMap(
-					Expressions.forStudy(session, study.getId()), 
-					expressionElements, updateStudy, updateStudy,
+					expressions, expressionElements, updateStudy, updateStudy,
 					fnCreateExpression(), fnDeleteExpression(session));
 			
 			if(updateStudy) {
-				updateStudyFromNode(study,studyElement,remoteToLocalExpressionId);
+				updateStudyFromNode(session,study,studyElement,remoteToLocalExpressionId);
 			}
 			
 			List<Element> questionElements = studyElement.element("questions").elements("question");
+			List<Question> questions = Questions.getQuestionsForStudy(session, study.getId(), null);
 			Map<Long,Long> remoteToLocalQuestionId = createRemoteToLocalMap(
-					Questions.getQuestionsForStudy(session, study.getId(), null), 
-					questionElements, updateStudy, updateStudy,
+					questions, questionElements, updateStudy, updateStudy,
 					fnCreateQuestion(), fnDeleteQuestion(session));
 			
 			Map<Long,Long> remoteToLocalOptionId = Maps.newTreeMap();
 
-			List<Question> questions = Questions.getQuestionsForStudy(session, study.getId(), null);
 			Map<Long,Question> localIdToQuestion = indexById(questions);
 			for(Element questionElement : questionElements) {
 				Long remoteQuestionId = attrId(questionElement);
 				Long localQuestionId = remoteToLocalQuestionId.get(remoteQuestionId);
 				if(localQuestionId != null) {
 					Question question = localIdToQuestion.get(localQuestionId);
+					if(question == null) {
+						String msg = "LocalQuestionId is "+localQuestionId+" but no local question? ";
+						msg += "Remote to local map: ";
+						for(Map.Entry<Long,Long> keyVal : remoteToLocalQuestionId.entrySet()) {
+							msg += " <"+keyVal.getKey()+","+keyVal.getValue()+">, ";
+						}
+						msg += "Ids in local map: ";
+						for(Long key : localIdToQuestion.keySet()) {
+							msg += " "+key+", ";
+						}
+						throw new RuntimeException(msg);
+					}
 					if(updateStudy) {
-						updateQuestionFromNode(question,questionElement,study.getId(),remoteToLocalExpressionId);
+						updateQuestionFromNode(session,question,questionElement,
+								study.getId(),remoteToLocalExpressionId);
 					}
 					List<Element> optionElements = questionElement.elements("option");
 					List<QuestionOption> optionEntities = Options.getOptionsForQuestion(session, question.getId());
@@ -145,14 +166,12 @@ public class Archiving {
 							fnCreateOption(),fnDeleteOption(session));
 					remoteToLocalOptionId.putAll(optionIdMap);
 					if(updateStudy) {
-						// re-fetch, since new options created in createRemoteToLocalMap
-						Map<Long,QuestionOption> idToOptionEntity = 
-							indexById(Options.getOptionsForQuestion(session, question.getId()));
+						Map<Long,QuestionOption> idToOptionEntity = indexById(optionEntities);
 						for(Element optionElement : optionElements) {
 							Long localId = remoteToLocalOptionId.get(attrId(optionElement));
 							if(localId != null) {
 								QuestionOption optionEntity = idToOptionEntity.get(localId);
-								updateOptionFromNode(optionEntity,optionElement,question.getId());
+								updateOptionFromNode(session,optionEntity,optionElement,question.getId());
 							}
 						}
 					}
@@ -160,12 +179,12 @@ public class Archiving {
 			}
 			
 			if(updateStudy) {
-				Map<Long,Expression> localIdToExpression = indexById(Expressions.forStudy(session, study.getId()));
+				Map<Long,Expression> localIdToExpression = indexById(expressions);
 				for(Element expressionElement : expressionElements) {
 					Long localExpressionId = remoteToLocalExpressionId.get(attrId(expressionElement));
 					if(localExpressionId != null) {
 						Expression expression = localIdToExpression.get(localExpressionId);
-						updateExpressionFromNode(expression,expressionElement,
+						updateExpressionFromNode(session,expression,expressionElement,
 								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId);
 					}
 				}
@@ -174,43 +193,43 @@ public class Archiving {
 			if(updateRespondentData) {
 				// Import interviews
 				List<Element> interviewElements = studyElement.element("interviews").elements("interview");
+				List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
 				Map<Long,Long> remoteToLocalInterviewId = createRemoteToLocalMap(
-						Interviews.getInterviewsForStudy(session, study.getId()), 
+						interviews, 
 						interviewElements, true, false,
 						fnCreateInterview(), null);
-				Map<Long,Interview> localIdToInterview = 
-					indexById(Interviews.getInterviewsForStudy(session, study.getId()));
+				Map<Long,Interview> localIdToInterview = indexById(interviews);
 				for(Element interviewElement : interviewElements) {
 					Long localInterviewId = remoteToLocalInterviewId.get(attrId(interviewElement));
 					Interview interview = localIdToInterview.get(localInterviewId);
-					updateInterviewFromNode(interview,interviewElement,study.getId());
+					updateInterviewFromNode(session,interview,interviewElement,study.getId());
 					
 					// Import alters
 					List<Element> alterElements = interviewElement.element("alters").elements("alter");
+					List<Alter> alterEntities = Alters.getForInterview(session, interview.getId());
 					Map<Long,Long> remoteToLocalAlterId = createRemoteToLocalMap(
-							Alters.getForInterview(session, interview.getId()),
+							alterEntities,
 							alterElements, true, true,
 							fnCreateAlter(), fnDeleteAlter(session));
-					Map<Long,Alter> localIdToAlter =
-						indexById(Alters.getForInterview(session, interview.getId()));
+					Map<Long,Alter> localIdToAlter = indexById(alterEntities);
 					for(Element alterElement : alterElements) {
 						Long localAlterId = remoteToLocalAlterId.get(attrId(alterElement));
 						Alter alter = localIdToAlter.get(localAlterId);
-						updateAlterFromNode(alter,alterElement,interview.getId());
+						updateAlterFromNode(session,alter,alterElement,interview.getId());
 					}
 					
 					// Import answers
 					List<Element> answerElements = interviewElement.element("answers").elements("answer");
+					List<Answer> answerEntities = Answers.getAnswersForInterview(session, interview.getId());
 					Map<Long,Long> remoteToLocalAnswerId = createRemoteToLocalMap(
-							Answers.getAnswersForInterview(session, interview.getId()),
+							answerEntities,
 							answerElements, true, false,
 							fnCreateAnswer(), null);
-					Map<Long,Answer> localIdToAnswer =
-						indexById(Answers.getAnswersForInterview(session, interview.getId()));
+					Map<Long,Answer> localIdToAnswer = indexById(answerEntities);
 					for(Element answerElement : answerElements) {
 						Long localAnswerId = remoteToLocalAnswerId.get(attrId(answerElement));
 						Answer answer = localIdToAnswer.get(localAnswerId);
-						updateAnswerFromNode(answer,answerElement,
+						updateAnswerFromNode(session,answer,answerElement,
 								study.getId(),interview.getId(),
 								remoteToLocalQuestionId,remoteToLocalAlterId,remoteToLocalOptionId);
 					}
@@ -251,9 +270,12 @@ public class Archiving {
 				entity.setRandomKey(key);
 				DB.save(entity);
 				keyToEntity.put(key, entity);
+				entities.add(entity);
 			}
 			if(shouldDelete && ! keyToElement.containsKey(key)) {
-				deleter.apply(keyToEntity.remove(key));
+				E entity = keyToEntity.remove(key);
+				deleter.apply(entity);
+				entities.remove(entity);
 			}
 			Entity entity = keyToEntity.get(key);
 			Element element = keyToElement.get(key);
@@ -280,8 +302,8 @@ public class Archiving {
 		return studyNode;
 	}
 	
-	private static void updateStudyFromNode(
-			Study study, Element studyElement, Map<Long,Long> remoteToLocalExpressionId) 
+	private static void updateStudyFromNode(Session session, Study study, Element studyElement, 
+			Map<Long,Long> remoteToLocalExpressionId) 
 	{
 		study.setName(attrString(studyElement,"name"));
 		study.setRandomKey(attrLong(studyElement,"key"));
@@ -295,6 +317,7 @@ public class Archiving {
 		study.setEgoIdPrompt(attrText(studyElement,"egoIdPrompt"));
 		study.setAlterPrompt(attrText(studyElement,"alterPrompt"));
 		study.setConclusion(attrText(studyElement,"conclusion"));
+		DB.save(session, study);
 	}
 	
 	private static Element addQuestionNode(Element questionsNode, 
@@ -319,9 +342,10 @@ public class Archiving {
 		return questionNode;
 	}
 	
-	private static void updateQuestionFromNode(Question question, Element node, 
+	private static void updateQuestionFromNode(Session session, Question question, Element node, 
 			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
 	{
+		question.setStudyId(studyId);
 		question.setTitle(attrString(node,"title"));
 		question.setAnswerTypeDB(attrString(node,"answerType"));
 		question.setTypeDB(attrString(node,"subjectType"));
@@ -335,6 +359,7 @@ public class Archiving {
 		question.setAnswerReasonExpressionId(
 				remoteReasonId == null ? null : 
 					remoteToLocalExpressionId.get(remoteReasonId));
+		DB.save(session, question);
 	}
 	
 	private static Element addOptionNode(Element questionNode, 
@@ -348,10 +373,14 @@ public class Archiving {
 			.addAttribute("ordering", ordering+"");
 	}
 	
-	private static void updateOptionFromNode(QuestionOption option, Element node, Long questionId) {
+	private static void updateOptionFromNode(Session session, QuestionOption option, Element node, 
+			Long questionId) 
+	{
+		option.setQuestionId(questionId);
 		option.setName(attrString(node,"name"));
 		option.setValue(attrString(node,"value"));
 		option.setOrdering(attrInt(node,"ordering"));
+		DB.save(session, option);
 	}
 	
 	private static Element addExpressionNode(Element parent, Expression expression) {
@@ -367,9 +396,10 @@ public class Archiving {
 		return expressionNode;
 	}
 	
-	private static void updateExpressionFromNode(Expression expression, Element node,
+	private static void updateExpressionFromNode(Session session, Expression expression, Element node,
 			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId)
 	{
+		expression.setStudyId(studyId);
 		expression.setName(attrString(node,"name"));
 		expression.setResultForUnanswered(attrBool(node,"resultForUnanswered"));
 		expression.setTypeDB(attrString(node,"type"));
@@ -382,7 +412,7 @@ public class Archiving {
 					remoteToLocalQuestionId.get(remoteQuestionId));
 		
 		// value (first set as normal, then convert IDs)
-		expression.setValueDB(attrString(node,"value"));
+		expression.setValueDB(attrText(node,"value"));
 		if(expression.getType().equals(Expression.Type.Selection) || 
 				expression.getType().equals(Expression.Type.Compound))
 		{
@@ -395,6 +425,7 @@ public class Archiving {
 			}
 			expression.setValue(localOptionIds);
 		}
+		DB.save(session, expression);
 	}
 	
 	private static Element addInterviewNode(Element parent, 
@@ -414,8 +445,10 @@ public class Archiving {
 		return interviewNode;
 	}
 	
-	private static void updateInterviewFromNode(Interview interview, Element node, Long studyId) {
+	private static void updateInterviewFromNode(Session session, Interview interview, Element node, Long studyId) 
+	{
 		interview.setStudyId(studyId);
+		DB.save(session, interview);
 	}
 	
 	private static Element addAlterNode(Element parent, Alter alter) {
@@ -425,9 +458,10 @@ public class Archiving {
 			.addAttribute("key", alter.getRandomKey()+"");
 	}
 	
-	private static void updateAlterFromNode(Alter alter, Element node, Long interviewId) {
+	private static void updateAlterFromNode(Session session, Alter alter, Element node, Long interviewId) {
 		alter.setInterviewId(interviewId);
 		alter.setName(attrString(node,"name"));
+		DB.save(session, alter);
 	}
 	
 	private static Element addAnswerNode(Element parent, Answer answer) {
@@ -443,9 +477,9 @@ public class Archiving {
 		return answerNode;
 	}
 	
-	private static void updateAnswerFromNode(Answer answer, Element node, Long studyId, Long interviewId,
-			Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalAlterId, 
-			Map<Long,Long> remoteToLocalOptionId)
+	private static void updateAnswerFromNode(Session session, Answer answer, Element node, 
+			Long studyId, Long interviewId, Map<Long,Long> remoteToLocalQuestionId, 
+			Map<Long,Long> remoteToLocalAlterId, Map<Long,Long> remoteToLocalOptionId)
 	{
 		answer.setStudyId(studyId);
 		answer.setInterviewId(interviewId);
@@ -466,12 +500,12 @@ public class Archiving {
 		
 		// alterId2
 		Long remoteAlterId2 = attrLong(node,"alterId2");
-		answer.setAlterId1(
+		answer.setAlterId2(
 				remoteAlterId2 == null ? null : 
 					remoteToLocalAlterId.get(remoteAlterId2));
 		
 		// value (requires translation - see Archiving.updateExpressionFromNode and MultipleSelectionAnswerFormFieldPanel)
-		String answerString = attrString(node,"value");
+		String answerString = attrText(node,"value");
 		Answer.AnswerType answerType = answer.getAnswerType();
 		if(answerType.equals(Answer.AnswerType.SELECTION) ||
 				answerType.equals(Answer.AnswerType.MULTIPLE_SELECTION))
@@ -492,6 +526,7 @@ public class Archiving {
 		} else {
 			answer.setValue(answerString);
 		}
+		DB.save(session, answer);
 	}
 	
 	private static String formatXMLDocument(Document document) throws IOException {
@@ -521,7 +556,16 @@ public class Archiving {
 	}
 	
 	private static String attrString(Element element, String name) {
-		String attr = element.attribute(name).getValue();
+		if(element == null || name == null) {
+			throw new RuntimeException(
+					"Unable to determine "+name+" attribute for "+
+					(element == null ? "null " : "")+"element.");
+		}
+		Attribute attribute = element.attribute(name);
+		if(attribute == null) {
+			throw new RuntimeException("Element does not contain the requested attribute: "+name);
+		}
+		String attr = attribute.getValue();
 		return
 			attr == null || attr.isEmpty() || attr.equals("null") ?
 					null : attr;

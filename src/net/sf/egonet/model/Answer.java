@@ -113,11 +113,23 @@ public class Answer extends Entity
 	}
 
 
-	public String       getAnswerTypeDB() { return getAnswerType().name(); }
+	public String getAnswerTypeDB() { 
+		AnswerType type = getAnswerType();
+		return type == null ? null : type.name(); 
+	}
+	
 	public String       getQuestionTypeDB()       { return Question.typeDB(getQuestionType());       }
 
-	public void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
-	public void setQuestionTypeDB(String val) { this.setQuestionType(QuestionType.valueOf(val)); }
+	public void setAnswerTypeDB(String val) { 
+		if(val != null && ! val.isEmpty()) {
+			this.setAnswerType(AnswerType.valueOf(val)); 
+		}
+	}
+	public void setQuestionTypeDB(String val) { 
+		if(val != null && ! val.isEmpty()) {
+			this.setQuestionType(QuestionType.valueOf(val)); 
+		}
+	}
 
 	// ---------------------------------
 	

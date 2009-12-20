@@ -1,37 +1,64 @@
 <wicket:extend>
 
+	<table>
+	<tr>
+	<td>
 	<fieldset>
-		<legend>Import new or modified study</legend>
+		<legend>Import new study</legend>
 		<form wicket:id="studyImportForm">
+			<br />
 			<p>
 				<input wicket:id="studyImportField" type="file" />
 			</p>
 			<p>
 				<input type="submit" value="Import" />
-				(Not working yet)
 			</p>
 		</form>
 	</fieldset>
-	
+	</td>
+	<td>
+	<fieldset>
+		<legend>Import changes to study</legend>
+		<form wicket:id="studyModifyForm">
+			<p>
+				<label for="studyToModify">Study:</label>
+				<select id="studyToModify" wicket:id="studyToModify" />
+			</p>
+			<p>
+				<input wicket:id="studyModifyField" type="file" />
+			</p>
+			<p>
+				<input type="submit" value="Import" />
+			</p>
+		</form>
+	</fieldset>
+	</td>
+	</tr>
+	<tr>
+	<td>
 	<fieldset>
 		<legend>Import respondent data</legend>
 		<form wicket:id="respondentDataImportForm">
+			<p>
+				<label for="studyToPopulate">Study:</label>
+				<select id="studyToPopulate" wicket:id="studyToPopulate" />
+			</p>
 			<p>
 				<input wicket:id="respondentDataImportField" type="file" />
 			</p>
 			<p>
 				<input type="submit" value="Import" />
-				(Not working yet)
 			</p>
 		</form>
 	</fieldset>
-
+	</td>
+	<td>
 	<fieldset>
 		<legend>Export</legend>
 		<form wicket:id="exportForm">
 			<p>
-				<label for="study">Study:</label>
-				<select id="study" wicket:id="studyDropdown" />
+				<label for="studyToExport">Study:</label>
+				<select id="studyToExport" wicket:id="studyToExport" />
 			</p>
 			<p>
 				<input wicket:id="studyExport" type="submit" value="Export study" />
@@ -41,5 +68,7 @@
 			</p>
 		</form>
 	</fieldset>
-		
+	</td>
+	</tr>
+	</table>
 </wicket:extend>
