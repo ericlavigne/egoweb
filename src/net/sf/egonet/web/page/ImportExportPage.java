@@ -47,6 +47,7 @@ public class ImportExportPage extends EgonetPage {
 					if(uploadText != null) {
 						Archiving.loadStudyXML(null, uploadText);
 					}
+					setResponsePage(new ImportExportPage());
 				} catch(Exception ex) {
 					throw new RuntimeException("Exception while trying to import study.",ex);
 				}
@@ -71,6 +72,7 @@ public class ImportExportPage extends EgonetPage {
 					Study study = getStudy(studyToModify);
 					if(uploadText != null && study != null) {
 						Archiving.loadStudyXML(study, uploadText);
+						setResponsePage(new ImportExportPage());
 					}
 					if(uploadText == null) {
 						throw new RuntimeException("Need to specify a study settings file.");
