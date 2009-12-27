@@ -18,21 +18,15 @@ public class Question extends Entity
 	protected String prefaceOld;
 	private AnswerType answerType;
 	private QuestionType type;
-	private boolean isRequired;
+	private Boolean askingStyleList;
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
 	private Integer ordering; // Just controls order in which questions are asked
 
-	public Question(String prompt, AnswerType answerType, QuestionType type, boolean isRequired)
-	{
-		this.prompt     = prompt;
-		this.answerType = answerType;
-		this.type       = type;
-		this.isRequired = isRequired;
-	}
-
 	public Question() {
+		prompt = "";
 		answerType = AnswerType.TEXTUAL;
 		type = QuestionType.EGO;
+		askingStyleList = false;
 	}
 
 	public String toString() {
@@ -64,7 +58,6 @@ public class Question extends Entity
 	
 	public String       getTitle()        { return this.title;        }
 	public QuestionType getType()         { return this.type;         }
-	public boolean      isRequired()      { return this.isRequired;   }
 	public Long         getStudyId()      { return this.studyId;        }
 	public String       getAnswerTypeDB() { return getAnswerType().name(); }
 	public String       getTypeDB()       { return typeDB(getType());       }
@@ -79,7 +72,6 @@ public class Question extends Entity
 	public void setAnswerType(AnswerType val) { this.answerType = val; }
 	public void setTitle(String          val) { this.title      = val; }
 	public void setType(QuestionType     val) { this.type       = val; }
-	public void setRequired(boolean      val) { this.isRequired = val; }
 	public void setStudyId(Long          val) { this.studyId      = val; }
 
 	public void setAnswerTypeDB(String val) { this.setAnswerType(AnswerType.valueOf(val)); }
@@ -162,5 +154,15 @@ public class Question extends Entity
 	}
 	protected void setCitationOld(String val) {
 		this.citationOld = val;
+	}
+
+	public void setAskingStyleList(Boolean askingStyleList) {
+		if(askingStyleList != null) {
+			this.askingStyleList = askingStyleList;
+		}
+	}
+
+	public Boolean getAskingStyleList() {
+		return askingStyleList == null ? false : askingStyleList;
 	}
 }

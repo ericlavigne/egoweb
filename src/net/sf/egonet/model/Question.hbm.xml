@@ -20,6 +20,7 @@
 		<property name="citationOld" column="citation" />
 		<property name="typeDB" column="subject_type" />
 		<property name="answerTypeDB" column="response_type" />
+		<property name="askingStyleList" column="asking_style_list" />
 		<property name="ordering" column="ordering" />
 
 		<property name="studyId" column="study_id" />

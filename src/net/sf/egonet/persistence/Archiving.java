@@ -329,7 +329,7 @@ public class Archiving {
 			.addAttribute("key", question.getRandomKey()+"")
 			.addAttribute("answerType", question.getAnswerTypeDB())
 			.addAttribute("subjectType", question.getTypeDB())
-			.addAttribute("required", question.isRequired()+"")
+			.addAttribute("askingStyleList", question.getAskingStyleList()+"")
 			// in case ordering == null, I use the order they were pulled from the DB
 			.addAttribute("ordering", ordering+"")
 			.addAttribute("answerReasonExpressionId", question.getAnswerReasonExpressionId()+"");
@@ -349,7 +349,7 @@ public class Archiving {
 		question.setTitle(attrString(node,"title"));
 		question.setAnswerTypeDB(attrString(node,"answerType"));
 		question.setTypeDB(attrString(node,"subjectType"));
-		question.setRequired(attrBool(node,"required"));
+		question.setAskingStyleList(attrBool(node,"askingStyleList"));
 		question.setOrdering(attrInt(node,"ordering"));
 		question.setPreface(attrText(node,"preface"));
 		question.setPrompt(attrText(node,"prompt"));

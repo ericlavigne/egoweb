@@ -17,6 +17,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -37,6 +38,7 @@ public class EditQuestionPanel extends Panel {
 	private TextArea questionCitationField;
 	private Model questionResponseTypeModel;
 	private Model questionAnswerReasonModel;
+	private Model askingStyleModel;
 	private static final String answerAlways = "Always";
 	
 	private Component parentThatNeedsUpdating;
@@ -107,6 +109,19 @@ public class EditQuestionPanel extends Panel {
 				questionAnswerReasonModel,
 				answerChoices));
 		
+		Label askingStyleListLabel = new Label("askingStyleListLabel","Ask with list of alters:");
+		askingStyleModel = new Model();
+		askingStyleModel.setObject(Boolean.FALSE);
+		CheckBox askingStyleListField = new CheckBox("askingStyleListField",askingStyleModel);
+		form.add(askingStyleListLabel);
+		form.add(askingStyleListField);
+		if(question.getType().equals(Question.QuestionType.EGO) ||
+				question.getType().equals(Question.QuestionType.EGO_ID))
+		{
+			askingStyleListLabel.setVisible(false);
+			askingStyleListField.setVisible(false);
+		}
+		
 		form.add(
 			new AjaxFallbackButton("submitQuestion",form)
             {
@@ -146,6 +161,10 @@ public class EditQuestionPanel extends Panel {
 		questionAnswerReasonModel.setObject(
 				answerReasonId == null ? 
 						answerAlways : Expressions.get(answerReasonId));
+		String msg = "Asking style in setFormFields: "+askingStyleModel.getObject();
+		askingStyleModel.setObject(question.getAskingStyleList());
+		msg += " -> "+askingStyleModel.getObject()+" (question had "+question.getAskingStyleList()+")";
+		//throw new RuntimeException(msg);
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
@@ -158,6 +177,12 @@ public class EditQuestionPanel extends Panel {
 		question.setAnswerReasonExpressionId(
 				answerReason == null || answerReason.equals(answerAlways) ?
 						null : ((Expression) answerReason).getId());
+		Boolean askingStyle = (Boolean) askingStyleModel.getObject();
+		String msg = "Asking style in insertFormFields (model="+askingStyle+
+			"): "+question.getAskingStyleList();
+		question.setAskingStyleList(askingStyle); // TODO: need to trace what happens in this method
+		msg += " -> "+question.getAskingStyleList();
+		// throw new RuntimeException(msg);
 	}
 	
 }
