@@ -15,6 +15,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.egonet.web.page.InterviewingAlterPage;
+import net.sf.egonet.web.page.InterviewingAlterPairPage;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.Triple;
@@ -142,13 +143,11 @@ public class Interviewing {
 	public static InterviewingAlterPage.Subject nextAlterPageForInterview(Session session, Long interviewId, 
 			InterviewingAlterPage.Subject currentPage, Boolean forward, Boolean unansweredOnly)
 	{
+		InterviewingAlterPage.Subject previousPage = currentPage;
+		EvaluationContext context = 
+			Expressions.getContext(session, Interviews.getInterview(session, interviewId));
 		TreeSet<InterviewingAlterPage.Subject> pages =
 			alterPagesForInterview(session, interviewId);
-		InterviewingAlterPage.Subject previousPage = currentPage; // TODO: case where currentPage == null
-		EvaluationContext context = null;
-		if(unansweredOnly) {
-			context = Expressions.getContext(session, Interviews.getInterview(session, interviewId));
-		}
 		while(true) {
 			InterviewingAlterPage.Subject nextPage;
 			if(previousPage == null) {
@@ -156,7 +155,7 @@ public class Interviewing {
 					forward ? pages.first() : pages.last();
 			} else {
 				nextPage =
-					forward ? pages.higher(previousPage) : pages.lower(previousPage); // XXX: do these methods do as I expect?
+					forward ? pages.higher(previousPage) : pages.lower(previousPage);
 			}
 			if(nextPage == null) {
 				return null;
@@ -168,6 +167,58 @@ public class Interviewing {
 				Boolean answered = 
 					context.qidAidToAlterAnswer.containsKey(
 							new PairUni<Long>(nextPage.question.getId(),alter.getId()));
+				if(! answered) {
+					return nextPage;
+				}
+			}
+			previousPage = nextPage;
+		}
+	}
+	
+	public static InterviewingAlterPairPage.Subject nextAlterPairPageForInterview(
+			final Long interviewId, final InterviewingAlterPairPage.Subject currentPage, 
+			final Boolean forward, final Boolean unansweredOnly)
+	{
+		return new DB.Action<InterviewingAlterPairPage.Subject>() {
+			public InterviewingAlterPairPage.Subject get() {
+				return nextAlterPairPageForInterview(
+						session, interviewId, currentPage, 
+						forward, unansweredOnly);
+			}
+		}.execute();
+	}
+	
+	public static InterviewingAlterPairPage.Subject nextAlterPairPageForInterview(Session session, 
+			Long interviewId, InterviewingAlterPairPage.Subject currentPage, 
+			Boolean forward, Boolean unansweredOnly)
+	{
+		InterviewingAlterPairPage.Subject previousPage = currentPage;
+		EvaluationContext context = 
+			Expressions.getContext(session, Interviews.getInterview(session, interviewId));
+		TreeSet<InterviewingAlterPairPage.Subject> pages =
+			alterPairPagesForInterview(session, interviewId);
+		while(true) {
+			InterviewingAlterPairPage.Subject nextPage;
+			if(previousPage == null) {
+				nextPage = 
+					forward ? pages.first() : pages.last();
+			} else {
+				nextPage =
+					forward ? pages.higher(previousPage) : pages.lower(previousPage);
+			}
+			if(nextPage == null) {
+				return null;
+			}
+			if(! unansweredOnly) {
+				return nextPage;
+			}
+			for(Alter secondAlter : nextPage.secondAlters) {
+				Boolean answered = 
+					context.qidA1idA2idToAlterPairAnswer.containsKey(
+							new TripleUni<Long>(
+									nextPage.question.getId(),
+									nextPage.firstAlter.getId(),
+									secondAlter.getId()));
 				if(! answered) {
 					return nextPage;
 				}
@@ -260,7 +311,7 @@ public class Interviewing {
 		}
 		return questionIdToSection;
 	}
-	
+
 	public static TreeSet<InterviewingAlterPage.Subject> 
 	alterPagesForInterview(Session session, Long interviewId)
 	{
@@ -288,6 +339,45 @@ public class Interviewing {
 					subject.alters = Lists.newArrayList(alter);
 					subject.interviewId = interviewId;
 					subject.question = question;
+					subject.sectionQuestions = qIdToSection.get(question.getId());
+					results.add(subject);
+				}
+			}
+		}
+		return results;
+	}
+
+	public static TreeSet<InterviewingAlterPairPage.Subject> 
+	alterPairPagesForInterview(Session session, Long interviewId)
+	{
+		ArrayList<Triple<Question,Alter,ArrayList<Alter>>> questionAlterSecondAltersList =
+			alterPairQuestionFirstAlterAndSecondAlters(session, interviewId);
+		Interview interview = Interviews.getInterview(interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
+		Map<Long,TreeSet<Question>> qIdToSection = 
+			createQuestionIdToSectionMap(new TreeSet<Question>(questions));
+		TreeSet<InterviewingAlterPairPage.Subject> results = Sets.newTreeSet();
+		for(Triple<Question,Alter,ArrayList<Alter>> questionAlterSecondAlters : questionAlterSecondAltersList) 
+		{
+			Question question = questionAlterSecondAlters.getFirst();
+			Alter firstAlter = questionAlterSecondAlters.getSecond();
+			ArrayList<Alter> secondAlters = questionAlterSecondAlters.getThird();
+			if(question.getAskingStyleList()) {
+				InterviewingAlterPairPage.Subject subject = new InterviewingAlterPairPage.Subject();
+				subject.interviewId = interviewId;
+				subject.question = question;
+				subject.firstAlter = firstAlter;
+				subject.secondAlters = secondAlters;
+				subject.sectionQuestions = qIdToSection.get(question.getId());
+				results.add(subject);
+			} else {
+				for(Alter secondAlter : secondAlters) {
+					InterviewingAlterPairPage.Subject subject = new InterviewingAlterPairPage.Subject();
+					subject.interviewId = interviewId;
+					subject.question = question;
+					subject.firstAlter = firstAlter;
+					subject.secondAlters = Lists.newArrayList(secondAlter);
 					subject.sectionQuestions = qIdToSection.get(question.getId());
 					results.add(subject);
 				}
@@ -467,6 +557,40 @@ public class Interviewing {
 			}
 		}
 		return null;
+	}
+	
+	public static ArrayList<Triple<Question,Alter,ArrayList<Alter>>>
+	alterPairQuestionFirstAlterAndSecondAlters(Session session, Long interviewId) {
+		ArrayList<Triple<Question,Alter,ArrayList<Alter>>> results = Lists.newArrayList();
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		EvaluationContext context = Expressions.getContext(session, interview);
+		for(Question question : questions) {
+			for(Alter alter1 : alters) {
+				ArrayList<Alter> secondAlters = Lists.newArrayList();
+				for(Alter alter2 : alters) {
+					if(alter1.getId() < alter2.getId()) {
+						Long reasonId = question.getAnswerReasonExpressionId();
+						Boolean shouldAnswer =
+							reasonId == null ||
+							Expressions.evaluate(
+									context.eidToExpression.get(reasonId), 
+									Lists.newArrayList(alter1,alter2), 
+									context);
+						if(shouldAnswer) {
+							secondAlters.add(alter2);
+						}
+					}
+				}
+				if(! secondAlters.isEmpty()) {
+					results.add(new Triple<Question,Alter,ArrayList<Alter>>(
+							question,alter1,secondAlters));
+				}
+			}
+		}
+		return results;
 	}
 	
 	public static ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> alterPairQuestionsForInterview(

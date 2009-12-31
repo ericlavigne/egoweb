@@ -43,7 +43,7 @@ public class InterviewingAlterPage extends EgonetPage {
 		}
 		@Override
 		public int hashCode() {
-			return 0;
+			return question.hashCode()+(question.getAskingStyleList() ? 0 : getAlter().hashCode());
 		}
 		@Override
 		public boolean equals(Object object) {
@@ -154,11 +154,7 @@ public class InterviewingAlterPage extends EgonetPage {
 		if(nextPage != null) {
 			return new InterviewingAlterPage(nextPage);
 		}
-		if(unansweredOnly) {
-			return InterviewingAlterPairPage.askNextUnanswered(interviewId,null,null);
-		} else {
-			return InterviewingAlterPairPage.askNext(interviewId,null,null);
-		}
+		return InterviewingAlterPairPage.askNext(interviewId,null,unansweredOnly);
 	}
 	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject) {
 		Subject previousSubject =
