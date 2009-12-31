@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
@@ -13,6 +14,7 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
+import net.sf.egonet.web.page.InterviewingAlterPage;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.Triple;
@@ -24,6 +26,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -125,6 +128,54 @@ public class Interviewing {
 		return null;
 	}
 
+	public static InterviewingAlterPage.Subject nextAlterPageForInterview(final Long interviewId, 
+			final InterviewingAlterPage.Subject currentPage, final Boolean forward, final Boolean unansweredOnly)
+	{
+		return new DB.Action<InterviewingAlterPage.Subject>() {
+			public InterviewingAlterPage.Subject get() {
+				return nextAlterPageForInterview(
+						session, interviewId, currentPage, 
+						forward, unansweredOnly);
+			}
+		}.execute();
+	}
+	public static InterviewingAlterPage.Subject nextAlterPageForInterview(Session session, Long interviewId, 
+			InterviewingAlterPage.Subject currentPage, Boolean forward, Boolean unansweredOnly)
+	{
+		TreeSet<InterviewingAlterPage.Subject> pages =
+			alterPagesForInterview(session, interviewId);
+		InterviewingAlterPage.Subject previousPage = currentPage; // TODO: case where currentPage == null
+		EvaluationContext context = null;
+		if(unansweredOnly) {
+			context = Expressions.getContext(session, Interviews.getInterview(session, interviewId));
+		}
+		while(true) {
+			InterviewingAlterPage.Subject nextPage;
+			if(previousPage == null) {
+				nextPage = 
+					forward ? pages.first() : pages.last();
+			} else {
+				nextPage =
+					forward ? pages.higher(previousPage) : pages.lower(previousPage); // XXX: do these methods do as I expect?
+			}
+			if(nextPage == null) {
+				return null;
+			}
+			if(! unansweredOnly) {
+				return nextPage;
+			}
+			for(Alter alter : nextPage.alters) {
+				Boolean answered = 
+					context.qidAidToAlterAnswer.containsKey(
+							new PairUni<Long>(nextPage.question.getId(),alter.getId()));
+				if(! answered) {
+					return nextPage;
+				}
+			}
+			previousPage = nextPage;
+		}
+	}
+	
 	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
 			final Long interviewId, 
 			final Question currentQuestion, final Alter currentAlter, 
@@ -187,6 +238,60 @@ public class Interviewing {
 		for(Question question : questions) {
 			results.add(new Pair<Question,ArrayList<Alter>>(
 					question, new ArrayList<Alter>(alters)));
+		}
+		return results;
+	}
+	
+	// Note: sections only relevant for alter and alter pair questions... for now...
+	public static Map<Long,TreeSet<Question>> createQuestionIdToSectionMap(TreeSet<Question> questions) {
+		Map<Long,TreeSet<Question>> questionIdToSection = Maps.newTreeMap();
+		TreeSet<Question> section = null;
+		Question previousQuestion = null;
+		for(Question question : questions) {
+			if(section == null || // reasons to start a new section
+					(question.getPreface() != null && ! question.getPreface().isEmpty()) ||
+					question.getAskingStyleList() || previousQuestion.getAskingStyleList()) 
+			{
+				section = new TreeSet<Question>();
+			}
+			previousQuestion = question;
+			section.add(question);
+			questionIdToSection.put(question.getId(), section);
+		}
+		return questionIdToSection;
+	}
+	
+	public static TreeSet<InterviewingAlterPage.Subject> 
+	alterPagesForInterview(Session session, Long interviewId)
+	{
+		ArrayList<Pair<Question,ArrayList<Alter>>> questionAlterListPairs =
+			alterQuestionsForInterview(session,interviewId,true);
+		Interview interview = Interviews.getInterview(interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		Map<Long,TreeSet<Question>> qIdToSection = 
+			createQuestionIdToSectionMap(new TreeSet<Question>(questions));
+		TreeSet<InterviewingAlterPage.Subject> results = Sets.newTreeSet();
+		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionAlterListPairs) {
+			Question question = questionAndAlters.getFirst();
+			ArrayList<Alter> alters = questionAndAlters.getSecond();
+			if(question.getAskingStyleList()) {
+				InterviewingAlterPage.Subject subject = new InterviewingAlterPage.Subject();
+				subject.alters = alters;
+				subject.interviewId = interviewId;
+				subject.question = question;
+				subject.sectionQuestions = qIdToSection.get(question.getId());
+				results.add(subject);
+			} else {
+				for(Alter alter : alters) {
+					InterviewingAlterPage.Subject subject = new InterviewingAlterPage.Subject();
+					subject.alters = Lists.newArrayList(alter);
+					subject.interviewId = interviewId;
+					subject.question = question;
+					subject.sectionQuestions = qIdToSection.get(question.getId());
+					results.add(subject);
+				}
+			}
 		}
 		return results;
 	}

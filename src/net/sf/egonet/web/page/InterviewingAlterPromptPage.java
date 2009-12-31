@@ -119,7 +119,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		});
 		add(new Link("forwardLink") {
 			public void onClick() {
-				EgonetPage page = InterviewingAlterPage.askNext(interview.getId(),null,null);
+				EgonetPage page = InterviewingAlterPage.askNext(interview.getId(),null,false);
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -139,7 +139,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		if(alters < 1 && (study.getMaxAlters() == null || study.getMaxAlters() > 0)) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		return InterviewingAlterPage.askNextUnanswered(interviewId,null,null);
+		return InterviewingAlterPage.askNext(interviewId,null,true);
 	}
 	
 	private class AlterUniquenessValidator extends AbstractValidator {

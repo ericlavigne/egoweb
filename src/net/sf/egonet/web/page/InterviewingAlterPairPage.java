@@ -152,6 +152,6 @@ public class InterviewingAlterPairPage extends EgonetPage {
 					previousQuestionAndAlterPairs.getSecond(), 
 					previousQuestionAndAlterPairs.getThird());
 		}
-		return InterviewingAlterPage.askPrevious(interviewId, null, null);
+		return InterviewingAlterPage.askPrevious(interviewId, null);
 	}
 }

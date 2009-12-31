@@ -1,6 +1,6 @@
 package net.sf.egonet.model;
 
-public class Alter extends Entity
+public class Alter extends OrderedEntity
 {
 	private String name;
 	private Long interviewId;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import net.sf.egonet.model.Answer.AnswerType;
 
-public class Question extends Entity
+public class Question extends OrderedEntity
 {
 	public static enum QuestionType { EGO_ID, EGO, ALTER, ALTER_PAIR };
 
@@ -20,7 +20,6 @@ public class Question extends Entity
 	private QuestionType type;
 	private Boolean askingStyleList;
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
-	private Integer ordering; // Just controls order in which questions are asked
 
 	public Question() {
 		prompt = "";
@@ -104,14 +103,6 @@ public class Question extends Entity
 
 	public Long getAnswerReasonExpressionId() {
 		return answerReasonExpressionId;
-	}
-
-	public void setOrdering(Integer ordering) {
-		this.ordering = ordering;
-	}
-
-	public Integer getOrdering() {
-		return ordering;
 	}
 	
 	// ---------------------------------
