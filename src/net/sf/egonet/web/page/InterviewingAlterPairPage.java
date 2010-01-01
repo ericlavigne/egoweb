@@ -26,7 +26,7 @@ import net.sf.functionalj.tuple.PairUni;
 public class InterviewingAlterPairPage extends EgonetPage {
 
 	public static class Subject implements Serializable, Comparable<Subject> {
-		// eventually need a way for one of these to represent a question intro
+		// TODO: need a way for one of these to represent a question intro: firstAlter -> null
 		public Long interviewId;
 		public Question question;
 		public Alter firstAlter;

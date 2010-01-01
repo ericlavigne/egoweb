@@ -25,7 +25,6 @@ import org.hibernate.Session;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -227,74 +226,8 @@ public class Interviewing {
 		}
 	}
 	
-	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
-			final Long interviewId, 
-			final Question currentQuestion, final Alter currentAlter, 
-			final Boolean forward, final Boolean unansweredOnly, final Integer maxAlters)
-	{
-		return new DB.Action<Pair<Question,ArrayList<Alter>>>() {
-			public Pair<Question, ArrayList<Alter>> get() {
-				return nextAlterQuestionForInterview(
-						session, interviewId, currentQuestion, currentAlter, 
-						forward, unansweredOnly, maxAlters);
-			}
-		}.execute();
-	}
-	
-	public static Pair<Question,ArrayList<Alter>> nextAlterQuestionForInterview(
-			Session session, Long interviewId, Question currentQuestion, Alter currentAlter, 
-			Boolean forward, Boolean unansweredOnly, Integer maxAlters)
-	{
-		ArrayList<Pair<Question,ArrayList<Alter>>> questions =
-			alterQuestionsForInterview(session,interviewId,forward);
-		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
-		Interview interview = Interviews.getInterview(interviewId);
-		EvaluationContext context = Expressions.getContext(session, interview);
-		for(Pair<Question,ArrayList<Alter>> questionAlters : questions) {
-			Question question = questionAlters.getFirst();
-			ArrayList<Alter> results = Lists.newArrayList();
-			for(Alter alter : questionAlters.getSecond()) {
-				Boolean answered = 
-					context.qidAidToAlterAnswer.containsKey(
-							new PairUni<Long>(question.getId(),alter.getId()));
-				if(passedCurrent && (maxAlters == null || results.size() < maxAlters) &&
-						! (unansweredOnly && answered)) {
-					results.add(alter);
-				}
-				if(currentQuestion != null && 
-						currentQuestion.getId().equals(question.getId()) && 
-						currentAlter.getId().equals(alter.getId())) 
-				{
-					passedCurrent = true;
-				}
-			}
-			if(! results.isEmpty()) {
-				if(! forward) { // Want to return alters in normal order.
-					Collections.reverse(results);
-				}
-				return new Pair<Question,ArrayList<Alter>>(question,results);
-			}
-		}
-		return null;
-	}
-
-	public static ArrayList<Pair<Question,ArrayList<Alter>>> 
-	alterQuestionsForInterview(Session session, Long interviewId)
-	{
-		Interview interview = Interviews.getInterview(session, interviewId);
-		List<Question> questions = 
-			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
-		List<Alter> alters = Alters.getForInterview(session, interviewId);
-		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
-		for(Question question : questions) {
-			results.add(new Pair<Question,ArrayList<Alter>>(
-					question, new ArrayList<Alter>(alters)));
-		}
-		return results;
-	}
-	
 	// Note: sections only relevant for alter and alter pair questions... for now...
-	public static Map<Long,TreeSet<Question>> createQuestionIdToSectionMap(TreeSet<Question> questions) {
+	private static Map<Long,TreeSet<Question>> createQuestionIdToSectionMap(TreeSet<Question> questions) {
 		Map<Long,TreeSet<Question>> questionIdToSection = Maps.newTreeMap();
 		TreeSet<Question> section = null;
 		Question previousQuestion = null;
@@ -312,11 +245,11 @@ public class Interviewing {
 		return questionIdToSection;
 	}
 
-	public static TreeSet<InterviewingAlterPage.Subject> 
+	private static TreeSet<InterviewingAlterPage.Subject> 
 	alterPagesForInterview(Session session, Long interviewId)
 	{
 		ArrayList<Pair<Question,ArrayList<Alter>>> questionAlterListPairs =
-			alterQuestionsForInterview(session,interviewId,true);
+			alterQuestionsForInterview(session,interviewId);
 		Interview interview = Interviews.getInterview(interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
@@ -347,7 +280,7 @@ public class Interviewing {
 		return results;
 	}
 
-	public static TreeSet<InterviewingAlterPairPage.Subject> 
+	private static TreeSet<InterviewingAlterPairPage.Subject> 
 	alterPairPagesForInterview(Session session, Long interviewId)
 	{
 		ArrayList<Triple<Question,Alter,ArrayList<Alter>>> questionAlterSecondAltersList =
@@ -386,77 +319,8 @@ public class Interviewing {
 		return results;
 	}
 	
-	private static ArrayList<Pair<Question,ArrayList<Alter>>>
-	afterCurrent(Question currentQuestion, Alter currentAlter,
-			ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters)
-	{
-		if(currentQuestion == null) {
-			return questionsAndAlters;
-		}
-		Boolean passedCurrent = false;
-		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
-		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionsAndAlters) {
-			Question question = questionAndAlters.getFirst();
-			ArrayList<Alter> alters = Lists.newArrayList();
-			for(Alter alter : questionAndAlters.getSecond()) {
-				if(passedCurrent) {
-					alters.add(alter);
-				}
-				if(question.getId().equals(currentQuestion.getId()) && 
-						alter.getId().equals(currentAlter.getId()))
-				{
-					passedCurrent = true;
-				}
-			}
-			if(! alters.isEmpty()) {
-				results.add(new Pair<Question,ArrayList<Alter>>(question,alters));
-			}
-		}
-		return results;
-	}
-	
-	private static ArrayList<Pair<Question,ArrayList<Alter>>>
-	unansweredOnly(
-			ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters,
-			Map<PairUni<Long>,Answer> questionAndAlterToAnswer)
-	{
-		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
-		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionsAndAlters) {
-			ArrayList<Alter> alters = Lists.newArrayList();
-			for(Alter alter : questionAndAlters.getSecond()) {
-				if(questionAndAlterToAnswer.containsKey(
-						new PairUni<Long>(
-								questionAndAlters.getFirst().getId(),
-								alter.getId()))) 
-				{
-					alters.add(alter);
-				}
-			}
-			if(! alters.isEmpty()) {
-				results.add(new Pair<Question,ArrayList<Alter>>(
-						questionAndAlters.getFirst(),
-						alters));
-			}
-		}
-		return results;
-	}
-	
-	private static ArrayList<Pair<Question,ArrayList<Alter>>>
-	reverseQuestionsAndAlters(ArrayList<Pair<Question,ArrayList<Alter>>> questionsAndAlters) 
-	{
-		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
-		for(Pair<Question,ArrayList<Alter>> questionAndAlters : 
-			Iterables.reverse(questionsAndAlters)) 
-		{
-			results.add(new Pair<Question,ArrayList<Alter>>(
-					questionAndAlters.getFirst(),
-					Lists.newArrayList(Iterables.reverse(questionAndAlters.getSecond()))));
-		}
-		return results;
-	}
-	
-	public static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
-			Session session, Long interviewId, Boolean forward) 
+	private static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
+			Session session, Long interviewId) 
 	{
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
@@ -466,10 +330,6 @@ public class Interviewing {
 			questionIdToAnswers.put(answer.getQuestionId(), answer);
 		}
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
-		if(! forward) {
-			Collections.reverse(questions);
-			Collections.reverse(alters);
-		}
 		EvaluationContext context = Expressions.getContext(session, interview);
 		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
 		for(Question question : questions) {
@@ -497,69 +357,7 @@ public class Interviewing {
 		return results;
 	}
 	
-	public static Triple<Question,Alter,ArrayList<Alter>> nextAlterPairQuestionForInterview(
-			final Long interviewId, 
-			final Question currentQuestion, final PairUni<Alter> currentAlterPair, 
-			final Boolean forward, final Boolean unansweredOnly, final Integer maxAlterPairs)
-	{
-		return new DB.Action<Triple<Question,Alter,ArrayList<Alter>>>() {
-			public Triple<Question,Alter,ArrayList<Alter>> get() {
-				return nextAlterPairQuestionForInterview(
-						session, interviewId, currentQuestion, currentAlterPair, 
-						forward, unansweredOnly, maxAlterPairs);
-			}
-		}.execute();
-	}
-	
-	public static Triple<Question,Alter,ArrayList<Alter>> nextAlterPairQuestionForInterview(
-			Session session, Long interviewId, Question currentQuestion, PairUni<Alter> currentAlterPair, 
-			Boolean forward, Boolean unansweredOnly, Integer maxAlterPairs)
-	{
-		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> questions =
-			alterPairQuestionsForInterview(session,interviewId,forward);
-		Boolean passedCurrent = currentQuestion == null; // No current question? Then pretend already passed it.
-		Interview interview = Interviews.getInterview(interviewId);
-		EvaluationContext context = Expressions.getContext(session, interview);
-		for(Pair<Question,ArrayList<PairUni<Alter>>> questionAlters : questions) {
-			Question question = questionAlters.getFirst();
-			Alter firstAlter = null;
-			ArrayList<Alter> secondAlters = Lists.newArrayList();
-			for(PairUni<Alter> alters : questionAlters.getSecond()) {
-				if(firstAlter != null && ! firstAlter.getId().equals(alters.getFirst().getId())) {
-					return new Triple<Question,Alter,ArrayList<Alter>>(question,firstAlter,secondAlters);
-				}
-				if(passedCurrent && (maxAlterPairs == null || secondAlters.size() < maxAlterPairs)) {
-					Boolean answered = context.qidA1idA2idToAlterPairAnswer.containsKey(
-							new TripleUni<Long>(
-									question.getId(),
-									alters.getFirst().getId(),
-									alters.getSecond().getId()));
-					if(unansweredOnly && answered) {
-						// Answered, but we only want unanswered. Skip it.
-					} else {
-						firstAlter = alters.getFirst();
-						secondAlters.add(alters.getSecond());
-					}
-				}
-				if(currentQuestion != null && 
-						currentQuestion.getId().equals(question.getId()) && 
-						currentAlterPair.getFirst().getId().equals(alters.getFirst().getId()) &&
-						currentAlterPair.getSecond().getId().equals(alters.getSecond().getId()) )
-				{
-					passedCurrent = true;
-				}
-			}
-			if(! secondAlters.isEmpty()) {
-				if(! forward) { // Want to return alter pairs in normal order.
-					Collections.reverse(secondAlters);
-				}
-				return new Triple<Question,Alter,ArrayList<Alter>>(question,firstAlter,secondAlters);
-			}
-		}
-		return null;
-	}
-	
-	public static ArrayList<Triple<Question,Alter,ArrayList<Alter>>>
+	private static ArrayList<Triple<Question,Alter,ArrayList<Alter>>>
 	alterPairQuestionFirstAlterAndSecondAlters(Session session, Long interviewId) {
 		ArrayList<Triple<Question,Alter,ArrayList<Alter>>> results = Lists.newArrayList();
 		Interview interview = Interviews.getInterview(session, interviewId);
@@ -588,46 +386,6 @@ public class Interviewing {
 					results.add(new Triple<Question,Alter,ArrayList<Alter>>(
 							question,alter1,secondAlters));
 				}
-			}
-		}
-		return results;
-	}
-	
-	public static ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> alterPairQuestionsForInterview(
-			Session session, Long interviewId, Boolean forward) 
-	{
-		ArrayList<Pair<Question,ArrayList<PairUni<Alter>>>> results = Lists.newArrayList();
-		Interview interview = Interviews.getInterview(session, interviewId);
-		List<Question> questions = 
-			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER_PAIR);
-		List<Alter> alters = Alters.getForInterview(session, interviewId);
-		if(! forward) {
-			Collections.reverse(questions);
-		}
-		EvaluationContext context = Expressions.getContext(session, interview);
-		for(Question question : questions) {
-			ArrayList<PairUni<Alter>> resultPairs = Lists.newArrayList();
-			for(Alter alter1 : alters) {
-				for(Alter alter2 : alters) {
-					if(alter1.getId() < alter2.getId()) { // To avoid repeats, convention that lower ID is first
-						Long reasonId = question.getAnswerReasonExpressionId();
-						Boolean shouldAnswer =
-							reasonId == null ||
-								Expressions.evaluate(
-										context.eidToExpression.get(reasonId), 
-										Lists.newArrayList(alter1,alter2), 
-										context);
-						if(shouldAnswer) {
-							resultPairs.add(new PairUni<Alter>(alter1,alter2));
-						}
-					}
-				}
-			}
-			if(! resultPairs.isEmpty()) {
-				if(! forward) {
-					Collections.reverse(resultPairs);
-				}
-				results.add(new Pair<Question,ArrayList<PairUni<Alter>>>(question,resultPairs));
 			}
 		}
 		return results;
