@@ -31,6 +31,21 @@ public class Question extends OrderedEntity
 	public String toString() {
 		return (title == null ? "Untitled question" : title)+" ("+type+")";
 	}
+	@Override
+	public int compareTo(OrderedEntity entity) {
+		if(entity instanceof Question) {
+			Question question = (Question) entity;
+			if(! getType().equals(question.getType())) {
+				if(getType().ordinal() < question.getType().ordinal()) {
+					return -1;
+				}
+				if(getType().ordinal() > question.getType().ordinal()) {
+					return 1;
+				}
+			}
+		}
+		return super.compareTo(entity);
+	}
 
 	public String individualizePrompt(ArrayList<Alter> alters) {
 		String questionText = getPrompt();
