@@ -66,7 +66,9 @@ public class InterviewingEgoIDPage extends EgonetPage {
 				newMessage += " interview id is "+interview.getId();
 				message.setObject(newMessage);
 				
-				setResponsePage(InterviewingEgoPage.askNextUnanswered(interview.getId(),null));
+				EgonetPage comeFrom = InterviewingEgoPage.askNext(interview.getId(), null, null);
+				setResponsePage(
+						InterviewingEgoPage.askNextUnanswered(interview.getId(),null,comeFrom));
             }
         };
 		

@@ -1,5 +1,7 @@
 package net.sf.egonet.web.page;
 
+import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
@@ -37,5 +39,16 @@ public class InterviewingQuestionIntroPage extends EgonetPage {
 				}
 			}
 		});
+	}
+
+	public static EgonetPage possiblyReplaceNextQuestionPageWithPreface(
+			Long interviewId, EgonetPage proposedNextPage,
+			Question earlyQuestion, Question lateQuestion,
+			EgonetPage earlyPage, EgonetPage latePage)
+	{
+		String preface =
+			Interviewing.getPrefaceBetweenQuestions(earlyQuestion, lateQuestion);
+		return preface == null ? proposedNextPage : 
+			new InterviewingQuestionIntroPage(interviewId,preface,earlyPage,latePage);
 	}
 }

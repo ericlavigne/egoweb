@@ -142,6 +142,10 @@ public class Question extends OrderedEntity
 	public String getPreface() {
 		return migrateToText(this,"preface");
 	}
+	public boolean hasPreface() {
+		String preface = getPreface();
+		return ! (preface == null || preface.isEmpty() || preface.matches("\\s*"));
+	}
 	protected void setPrefaceOld(String preface) {
 		this.prefaceOld = preface;
 	}

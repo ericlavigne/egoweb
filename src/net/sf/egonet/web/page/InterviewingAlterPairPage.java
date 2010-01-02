@@ -23,6 +23,8 @@ import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.functionalj.tuple.PairUni;
 
+import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
+
 public class InterviewingAlterPairPage extends EgonetPage {
 
 	public static class Subject implements Serializable, Comparable<Subject> {
@@ -128,7 +130,8 @@ public class InterviewingAlterPairPage extends EgonetPage {
 								subject.interviewId, subject.question, answerField.getAlters(), answerString);
 					}
 				}
-				setResponsePage(askNext(subject.interviewId,subject,true));
+				setResponsePage(
+						askNext(subject.interviewId,subject,true,new InterviewingAlterPairPage(subject)));
 			}
 		};
 		questionsView = new ListView("questions",answerFields) {
@@ -146,7 +149,8 @@ public class InterviewingAlterPairPage extends EgonetPage {
 		
 		add(new Link("backwardLink") {
 			public void onClick() {
-				EgonetPage page = askPrevious(subject.interviewId,subject);
+				EgonetPage page = 
+					askPrevious(subject.interviewId,subject,new InterviewingAlterPairPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -154,7 +158,8 @@ public class InterviewingAlterPairPage extends EgonetPage {
 		});
 		add(new Link("forwardLink") {
 			public void onClick() {
-				EgonetPage page = askNext(subject.interviewId,subject,false);
+				EgonetPage page = 
+					askNext(subject.interviewId,subject,false,new InterviewingAlterPairPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -170,21 +175,31 @@ public class InterviewingAlterPairPage extends EgonetPage {
 	}
 	
 	public static EgonetPage askNext(
-			Long interviewId, Subject currentPage, boolean unansweredOnly) 
+			Long interviewId, Subject currentPage, boolean unansweredOnly, EgonetPage comeFrom) 
 	{
-		Subject nextPage = 
+		Subject nextSubject = 
 			Interviewing.nextAlterPairPageForInterview(interviewId, currentPage, true, unansweredOnly);
-		if(nextPage != null) {
-			return new InterviewingAlterPairPage(nextPage);
+		if(nextSubject != null) {
+			EgonetPage nextPage = new InterviewingAlterPairPage(nextSubject);
+			return possiblyReplaceNextQuestionPageWithPreface(
+					interviewId,nextPage,
+					currentPage == null ? null : currentPage.question, 
+					nextSubject.question,
+					comeFrom,nextPage);
 		}
 		return new InterviewingConclusionPage(interviewId);
 	}
-	public static EgonetPage askPrevious(Long interviewId, Subject currentPage) {
-		Subject previousPage =
-			Interviewing.nextAlterPairPageForInterview(interviewId, currentPage, false, false);
-		if(previousPage != null) {
-			return new InterviewingAlterPairPage(previousPage);
-		}
-		return InterviewingAlterPage.askPrevious(interviewId, null);
+	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject, EgonetPage comeFrom) {
+		Subject previousSubject =
+			Interviewing.nextAlterPairPageForInterview(interviewId, currentSubject, false, false);
+		EgonetPage previousPage = 
+			previousSubject != null ? 
+					new InterviewingAlterPairPage(previousSubject) : 
+						InterviewingAlterPage.askPrevious(interviewId, null, comeFrom);
+		return possiblyReplaceNextQuestionPageWithPreface(
+				interviewId,previousPage,
+				previousSubject == null ? null : previousSubject.question,
+				currentSubject == null ? null : currentSubject.question,
+				previousPage,comeFrom);
 	}
 }

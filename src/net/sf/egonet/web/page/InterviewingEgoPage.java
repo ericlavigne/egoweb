@@ -13,6 +13,8 @@ import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 
+import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
+
 public class InterviewingEgoPage extends EgonetPage {
 	
 	private Long interviewId;
@@ -37,7 +39,9 @@ public class InterviewingEgoPage extends EgonetPage {
 				String answerString = field.getAnswer();
 				if(answerString != null) {
 					Answers.setAnswerForInterviewAndQuestion(interviewId, question, answerString);
-					setResponsePage(askNextUnanswered(interviewId,question));
+					setResponsePage(
+							askNextUnanswered(interviewId,question,
+									new InterviewingEgoPage(interviewId,question)));
 				}
 			}
 		};
@@ -54,7 +58,8 @@ public class InterviewingEgoPage extends EgonetPage {
 
 		add(new Link("backwardLink") {
 			public void onClick() {
-				EgonetPage page = askPrevious(interviewId,question);
+				EgonetPage page = 
+					askPrevious(interviewId,question,new InterviewingEgoPage(interviewId,question));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -62,7 +67,8 @@ public class InterviewingEgoPage extends EgonetPage {
 		});
 		add(new Link("forwardLink") {
 			public void onClick() {
-				EgonetPage page = askNext(interviewId,question);
+				EgonetPage page = 
+					askNext(interviewId,question,new InterviewingEgoPage(interviewId,question));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -70,33 +76,48 @@ public class InterviewingEgoPage extends EgonetPage {
 		});
 	}
 
-	public static EgonetPage askNextUnanswered(Long interviewId,Question currentQuestion) {
+	//                    forward, unansweredOnly
+	// askNextUnanswered: true,    true
+	//           askNext: true,    false
+	//       askPrevious: false,   false
+	
+	public static EgonetPage askNextUnanswered(
+			Long interviewId,Question currentQuestion, EgonetPage comeFrom) 
+	{
 		Question nextEgoQuestion = 
 			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,true,true);
 		if(nextEgoQuestion != null) {
-			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
+			EgonetPage nextEgoPage = new InterviewingEgoPage(interviewId, nextEgoQuestion);
+			return possiblyReplaceNextQuestionPageWithPreface(
+					interviewId,nextEgoPage,currentQuestion,nextEgoQuestion,
+					comeFrom,nextEgoPage);
 		}
-		return InterviewingAlterPromptPage.askNextUnanswered(interviewId);
+		return InterviewingAlterPromptPage.askNextUnanswered(interviewId,comeFrom);
 	}
-	public static EgonetPage askNext(Long interviewId,Question currentQuestion) {
+	public static EgonetPage askNext(Long interviewId,Question currentQuestion, EgonetPage comeFrom) 
+	{
 		Question nextEgoQuestion = 
 			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,true,false);
 		if(nextEgoQuestion != null) {
-			return new InterviewingEgoPage(interviewId, nextEgoQuestion);
+			EgonetPage nextPage = new InterviewingEgoPage(interviewId, nextEgoQuestion);
+			return possiblyReplaceNextQuestionPageWithPreface(
+					interviewId,nextPage,currentQuestion,nextEgoQuestion,
+					comeFrom,nextPage);
 		}
 		Study study = Studies.getStudyForInterview(interviewId);
 		Integer max = study.getMaxAlters();
 		if(max != null && max > 0) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		return InterviewingAlterPage.askNext(interviewId,null,null);
+		return InterviewingAlterPage.askNext(interviewId,null,null,comeFrom);
 	}
-	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion) {
+	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion, EgonetPage comeFrom) {
 		Question previousEgoQuestion = 
 			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,false,false);
-		if(previousEgoQuestion != null) {
-			return new InterviewingEgoPage(interviewId, previousEgoQuestion);
-		}
-		return null; 
+		EgonetPage previousPage = previousEgoQuestion == null ? null :
+			new InterviewingEgoPage(interviewId, previousEgoQuestion);
+		return possiblyReplaceNextQuestionPageWithPreface(
+				interviewId,previousPage,previousEgoQuestion,currentQuestion,
+				previousPage,comeFrom);
 	}
 }

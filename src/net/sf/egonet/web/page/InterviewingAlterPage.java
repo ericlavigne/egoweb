@@ -23,6 +23,8 @@ import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 
+import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
+
 public class InterviewingAlterPage extends EgonetPage {
 	
 	public static class Subject implements Serializable, Comparable<Subject> {
@@ -115,7 +117,8 @@ public class InterviewingAlterPage extends EgonetPage {
 								subject.interviewId, subject.question, answerField.getAlters(), answerString);
 					}
 				}
-				setResponsePage(askNext(subject.interviewId,subject,true));
+				setResponsePage(
+						askNext(subject.interviewId,subject,true, new InterviewingAlterPage(subject)));
 			}
 		};
 		questionsView = new ListView("questions",answerFields) {
@@ -131,7 +134,8 @@ public class InterviewingAlterPage extends EgonetPage {
 
 		add(new Link("backwardLink") {
 			public void onClick() {
-				EgonetPage page = askPrevious(subject.interviewId,subject);
+				EgonetPage page = 
+					askPrevious(subject.interviewId,subject, new InterviewingAlterPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -139,7 +143,8 @@ public class InterviewingAlterPage extends EgonetPage {
 		});
 		add(new Link("forwardLink") {
 			public void onClick() {
-				EgonetPage page = askNext(subject.interviewId,subject,false);
+				EgonetPage page = 
+					askNext(subject.interviewId,subject,false, new InterviewingAlterPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -147,27 +152,43 @@ public class InterviewingAlterPage extends EgonetPage {
 		});
 	}
 	
-	public static EgonetPage askNext(Long interviewId, Subject currentSubject, Boolean unansweredOnly) {
-		Subject nextPage =
+	public static EgonetPage askNext(Long interviewId, Subject currentSubject, 
+			Boolean unansweredOnly, EgonetPage comeFrom) 
+	{
+		Subject nextSubject =
 			Interviewing.nextAlterPageForInterview(
 					interviewId, currentSubject, true, unansweredOnly);
-		if(nextPage != null) {
-			return new InterviewingAlterPage(nextPage);
+		if(nextSubject != null) {
+			EgonetPage nextPage = new InterviewingAlterPage(nextSubject);
+			return possiblyReplaceNextQuestionPageWithPreface(
+					interviewId,nextPage,
+					currentSubject == null ? null : currentSubject.question,
+					nextSubject.question,
+					comeFrom,nextPage);
 		}
-		return InterviewingAlterPairPage.askNext(interviewId,null,unansweredOnly);
+		return InterviewingAlterPairPage.askNext(interviewId,null,unansweredOnly,comeFrom);
 	}
-	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject) {
+	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject, EgonetPage comeFrom) 
+	{
 		Subject previousSubject =
 			Interviewing.nextAlterPageForInterview(
 					interviewId, currentSubject, false, false);
+		EgonetPage previousPage;
 		if(previousSubject != null) {
-			return new InterviewingAlterPage(previousSubject);
+			previousPage = new InterviewingAlterPage(previousSubject);
+		} else {
+			Study study = Studies.getStudyForInterview(interviewId);
+			Integer max = study.getMaxAlters();
+			if(max != null && max > 0) {
+				previousPage = new InterviewingAlterPromptPage(interviewId);
+			} else {
+				previousPage = InterviewingEgoPage.askPrevious(interviewId, null, comeFrom); 
+			}
 		}
-		Study study = Studies.getStudyForInterview(interviewId);
-		Integer max = study.getMaxAlters();
-		if(max != null && max > 0) {
-			return new InterviewingAlterPromptPage(interviewId);
-		}
-		return InterviewingEgoPage.askPrevious(interviewId, null); 
+		return possiblyReplaceNextQuestionPageWithPreface(
+				interviewId,previousPage,
+				previousSubject == null ? null : previousSubject.question, 
+				currentSubject == null ? null : currentSubject.question,
+				previousPage,comeFrom);
 	}
 }

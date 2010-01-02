@@ -67,7 +67,7 @@ public class AnalysisStudyPage extends EgonetPage {
 						Interviews.getEgoNameForInterview(interview.getId())));
 				item.add(new Button("interviewReview") {
 					public void onSubmit() {
-						EgonetPage page = InterviewingEgoPage.askNext(interview.getId(), null);
+						EgonetPage page = InterviewingEgoPage.askNext(interview.getId(), null,null);
 						if(page != null) {
 							setResponsePage(page);
 						}

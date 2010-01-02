@@ -85,7 +85,9 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		nextQuestionForm.add(new Button("nextQuestionButton") {
 			public void onSubmit() {
 				if(minAlters == null || ! (getCurrentAlters() < minAlters)) {
-					setResponsePage(askNextUnanswered(interview.getId()));
+					setResponsePage(
+							askNextUnanswered(interview.getId(), 
+									new InterviewingAlterPromptPage(interview.getId())));
 				}
 			}
 		});
@@ -111,7 +113,9 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 
 		add(new Link("backwardLink") {
 			public void onClick() {
-				EgonetPage page = InterviewingEgoPage.askPrevious(interview.getId(),null);
+				EgonetPage page = 
+					InterviewingEgoPage.askPrevious(interview.getId(),null,
+							new InterviewingAlterPromptPage(interview.getId()));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -119,7 +123,9 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		});
 		add(new Link("forwardLink") {
 			public void onClick() {
-				EgonetPage page = InterviewingAlterPage.askNext(interview.getId(),null,false);
+				EgonetPage page = 
+					InterviewingAlterPage.askNext(interview.getId(),null,false,
+							new InterviewingAlterPromptPage(interview.getId()));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -127,7 +133,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		});
 	}
 
-	public static EgonetPage askNextUnanswered(Long interviewId) {
+	public static EgonetPage askNextUnanswered(Long interviewId, EgonetPage comeFrom) {
 		Study study = Studies.getStudyForInterview(interviewId);
 		Integer alters = Alters.getForInterview(interviewId).size();
 		Boolean altersMeetRequirements = 
@@ -139,7 +145,7 @@ public class InterviewingAlterPromptPage extends EgonetPage {
 		if(alters < 1 && (study.getMaxAlters() == null || study.getMaxAlters() > 0)) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		return InterviewingAlterPage.askNext(interviewId,null,true);
+		return InterviewingAlterPage.askNext(interviewId,null,true,comeFrom);
 	}
 	
 	private class AlterUniquenessValidator extends AbstractValidator {

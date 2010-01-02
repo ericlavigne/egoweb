@@ -227,14 +227,17 @@ public class Interviewing {
 	}
 	
 	// Note: sections only relevant for alter and alter pair questions... for now...
-	private static Map<Long,TreeSet<Question>> createQuestionIdToSectionMap(TreeSet<Question> questions) {
+	private static Map<Long,TreeSet<Question>> 
+	createQuestionIdToSectionMap(Collection<Question> questions) 
+	{
 		Map<Long,TreeSet<Question>> questionIdToSection = Maps.newTreeMap();
 		TreeSet<Question> section = null;
 		Question previousQuestion = null;
-		for(Question question : questions) {
+		for(Question question : new TreeSet<Question>(questions)) {
 			if(section == null || // reasons to start a new section
-					(question.getPreface() != null && ! question.getPreface().isEmpty()) ||
-					question.getAskingStyleList() || previousQuestion.getAskingStyleList()) 
+					question.hasPreface() ||
+					question.getAskingStyleList() || 
+					previousQuestion.getAskingStyleList()) 
 			{
 				section = new TreeSet<Question>();
 			}
@@ -245,6 +248,34 @@ public class Interviewing {
 		return questionIdToSection;
 	}
 
+	public static String getPrefaceBetweenQuestions(final Question early, final Question late) {
+		return new DB.Action<String>() {
+			public String get() {
+				return getPrefaceBetweenQuestions(session,early,late);
+			}
+		}.execute();
+	}
+	public static String getPrefaceBetweenQuestions(
+			Session session, Question early, Question late) 
+	{
+		if(late == null) {
+			return null;
+		}
+		Set<Question> section = 
+			createQuestionIdToSectionMap(
+					Questions.getQuestionsForStudy(late.getStudyId(), late.getType()))
+			.get(late.getId());
+		if(early != null && section.contains(early)) {
+			return null;
+		}
+		for(Question question : section) {
+			if(question.hasPreface()) {
+				return question.getPreface();
+			}
+		}
+		return null;
+	}
+	
 	private static TreeSet<InterviewingAlterPage.Subject> 
 	alterPagesForInterview(Session session, Long interviewId)
 	{
