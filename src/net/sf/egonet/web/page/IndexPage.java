@@ -20,7 +20,7 @@ public class IndexPage extends EgonetPage
 	            {
 	                public void onClick()
 	                {
-	                    setResponsePage(new InterviewingPage());
+	                    setResponsePage(new InterviewingStudyListPage());
 	                }
 	            }
 	        );

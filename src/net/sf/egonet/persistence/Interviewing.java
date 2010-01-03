@@ -14,8 +14,11 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
+import net.sf.egonet.web.page.EgonetPage;
 import net.sf.egonet.web.page.InterviewingAlterPage;
 import net.sf.egonet.web.page.InterviewingAlterPairPage;
+import net.sf.egonet.web.page.InterviewingAlterPromptPage;
+import net.sf.egonet.web.page.InterviewingEgoPage;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.Triple;
@@ -128,6 +131,28 @@ public class Interviewing {
 		return null;
 	}
 
+	public static List<Question> answeredEgoQuestionsForInterview(
+			Session session, EvaluationContext context, Long interviewId) 
+			{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.EGO);
+		List<Question> answeredQuestions = Lists.newArrayList();
+		for(Question question : questions) {
+			Long reasonId = question.getAnswerReasonExpressionId();
+			Boolean shouldAnswer = 
+				reasonId == null || 
+				Expressions.evaluate(
+						context.eidToExpression.get(reasonId), 
+						new ArrayList<Alter>(), 
+						context);
+			if(shouldAnswer && context.qidToEgoAnswer.get(question.getId()) != null) {
+				answeredQuestions.add(question);
+			}
+		}
+		return answeredQuestions;
+	}
+	
 	public static InterviewingAlterPage.Subject nextAlterPageForInterview(final Long interviewId, 
 			final InterviewingAlterPage.Subject currentPage, final Boolean forward, final Boolean unansweredOnly)
 	{
@@ -276,6 +301,28 @@ public class Interviewing {
 		return null;
 	}
 	
+	public static ArrayList<InterviewingAlterPage.Subject> 
+	answeredAlterPagesForInterview(Session session, EvaluationContext context, Long interviewId)
+	{
+		ArrayList<InterviewingAlterPage.Subject> results = Lists.newArrayList();
+		for(InterviewingAlterPage.Subject subject : alterPagesForInterview(session,interviewId)) {
+			Boolean answered = false;
+			for(Alter alter : subject.alters) {
+				if(context.qidAidToAlterAnswer.containsKey(
+						new PairUni<Long>(
+								subject.question.getId(),
+								alter.getId())))
+				{
+					answered = true;
+				}
+			}
+			if(answered) {
+				results.add(subject);
+			}
+		}
+		return results;
+	}
+	
 	private static TreeSet<InterviewingAlterPage.Subject> 
 	alterPagesForInterview(Session session, Long interviewId)
 	{
@@ -310,7 +357,31 @@ public class Interviewing {
 		}
 		return results;
 	}
-
+	
+	public static ArrayList<InterviewingAlterPairPage.Subject> 
+	answeredAlterPairPagesForInterview(Session session, EvaluationContext context, Long interviewId)
+	{
+		ArrayList<InterviewingAlterPairPage.Subject> results = Lists.newArrayList();
+		for(InterviewingAlterPairPage.Subject subject : alterPairPagesForInterview(session,interviewId)) {
+			Boolean answered = false;
+			for(Alter secondAlter : subject.secondAlters) {
+				if(context.qidA1idA2idToAlterPairAnswer.containsKey(
+						new TripleUni<Long>(
+								subject.question.getId(),
+								subject.firstAlter.getId(),
+								secondAlter.getId())))
+				{
+					answered = true;
+				}
+			}
+			if(answered) {
+				results.add(subject);
+			}
+		}
+		return results;
+	}
+	
+	
 	private static TreeSet<InterviewingAlterPairPage.Subject> 
 	alterPairPagesForInterview(Session session, Long interviewId)
 	{
@@ -420,5 +491,38 @@ public class Interviewing {
 			}
 		}
 		return results;
+	}
+
+	public static List<EgonetPage> getAnsweredPagesForInterview(final Long interviewId) {
+
+		return new DB.Action<List<EgonetPage>>() {
+			public List<EgonetPage> get() {
+				return getAnsweredPagesForInterview(session, interviewId);
+			}
+		}.execute();
+	}
+	public static List<EgonetPage> getAnsweredPagesForInterview(Session session, Long interviewId) {
+		// TODO: speedup by not instantiating pages? just store info about the pages so that one or
+		// two can be instantiated later.
+		Interview interview = Interviews.getInterview(session, interviewId);
+		EvaluationContext context = Expressions.getContext(session, interview);
+		List<EgonetPage> pages = Lists.newArrayList();
+		for(Question egoQuestion : answeredEgoQuestionsForInterview(session,context,interviewId)) {
+			pages.add(new InterviewingEgoPage(interviewId,egoQuestion));
+		}
+		if(! Alters.getForInterview(session,interviewId).isEmpty()) {
+			pages.add(new InterviewingAlterPromptPage(interviewId));
+		}
+		for(InterviewingAlterPage.Subject alterSubject : 
+			answeredAlterPagesForInterview(session,context,interviewId)) 
+		{
+			pages.add(new InterviewingAlterPage(alterSubject));
+		}
+		for(InterviewingAlterPairPage.Subject alterPairSubject : 
+			answeredAlterPairPagesForInterview(session,context,interviewId)) 
+		{
+			pages.add(new InterviewingAlterPairPage(alterPairSubject));
+		}
+		return pages;
 	}
 }

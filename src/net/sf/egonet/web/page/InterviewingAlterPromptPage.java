@@ -26,17 +26,19 @@ import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 
-public class InterviewingAlterPromptPage extends EgonetPage {
+public class InterviewingAlterPromptPage extends InterviewingPage {
 
 	private Interview interview;
 	private TextField addAlterField;
 	
 	public InterviewingAlterPromptPage(Long interviewId) {
-		super(Studies.getStudyForInterview(interviewId).getName()+ " - Interviewing "
-				+Interviews.getEgoNameForInterview(interviewId)
-				+" (respondent #"+interviewId+")");
+		super(interviewId);
 		this.interview = Interviews.getInterview(interviewId);
 		build();
+	}
+	
+	public String toString() {
+		return "Alter Prompt ("+getAlters().size()+")";
 	}
 	
 	public List<Alter> getAlters() {

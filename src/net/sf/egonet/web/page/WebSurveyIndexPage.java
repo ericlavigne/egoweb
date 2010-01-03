@@ -14,7 +14,7 @@ public class WebSurveyIndexPage extends WebPage {
 		
 		add(new Link("interviewingLink") {
 			public void onClick() {
-				setResponsePage(new InterviewingPage());
+				setResponsePage(new InterviewingStudyListPage());
 			}
 		});
 		

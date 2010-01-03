@@ -25,7 +25,7 @@ import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
-public class InterviewingAlterPage extends EgonetPage {
+public class InterviewingAlterPage extends InterviewingPage {
 	
 	public static class Subject implements Serializable, Comparable<Subject> {
 		// eventually need a way for one of these to represent a question intro
@@ -77,9 +77,7 @@ public class InterviewingAlterPage extends EgonetPage {
 	private ListView questionsView;
 
 	public InterviewingAlterPage(Subject subject) {
-		super(Studies.getStudyForInterview(subject.interviewId).getName()+ " - Interviewing "
-				+Interviews.getEgoNameForInterview(subject.interviewId)
-				+" (respondent #"+subject.interviewId+")");
+		super(subject.interviewId);
 		this.subject = subject;
 		build();
 	}
@@ -150,6 +148,10 @@ public class InterviewingAlterPage extends EgonetPage {
 				}
 			}
 		});
+	}
+
+	public String toString() {
+		return subject.toString();
 	}
 	
 	public static EgonetPage askNext(Long interviewId, Subject currentSubject, 

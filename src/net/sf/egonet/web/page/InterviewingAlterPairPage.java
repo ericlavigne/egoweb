@@ -19,13 +19,12 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
-import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.functionalj.tuple.PairUni;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
-public class InterviewingAlterPairPage extends EgonetPage {
+public class InterviewingAlterPairPage extends InterviewingPage {
 
 	public static class Subject implements Serializable, Comparable<Subject> {
 		// TODO: need a way for one of these to represent a question intro: firstAlter -> null
@@ -86,9 +85,7 @@ public class InterviewingAlterPairPage extends EgonetPage {
 	
 	public InterviewingAlterPairPage(Subject subject) 
 	{
-		super(Studies.getStudyForInterview(subject.interviewId).getName()+ " - Interviewing "
-				+Interviews.getEgoNameForInterview(subject.interviewId)
-				+" (respondent #"+subject.interviewId+")");
+		super(subject.interviewId);
 		this.subject = subject;
 		build();
 	}
@@ -167,6 +164,10 @@ public class InterviewingAlterPairPage extends EgonetPage {
 		});
 	}
 
+	public String toString() {
+		return subject.toString();
+	}
+	
 	public PairUni<Alter> getFirstAlterPair() {
 		return new PairUni<Alter>(subject.firstAlter,subject.secondAlters.get(0));
 	}

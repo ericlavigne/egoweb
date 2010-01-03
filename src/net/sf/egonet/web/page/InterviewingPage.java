@@ -1,24 +1,15 @@
 package net.sf.egonet.web.page;
 
-import org.apache.wicket.PageParameters;
-
-import net.sf.egonet.model.Study;
-import net.sf.egonet.web.panel.StudyListPanel;
-import net.sf.functionalj.tuple.Pair;
+import net.sf.egonet.persistence.Interviews;
+import net.sf.egonet.persistence.Studies;
+import net.sf.egonet.web.panel.InterviewNavigationPanel;
 
 public class InterviewingPage extends EgonetPage {
-	public InterviewingPage() {
-		super("Interviewing - Select a study");
+	public InterviewingPage(Long interviewId) {
+		super(Studies.getStudyForInterview(interviewId).getName()+ " - Interviewing "
+				+Interviews.getEgoNameForInterview(interviewId)
+				+" (respondent #"+interviewId+")");
 
-		add(new StudyListPanel("studyList") {
-			protected Pair<Class<?>,PageParameters> getStudyBookmark(Study s) {
-				PageParameters pars = new PageParameters();
-				pars.add("studyId", s.getId().toString());
-				return new Pair<Class<?>,PageParameters>(
-						s.getIntroduction() == null || s.getIntroduction().isEmpty() ? 
-								InterviewingEgoIDPage.class : InterviewingIntroductionPage.class,
-						pars);
-			}
-		});	
+		add(new InterviewNavigationPanel("navigation",interviewId));
 	}
 }

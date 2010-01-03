@@ -2,25 +2,24 @@ package net.sf.egonet.web.page;
 
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Interviewing;
-import net.sf.egonet.persistence.Interviews;
-import net.sf.egonet.persistence.Studies;
 
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
 
-public class InterviewingQuestionIntroPage extends EgonetPage {
+public class InterviewingQuestionIntroPage extends InterviewingPage {
 
 	private EgonetPage previousPage, nextPage;
+	
+	private String text;
 	
 	public InterviewingQuestionIntroPage(
 			Long interviewId, String text, EgonetPage previous, EgonetPage next) 
 	{
-		super(Studies.getStudyForInterview(interviewId).getName()+ " - Interviewing "
-				+Interviews.getEgoNameForInterview(interviewId)
-				+" (respondent #"+interviewId+")");
+		super(interviewId);
 
         this.previousPage = previous;
         this.nextPage = next;
+        this.text = text;
         
         add(new MultiLineLabel("text", text));
 
@@ -41,6 +40,10 @@ public class InterviewingQuestionIntroPage extends EgonetPage {
 		});
 	}
 
+	public String toString() {
+		return text.length() < 23 ? text : text.substring(0, 20)+"...";
+	}
+	
 	public static EgonetPage possiblyReplaceNextQuestionPageWithPreface(
 			Long interviewId, EgonetPage proposedNextPage,
 			Question earlyQuestion, Question lateQuestion,
