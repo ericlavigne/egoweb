@@ -14,11 +14,10 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
-import net.sf.egonet.web.page.EgonetPage;
 import net.sf.egonet.web.page.InterviewingAlterPage;
 import net.sf.egonet.web.page.InterviewingAlterPairPage;
-import net.sf.egonet.web.page.InterviewingAlterPromptPage;
-import net.sf.egonet.web.page.InterviewingEgoPage;
+import net.sf.egonet.web.panel.InterviewNavigationPanel;
+import net.sf.egonet.web.panel.InterviewNavigationPanel.InterviewLink;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.Triple;
@@ -493,36 +492,36 @@ public class Interviewing {
 		return results;
 	}
 
-	public static List<EgonetPage> getAnsweredPagesForInterview(final Long interviewId) {
-
-		return new DB.Action<List<EgonetPage>>() {
-			public List<EgonetPage> get() {
+	public static List<InterviewNavigationPanel.InterviewLink> 
+	getAnsweredPagesForInterview(final Long interviewId) {
+		return new DB.Action<List<InterviewNavigationPanel.InterviewLink>>() {
+			public List<InterviewNavigationPanel.InterviewLink> get() {
 				return getAnsweredPagesForInterview(session, interviewId);
 			}
 		}.execute();
 	}
-	public static List<EgonetPage> getAnsweredPagesForInterview(Session session, Long interviewId) {
-		// TODO: speedup by not instantiating pages? just store info about the pages so that one or
-		// two can be instantiated later.
+	public static List<InterviewNavigationPanel.InterviewLink> 
+	getAnsweredPagesForInterview(Session session, Long interviewId) {
 		Interview interview = Interviews.getInterview(session, interviewId);
 		EvaluationContext context = Expressions.getContext(session, interview);
-		List<EgonetPage> pages = Lists.newArrayList();
+		List<InterviewLink> links = Lists.newArrayList();
 		for(Question egoQuestion : answeredEgoQuestionsForInterview(session,context,interviewId)) {
-			pages.add(new InterviewingEgoPage(interviewId,egoQuestion));
+			links.add(new InterviewNavigationPanel.EgoLink(interviewId,egoQuestion));
 		}
-		if(! Alters.getForInterview(session,interviewId).isEmpty()) {
-			pages.add(new InterviewingAlterPromptPage(interviewId));
+		Integer alters = Alters.getForInterview(session,interviewId).size();
+		if(alters > 0) {
+			links.add(new InterviewNavigationPanel.AlterPromptLink(interviewId,alters));
 		}
 		for(InterviewingAlterPage.Subject alterSubject : 
 			answeredAlterPagesForInterview(session,context,interviewId)) 
 		{
-			pages.add(new InterviewingAlterPage(alterSubject));
+			links.add(new InterviewNavigationPanel.AlterLink(alterSubject));
 		}
 		for(InterviewingAlterPairPage.Subject alterPairSubject : 
 			answeredAlterPairPagesForInterview(session,context,interviewId)) 
 		{
-			pages.add(new InterviewingAlterPairPage(alterPairSubject));
+			links.add(new InterviewNavigationPanel.AlterPairLink(alterPairSubject));
 		}
-		return pages;
+		return links;
 	}
 }
