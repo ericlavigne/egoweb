@@ -19,6 +19,8 @@
 		<property name="value" column="value_text" type="text" length="32672" />
 		<property name="valueOld" column="value" />
 		
+		<property name="skipReasonDB" column="skipReason" />
+		
 		<!-- These properties are redundant, and could be determined from the corresponding Question. -->
 		<property name="studyId" column="study_id" />
 		<property name="questionTypeDB" column="question_type" />

@@ -5,6 +5,7 @@ import net.sf.egonet.model.Question.QuestionType;
 public class Answer extends Entity
 {
 	public static enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION };
+	public static enum SkipReason { NONE, REFUSE, DONT_KNOW };
 
 	private Long questionId;
 	private Long interviewId;
@@ -23,6 +24,8 @@ public class Answer extends Entity
 	protected String value;
 	protected String valueOld;
 
+	private SkipReason skipReason;
+	
 	public Answer() {
 
 	}
@@ -130,6 +133,23 @@ public class Answer extends Entity
 			this.setQuestionType(QuestionType.valueOf(val)); 
 		}
 	}
+	public void setSkipReasonDB(String val) { 
+		if(val != null && ! val.isEmpty()) {
+			this.setSkipReason(SkipReason.valueOf(val)); 
+		}
+	}
+
+	public String getSkipReasonDB() { 
+		return getSkipReason().name();
+	}
+
+	public void setSkipReason(SkipReason skipReason) {
+		this.skipReason = skipReason;
+	}
+
+	public SkipReason getSkipReason() {
+		return skipReason == null ? SkipReason.NONE : skipReason;
+	}
 
 	// ---------------------------------
 	
@@ -147,4 +167,5 @@ public class Answer extends Entity
 	protected String getValueOld() {
 		return null;
 	}
+
 }
