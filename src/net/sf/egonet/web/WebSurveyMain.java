@@ -14,7 +14,7 @@ public class WebSurveyMain extends Main {
 	
 	public static void main(String[] args) throws Exception {
 
-		Server server = createAndConfigureServer("net.sf.egonet.web.WebSurveyMain",8639);
+		Server server = createAndConfigureServer("net.sf.egonet.web.WebSurveyMain",8639,false);
 		
 		server.start();
 		DB.migrate();

@@ -57,10 +57,10 @@ public class Main extends WebApplication
 	protected String applicationClassName = "net.sf.egonet.web.Main";
 	
 	public static Server createAndConfigureServer() {
-		return createAndConfigureServer("net.sf.egonet.web.Main",8080);
+		return createAndConfigureServer("net.sf.egonet.web.Main",8080,true);
 	}
 	
-	public static Server createAndConfigureServer(String applicationClassName, Integer port) {
+	public static Server createAndConfigureServer(String applicationClassName, Integer port, Boolean localOnly) {
 
         Server server = new Server(port); // TODO: Restrict access to localhost: 0.0.0.0 -> 192.168.1.1?
 
@@ -76,6 +76,9 @@ public class Main extends WebApplication
 		embeddedContext.addServlet(embeddedHolder, "/*");
 
 		Context context = new Context(server, "/", Context.SESSIONS);
+		if(localOnly) {
+			context.setVirtualHosts(new String[]{"127.0.0.1"});
+		}
 		ServletHolder servletHolder = new ServletHolder(new WicketServlet());
 		servletHolder.setInitParameter("applicationClassName",
 				applicationClassName);

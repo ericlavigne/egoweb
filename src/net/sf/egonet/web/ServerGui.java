@@ -16,7 +16,7 @@ public class ServerGui extends JFrame {
 	private Server server;
 	
 	public ServerGui() throws Exception {
-		super("Server started at http://localhost:8080 - Close this window to shutdown the server.");
+		super("Server started at http://127.0.0.1:8080 - Close this window to shutdown the server.");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -33,7 +33,7 @@ public class ServerGui extends JFrame {
 			}
 		});
 		DB.migrate();
-		Desktop.getDesktop().browse(new URI("http://localhost:8080"));
+		Desktop.getDesktop().browse(new URI("http://127.0.0.1:8080"));
 		
 		setSize(800,150);
 		setVisible(true);
