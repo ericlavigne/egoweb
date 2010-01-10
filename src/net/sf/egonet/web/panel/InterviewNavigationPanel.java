@@ -1,6 +1,7 @@
 package net.sf.egonet.web.panel;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Question;
@@ -21,10 +22,12 @@ import org.apache.wicket.model.PropertyModel;
 public class InterviewNavigationPanel extends Panel {
 	
 	private Long interviewId;
+	private boolean showingLinks;
 	
 	public InterviewNavigationPanel(String id, Long interviewId) {
 		super(id);
 		this.interviewId = interviewId;
+		this.showingLinks = false;
 		build();
 	}
 	
@@ -106,10 +109,16 @@ public class InterviewNavigationPanel extends Panel {
 	}
 	
 	public List<InterviewLink> getLinks() {
-		return Interviewing.getAnsweredPagesForInterview(interviewId);
+		return showingLinks ? 
+				Interviewing.getAnsweredPagesForInterview(interviewId) : 
+					new ArrayList<InterviewLink>();
 	}
 	
 	private void build() {
+		add(new Link("showLinks") {
+			public void onClick() {
+				showingLinks = ! showingLinks;
+			}});
 		add(new ListView("pages", new PropertyModel(this,"links")) {
 			protected void populateItem(ListItem item) {
 				final InterviewLink page = (InterviewLink) item.getModelObject();
