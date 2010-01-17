@@ -47,7 +47,8 @@ public class InterviewingEgoPage extends InterviewingPage {
 		if(answer == null) {
 			field = AnswerFormFieldPanel.getInstance("question",question);
 		} else {
-			field = AnswerFormFieldPanel.getInstance("question",question,answer.getValue());
+			field = AnswerFormFieldPanel.getInstance("question",
+					question,answer.getValue(),answer.getSkipReason());
 		}
 		field.setAutoFocus();
 		form.add(field);

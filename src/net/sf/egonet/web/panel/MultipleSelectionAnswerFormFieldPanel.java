@@ -7,23 +7,26 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
 
 public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
-	private CheckboxesPanel<QuestionOption> answerField;
+	private CheckboxesPanel<Object> answerField;
 	private ArrayList<QuestionOption> originallySelectedOptions;
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
-		super(id,question,alters);
+		super(id,question,Answer.SkipReason.NONE,alters);
 		originallySelectedOptions = Lists.newArrayList();
 		build();
 	}
 	
-	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, String answer, ArrayList<Alter> alters) {
-		super(id,question,alters);
+	public MultipleSelectionAnswerFormFieldPanel(String id, 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+	{
+		super(id,question,skipReason,alters);
 		originallySelectedOptions = Lists.newArrayList();
 		try {
 			for(String answerIdString : answer.split(",")) {
@@ -41,10 +44,26 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	}
 	
 	private void build() {
-		answerField = new CheckboxesPanel<QuestionOption>("answer",getOptions(),originallySelectedOptions) 
+		List<Object> allItems = Lists.newArrayList();
+		allItems.addAll(getOptions());
+		if(! question.getType().equals(Question.QuestionType.EGO_ID)) { // Can't refuse EgoID question
+			allItems.add(dontKnow);
+			allItems.add(refuse);
+		}
+		List<Object> selectedItems = Lists.newArrayList();
+		if(originalSkipReason.equals(Answer.SkipReason.NONE)) {
+			selectedItems.addAll(originallySelectedOptions);
+		} else if(originalSkipReason.equals(Answer.SkipReason.DONT_KNOW)) {
+			selectedItems.add(dontKnow);
+		} else if(originalSkipReason.equals(Answer.SkipReason.REFUSE)) {
+			selectedItems.add(refuse);
+		}
+		answerField = new CheckboxesPanel<Object>("answer",allItems,selectedItems) 
 		{
-			protected String showItem(QuestionOption option) {
-				return option.getName();
+			protected String showItem(Object option) {
+				return option instanceof QuestionOption ? 
+						((QuestionOption) option).getName() : 
+							option.toString();
 			}
 		};
 		add(answerField);
@@ -52,10 +71,20 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 
 	public String getAnswer() {
 		List<String> optionIdStrings = Lists.newArrayList();
-		for(QuestionOption option : answerField.getSelected()) {
-			optionIdStrings.add(option.getId().toString());
+		for(Object option : answerField.getSelected()) {
+			if(option instanceof QuestionOption) {
+				optionIdStrings.add(((QuestionOption) option).getId().toString());
+			}
 		}
 		return Joiner.on(",").join(optionIdStrings);
+	}
+	
+	public boolean dontKnow() {
+		return answerField.getSelected().contains(dontKnow);
+	}
+	
+	public boolean refused() {
+		return answerField.getSelected().contains(refuse);
 	}
 	
 	public List<QuestionOption> getOptions() {

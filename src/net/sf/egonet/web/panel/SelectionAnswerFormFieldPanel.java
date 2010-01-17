@@ -6,7 +6,10 @@ import java.util.List;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Lists;
+
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
@@ -18,35 +21,47 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private DropDownChoice dropDownChoice;
 	
 	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
-		super(id,question,alters);
+		super(id,question,Answer.SkipReason.NONE,alters);
 		this.answer = new Model();
 		build();
 	}
 	
-	public SelectionAnswerFormFieldPanel(String id, Question question, String answer, ArrayList<Alter> alters) {
-		super(id,question,alters);
+	public SelectionAnswerFormFieldPanel(String id, 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+	{
+		super(id,question,skipReason,alters);
 		this.answer = new Model();
-		try {
-			Long optionId = Long.parseLong(answer);
-			for(QuestionOption option : getOptions()) {
-				if(option.getId().equals(optionId)) {
-					this.answer = new Model(option);
+		if(skipReason.equals(Answer.SkipReason.DONT_KNOW)) {
+			this.answer = new Model(dontKnow);
+		} else if(skipReason.equals(Answer.SkipReason.REFUSE)) {
+			this.answer = new Model(refuse);
+		} else {
+			try {
+				Long optionId = Long.parseLong(answer);
+				for(QuestionOption option : getOptions()) {
+					if(option.getId().equals(optionId)) {
+						this.answer = new Model(option);
+					}
 				}
+			} catch(Exception ex) {
+				// Most likely failed to parse answer. Fall back to no existing answer.
 			}
-		} catch(Exception ex) {
-			// Most likely failed to parse answer. Fall back to no existing answer.
 		}
 		build();
 	}
 	
 	private void build() {
-		dropDownChoice = new DropDownChoice("answer",answer,getOptions());
+		List<Object> choices = Lists.newArrayList();
+		choices.addAll(getOptions());
+		choices.addAll(Lists.newArrayList(dontKnow,refuse));
+		dropDownChoice = new DropDownChoice("answer",answer,choices);
 		add(dropDownChoice);
 	}
 
 	public String getAnswer() {
-		QuestionOption option = (QuestionOption) answer.getObject();
-		return option == null ? null : option.getId().toString();
+		Object selected = answer.getObject();
+		return selected != null && selected instanceof QuestionOption ? 
+				((QuestionOption) selected).getId().toString() : null;
 	}
 	
 	public List<QuestionOption> getOptions() {
@@ -55,5 +70,15 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	public void setAutoFocus() {
 		dropDownChoice.add(new FocusOnLoadBehavior());
+	}
+
+	@Override
+	public boolean dontKnow() {
+		return answer.getObject() != null && answer.getObject().equals(dontKnow);
+	}
+
+	@Override
+	public boolean refused() {
+		return answer.getObject() != null && answer.getObject().equals(refuse);
 	}
 }

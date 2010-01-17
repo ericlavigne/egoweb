@@ -99,7 +99,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 				answerFields.add(AnswerFormFieldPanel.getInstance("question", subject.question, alters));
 			} else {
 				answerFields.add(AnswerFormFieldPanel.getInstance("question", 
-						subject.question, answer.getValue(), alters));
+						subject.question, answer.getValue(), answer.getSkipReason(), alters));
 			}
 			if(! answerFields.isEmpty()) {
 				answerFields.get(0).setAutoFocus();

@@ -3,6 +3,7 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 
 import net.sf.egonet.model.Alter;
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import static net.sf.egonet.model.Answer.AnswerType;
 
@@ -13,17 +14,25 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	protected Question question;
 	protected ArrayList<Alter> alters;
 
-	protected AnswerFormFieldPanel(String id, Question question) { 
-		this(id,question, new ArrayList<Alter>());
+	protected final Answer.SkipReason originalSkipReason;
+	
+	protected final String dontKnow = "Don't know", refuse = "Refuse";
+
+	protected AnswerFormFieldPanel(String id, Question question, Answer.SkipReason originalSkipReason) { 
+		this(id,question, originalSkipReason, new ArrayList<Alter>());
 	}
 	
-	protected AnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
+	protected AnswerFormFieldPanel(String id, 
+			Question question, Answer.SkipReason originalSkipReason, ArrayList<Alter> alters) 
+	{
 		super(id);
 		this.question = question;
 		this.alters = alters;
+		this.originalSkipReason = originalSkipReason;
 	}
 
-	public static AnswerFormFieldPanel getInstance(String id, Question question) {
+	public static AnswerFormFieldPanel getInstance(String id, Question question) 
+	{
 		return getInstance(id,question, new ArrayList<Alter>());
 	}
 	
@@ -46,25 +55,26 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
 	
-	public static AnswerFormFieldPanel getInstance(String id, Question question, String answer) {
-		return getInstance(id,question,answer, new ArrayList<Alter>());
+	public static AnswerFormFieldPanel getInstance(String id, Question question, String answer, Answer.SkipReason skipReason) {
+		return getInstance(id,question,answer,skipReason,new ArrayList<Alter>());
 	}
 	
-	public static AnswerFormFieldPanel getInstance(String id, Question question, String answer, ArrayList<Alter> alters) {
-		
+	public static AnswerFormFieldPanel getInstance(String id, 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+	{
 		AnswerType type = question.getAnswerType();
 		
 		if(type.equals(AnswerType.TEXTUAL)) {
-			return new TextAnswerFormFieldPanel(id,question,answer,alters);
+			return new TextAnswerFormFieldPanel(id,question,answer,skipReason,alters);
 		}
 		if(type.equals(AnswerType.NUMERICAL)) {
-			return new NumberAnswerFormFieldPanel(id,question,answer,alters);
+			return new NumberAnswerFormFieldPanel(id,question,answer,skipReason,alters);
 		}
 		if(type.equals(AnswerType.SELECTION)) {
-			return new SelectionAnswerFormFieldPanel(id,question,answer,alters);
+			return new SelectionAnswerFormFieldPanel(id,question,answer,skipReason,alters);
 		}
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
-			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,alters);
+			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,skipReason,alters);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
@@ -83,7 +93,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		return question.individualizePrompt(alters);
 	}
 
-	public void setAutoFocus() {
-		
-	}
+	public abstract void setAutoFocus();
+	public abstract boolean dontKnow();
+	public abstract boolean refused();
 }
