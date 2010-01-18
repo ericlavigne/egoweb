@@ -53,7 +53,9 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private void build() {
 		List<Object> choices = Lists.newArrayList();
 		choices.addAll(getOptions());
-		choices.addAll(Lists.newArrayList(dontKnow,refuse));
+		if(! question.getType().equals(Question.QuestionType.EGO_ID)) {
+			choices.addAll(Lists.newArrayList(dontKnow,refuse));
+		}
 		dropDownChoice = new DropDownChoice("answer",answer,choices);
 		add(dropDownChoice);
 	}

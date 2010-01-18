@@ -37,6 +37,9 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		add(textField);
 		
 		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
+		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
+			refAndDK = Lists.newArrayList();
+		}
 		ArrayList<String> selectedRefAndDK = Lists.newArrayList();
 		if(originalSkipReason.equals(SkipReason.DONT_KNOW)) {
 			selectedRefAndDK.add(dontKnow);
