@@ -16,7 +16,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 
 	protected final Answer.SkipReason originalSkipReason;
 	
-	protected final String dontKnow = "Don't know", refuse = "Refuse";
+	public final static String dontKnow = "Don't know";
+	public final static String refuse = "Refuse";
 
 	protected AnswerFormFieldPanel(String id, Question question, Answer.SkipReason originalSkipReason) { 
 		this(id,question, originalSkipReason, new ArrayList<Alter>());

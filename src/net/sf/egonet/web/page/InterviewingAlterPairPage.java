@@ -20,6 +20,7 @@ import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
+import net.sf.egonet.web.panel.CheckboxesPanel;
 import net.sf.functionalj.tuple.PairUni;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
@@ -83,6 +84,8 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 	
 	private ListView questionsView;
 	
+	private CheckboxesPanel<String> refDKCheck;
+	
 	public InterviewingAlterPairPage(Subject subject) 
 	{
 		super(subject.interviewId);
@@ -112,10 +115,11 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 			}
 		}
 		
+		Boolean singleAlterPair = subject.secondAlters.size() < 2;
+		
 		ArrayList<Alter> altersInPrompt = 
-			subject.secondAlters.size() < 2 ? 
-					Lists.newArrayList(subject.firstAlter,subject.secondAlters.get(0)) : 
-						Lists.newArrayList(subject.firstAlter);
+			singleAlterPair ? Lists.newArrayList(subject.firstAlter,subject.secondAlters.get(0)) : 
+				Lists.newArrayList(subject.firstAlter);
 		add(new MultiLineLabel("prompt", subject.question.individualizePrompt(altersInPrompt)));
 		
 		Form form = new Form("form") {
@@ -142,6 +146,18 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		};
 		questionsView.setReuseItems(true);
 		form.add(questionsView);
+		
+		ArrayList<String> allOptions = Lists.newArrayList();
+		ArrayList<String> selectedOptions = Lists.newArrayList(); // TODO: populate this
+		if(subject.question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) {
+			allOptions.add(none);
+		}
+		if(! singleAlterPair) {
+			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
+		}
+		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
+		form.add(refDKCheck);
+		
 		add(form);
 		
 		add(new Link("backwardLink") {

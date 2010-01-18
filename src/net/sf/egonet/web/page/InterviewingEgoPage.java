@@ -1,8 +1,12 @@
 package net.sf.egonet.web.page;
 
+import java.util.ArrayList;
+
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+
+import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
@@ -11,6 +15,7 @@ import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
+import net.sf.egonet.web.panel.CheckboxesPanel;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
@@ -19,6 +24,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 	private Long interviewId;
 	private Question question;
 	private AnswerFormFieldPanel field;
+	private CheckboxesPanel<String> noneCheck;
 	
 	public InterviewingEgoPage(Long interviewId, Question question) {
 		super(interviewId);
@@ -52,6 +58,20 @@ public class InterviewingEgoPage extends InterviewingPage {
 		}
 		field.setAutoFocus();
 		form.add(field);
+
+		ArrayList<String> allOptions = Lists.newArrayList();
+		ArrayList<String> selectedOptions = Lists.newArrayList();
+		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) {
+			allOptions.add(none);
+			if(answer != null && 
+					(answer.getValue() == null || answer.getValue().isEmpty()) &&
+					answer.getSkipReason().equals(Answer.SkipReason.NONE)) {
+				selectedOptions.add(none);
+			}
+		}
+		noneCheck = new CheckboxesPanel<String>("noneCheck",allOptions,selectedOptions);
+		form.add(noneCheck);
+		
 		add(form);
 
 		add(new Link("backwardLink") {
