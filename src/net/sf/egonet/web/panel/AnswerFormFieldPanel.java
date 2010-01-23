@@ -1,6 +1,7 @@
 package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
@@ -18,6 +19,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	
 	public final static String dontKnow = "Don't know";
 	public final static String refuse = "Refuse";
+	public final static String none = "None";
 
 	protected AnswerFormFieldPanel(String id, Question question, Answer.SkipReason originalSkipReason) { 
 		this(id,question, originalSkipReason, new ArrayList<Alter>());
@@ -97,4 +99,70 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public abstract void setAutoFocus();
 	public abstract boolean dontKnow();
 	public abstract boolean refused();
+	
+	public boolean consistent(Collection<String> pageLevelFlags) {
+		return inconsistencyReason(pageLevelFlags) == null;
+	}
+	public String inconsistencyReason(Collection<String> pageLevelFlags) {
+		if(pageLevelFlags.size() > 1) {
+			return "Can't select more than one page-level flag";
+		}
+		boolean ref = refused() || pageLevelFlags.contains(refuse);
+		boolean dk = dontKnow() || pageLevelFlags.contains(dontKnow);
+		boolean pageNone = pageLevelFlags.contains(none);
+		if(ref && dk) {
+			return "Can't give two skip reasons";
+		}
+		if((ref || dk || pageNone) && answered()) {
+			return "Can't provide a skip reason without skipping";
+		}
+		return null;
+	}
+	public boolean answered() {
+		return ! (getAnswer() == null || getAnswer().isEmpty());
+	}
+	public boolean answeredOrRefused(Collection<String> pageLevelFlags) {
+		return answered() || refused() || dontKnow() || ! pageLevelFlags.isEmpty();
+	}
+	public static boolean 
+	allConsistent(Collection<AnswerFormFieldPanel> panels, Collection<String> pageLevelFlags)
+	{
+		for(AnswerFormFieldPanel panel : panels) {
+			if(! panel.consistent(pageLevelFlags)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean 
+	someAnswered(Collection<AnswerFormFieldPanel> panels)
+	{
+		for(AnswerFormFieldPanel panel : panels) {
+			if(panel.answered()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean 
+	allAnsweredOrRefused(Collection<AnswerFormFieldPanel> panels, Collection<String> pageLevelFlags)
+	{
+		for(AnswerFormFieldPanel panel : panels) {
+			if(! panel.answeredOrRefused(pageLevelFlags)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean 
+	okayToContinue(Collection<AnswerFormFieldPanel> panels, Collection<String> pageLevelFlags)
+	{
+		return allConsistent(panels,pageLevelFlags) &&
+			(allAnsweredOrRefused(panels,pageLevelFlags) ||
+					(someAnswered(panels) && 
+							panels.iterator().next().question.needsMultiSelectionResponse()));
+	}
 }

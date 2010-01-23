@@ -17,5 +17,5 @@ public class InterviewingPage extends EgonetPage {
 	public final static String 
 		dontKnow = AnswerFormFieldPanel.dontKnow, 
 		refuse = AnswerFormFieldPanel.refuse,
-		none = "None";
+		none = AnswerFormFieldPanel.none;
 }
