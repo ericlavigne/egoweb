@@ -21,7 +21,6 @@ import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.egonet.web.panel.CheckboxesPanel;
-import net.sf.functionalj.tuple.PairUni;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
@@ -182,13 +181,6 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 
 	public String toString() {
 		return subject.toString();
-	}
-	
-	public PairUni<Alter> getFirstAlterPair() {
-		return new PairUni<Alter>(subject.firstAlter,subject.secondAlters.get(0));
-	}
-	public PairUni<Alter> getLastAlterPair() {
-		return new PairUni<Alter>(subject.firstAlter,subject.secondAlters.get(subject.secondAlters.size()-1));
 	}
 	
 	public static EgonetPage askNext(
