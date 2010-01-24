@@ -123,15 +123,27 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
+				boolean okayToContinue = 
+					AnswerFormFieldPanel.okayToContinue(answerFields, refDKCheck.getSelected());
+				boolean consistent = 
+				AnswerFormFieldPanel.allConsistent(answerFields, refDKCheck.getSelected());
 				for(AnswerFormFieldPanel answerField : answerFields) {
-					String answerString = answerField.getAnswer();
-					if(answerString != null) {
-						Answers.setAnswerForInterviewQuestionAlters(
-								subject.interviewId, subject.question, answerField.getAlters(), answerString);
+					if(okayToContinue) {
+						String answerString = answerField.getAnswer();
+						if(answerString != null) {
+							Answers.setAnswerForInterviewQuestionAlters(
+									subject.interviewId, subject.question, answerField.getAlters(), answerString);
+						}
+					} else if(consistent) {
+						// TODO: Post note about no-answer
+					} else {
+						// TODO: Post note about consistency
 					}
 				}
-				setResponsePage(
-						askNext(subject.interviewId,subject,true,new InterviewingAlterPairPage(subject)));
+				if(okayToContinue) {
+					setResponsePage(
+							askNext(subject.interviewId,subject,true,new InterviewingAlterPairPage(subject)));
+				}
 			}
 		};
 		questionsView = new ListView("questions",answerFields) {
