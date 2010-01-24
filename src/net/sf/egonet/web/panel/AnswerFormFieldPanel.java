@@ -100,6 +100,16 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public abstract boolean dontKnow();
 	public abstract boolean refused();
 	
+	public Answer.SkipReason getSkipReason() {
+		if(refused()) {
+			return Answer.SkipReason.REFUSE;
+		} else if(dontKnow()) {
+			return Answer.SkipReason.DONT_KNOW;
+		} else {
+			return Answer.SkipReason.NONE;
+		}
+	}
+	
 	public boolean consistent(Collection<String> pageLevelFlags) {
 		return inconsistencyReason(pageLevelFlags) == null;
 	}

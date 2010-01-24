@@ -1,6 +1,7 @@
 package net.sf.egonet.web.page;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
@@ -39,12 +40,24 @@ public class InterviewingEgoPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
-				String answerString = field.getAnswer();
-				if(answerString != null) {
-					Answers.setAnswerForInterviewAndQuestion(interviewId, question, answerString);
-					setResponsePage(
-							askNextUnanswered(interviewId,question,
-									new InterviewingEgoPage(interviewId,question)));
+				List<AnswerFormFieldPanel> answerFields = Lists.newArrayList(field);
+				boolean okayToContinue = 
+					AnswerFormFieldPanel.okayToContinue(answerFields, noneCheck.getSelected());
+				boolean consistent = 
+					AnswerFormFieldPanel.allConsistent(answerFields, noneCheck.getSelected());
+				if(okayToContinue) {
+					String answerString = field.getAnswer();
+					if(answerString != null) {
+						Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+								answerString,field.getSkipReason());
+						setResponsePage(
+								askNextUnanswered(interviewId,question,
+										new InterviewingEgoPage(interviewId,question)));
+					}
+				} else if(consistent) {
+					// TODO: complain about no answer
+				} else {
+					// TODO: complain about inconsistency
 				}
 			}
 		};
@@ -83,7 +96,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 				}
 			}
 		});
-		add(new Link("forwardLink") {
+		Link forwardLink = new Link("forwardLink") {
 			public void onClick() {
 				EgonetPage page = 
 					askNext(interviewId,question,new InterviewingEgoPage(interviewId,question));
@@ -91,7 +104,14 @@ public class InterviewingEgoPage extends InterviewingPage {
 					setResponsePage(page);
 				}
 			}
-		});
+		};
+		add(forwardLink);
+		if(! AnswerFormFieldPanel.okayToContinue(
+				Lists.newArrayList(field),
+				noneCheck.getSelected())) 
+		{
+			forwardLink.setVisible(false);
+		}
 	}
 
 	//                    forward, unansweredOnly

@@ -142,7 +142,8 @@ public class Answers {
 	}
 	
 	public static void setAnswerForInterviewAndQuestion(
-			Session session, Interview interview, Question question, ArrayList<Alter> alters, String answerString) 
+			Session session, Interview interview, Question question, ArrayList<Alter> alters, 
+			String answerString, Answer.SkipReason skipReason) 
 	{
 		Answer answer = getAnswerForInterviewQuestionAlters(session,interview,question,alters);
 		if(answer == null) {
@@ -158,23 +159,29 @@ public class Answers {
 		} else {
 			answer.setValue(answerString);
 		}
+		answer.setSkipReason(skipReason);
 		DB.save(answer);
 	}
 	
 	public static void setAnswerForInterviewAndQuestion(
-			final Long interviewId, final Question question, final String answerString) {
-		setAnswerForInterviewQuestionAlters(interviewId,question,new ArrayList<Alter>(),answerString);
+			final Long interviewId, final Question question, 
+			final String answerString, final Answer.SkipReason skipReason) 
+	{
+		setAnswerForInterviewQuestionAlters(interviewId,
+				question,new ArrayList<Alter>(),
+				answerString,skipReason);
 	}
 	
 	public static void setAnswerForInterviewQuestionAlters(
-			final Long interviewId, final Question question, 
-			final ArrayList<Alter> alters, final String answerString) {
+			final Long interviewId, final Question question, final ArrayList<Alter> alters, 
+			final String answerString, final Answer.SkipReason skipReason) 
+	{
 		DB.withTx(new DB.Action<Object>() {
 			public Object get() {
 				setAnswerForInterviewAndQuestion(
 						session,
 						Interviews.getInterview(session, interviewId),
-						question,alters,answerString);
+						question,alters,answerString,skipReason);
 				return null;
 			}
 		});

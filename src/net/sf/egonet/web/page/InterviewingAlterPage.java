@@ -112,15 +112,27 @@ public class InterviewingAlterPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
+				boolean okayToContinue = 
+					AnswerFormFieldPanel.okayToContinue(answerFields, refDKCheck.getSelected());
+				boolean consistent = 
+					AnswerFormFieldPanel.allConsistent(answerFields, refDKCheck.getSelected());
 				for(AnswerFormFieldPanel answerField : answerFields) {
-					String answerString = answerField.getAnswer();
-					if(answerString != null) {
+					if(okayToContinue) {
+						String answerString = answerField.getAnswer();
 						Answers.setAnswerForInterviewQuestionAlters(
-								subject.interviewId, subject.question, answerField.getAlters(), answerString);
+								subject.interviewId, subject.question, answerField.getAlters(), 
+								answerString, answerField.getSkipReason());
+					} else if(consistent) {
+						// TODO: Post note about no-answer
+					} else {
+						// TODO: Post note about consistency
 					}
 				}
-				setResponsePage(
-						askNext(subject.interviewId,subject,true, new InterviewingAlterPage(subject)));
+				if(okayToContinue) {
+					setResponsePage(
+							askNext(subject.interviewId,subject,true, 
+									new InterviewingAlterPage(subject)));
+				}
 			}
 		};
 		questionsView = new ListView("questions",answerFields) {
@@ -155,7 +167,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 				}
 			}
 		});
-		add(new Link("forwardLink") {
+		Link forwardLink = new Link("forwardLink") {
 			public void onClick() {
 				EgonetPage page = 
 					askNext(subject.interviewId,subject,false, new InterviewingAlterPage(subject));
@@ -163,7 +175,11 @@ public class InterviewingAlterPage extends InterviewingPage {
 					setResponsePage(page);
 				}
 			}
-		});
+		};
+		add(forwardLink);
+		if(! AnswerFormFieldPanel.okayToContinue(answerFields,refDKCheck.getSelected())) {
+			forwardLink.setVisible(false);
+		}
 	}
 
 	public String toString() {
