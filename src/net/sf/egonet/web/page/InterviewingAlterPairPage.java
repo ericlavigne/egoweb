@@ -168,7 +168,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 				}
 			}
 		});
-		add(new Link("forwardLink") {
+		Link forwardLink = new Link("forwardLink") {
 			public void onClick() {
 				EgonetPage page = 
 					askNext(subject.interviewId,subject,false,new InterviewingAlterPairPage(subject));
@@ -176,7 +176,11 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 					setResponsePage(page);
 				}
 			}
-		});
+		};
+		add(forwardLink);
+		if(! AnswerFormFieldPanel.okayToContinue(answerFields,refDKCheck.getSelected())) {
+			forwardLink.setVisible(false);
+		}
 	}
 
 	public String toString() {
