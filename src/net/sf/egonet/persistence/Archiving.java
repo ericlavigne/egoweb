@@ -470,6 +470,7 @@ public class Archiving {
 			.addAttribute("key", answer.getRandomKey()+"")
 			.addAttribute("questionId", answer.getQuestionId()+"")
 			.addAttribute("questionType", answer.getQuestionTypeDB())
+			.addAttribute("skipReason", answer.getSkipReasonDB())
 			.addAttribute("answerType", answer.getAnswerTypeDB())
 			.addAttribute("alterId1", answer.getAlterId1()+"")
 			.addAttribute("alterId2", answer.getAlterId2()+"");
@@ -484,6 +485,7 @@ public class Archiving {
 		answer.setStudyId(studyId);
 		answer.setInterviewId(interviewId);
 		answer.setQuestionTypeDB(attrString(node,"questionType"));
+		answer.setSkipReasonDB(attrString(node,"skipReason"));
 		answer.setAnswerTypeDB(attrString(node,"answerType"));
 		
 		// questionId
