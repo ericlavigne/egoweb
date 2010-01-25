@@ -56,19 +56,25 @@ public class InterviewingEgoIDPage extends EgonetPage {
 			@Override
 			public void onSubmit()
             {
-				String newMessage = "Submitted data:";
+				boolean answeredAll = true;
 				List<Answer> answers = Lists.newArrayList();
 				for(AnswerFormFieldPanel question : questions) {
-					newMessage += " "+question.getAnswer();
-					answers.add(new Answer(question.getQuestion(),question.getAnswer()));
+					if(question.answered()) {
+						answers.add(new Answer(question.getQuestion(),question.getAnswer()));
+						question.setNotification("");
+					} else {
+						answeredAll = false;
+						question.setNotification("Unanswered");
+					}
 				}
-				Interview interview = Interviewing.findOrCreateMatchingInterviewForStudy(studyId, answers);
-				newMessage += " interview id is "+interview.getId();
-				message.setObject(newMessage);
+				if(answeredAll && ! answers.isEmpty()) {
+					Interview interview = 
+						Interviewing.findOrCreateMatchingInterviewForStudy(studyId, answers);
 				
-				EgonetPage comeFrom = InterviewingEgoPage.askNext(interview.getId(), null, null);
-				setResponsePage(
-						InterviewingEgoPage.askNextUnanswered(interview.getId(),null,comeFrom));
+					EgonetPage comeFrom = InterviewingEgoPage.askNext(interview.getId(), null, null);
+					setResponsePage(
+							InterviewingEgoPage.askNextUnanswered(interview.getId(),null,comeFrom));
+				}
             }
         };
 		
