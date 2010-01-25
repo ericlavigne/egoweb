@@ -131,12 +131,9 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				for(AnswerFormFieldPanel answerField : answerFields) {
 					if(okayToContinue) {
-						String answerString = answerField.getAnswer();
-						if(answerString != null) {
-							Answers.setAnswerForInterviewQuestionAlters(
-									subject.interviewId, subject.question, answerField.getAlters(), 
-									answerString, answerField.getSkipReason(pageFlags));
-						}
+						Answers.setAnswerForInterviewQuestionAlters(
+								subject.interviewId, subject.question, answerField.getAlters(), 
+								answerField.getAnswer(), answerField.getSkipReason(pageFlags));
 					} else if(consistent) {
 						// TODO: Post note about no-answer
 					} else {

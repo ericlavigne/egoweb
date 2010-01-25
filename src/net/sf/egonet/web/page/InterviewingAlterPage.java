@@ -120,10 +120,9 @@ public class InterviewingAlterPage extends InterviewingPage {
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				for(AnswerFormFieldPanel answerField : answerFields) {
 					if(okayToContinue) {
-						String answerString = answerField.getAnswer();
 						Answers.setAnswerForInterviewQuestionAlters(
 								subject.interviewId, subject.question, answerField.getAlters(), 
-								answerString, answerField.getSkipReason(pageFlags));
+								answerField.getAnswer(), answerField.getSkipReason(pageFlags));
 					} else if(consistent) {
 						// TODO: Post note about no-answer
 					} else {

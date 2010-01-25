@@ -47,14 +47,11 @@ public class InterviewingEgoPage extends InterviewingPage {
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				if(okayToContinue) {
-					String answerString = field.getAnswer();
-					if(answerString != null) {
-						Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-								answerString,field.getSkipReason(pageFlags));
-						setResponsePage(
-								askNextUnanswered(interviewId,question,
-										new InterviewingEgoPage(interviewId,question)));
-					}
+					Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+							field.getAnswer(),field.getSkipReason(pageFlags));
+					setResponsePage(
+							askNextUnanswered(interviewId,question,
+									new InterviewingEgoPage(interviewId,question)));
 				} else if(consistent) {
 					// TODO: complain about no answer
 				} else {
