@@ -173,6 +173,9 @@ public class Interviewing {
 			alterPagesForInterview(session, interviewId);
 		while(true) {
 			InterviewingAlterPage.Subject nextPage;
+			if(pages.isEmpty()) {
+				return null;
+			}
 			if(previousPage == null) {
 				nextPage = 
 					forward ? pages.first() : pages.last();
@@ -222,6 +225,9 @@ public class Interviewing {
 			alterPairPagesForInterview(session, interviewId);
 		while(true) {
 			InterviewingAlterPairPage.Subject nextPage;
+			if(pages.isEmpty()) {
+				return null;
+			}
 			if(previousPage == null) {
 				nextPage = 
 					forward ? pages.first() : pages.last();

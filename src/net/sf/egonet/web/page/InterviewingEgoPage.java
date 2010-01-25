@@ -1,9 +1,7 @@
 package net.sf.egonet.web.page;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 
@@ -16,7 +14,7 @@ import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
-import net.sf.egonet.web.panel.CheckboxesPanel;
+import net.sf.egonet.web.panel.InterviewingPanel;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
@@ -24,8 +22,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 	
 	private Long interviewId;
 	private Question question;
-	private AnswerFormFieldPanel field;
-	private CheckboxesPanel<String> noneCheck;
+	private InterviewingPanel interviewingPanel;
 	
 	public InterviewingEgoPage(Long interviewId, Question question) {
 		super(interviewId);
@@ -36,19 +33,19 @@ public class InterviewingEgoPage extends InterviewingPage {
 
 	private void build() {
 		
-		add(new MultiLineLabel("prompt", question.getPrompt()));
-		
 		Form form = new Form("form") {
 			public void onSubmit() {
-				List<String> pageFlags = noneCheck.getSelected();
-				List<AnswerFormFieldPanel> answerFields = Lists.newArrayList(field);
+				List<String> pageFlags = interviewingPanel.pageFlags();
+				List<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
 				boolean okayToContinue = 
 					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				if(okayToContinue) {
-					Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-							field.getAnswer(),field.getSkipReason(pageFlags));
+					for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
+						Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+								field.getAnswer(),field.getSkipReason(pageFlags));
+					}
 					setResponsePage(
 							askNextUnanswered(interviewId,question,
 									new InterviewingEgoPage(interviewId,question)));
@@ -60,28 +57,18 @@ public class InterviewingEgoPage extends InterviewingPage {
 			}
 		};
 		
+		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question);
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
-		if(answer == null) {
-			field = AnswerFormFieldPanel.getInstance("question",question);
-		} else {
+		if(answer != null) {
 			field = AnswerFormFieldPanel.getInstance("question",
 					question,answer.getValue(),answer.getSkipReason());
 		}
 		field.setAutoFocus();
 		form.add(field);
-
-		ArrayList<String> allOptions = Lists.newArrayList();
-		ArrayList<String> selectedOptions = Lists.newArrayList();
-		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) {
-			allOptions.add(none);
-			if(answer != null && 
-					(answer.getValue() == null || answer.getValue().isEmpty()) &&
-					answer.getSkipReason().equals(Answer.SkipReason.NONE)) {
-				selectedOptions.add(none);
-			}
-		}
-		noneCheck = new CheckboxesPanel<String>("noneCheck",allOptions,selectedOptions);
-		form.add(noneCheck);
+		
+		interviewingPanel = 
+			new InterviewingPanel("interviewingPanel",question,Lists.newArrayList(field));
+		form.add(interviewingPanel);
 		
 		add(form);
 
@@ -105,8 +92,8 @@ public class InterviewingEgoPage extends InterviewingPage {
 		};
 		add(forwardLink);
 		if(! AnswerFormFieldPanel.okayToContinue(
-				Lists.newArrayList(field),
-				noneCheck.getSelected())) 
+				interviewingPanel.getAnswerFields(),
+				interviewingPanel.pageFlags())) 
 		{
 			forwardLink.setVisible(false);
 		}
