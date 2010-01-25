@@ -18,6 +18,11 @@ public class Study extends Entity
 	
 	private Long adjacencyExpressionId;
 
+	private String valueRefusal;
+	private String valueDontKnow;
+	private String valueLogicalSkip;
+	private String valueNotYetAnswered;
+
 	public Study()
 	{
 		this("");
@@ -125,5 +130,49 @@ public class Study extends Entity
 	}
 	public String getConclusionOld() {
 		return null;
+	}
+
+	public void setValueRefusal(String valueRefusal) {
+		if(valueRefusal != null && ! valueRefusal.isEmpty()) {
+			this.valueRefusal = valueRefusal;
+		}
+	}
+
+	public String getValueRefusal() {
+		return valueRefusal == null || valueRefusal.isEmpty() ?
+				"-1" : valueRefusal;
+	}
+
+	public void setValueDontKnow(String valueDontKnow) {
+		if(valueDontKnow != null && ! valueDontKnow.isEmpty()) {
+			this.valueDontKnow = valueDontKnow;
+		}
+	}
+
+	public String getValueDontKnow() {
+		return valueDontKnow == null || valueDontKnow.isEmpty() ?
+				"-2" : valueDontKnow;
+	}
+
+	public void setValueLogicalSkip(String valueLogicalSkip) {
+		if(valueLogicalSkip != null && ! valueLogicalSkip.isEmpty()) {
+			this.valueLogicalSkip = valueLogicalSkip;
+		}
+	}
+
+	public String getValueLogicalSkip() {
+		return valueLogicalSkip == null || valueLogicalSkip.isEmpty() ?
+				"-3" : valueLogicalSkip;
+	}
+
+	public void setValueNotYetAnswered(String valueNotYetAnswered) {
+		if(valueNotYetAnswered != null && ! valueNotYetAnswered.isEmpty()) {
+			this.valueNotYetAnswered = valueNotYetAnswered;
+		}
+	}
+
+	public String getValueNotYetAnswered() {
+		return valueNotYetAnswered == null || valueNotYetAnswered.isEmpty() ?
+				"-4" : valueNotYetAnswered;
 	}
 }

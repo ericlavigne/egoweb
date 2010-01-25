@@ -31,6 +31,11 @@ public class StudySettingsPanel extends Panel {
 	private TextField maxAltersField;
 	
 	private Model adjacencyModel;
+
+	private TextField refusedField;
+	private TextField dontKnowField;
+	private TextField logicalSkipField;
+	private TextField notYetField;
 	
 	public StudySettingsPanel(String id, Study study) {
 		super(id);
@@ -71,6 +76,16 @@ public class StudySettingsPanel extends Panel {
 		adjacencyModel = new Model();
 		form.add(new DropDownChoice("adjacencyField",adjacencyModel,Expressions.forStudy(study.getId())));
 		
+		refusedField = new TextField("refusedField", new Model(""));
+		dontKnowField = new TextField("dontKnowField", new Model(""));
+		logicalSkipField = new TextField("logicalSkipField", new Model(""));
+		notYetField = new TextField("notYetField", new Model(""));
+		
+		form.add(refusedField);
+		form.add(dontKnowField);
+		form.add(logicalSkipField);
+		form.add(notYetField);
+		
 		Button button = new Button("saveButton") {
 			@Override
 			public void onSubmit() {
@@ -93,6 +108,11 @@ public class StudySettingsPanel extends Panel {
 		minAltersField.setModelObject(study.getMinAlters() == null ? "0" : study.getMinAlters().toString());
 		maxAltersField.setModelObject(study.getMaxAlters() == null ? "" : study.getMaxAlters().toString());
 
+		refusedField.setModelObject(study.getValueRefusal());
+		dontKnowField.setModelObject(study.getValueDontKnow());
+		logicalSkipField.setModelObject(study.getValueLogicalSkip());
+		notYetField.setModelObject(study.getValueNotYetAnswered());
+		
 		Long adjacencyId = study.getAdjacencyExpressionId();
 		if(adjacencyId != null) {
 			adjacencyModel.setObject(Expressions.get(adjacencyId));
@@ -114,6 +134,11 @@ public class StudySettingsPanel extends Panel {
 		study.setMaxAlters(
 				maxAltersString == null || maxAltersString.isEmpty() ? null : 
 					Integer.parseInt(maxAltersString));
+		
+		study.setValueRefusal(refusedField.getModelObjectAsString());
+		study.setValueDontKnow(dontKnowField.getModelObjectAsString());
+		study.setValueLogicalSkip(logicalSkipField.getModelObjectAsString());
+		study.setValueNotYetAnswered(notYetField.getModelObjectAsString());
 		
 		Expression adjacencyReason = (Expression) adjacencyModel.getObject();
 		if(adjacencyReason != null) {

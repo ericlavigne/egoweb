@@ -26,6 +26,11 @@
 		<property name="minAlters" column="min_alters" />
 		<property name="maxAlters" column="max_alters" />
 		<property name="adjacencyExpressionId" column="adjacency_expression_id" />
+		
+		<property name="valueRefusal" column="value_refusal" />
+		<property name="valueDontKnow" column="value_dont_know" />
+		<property name="valueLogicalSkip" column="value_logical_skip" />
+		<property name="valueNotYetAnswered" column="value_not_yet_answered" />
 	</class>
 </hibernate-mapping>
 
