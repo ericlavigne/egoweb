@@ -294,6 +294,10 @@ public class Archiving {
 			.addAttribute("key", study.getRandomKey()+"")
 			.addAttribute("minAlters", study.getMinAlters()+"")
 			.addAttribute("maxAlters", study.getMaxAlters()+"")
+			.addAttribute("valueDontKnow", study.getValueDontKnow())
+			.addAttribute("valueLogicalSkip", study.getValueLogicalSkip())
+			.addAttribute("valueNotYetAnswered", study.getValueNotYetAnswered())
+			.addAttribute("valueRefusal", study.getValueRefusal())
 			.addAttribute("adjacencyExpressionId", study.getAdjacencyExpressionId()+"");
 		addText(studyNode,"introduction",study.getIntroduction());
 		addText(studyNode,"egoIdPrompt",study.getEgoIdPrompt());
@@ -309,6 +313,10 @@ public class Archiving {
 		study.setRandomKey(attrLong(studyElement,"key"));
 		study.setMinAlters(attrInt(studyElement,"minAlters"));
 		study.setMaxAlters(attrInt(studyElement,"maxAlters"));
+		study.setValueDontKnow(attrString(studyElement,"valueDontKnow"));
+		study.setValueLogicalSkip(attrString(studyElement,"valueLogicalSkip"));
+		study.setValueNotYetAnswered(attrString(studyElement,"valueNotYetAnswered"));
+		study.setValueRefusal(attrString(studyElement,"valueRefusal"));
 		Long remoteAdjacencyId = attrLong(studyElement,"adjacencyExpressionId");
 		study.setAdjacencyExpressionId(
 				remoteAdjacencyId == null ? null : 
