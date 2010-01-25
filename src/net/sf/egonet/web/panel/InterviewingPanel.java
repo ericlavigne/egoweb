@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
+import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -78,5 +79,26 @@ public class InterviewingPanel extends Panel {
 	
 	public ArrayList<AnswerFormFieldPanel> getAnswerFields() {
 		return this.answerFields;
+	}
+	
+	public static InterviewingPanel createExample(String id, Question question) {
+		ArrayList<AnswerFormFieldPanel> panels = Lists.newArrayList();
+		Interview interview = new Interview();
+		Alter oneAlter = new Alter(interview,"Jacob");
+		List<String> names = 
+			Lists.newArrayList("Emma","Michael","Ethan","Isabella","Joshua");
+		for(int i = 0; i < (question.getAskingStyleList() ? 5 : 1); i++) {
+			ArrayList<Alter> alters = Lists.newArrayList();
+			Alter otherAlter = new Alter(interview,names.get(i));
+			if(question.getType().equals(Question.QuestionType.ALTER)) {
+				alters.add(otherAlter);
+			}
+			if(question.getType().equals(Question.QuestionType.ALTER_PAIR)) {
+				alters.add(oneAlter);
+				alters.add(otherAlter);
+			}
+			panels.add(AnswerFormFieldPanel.getInstance("question", question, alters));
+		}
+		return new InterviewingPanel(id,question,panels);
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Answer.AnswerType;
+import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
@@ -19,6 +20,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.collect.Lists;
 
 public class EditStudyQuestionsPanel extends Panel {
 
@@ -86,6 +89,16 @@ public class EditStudyQuestionsPanel extends Panel {
 				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
+				AjaxFallbackLink questionPreview = new AjaxFallbackLink("questionPreview") {
+					public void onClick(AjaxRequestTarget target) {
+						previewQuestion(question);
+						target.addComponent(editQuestionPanelContainer);
+					}
+				};
+				item.add(questionPreview);
+				if(QuestionType.EGO_ID.equals(question.getType())) {
+					questionPreview.setVisible(false);
+				}
 				item.add(new AjaxFallbackLink("questionMoveUp") {
 					public void onClick(AjaxRequestTarget target) {
 						Questions.moveEarlier(question);
@@ -130,6 +143,11 @@ public class EditStudyQuestionsPanel extends Panel {
 	}
 	private void editQuestionOptions(Question question) {
 		Panel newPanel = new EditQuestionOptionsPanel("editQuestionPanel",questionsContainer,question);
+		editQuestionPanel.replaceWith(newPanel);
+		editQuestionPanel = newPanel;
+	}
+	private void previewQuestion(Question question) {
+		Panel newPanel = InterviewingPanel.createExample("editQuestionPanel", question);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}

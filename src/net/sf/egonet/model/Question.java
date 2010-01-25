@@ -173,6 +173,9 @@ public class Question extends OrderedEntity
 	}
 
 	public Boolean getAskingStyleList() {
+		if(getType().equals(QuestionType.EGO)) {
+			return false;
+		}
 		return askingStyleList == null ? false : askingStyleList;
 	}
 }
