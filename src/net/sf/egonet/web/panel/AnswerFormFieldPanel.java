@@ -8,6 +8,7 @@ import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import static net.sf.egonet.model.Answer.AnswerType;
 
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 public abstract class AnswerFormFieldPanel extends Panel {
@@ -16,6 +17,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	protected ArrayList<Alter> alters;
 
 	protected final Answer.SkipReason originalSkipReason;
+	
+	private Label notification;
 	
 	public final static String dontKnow = "Don't know";
 	public final static String refuse = "Refuse";
@@ -32,6 +35,13 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		this.question = question;
 		this.alters = alters;
 		this.originalSkipReason = originalSkipReason;
+		
+		notification = new Label("notification","");
+		add(notification);
+	}
+	
+	public void setNotification(String text) {
+		notification.setModelObject(text);
 	}
 
 	public static AnswerFormFieldPanel getInstance(String id, Question question) 

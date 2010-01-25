@@ -41,18 +41,24 @@ public class InterviewingEgoPage extends InterviewingPage {
 					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
-				if(okayToContinue) {
-					for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
-						Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-								field.getAnswer(),field.getSkipReason(pageFlags));
+				for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
+					if(okayToContinue) {
+							Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+									field.getAnswer(),field.getSkipReason(pageFlags));
+					} else if(consistent) {
+						field.setNotification(
+								field.answeredOrRefused(pageFlags) ?
+										"" : "Unanswered");
+					} else {
+						field.setNotification(
+								field.consistent(pageFlags) ?
+										"" : field.inconsistencyReason(pageFlags));
 					}
+				}
+				if(okayToContinue) {
 					setResponsePage(
 							askNextUnanswered(interviewId,question,
 									new InterviewingEgoPage(interviewId,question)));
-				} else if(consistent) {
-					// TODO: complain about no answer
-				} else {
-					// TODO: complain about inconsistency
 				}
 			}
 		};

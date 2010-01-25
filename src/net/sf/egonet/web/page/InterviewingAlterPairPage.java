@@ -102,9 +102,13 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 								subject.interviewId, subject.question, answerField.getAlters(), 
 								answerField.getAnswer(), answerField.getSkipReason(pageFlags));
 					} else if(consistent) {
-						// TODO: Post note about no-answer
+						answerField.setNotification(
+								answerField.answeredOrRefused(pageFlags) ?
+										"" : "Unanswered");
 					} else {
-						// TODO: Post note about consistency
+						answerField.setNotification(
+								answerField.consistent(pageFlags) ?
+										"" : answerField.inconsistencyReason(pageFlags));
 					}
 				}
 				if(okayToContinue) {

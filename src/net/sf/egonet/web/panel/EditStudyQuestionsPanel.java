@@ -21,8 +21,6 @@ import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
-import com.google.common.collect.Lists;
-
 public class EditStudyQuestionsPanel extends Panel {
 
 	private Long studyId;
