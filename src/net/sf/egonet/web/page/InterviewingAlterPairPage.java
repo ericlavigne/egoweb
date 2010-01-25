@@ -5,12 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 
 import com.google.common.collect.Lists;
 
@@ -21,7 +17,7 @@ import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
-import net.sf.egonet.web.panel.CheckboxesPanel;
+import net.sf.egonet.web.panel.InterviewingPanel;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
@@ -80,11 +76,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 
 	private Subject subject;
 
-	public ArrayList<AnswerFormFieldPanel> answerFields;
-	
-	private ListView questionsView;
-	
-	private CheckboxesPanel<String> refDKCheck;
+	private InterviewingPanel interviewingPanel;
 	
 	public InterviewingAlterPairPage(Subject subject) 
 	{
@@ -94,37 +86,12 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 	}
 	
 	private void build() {
-		answerFields = Lists.newArrayList();
-		for(Alter secondAlter : subject.secondAlters) {
-			ArrayList<Alter> alters = Lists.newArrayList(subject.firstAlter,secondAlter);
-			Answer answer = 
-				Answers.getAnswerForInterviewQuestionAlters(
-						Interviews.getInterview(subject.interviewId), 
-						subject.question, alters);
-			if(answer == null) {
-				answerFields.add(
-						AnswerFormFieldPanel.getInstance("question", 
-								subject.question, alters));
-			} else {
-				answerFields.add(
-						AnswerFormFieldPanel.getInstance("question", 
-								subject.question, answer.getValue(), answer.getSkipReason(), alters));
-			}
-			if(! answerFields.isEmpty()) {
-				answerFields.get(0).setAutoFocus();
-			}
-		}
 		
-		Boolean singleAlterPair = subject.secondAlters.size() < 2;
-		
-		ArrayList<Alter> altersInPrompt = 
-			singleAlterPair ? Lists.newArrayList(subject.firstAlter,subject.secondAlters.get(0)) : 
-				Lists.newArrayList(subject.firstAlter);
-		add(new MultiLineLabel("prompt", subject.question.individualizePrompt(altersInPrompt)));
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
-				List<String> pageFlags = refDKCheck.getSelected();
+				List<String> pageFlags = interviewingPanel.pageFlags();
+				ArrayList<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
 				boolean okayToContinue = 
 					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
@@ -146,28 +113,31 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 				}
 			}
 		};
-		questionsView = new ListView("questions",answerFields) {
-			protected void populateItem(ListItem item) {
-				AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
-				item.add(wrapper);
-				item.add(new Label("alter",
-						subject.secondAlters.size() < 2 ? 
-								"" : wrapper.getAlters().get(1).getName()));
-			}
-		};
-		questionsView.setReuseItems(true);
-		form.add(questionsView);
 		
-		ArrayList<String> allOptions = Lists.newArrayList();
-		ArrayList<String> selectedOptions = Lists.newArrayList(); // TODO: populate this
-		if(subject.question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) {
-			allOptions.add(none);
+		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
+		for(Alter secondAlter : subject.secondAlters) {
+			ArrayList<Alter> alters = Lists.newArrayList(subject.firstAlter,secondAlter);
+			Answer answer = 
+				Answers.getAnswerForInterviewQuestionAlters(
+						Interviews.getInterview(subject.interviewId), 
+						subject.question, alters);
+			if(answer == null) {
+				answerFields.add(
+						AnswerFormFieldPanel.getInstance("question", 
+								subject.question, alters));
+			} else {
+				answerFields.add(
+						AnswerFormFieldPanel.getInstance("question", 
+								subject.question, answer.getValue(), answer.getSkipReason(), alters));
+			}
+			if(! answerFields.isEmpty()) {
+				answerFields.get(0).setAutoFocus();
+			}
 		}
-		if(! singleAlterPair) {
-			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
-		}
-		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
-		form.add(refDKCheck);
+		
+		interviewingPanel = 
+			new InterviewingPanel("interviewingPanel",subject.question,answerFields);
+		form.add(interviewingPanel);
 		
 		add(form);
 		
@@ -190,7 +160,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 			}
 		};
 		add(forwardLink);
-		if(! AnswerFormFieldPanel.okayToContinue(answerFields,refDKCheck.getSelected())) {
+		if(! AnswerFormFieldPanel.okayToContinue(answerFields,interviewingPanel.pageFlags())) {
 			forwardLink.setVisible(false);
 		}
 	}
