@@ -2,6 +2,7 @@ package net.sf.egonet.web.page;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -123,17 +124,18 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
+				List<String> pageFlags = refDKCheck.getSelected();
 				boolean okayToContinue = 
-					AnswerFormFieldPanel.okayToContinue(answerFields, refDKCheck.getSelected());
+					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
-					AnswerFormFieldPanel.allConsistent(answerFields, refDKCheck.getSelected());
+					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				for(AnswerFormFieldPanel answerField : answerFields) {
 					if(okayToContinue) {
 						String answerString = answerField.getAnswer();
 						if(answerString != null) {
 							Answers.setAnswerForInterviewQuestionAlters(
 									subject.interviewId, subject.question, answerField.getAlters(), 
-									answerString, answerField.getSkipReason());
+									answerString, answerField.getSkipReason(pageFlags));
 						}
 					} else if(consistent) {
 						// TODO: Post note about no-answer

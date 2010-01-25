@@ -100,10 +100,10 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public abstract boolean dontKnow();
 	public abstract boolean refused();
 	
-	public Answer.SkipReason getSkipReason() {
-		if(refused()) {
+	public Answer.SkipReason getSkipReason(Collection<String> pageLevelFlags) {
+		if(refused() || pageLevelFlags.contains(refuse)) {
 			return Answer.SkipReason.REFUSE;
-		} else if(dontKnow()) {
+		} else if(dontKnow() || pageLevelFlags.contains(dontKnow)) {
 			return Answer.SkipReason.DONT_KNOW;
 		} else {
 			return Answer.SkipReason.NONE;

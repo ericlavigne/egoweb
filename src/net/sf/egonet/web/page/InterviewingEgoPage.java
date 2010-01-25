@@ -40,16 +40,17 @@ public class InterviewingEgoPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
+				List<String> pageFlags = noneCheck.getSelected();
 				List<AnswerFormFieldPanel> answerFields = Lists.newArrayList(field);
 				boolean okayToContinue = 
-					AnswerFormFieldPanel.okayToContinue(answerFields, noneCheck.getSelected());
+					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
-					AnswerFormFieldPanel.allConsistent(answerFields, noneCheck.getSelected());
+					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				if(okayToContinue) {
 					String answerString = field.getAnswer();
 					if(answerString != null) {
 						Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-								answerString,field.getSkipReason());
+								answerString,field.getSkipReason(pageFlags));
 						setResponsePage(
 								askNextUnanswered(interviewId,question,
 										new InterviewingEgoPage(interviewId,question)));
