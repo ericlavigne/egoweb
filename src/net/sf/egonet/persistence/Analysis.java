@@ -182,12 +182,18 @@ public class Analysis {
 				Alter alter = alters.get(alterIndex-1);
 				List<String> output = Lists.newArrayList();
 				output.add(interviewIndex.toString());
+				
 				for(Question question : egoIdQuestions) {
-					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+					output.add(showAnswer(study, context, question,
+							context.qidToEgoAnswer.get(question.getId()), 
+							null, null, optionIdToValue));
 				}
 				for(Question question : egoQuestions) {
-					output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+					output.add(showAnswer(study, context, question,
+							context.qidToEgoAnswer.get(question.getId()), 
+							null, null, optionIdToValue));
 				}
+
 				output.add(statistics.density()+"");
 				
 				for(String centralityProperty : Statistics.centralityProperties) {
@@ -208,9 +214,10 @@ public class Analysis {
 				output.add(alterIndex.toString());
 				output.add(alter.getName());
 				for(Question question : alterQuestions) {
-					output.add(showAnswer(optionIdToValue,question,
+					output.add(showAnswer(study, context, question,
 							context.qidAidToAlterAnswer.get(
-									new PairUni<Long>(question.getId(),alter.getId()))));
+									new PairUni<Long>(question.getId(),alter.getId())), 
+							alter, null, optionIdToValue));
 				}
 				for(String centralityProperty : Statistics.centralityProperties) {
 					output.add(statistics.centrality(centralityProperty, alter)+"");
@@ -274,16 +281,19 @@ public class Analysis {
 					List<String> output = Lists.newArrayList();
 					output.add(interviewIndex.toString());
 					for(Question question : egoIdQuestions) {
-						output.add(showAnswer(optionIdToValue,question,context.qidToEgoAnswer.get(question.getId())));
+						output.add(showAnswer(study, context, question,
+								context.qidToEgoAnswer.get(question.getId()), 
+								null, null, optionIdToValue));
 					}
 					output.add(alter1Index.toString());
 					output.add(alter1.getName());
 					output.add(alter2Index.toString());
 					output.add(alter2.getName());
 					for(Question question : alterPairQuestions) {
-						output.add(showAnswer(optionIdToValue,question,
+						output.add(showAnswer(study,context,question,
 								context.qidA1idA2idToAlterPairAnswer.get(
-										new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId()))));
+										new TripleUni<Long>(question.getId(),alter1.getId(),alter2.getId())),
+								alter1,alter2,optionIdToValue));
 					}
 					Integer distance = network.distance(alter1, alter2);
 					output.add(distance == null ? "Inf" : distance+"");
@@ -358,6 +368,38 @@ public class Analysis {
 			return stringWriter.toString();
 		} catch(Exception ex) {
 			throw new RuntimeException("Unable to output alter pair csv for study "+study.getName(),ex);
+		}
+	}
+	
+	private static String showAnswer(
+			Study study, EvaluationContext context, 
+			Question question,
+			Answer answer, Alter alter1, Alter alter2,Map<Long,String> optionIdToValue)
+	{
+		ArrayList<Alter> alters = Lists.newArrayList();
+		if(alter1 != null) {
+			alters.add(alter1);
+		}
+		if(alter2 != null) {
+			alters.add(alter2);
+		}
+		Long exprId = question.getAnswerReasonExpressionId();
+		if(exprId != null) {
+			Expression expression = context.eidToExpression.get(exprId);
+			if(expression != null && 
+					! Expressions.evaluate(context.eidToExpression.get(exprId),alters,context))
+			{
+				return study.getValueLogicalSkip();
+			}
+		}
+		if(answer == null) {
+			return study.getValueNotYetAnswered();
+		} else if(answer.getSkipReason().equals(Answer.SkipReason.REFUSE)) {
+			return study.getValueRefusal();
+		} else if(answer.getSkipReason().equals(Answer.SkipReason.DONT_KNOW)) {
+			return study.getValueDontKnow();
+		} else {
+			return showAnswer(optionIdToValue, question, answer);
 		}
 	}
 	
