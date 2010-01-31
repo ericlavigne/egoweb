@@ -75,10 +75,12 @@ public class AnalysisStudyPage extends EgonetPage {
 				});
 				item.add(new Button("interviewVisualize") {
 					public void onSubmit() {
-						// TODO: Would be better as embedded image with size/color/adjacency controls. See p233 of Wicket in Action.
-						
-						downloadImage(interview.getId()+".jpg", 
-								Analysis.getImageForInterview(interview, getConnectionReason()));
+						//downloadImage(interview.getId()+".jpg", 
+						//		Analysis.getImageForInterview(interview, getConnectionReason()));
+						setResponsePage(
+								new NetworkVisualizationPage(
+										interview,
+										getConnectionReason()));
 					}
 				});
 			}});

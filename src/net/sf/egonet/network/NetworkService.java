@@ -24,8 +24,8 @@ public class NetworkService
 {
     public static <N> BufferedImage createImage(Network<N> network)
     {
-        final int width  = 1000;
-        final int height = 1000;
+        final int width  = 1200;
+        final int height = 800;
         final Color nodeColor = Color.GREEN;
         final boolean labelVertices = true;
         final boolean labelEdges = false;

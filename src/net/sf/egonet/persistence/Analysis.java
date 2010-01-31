@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.wicket.util.io.ByteArrayOutputStream;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.ResourceStreamNotFoundException;
 import org.apache.wicket.util.time.Time;
@@ -24,8 +23,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
@@ -38,6 +35,7 @@ import net.sf.egonet.network.Network;
 import net.sf.egonet.network.NetworkService;
 import net.sf.egonet.network.Statistics;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
+import net.sf.egonet.web.component.NetworkImage;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.TripleUni;
 
@@ -60,14 +58,7 @@ public class Analysis {
 		private byte[] imagedata;
 		
 		public ImageResourceStream(BufferedImage image) {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-			try {
-				encoder.encode(image);
-				imagedata = os.toByteArray();
-			} catch(Exception ex) {
-				throw new RuntimeException("Failed to create image resource stream",ex);
-			}
+			imagedata = NetworkImage.getJPEGFromBufferedImage(image);
 		}
 		public void close() throws IOException {
 		}
@@ -89,6 +80,16 @@ public class Analysis {
 		public Time lastModifiedTime() {
 			return Time.now();
 		}
+	}
+	
+	public static Network<Alter> 
+	getNetworkForInterview(final Interview interview, final Expression connection)
+	{
+		return new DB.Action<Network<Alter>>() {
+			public Network<Alter> get() {
+				return getNetworkForInterview(session, interview, connection);
+			}
+		}.execute();
 	}
 	
 	public static Network<Alter> getNetworkForInterview(Session session, Interview interview, Expression connection) {
