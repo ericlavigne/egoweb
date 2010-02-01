@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import net.sf.egonet.network.Network;
 import net.sf.egonet.network.NetworkService;
 
+import org.apache.commons.collections15.Transformer;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.image.resource.DynamicImageResource;
 import org.apache.wicket.util.io.ByteArrayOutputStream;
@@ -18,12 +19,14 @@ public class NetworkImage<N> extends Image {
 	private Network<N> network;
 	private NetworkService.LayoutOption layoutOption;
 	private Color background;
+	private Transformer<N,String> nodeLabeller;
 	
 	public NetworkImage(String id, Network<N> network) {
 		super(id);
 		this.network = network;
 		this.layoutOption = null;
 		this.background = null;
+		this.nodeLabeller = null;
 		refresh();
 	}
 	
@@ -34,6 +37,9 @@ public class NetworkImage<N> extends Image {
 	public void setBackground(Color color) {
 		this.background = color;
 	}
+	public void setNodeLabeller(Transformer<N,String> nodeLabeller) {
+		this.nodeLabeller = nodeLabeller;
+	}
 	
 	public void refresh() {
 		setImageResource(new DynamicImageResource() {
@@ -41,7 +47,8 @@ public class NetworkImage<N> extends Image {
 				return getJPEGFromBufferedImage(
 						NetworkService.createImage(
 								NetworkImage.this.network, 
-								layoutOption, background));
+								layoutOption, background,
+								nodeLabeller));
 			}
 		});
 	}

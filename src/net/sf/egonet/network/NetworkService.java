@@ -29,7 +29,8 @@ public class NetworkService
 	public static enum LayoutOption {KK,FR,Circle,ISOM}
 	
     public static <N> BufferedImage createImage(Network<N> network, 
-    		LayoutOption layoutOption, Color backgroundColor)
+    		LayoutOption layoutOption, Color backgroundColor, 
+    		Transformer<N,String> nodeLabeller)
     {
         final int width  = 1600;
         final int height = 800;
@@ -65,8 +66,13 @@ public class NetworkService
         vv.setBackground(backgroundColor == null ? Color.WHITE : backgroundColor);
         vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(network, edgeStroke));
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-        if (labelVertices) vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<N>());
-        if (labelEdges)    vv.getRenderContext().setEdgeLabelTransformer(  new ToStringLabeller<PairUni<N>>());
+        if (labelVertices) {
+        	vv.getRenderContext().setVertexLabelTransformer(
+        			nodeLabeller == null ? new ToStringLabeller<N>() : nodeLabeller);
+        }
+        if (labelEdges) {
+        	vv.getRenderContext().setEdgeLabelTransformer(  new ToStringLabeller<PairUni<N>>());
+        }
 
         return (BufferedImage) vv.getImage(center, d);
     }

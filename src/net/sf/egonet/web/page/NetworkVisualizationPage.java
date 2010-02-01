@@ -3,6 +3,8 @@ package net.sf.egonet.web.page;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import org.apache.commons.collections15.Transformer;
+
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -54,7 +56,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 						});
 			}
 		});
-		
+
 		add(new Link("backgroundLink") {
 			public void onClick() {
 				final ArrayList<Color> colors = 
@@ -82,5 +84,47 @@ public class NetworkVisualizationPage extends EgonetPage {
 						});
 			}
 		});
+		add(new Link("nodeLabelLink") {
+			public void onClick() {
+				ArrayList<AlterLabeller> options = 
+					Lists.newArrayList(new AlterNoneLabeller(), new AlterLabeller());
+				replacePrimary(
+						new SingleSelectionPanel<AlterLabeller>("primaryPanel",
+								"Alter Label",options) 
+						{
+							public void action(AlterLabeller option) {
+								networkImage.setNodeLabeller(option);
+								networkImage.refresh();
+							}
+						});
+			}
+		});
+	}
+
+	public class AlterLabeller implements Transformer<Alter,String> {
+		public String transform(Alter alter) {
+			return alter.getName();
+		}
+		public String toString() {
+			return "Name";
+		}
+	}
+	public class AlterNoneLabeller extends AlterLabeller {
+		public String transform(Alter alter) {
+			return "";
+		}
+		public String toString() {
+			return "None";
+		}
+	}
+	public class AlterAnswerLabeller extends AlterLabeller {
+		public String transform(Alter alter) {
+			return alter.getName(); // TODO: constructor with question, and use it
+		}
+	}
+	public class AlterExpressionLabeller extends AlterLabeller {
+		public String transform(Alter alter) {
+			return alter.getName(); // TODO: constructor with expression, and use it
+		}
 	}
 }
