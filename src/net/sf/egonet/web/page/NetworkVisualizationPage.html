@@ -1,6 +1,31 @@
 <wicket:extend>
 
 	<img wicket:id="networkImage" 
-		style="width:70%; display:block; margin-left:auto; margin-right:auto"/>
+		style="width:80%; display:block; float:right"/>
+
+	<div>
+		<ul>
+			<li><a href="#" wicket:id="layoutLink">Layout</a></li>
+			<li>Background</li>
+			<li>Labels</li>
+			<li>Nodes</li>
+			<ul>
+				<li>Color</li>
+				<li>Size</li>
+				<li>Shape</li>
+			</ul>
+			<li>Edges</li>
+			<ul>
+				<li>Color</li>
+				<li>Size</li>
+			</ul>
+		</ul>
+	</div>
+
+	<div wicket:id="primaryPanel">
+		<h3>Layout</h3>
+		<p>Layout options</p>
+		<p>Update button</p>
+	</div>
 
 </wicket:extend>

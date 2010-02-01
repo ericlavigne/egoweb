@@ -15,16 +15,26 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
 public class NetworkImage<N> extends Image {
 
 	private Network<N> network;
+	private NetworkService.LayoutOption layoutOption;
 	
 	public NetworkImage(String id, Network<N> network) {
 		super(id);
 		this.network = network;
-		
+		this.layoutOption = null;
+		refresh();
+	}
+	
+	public void setLayout(NetworkService.LayoutOption layoutOption) {
+		this.layoutOption = layoutOption;
+	}
+	
+	public void refresh() {
 		setImageResource(new DynamicImageResource() {
 			protected byte[] getImageData() {
 				return getJPEGFromBufferedImage(
 						NetworkService.createImage(
-								NetworkImage.this.network));
+								NetworkImage.this.network, 
+								layoutOption));
 			}
 		});
 	}

@@ -1,6 +1,9 @@
 package net.sf.egonet.network;
 
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
+import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
@@ -20,11 +23,14 @@ import org.apache.commons.collections15.Transformer;
 
 import net.sf.functionalj.tuple.PairUni;
 
+
 public class NetworkService
 {
-    public static <N> BufferedImage createImage(Network<N> network)
+	public static enum LayoutOption {KK,FR,Circle,ISOM}
+	
+    public static <N> BufferedImage createImage(Network<N> network, LayoutOption layoutOption)
     {
-        final int width  = 1200;
+        final int width  = 1600;
         final int height = 800;
         final Color nodeColor = Color.GREEN;
         final boolean labelVertices = true;
@@ -40,7 +46,17 @@ public class NetworkService
 
         Dimension d = new Dimension(width, height);
 
-        Layout<N,PairUni<N>> layout = new FRLayout<N,PairUni<N>>(g);
+        Layout<N,PairUni<N>> layout = null;
+        if(layoutOption == null || layoutOption.equals(LayoutOption.FR)) {
+        	layout = new FRLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.KK)) {
+        	layout = new KKLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.Circle)) {
+        	layout = new CircleLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.ISOM)) {
+        	layout = new ISOMLayout<N,PairUni<N>>(g);
+        }
+        
         layout.setSize(d);
 
         VisualizationImageServer<N,PairUni<N>> vv = new VisualizationImageServer<N,PairUni<N>>(layout, d);
