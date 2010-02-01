@@ -19,6 +19,10 @@ public abstract class SingleSelectionPanel<N> extends Panel {
 	
 	public abstract void action(N option);
 	
+	public String show(N option) {
+		return option.toString();
+	}
+	
 	public SingleSelectionPanel(String id, String title, ArrayList<N> options) {
 		super(id);
 		this.options = options;
@@ -34,7 +38,7 @@ public abstract class SingleSelectionPanel<N> extends Panel {
 						action(option);
 					}
 				};
-				optionLink.add(new Label("optionName",option.toString()));
+				optionLink.add(new Label("optionName",show(option)));
 				item.add(optionLink);
 			}
 		});

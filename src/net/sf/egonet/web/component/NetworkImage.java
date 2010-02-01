@@ -1,5 +1,6 @@
 package net.sf.egonet.web.component;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import net.sf.egonet.network.Network;
@@ -16,16 +17,22 @@ public class NetworkImage<N> extends Image {
 
 	private Network<N> network;
 	private NetworkService.LayoutOption layoutOption;
+	private Color background;
 	
 	public NetworkImage(String id, Network<N> network) {
 		super(id);
 		this.network = network;
 		this.layoutOption = null;
+		this.background = null;
 		refresh();
 	}
 	
 	public void setLayout(NetworkService.LayoutOption layoutOption) {
 		this.layoutOption = layoutOption;
+	}
+	
+	public void setBackground(Color color) {
+		this.background = color;
 	}
 	
 	public void refresh() {
@@ -34,7 +41,7 @@ public class NetworkImage<N> extends Image {
 				return getJPEGFromBufferedImage(
 						NetworkService.createImage(
 								NetworkImage.this.network, 
-								layoutOption));
+								layoutOption, background));
 			}
 		});
 	}

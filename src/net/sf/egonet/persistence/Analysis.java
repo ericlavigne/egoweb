@@ -50,7 +50,7 @@ public class Analysis {
 	}
 	
 	public static BufferedImage getImageForInterview(Session session, Interview interview, Expression connection) {
-		return NetworkService.createImage(getNetworkForInterview(session,interview,connection),null);
+		return NetworkService.createImage(getNetworkForInterview(session,interview,connection),null,null);
 	}
 
 	public static class ImageResourceStream implements IResourceStream {

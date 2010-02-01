@@ -28,7 +28,8 @@ public class NetworkService
 {
 	public static enum LayoutOption {KK,FR,Circle,ISOM}
 	
-    public static <N> BufferedImage createImage(Network<N> network, LayoutOption layoutOption)
+    public static <N> BufferedImage createImage(Network<N> network, 
+    		LayoutOption layoutOption, Color backgroundColor)
     {
         final int width  = 1600;
         final int height = 800;
@@ -61,6 +62,7 @@ public class NetworkService
 
         VisualizationImageServer<N,PairUni<N>> vv = new VisualizationImageServer<N,PairUni<N>>(layout, d);
         vv.getRenderContext().setVertexFillPaintTransformer(newVertexPainter(network, nodeColor));
+        vv.setBackground(backgroundColor == null ? Color.WHITE : backgroundColor);
         vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(network, edgeStroke));
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
         if (labelVertices) vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<N>());
