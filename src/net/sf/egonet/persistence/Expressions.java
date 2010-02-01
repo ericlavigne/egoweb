@@ -201,6 +201,14 @@ public class Expressions {
 		public Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer = Maps.newHashMap();
 	}
 	
+	public static EvaluationContext getContext(final Interview interview) {
+		return new DB.Action<EvaluationContext>() {
+			public EvaluationContext get() {
+				return getContext(session,interview);
+			}
+		}.execute();
+	}
+	
 	public static EvaluationContext getContext(Session session, Interview interview) {
 		EvaluationContext context = new EvaluationContext();
 		Long studyId = interview.getStudyId();
