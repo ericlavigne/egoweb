@@ -91,13 +91,19 @@ public class Questions {
 	public static List<Question> getQuestionsForStudy(
 			Session session, final Long studyId, final QuestionType type) 
 	{
-		Query query = session.createQuery("from Question q where q.active = 1 and q.studyId = :studyId " +
-				(type == null ? "" : "and q.typeDB = :type")+ " order by q.ordering")
-				.setLong("studyId", studyId);
-		if(type != null) {
-			query.setString("type", Question.typeDB(type));
+		try {
+			Query query = session.createQuery("from Question q where q.active = 1 and q.studyId = :studyId " +
+					(type == null ? "" : "and q.typeDB = :type")+ " order by q.ordering")
+					.setLong("studyId", studyId);
+			if(type != null) {
+				query.setString("type", Question.typeDB(type));
+			}
+			return query.list();
+		} catch(Exception ex) {
+			throw new RuntimeException(
+					"Unable to getQuestionsForStudy("+studyId+","+type+")",
+					ex);
 		}
-		return query.list();
 	}
 
 	public static List<Question> getQuestionsForStudy(final Long studyId, final QuestionType type) {

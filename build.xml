@@ -54,7 +54,7 @@
 			<zipfileset src="${lib.dir}/antlr-2.7.6.jar" />
 			<zipfileset src="${lib.dir}/collections-generic-4.01.jar" />
 			<zipfileset src="${lib.dir}/commons-collections-3.1.jar" />
-			<zipfileset src="${lib.dir}/derby-10.5.1.1.jar" />
+			<zipfileset src="${lib.dir}/derby-10.5.3.1-svn912156.jar" />
 			<zipfileset src="${lib.dir}/dom4j-1.6.1.jar" />
 			<zipfileset src="${lib.dir}/functionalj.jar" />
 			<zipfileset src="${lib.dir}/google-collect-1.0-rc2.jar" />
