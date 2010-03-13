@@ -65,6 +65,14 @@ public class Interviewing {
 				return interview;
 			}
 			private Boolean answersMatch(Collection<Answer> ego1Answers, Collection<Answer> ego2Answers) {
+                if (ego1Answers.isEmpty() && !ego2Answers.isEmpty())
+                {
+                    return false;
+                }
+                if (!ego1Answers.isEmpty() && ego2Answers.isEmpty())
+                {
+                    return false;
+                }
 				for(Answer ego1Answer : ego1Answers) {
 					for(Answer ego2Answer : ego2Answers) {
 						if(ego1Answer.getQuestionId().equals(ego2Answer.getQuestionId()) &&

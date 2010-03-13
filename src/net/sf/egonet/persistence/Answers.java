@@ -36,6 +36,16 @@ public class Answers {
 			.list();
 	}
 
+	@SuppressWarnings("unchecked")
+    public static List<Answer> getAnswersForQuestion(
+            final Long questionId)
+    {
+		return new DB.Action<List<Answer>>() {
+			public List<Answer> get() {
+				return getAnswersForQuestion(session,questionId);
+			}
+		}.execute();
+    }
 
 	@SuppressWarnings("unchecked")
 	public static List<Answer> getAnswersForQuestion(

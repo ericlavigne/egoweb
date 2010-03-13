@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 import net.sf.egonet.persistence.Analysis;
+import net.sf.egonet.web.Main;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -30,6 +32,12 @@ public class EgonetPage extends WebPage
 
 		add(new Label("headTitle",getTitle()));
 		add(new Label("inlineTitle",getTitle()));
+
+        Application application = getApplication();
+        if (application instanceof Main)
+        {
+            ((Main)application).userActivityOccurred();
+        }
 	}
 
 	public String getTitle() {
