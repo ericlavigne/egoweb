@@ -43,4 +43,8 @@
         <appender-ref ref="egonet"/>
         <appender-ref ref="stdout"/>
     </logger>
+    
+    <logger name="net.sf.hibernate">
+    	<level value="warn"/>
+    </logger>
 </configuration>

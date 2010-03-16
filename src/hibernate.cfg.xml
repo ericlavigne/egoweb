@@ -18,8 +18,8 @@
 		<property name="hibernate.c3p0.max_statements">50</property>
 		<property name="hibernate.c3p0.idle_test_period">3000</property>
 
-		<property name="show_sql">true</property>
-		<property name="format_sql">true</property>
+		<property name="show_sql">false</property>
+		<property name="format_sql">false</property>
 
 		<mapping resource="net/sf/egonet/model/Study.hbm.xml" />
 		<mapping resource="net/sf/egonet/model/Question.hbm.xml" />

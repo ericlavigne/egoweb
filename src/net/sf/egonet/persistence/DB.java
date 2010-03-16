@@ -68,6 +68,10 @@ public class DB {
 		new Action<Object>() {
 			public Object get() {
 				// TODO: Need to store schema version so each migration can be applied exactly once.
+				session.createSQLQuery(
+						"create index idx_questionoption_qid_ord on " +
+						"question_option(question_id,ordering)")
+				.executeUpdate();
 				/*
 				for(String entity : new String[]{
 						"Alter","Answer","Expression","Interview","Question","QuestionOption","Study"}) 
