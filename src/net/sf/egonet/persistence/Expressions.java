@@ -416,7 +416,7 @@ public class Expressions {
 	private static Boolean evaluateNumericalExpression(Expression expression, Answer answer) {
 		try {
 			Long answerNumber = Long.parseLong(answer.getValue());
-			Long expressionNumber = (Long) expression.getValue();
+			Long expressionNumber = ((Number) expression.getValue()).longValue();
 			Operator operator = expression.getOperator();
 
 			if(answerNumber > expressionNumber) {
