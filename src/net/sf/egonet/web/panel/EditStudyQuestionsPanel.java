@@ -1,6 +1,7 @@
 package net.sf.egonet.web.panel;
 
 import java.util.List;
+import java.util.TreeSet;
 
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
@@ -21,6 +22,8 @@ import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
+import com.google.common.collect.Sets;
+
 public class EditStudyQuestionsPanel extends Panel {
 
 	private Long studyId;
@@ -30,6 +33,7 @@ public class EditStudyQuestionsPanel extends Panel {
 	private Form editQuestionPanelContainer;
 	private Panel editQuestionPanel;
 	
+	private TreeSet<Question> selectedQuestions;
 	
 	public EditStudyQuestionsPanel(String id, Study study, Question.QuestionType questionType) {
 		super(id);
@@ -48,6 +52,7 @@ public class EditStudyQuestionsPanel extends Panel {
 	
 	private void build()
     {
+		selectedQuestions = new TreeSet<Question>();
 
 		questionsContainer = new Form("questionsContainer");
 		questionsContainer.setOutputMarkupId(true);
@@ -100,6 +105,26 @@ public class EditStudyQuestionsPanel extends Panel {
 				item.add(new AjaxFallbackLink("questionMoveUp") {
 					public void onClick(AjaxRequestTarget target) {
 						Questions.moveEarlier(question);
+						target.addComponent(questionsContainer);
+					}
+				});
+				Link questionSelectLink = new AjaxFallbackLink("questionSelect") {
+					public void onClick(AjaxRequestTarget target) {
+						if(selectedQuestions.contains(question)) {
+							selectedQuestions.remove(question);
+						} else {
+							selectedQuestions.add(question);
+						}
+						target.addComponent(questionsContainer);
+					}
+				};
+				questionSelectLink.add(new Label("questionSelectLabel",
+						selectedQuestions.contains(question) ? "[SELECTED]" : "Select"));
+				item.add(questionSelectLink);
+				item.add(new AjaxFallbackLink("questionPull") {
+					public void onClick(AjaxRequestTarget target) {
+						Questions.pull(question, selectedQuestions);
+						selectedQuestions = Sets.newTreeSet();
 						target.addComponent(questionsContainer);
 					}
 				});

@@ -1,6 +1,7 @@
 package net.sf.egonet.persistence;
 
 import java.util.List;
+import java.util.Set;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
@@ -11,6 +12,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 public class Questions {
 
@@ -137,6 +139,45 @@ public class Questions {
 		DB.withTx(new Function<Session,Object>() {
 			public Object apply(Session session) {
 				moveEarlier(session,question);
+				return null;
+			}
+		});
+	}
+	
+	public static void pull(Session session, Question target, Set<Question> selectedQuestions) {
+		List<Question> questions = 
+			getQuestionsForStudy(session,target.getStudyId(),target.getType());
+		List<Question> newOrder = Lists.newArrayList();
+		for(Question question : questions) {
+			boolean afterTarget = question.getOrdering() > target.getOrdering();
+			boolean selected = selectedQuestions.contains(question);
+			if(! (afterTarget || selected)) {
+				newOrder.add(question);
+			}
+		}
+		for(Question question : questions) {
+			boolean selected = selectedQuestions.contains(question);
+			if(selected) {
+				newOrder.add(question);
+			}
+		}
+		for(Question question : questions) {
+			boolean afterTarget = question.getOrdering() > target.getOrdering();
+			boolean selected = selectedQuestions.contains(question);
+			if(afterTarget && ! selected) {
+				newOrder.add(question);
+			}
+		}
+		for(Integer j = 0; j < newOrder.size(); j++) {
+			newOrder.get(j).setOrdering(j);
+			DB.save(newOrder.get(j));
+		}
+	}
+
+	public static void pull(final Question target, final Set<Question> selectedQuestions) {
+		DB.withTx(new Function<Session,Object>() {
+			public Object apply(Session session) {
+				pull(session,target,selectedQuestions);
 				return null;
 			}
 		});
