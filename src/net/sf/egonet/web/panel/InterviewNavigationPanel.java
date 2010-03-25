@@ -19,15 +19,17 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
+import com.google.common.collect.Lists;
+
 public class InterviewNavigationPanel extends Panel {
 	
 	private Long interviewId;
-	private boolean showingLinks;
+	private ArrayList<InterviewLink> links;
 	
 	public InterviewNavigationPanel(String id, Long interviewId) {
 		super(id);
 		this.interviewId = interviewId;
-		this.showingLinks = false;
+		this.links = Lists.newArrayList();
 		build();
 	}
 	
@@ -109,15 +111,18 @@ public class InterviewNavigationPanel extends Panel {
 	}
 	
 	public List<InterviewLink> getLinks() {
-		return showingLinks ? 
-				Interviewing.getAnsweredPagesForInterview(interviewId) : 
-					new ArrayList<InterviewLink>();
+		return links;
 	}
 	
 	private void build() {
 		add(new Link("showLinks") {
 			public void onClick() {
-				showingLinks = ! showingLinks;
+				if(links.isEmpty()) {
+					links = Lists.newArrayList(
+							Interviewing.getAnsweredPagesForInterview(interviewId));
+				} else {
+					links = Lists.newArrayList();
+				}
 			}});
 		add(new ListView("pages", new PropertyModel(this,"links")) {
 			protected void populateItem(ListItem item) {
