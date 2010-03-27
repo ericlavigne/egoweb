@@ -333,6 +333,11 @@ public class Expressions {
 		Expression.Operator operator = expression.getOperator();
 		for(Long expressionId : (List<Long>) expression.getValue()) {
 			Expression subExpression = eidToExpression.get(expressionId);
+			if(subExpression == null) {
+				throw new RuntimeException("Unable to find expression#"+expressionId+
+						" referenced in expression#"+expression.getId()+": "+
+						expression.getName()+"("+expression.getType()+")");
+			}
 			ArrayList<ArrayList<Alter>> alterGroups = Lists.newArrayList();
 			Boolean simple = ! subExpression.getType().equals(Expression.Type.Compound);
 			if(simple && qidToQuestion.get(subExpression.getQuestionId()).isAboutAlter()) {
