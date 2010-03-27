@@ -5,6 +5,7 @@ package net.sf.egonet.model;
  */
 public class QuestionOption extends Entity
 {
+	private Long studyId;
 	private Long questionId;
 	private String name;
 	private String value;
@@ -21,6 +22,7 @@ public class QuestionOption extends Entity
 		return name == null || name.isEmpty() ? "<unnamed option>" : name;
 	}
 
+	public Long   getStudyId() { return studyId; }
 	public Long   getQuestionId() { return questionId; }
 	public String getName()       { return name;       }
 	public void setName(String val)     { this.name       = val; }
@@ -35,5 +37,6 @@ public class QuestionOption extends Entity
 
 	public QuestionOption() {}
 
+	public void setStudyId(Long val) { this.studyId = val; }
 	public void setQuestionId(Long val) { this.questionId = val; }
 }

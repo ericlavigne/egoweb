@@ -10,7 +10,24 @@ import org.hibernate.Session;
 import com.google.common.base.Function;
 
 public class Options {
-
+	
+	public static List<QuestionOption> getOptionsForStudy(final Long studyId) {
+		return DB.withTx(new DB.Action<List<QuestionOption>>() {
+			public List<QuestionOption> get() {
+				return getOptionsForStudy(session,studyId);
+			}
+		});
+	}
+	
+	public static List<QuestionOption>
+	getOptionsForStudy(Session session, final Long studyId)
+	{
+		return session.createQuery("from QuestionOption where active = 1 and " +
+				" studyId = :studyId")
+				.setLong("studyId", studyId)
+				.list();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static List<QuestionOption> 
 	getOptionsForQuestion(Session session, final Long questionId) 
@@ -40,7 +57,6 @@ public class Options {
 		return options;
 	}
 	
-
 	public static List<QuestionOption> getOptionsForQuestion(final Long questionId) {
 		return DB.withTx(new DB.Action<List<QuestionOption>>() {
 			public List<QuestionOption> get() {
@@ -48,7 +64,6 @@ public class Options {
 			}
 		});
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public static void delete(Session session, final QuestionOption option) {

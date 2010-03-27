@@ -1,9 +1,11 @@
 package net.sf.egonet.web.panel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.model.Question.QuestionType;
@@ -21,8 +23,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultiset;
 
 public class EditStudyQuestionsPanel extends Panel {
 
@@ -46,8 +50,35 @@ public class EditStudyQuestionsPanel extends Panel {
 		return Studies.getStudy(studyId);
 	}
 
+	private ArrayList<Question> questions;
+	private DateTime questionsLastRefreshed;
+	
 	public List<Question> getQuestions() {
-		return Questions.getQuestionsForStudy(studyId,questionType);
+		DateTime now = new DateTime();
+		if(questions == null || questionsLastRefreshed.isBefore(now.minusSeconds(1))) {
+			questions = 
+				new ArrayList<Question>(Questions.getQuestionsForStudy(studyId,questionType));
+			questionsLastRefreshed = now;
+		}
+		return questions;
+	}
+	
+	private TreeMultiset<Long> optionsPerQuestionId;
+	private DateTime optionsPerQuestionIdLastRefreshed;
+
+	private Integer getNumOptionsForQuestion(Question question) {
+		DateTime now = new DateTime();
+		if(optionsPerQuestionId == null || 
+				optionsPerQuestionIdLastRefreshed.isBefore(now.minusSeconds(1))) 
+		{
+			optionsPerQuestionId = TreeMultiset.create();
+			for(QuestionOption option : Options.getOptionsForStudy(studyId)) {
+				optionsPerQuestionId.add(option.getQuestionId());
+			}
+			optionsPerQuestionIdLastRefreshed = now;
+		}
+		Integer numOptions = optionsPerQuestionId.count(question.getId());
+		return numOptions == null ? 0 : numOptions;
 	}
 	
 	private void build()
@@ -88,7 +119,11 @@ public class EditStudyQuestionsPanel extends Panel {
 				questionLink.add(new Label("questionTitle", question.getTitle()));
 				item.add(questionLink);
 				questionOptionsLink.add(
-						new Label("questionOptionsLabel", selectionQuestion ? "Options ("+Options.getOptionsForQuestion(question.getId()).size()+")" : ""));
+						new Label("questionOptionsLabel", 
+								selectionQuestion ? 
+										"Options ("+
+											getNumOptionsForQuestion(question)+")" 
+										: ""));
 				item.add(questionOptionsLink);
 				item.add(new Label("questionPrompt", question.getPrompt()));
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));

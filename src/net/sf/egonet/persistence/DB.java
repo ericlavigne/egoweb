@@ -1,12 +1,17 @@
 package net.sf.egonet.persistence;
 
+import java.util.TreeMap;
+
 import net.sf.egonet.model.Entity;
+import net.sf.egonet.model.Question;
+import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.web.Main;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 public class DB {
 
@@ -81,6 +86,18 @@ public class DB {
 							.executeUpdate();
 				}
 				*/
+				TreeMap<Long,Long> qIdToStudyId = Maps.newTreeMap();
+				for(Object questionObj : session.createQuery("from Question").list()) {
+					Question question = (Question) questionObj;
+					qIdToStudyId.put(question.getId(), question.getStudyId());
+				}
+				for(Object optionObj : session.createQuery("from QuestionOption").list()) {
+					QuestionOption option = (QuestionOption) optionObj;
+					if(option.getQuestionId() != null && option.getStudyId() == null) {
+						option.setStudyId(qIdToStudyId.get(option.getQuestionId()));
+						DB.save(session, option);
+					}
+				}
 				return null;
 			}
 		}.execute();

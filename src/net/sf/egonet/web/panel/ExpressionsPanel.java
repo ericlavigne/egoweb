@@ -1,5 +1,6 @@
 package net.sf.egonet.web.panel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
@@ -19,6 +20,7 @@ import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.joda.time.DateTime;
 
 public class ExpressionsPanel extends Panel {
 	
@@ -30,8 +32,16 @@ public class ExpressionsPanel extends Panel {
 		build();
 	}
 	
+	private ArrayList<Expression> expressions;
+	private DateTime expressionsLastRefreshed;
+	
 	public List<Expression> getExpressions() {
-		return Expressions.forStudy(studyId); 
+		DateTime now = new DateTime();
+		if(expressions == null || expressionsLastRefreshed.isBefore(now.minusSeconds(1))) {
+			expressions = new ArrayList<Expression>(Expressions.forStudy(studyId));
+			expressionsLastRefreshed = now;
+		}
+		return expressions;
 	}
 	
 	private Form form;
