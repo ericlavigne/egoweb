@@ -23,7 +23,7 @@ public class EgonetPage extends WebPage
 	private String title;
 
 	public EgonetPage() {
-		this("Egonet");
+		this("Egoweb");
 	}
 
 	public EgonetPage(String title)
