@@ -154,7 +154,7 @@ public class Expressions {
 				context.qidA1idA2idToAlterPairAnswer);
 	}
 	
-	public static Boolean evaluate(Expression expression, ArrayList<Alter> alters,
+	private static Boolean evaluate(Expression expression, ArrayList<Alter> alters,
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
 			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 

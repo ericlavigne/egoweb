@@ -131,24 +131,24 @@ public class Expression extends Entity {
 		return allowedOperators(this.type);
 	}
 	public static List<Operator> allowedOperators(Type type) {
-		List<Operator> operators = Lists.newArrayList();
-		if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
-			operators.add(Operator.All);
-			operators.add(Operator.Some);
-			operators.add(Operator.None);
+		if(type.equals(Type.Compound)) {
+			return Lists.newArrayList(Operator.All,Operator.Some,Operator.None);
+		}
+		if(type.equals(Type.Selection)) {
+			return Lists.newArrayList(Operator.All,Operator.Some,Operator.None);
 		}
 		if(type.equals(Type.Text)) {
-			operators.add(Operator.Equals);
-			operators.add(Operator.Contains);
+			return Lists.newArrayList(Operator.Equals,Operator.Contains);
 		}
 		if(type.equals(Type.Number)) {
-			operators.add(Operator.Greater);
-			operators.add(Operator.GreaterOrEqual);
-			operators.add(Operator.Equals);
-			operators.add(Operator.LessOrEqual);
-			operators.add(Operator.Less);
+			return Lists.newArrayList(
+					Operator.Greater,
+					Operator.GreaterOrEqual,
+					Operator.Equals,
+					Operator.LessOrEqual,
+					Operator.Less);
 		}
-		return operators;
+		throw new RuntimeException("Unrecognized expression type: "+type);
 	}
 	
 	// For Hibernate only
