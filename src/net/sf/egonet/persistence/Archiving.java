@@ -185,7 +185,8 @@ public class Archiving {
 					if(localExpressionId != null) {
 						Expression expression = localIdToExpression.get(localExpressionId);
 						updateExpressionFromNode(session,expression,expressionElement,
-								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId);
+								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId,
+								remoteToLocalExpressionId);
 					}
 				}
 			}
@@ -405,7 +406,8 @@ public class Archiving {
 	}
 	
 	private static void updateExpressionFromNode(Session session, Expression expression, Element node,
-			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId)
+			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId,
+			Map<Long,Long> remoteToLocalExpressionId)
 	{
 		expression.setStudyId(studyId);
 		expression.setName(attrString(node,"name"));
@@ -425,10 +427,13 @@ public class Archiving {
 				expression.getType().equals(Expression.Type.Compound))
 		{
 			List<Long> localOptionIds = Lists.newArrayList();
-			for(Long remoteOptionId : (List<Long>) expression.getValue()) {
-				Long localOptionId = remoteToLocalOptionId.get(remoteOptionId);
-				if(localOptionId != null) {
-					localOptionIds.add(localOptionId);
+			for(Long remoteValueId : (List<Long>) expression.getValue()) {
+				Map<Long,Long> remoteToLocalValueId = 
+					expression.getType().equals(Expression.Type.Compound) ?
+							remoteToLocalExpressionId : remoteToLocalOptionId;
+				Long localValueId = remoteToLocalValueId.get(remoteValueId);
+				if(localValueId != null) {
+					localOptionIds.add(localValueId);
 				}
 			}
 			expression.setValue(localOptionIds);
