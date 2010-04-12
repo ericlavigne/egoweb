@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Answer.AnswerType;
+import net.sf.functionalj.tuple.Pair;
+import net.sf.functionalj.tuple.Triple;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -11,9 +13,11 @@ import com.google.common.collect.Lists;
 
 public class Expression extends Entity {
 	
-	public static enum Operator {All,Some,None,Equals,Contains,Greater,GreaterOrEqual,LessOrEqual,Less}
+	public static enum Operator 
+		{All,Some,None,Equals,Contains,Greater,GreaterOrEqual,LessOrEqual,Less,Count,Sum}
 	
-	public static enum Type {Compound,Selection,Text,Number}
+	public static enum Type 
+		{Compound,Selection,Text,Number,Counting,Comparison}
 	
 	private String name;
 	private Type type;
@@ -98,7 +102,16 @@ public class Expression extends Entity {
 	
 	public void setValue(Object value) {
 		if(value != null) {
-			if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
+			if(type.equals(Type.Comparison)) {
+				Pair<Integer,Long> numberExpr = (Pair<Integer,Long>) value;
+				setValueDB(numberExpr.getFirst()+":"+numberExpr.getSecond());
+			} else if(type.equals(Type.Counting)) {
+				Triple<Integer,List<Long>,List<Long>> numberExprsQuests =
+					(Triple<Integer,List<Long>,List<Long>>) value;
+				setValueDB(numberExprsQuests.getFirst()+":"+
+						Joiner.on(",").join(numberExprsQuests.getSecond())+":"+
+						Joiner.on(",").join(numberExprsQuests.getThird()));
+			} else if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
 				setValueDB(Joiner.on(",").join((List<Long>) value));
 			} else if(type.equals(Type.Number) || type.equals(Type.Text)) {
 				setValueDB(value.toString());
@@ -109,15 +122,44 @@ public class Expression extends Entity {
 		}
 	}
 	public Object getValue() {
-		if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
-			if(getValueDB() == null || getValueDB().isEmpty()) {
-				return new ArrayList<Long>();
-			}
-			return Lists.transform(Lists.newArrayList(getValueDB().split(",")), new Function<String,Long>() {
-				public Long apply(String string) {
-					return Long.parseLong(string);
+		String valDB = getValueDB();
+		if(type.equals(Type.Comparison)) {
+			try {
+				String[] numberExpr = valDB.split(":");
+				if(numberExpr.length == 2) {
+					return new Pair<Integer,Long>(
+							Integer.parseInt(numberExpr[0]),
+							Long.parseLong(numberExpr[1]));
+				} else {
+					throw new RuntimeException("Wrong number of : separated parts in value.");
 				}
-			});
+			} catch(Exception ex) {
+				throw new RuntimeException(
+						"Invalid value in comparison expression: name="+
+							getName()+", value="+getValueDB(),
+						ex);
+			}
+		}
+		if(type.equals(Type.Counting)) {
+			try {
+				String[] numberExprsQuests = valDB.split(":");
+				if(numberExprsQuests.length == 3) {
+					Integer number = Integer.parseInt(numberExprsQuests[0]);
+					List<Long> exprs = commaSepToLongs(numberExprsQuests[1]);
+					List<Long> quests = commaSepToLongs(numberExprsQuests[2]);
+					return new Triple<Integer,List<Long>,List<Long>>(number,exprs,quests);
+				} else {
+					throw new RuntimeException("Wrong number of : separated parts in value.");
+				}
+			} catch(Exception ex) {
+				throw new RuntimeException(
+						"Invalid value in counting expression: name="+
+							getName()+", value="+getValueDB(),
+						ex);
+			}
+		}
+		if(type.equals(Type.Compound) || type.equals(Type.Selection)) {
+			return commaSepToLongs(valDB);
 		}
 		if(type.equals(Type.Number)) {
 			return getValueDB() == null ? null : Integer.parseInt(getValueDB());
@@ -127,10 +169,26 @@ public class Expression extends Entity {
 		}
 		throw new RuntimeException("Can't getValue() for Expression because no case provided for type "+type);
 	}
+	private static List<Long> commaSepToLongs(String commaSep) {
+		return commaSep == null || commaSep.isEmpty() ?
+				new ArrayList<Long>() : 
+					Lists.transform(Lists.newArrayList(commaSep.split(",")), parseLong);
+	}
+	private static Function<String,Long> parseLong = new Function<String,Long>() {
+		public Long apply(String string) {
+			return Long.parseLong(string);
+		}
+	};
 	public List<Operator> allowedOperators() {
 		return allowedOperators(this.type);
 	}
 	public static List<Operator> allowedOperators(Type type) {
+		if(type.equals(Type.Comparison)) {
+			return allowedOperators(Type.Number);
+		}
+		if(type.equals(Type.Counting)) {
+			return Lists.newArrayList(Operator.Count,Operator.Sum);
+		}
 		if(type.equals(Type.Compound)) {
 			return Lists.newArrayList(Operator.All,Operator.Some,Operator.None);
 		}
