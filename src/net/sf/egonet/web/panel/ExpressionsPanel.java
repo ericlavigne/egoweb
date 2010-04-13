@@ -47,7 +47,7 @@ public class ExpressionsPanel extends Panel {
 	private Form form;
 	private Panel editExpressionPanel;
 	private String panelId = "editExpressionPanel";
-	private Model questionSelectionModel;
+	private Model questionSelectionModel,comparisonTopicModel;
 	
 	private void build() {
 		form = new Form("form");
@@ -108,6 +108,26 @@ public class ExpressionsPanel extends Panel {
 					}
 				}
 	        );
+
+		comparisonTopicModel = new Model(); 
+		form.add(new DropDownChoice(
+				"comparisonTopicField",
+				comparisonTopicModel,
+				getExpressions()));
+		
+		form.add(
+				new Button("newComparisonExpression")
+	            {
+					@Override
+					public void onSubmit()
+	                {
+						Expression comparisonTopic = (Expression) comparisonTopicModel.getObject();
+						if(comparisonTopic != null) {
+							editExpression(Expression.comparisonAbout(comparisonTopic));
+						}
+					}
+				}
+	        );
 		
 		add(form);
 		
@@ -130,6 +150,9 @@ public class ExpressionsPanel extends Panel {
 		}
 		if(expression.getType().equals(Expression.Type.Compound)) {
 			return new CompoundExpressionEditorPanel(panelId,expression);
+		}
+		if(expression.getType().equals(Expression.Type.Comparison)) {
+			throw new RuntimeException("Failed to edit a comparison expression: "+expression);
 		}
 		return new EmptyPanel(panelId);
 	}

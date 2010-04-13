@@ -40,6 +40,16 @@ public class Expression extends Entity {
 		questionId = question.getId();
 		setDefaultValues();
 	}
+	public static Expression comparisonAbout(Expression expression) {
+		Expression result = new Expression();
+		result.setName("");
+		result.type = Type.Comparison;
+		result.setOperator(Operator.Equals);
+		result.studyId = expression.studyId;
+		result.setValue(new Pair<Integer,Long>(1,expression.getId()));
+		return result;
+	}
+	
 	public String toString() {
 		return name == null || name.isEmpty() ? "Untitled expression" : name;
 	}
