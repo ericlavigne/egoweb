@@ -152,7 +152,10 @@ public class ExpressionsPanel extends Panel {
 			return new CompoundExpressionEditorPanel(panelId,expression);
 		}
 		if(expression.getType().equals(Expression.Type.Comparison)) {
-			throw new RuntimeException("Failed to edit a comparison expression: "+expression);
+			return new ComparisonExpressionEditorPanel(panelId,expression);
+		}
+		if(expression.getType().equals(Expression.Type.Counting)) {
+			throw new RuntimeException("Failed to edit a counting expression: "+expression);
 		}
 		return new EmptyPanel(panelId);
 	}
