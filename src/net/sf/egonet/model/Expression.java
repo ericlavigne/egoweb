@@ -49,6 +49,14 @@ public class Expression extends Entity {
 		result.setValue(new Pair<Integer,Long>(1,expression.getId()));
 		return result;
 	}
+	public static Expression countingForStudy(Study study) {
+		Expression result = new Expression(study);
+		result.type = Type.Counting;
+		result.setOperator(Operator.Sum);
+		List<Long> noneSelected = Lists.newArrayList();
+		result.setValue(new Triple<Integer,List<Long>,List<Long>>(1,noneSelected,noneSelected));
+		return result;
+	}
 	
 	public String toString() {
 		return name == null || name.isEmpty() ? "Untitled expression" : name;
@@ -152,14 +160,14 @@ public class Expression extends Entity {
 		}
 		if(type.equals(Type.Counting)) {
 			try {
-				String[] numberExprsQuests = valDB.split(":");
-				if(numberExprsQuests.length == 3) {
-					Integer number = Integer.parseInt(numberExprsQuests[0]);
-					List<Long> exprs = commaSepToLongs(numberExprsQuests[1]);
-					List<Long> quests = commaSepToLongs(numberExprsQuests[2]);
+				List<String> numberExprsQuests = colonSep(valDB);
+				if(numberExprsQuests.size() == 3) {
+					Integer number = Integer.parseInt(numberExprsQuests.get(0));
+					List<Long> exprs = commaSepToLongs(numberExprsQuests.get(1));
+					List<Long> quests = commaSepToLongs(numberExprsQuests.get(2));
 					return new Triple<Integer,List<Long>,List<Long>>(number,exprs,quests);
 				} else {
-					throw new RuntimeException("Wrong number of : separated parts in value.");
+					throw new RuntimeException("Wrong number of : separated parts in value: valDB");
 				}
 			} catch(Exception ex) {
 				throw new RuntimeException(
@@ -178,6 +186,20 @@ public class Expression extends Entity {
 			return getValueDB();
 		}
 		throw new RuntimeException("Can't getValue() for Expression because no case provided for type "+type);
+	}
+	public static List<String> colonSep(String target) {
+		int startSearch = 0, nextColon = 0;
+		List<String> results = Lists.newArrayList();
+		while(nextColon > -1) {
+			nextColon = target.indexOf(":", startSearch);
+			if(nextColon < 0) {
+				results.add(target.substring(startSearch));
+			} else {
+				results.add(target.substring(startSearch, nextColon));
+				startSearch = nextColon + 1;
+			}
+		}
+		return results;
 	}
 	private static List<Long> commaSepToLongs(String commaSep) {
 		return commaSep == null || commaSep.isEmpty() ?

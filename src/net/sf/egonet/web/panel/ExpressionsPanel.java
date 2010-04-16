@@ -113,8 +113,8 @@ public class ExpressionsPanel extends Panel {
 		form.add(new DropDownChoice(
 				"comparisonTopicField",
 				comparisonTopicModel,
-				getExpressions()));
-		
+				new PropertyModel(this,"expressions")));
+
 		form.add(
 				new Button("newComparisonExpression")
 	            {
@@ -125,6 +125,17 @@ public class ExpressionsPanel extends Panel {
 						if(comparisonTopic != null) {
 							editExpression(Expression.comparisonAbout(comparisonTopic));
 						}
+					}
+				}
+	        );
+		
+		form.add(
+				new Button("newCountingExpression")
+	            {
+					@Override
+					public void onSubmit()
+	                {
+						editExpression(Expression.countingForStudy(Studies.getStudy(studyId)));
 					}
 				}
 	        );
@@ -155,7 +166,7 @@ public class ExpressionsPanel extends Panel {
 			return new ComparisonExpressionEditorPanel(panelId,expression);
 		}
 		if(expression.getType().equals(Expression.Type.Counting)) {
-			throw new RuntimeException("Failed to edit a counting expression: "+expression);
+			return new CountingExpressionEditorPanel(panelId,expression);
 		}
 		return new EmptyPanel(panelId);
 	}
