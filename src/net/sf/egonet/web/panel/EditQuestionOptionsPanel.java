@@ -221,7 +221,13 @@ public class EditQuestionOptionsPanel extends Panel {
 							Options.delete(option);
 						}
 						for(String preset : Presets.get().get(presetName)) {
-							DB.save(new QuestionOption(question.getId(),preset));
+							QuestionOption option = new QuestionOption(question.getId(),preset);
+							if(preset.equals("Yes")) {
+								option.setValue("1");
+							} else if(preset.equals("No")) {
+								option.setValue("0");
+							}
+							DB.save(option);
 						}
 						editOptionForm.setVisible(false);
 						updateOptionsAndParent(target);
