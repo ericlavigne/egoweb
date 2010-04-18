@@ -74,6 +74,27 @@ public class Expressions {
 				expressionIds.remove(expression.getId());
 				otherExpression.setValue(expressionIds);
 				DB.save(otherExpression);
+			} else if(otherExpression.getType().equals(Expression.Type.Comparison)) {
+				Pair<Integer,Long> numberExpr = (Pair<Integer,Long>) otherExpression.getValue();
+				if(numberExpr.getSecond().equals(expression.getId())) {
+					delete(otherExpression);
+				}
+			} else if(otherExpression.getType().equals(Expression.Type.Counting)) {
+				Triple<Integer,List<Long>,List<Long>> numberExprsQuests =
+					(Triple<Integer,List<Long>,List<Long>>) otherExpression.getValue();
+				if(numberExprsQuests.getSecond().contains(expression.getId())) {
+					List<Long> newExprs = Lists.newArrayList();
+					for(Long expr : numberExprsQuests.getSecond()) {
+						if(! expr.equals(expression.getId())) {
+							newExprs.add(expr);
+						}
+					}
+					otherExpression.setValue(new Triple<Integer,List<Long>,List<Long>>(
+							numberExprsQuests.getFirst(),
+							newExprs,
+							numberExprsQuests.getThird()));
+					DB.save(session, otherExpression);
+				}
 			}
 		}
 		Long studyId = expression.getStudyId();
