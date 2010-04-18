@@ -9,10 +9,14 @@ import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
+import net.sf.egonet.model.Answer.SkipReason;
 import net.sf.egonet.model.Expression.Operator;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.PairUni;
+import net.sf.functionalj.tuple.Triple;
 import net.sf.functionalj.tuple.TripleUni;
 
 import org.hibernate.Session;
@@ -90,9 +94,10 @@ public class Expressions {
 	}
 	
 	public static class EvaluationContext {
-		public Map<Long,Question> qidToQuestion = Maps.newHashMap(); 
+		public Map<Long,Question> qidToQuestion = Maps.newHashMap();
 		public Map<Long,Expression> eidToExpression = Maps.newHashMap();
-		public Map<Long,Answer> qidToEgoAnswer = Maps.newHashMap(); 
+		public Map<Long,QuestionOption> idToOption = Maps.newHashMap();
+		public Map<Long,Answer> qidToEgoAnswer = Maps.newHashMap();
 		public Map<PairUni<Long>,Answer> qidAidToAlterAnswer = Maps.newHashMap();
 		public Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer = Maps.newHashMap();
 	}
@@ -114,6 +119,9 @@ public class Expressions {
 		}
 		for(Expression expression : Expressions.forStudy(session, studyId)) {
 			context.eidToExpression.put(expression.getId(), expression);
+		}
+		for(QuestionOption option : Options.getOptionsForStudy(session, studyId)) {
+			context.idToOption.put(option.getId(), option);
 		}
 		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, Question.QuestionType.EGO)) {
 			context.qidToEgoAnswer.put(answer.getQuestionId(), answer);
@@ -145,23 +153,91 @@ public class Expressions {
 		return context;
 	}
 	
-	public static Boolean evaluate(Expression expression, ArrayList<Alter> alters, 
+	public static Object evaluate(Expression expression, ArrayList<Alter> alters, 
 			EvaluationContext context) 
 	{
 		return evaluate(expression,alters,
-				context.qidToQuestion,context.eidToExpression,
+				context.qidToQuestion,context.eidToExpression,context.idToOption,
 				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
 				context.qidA1idA2idToAlterPairAnswer);
 	}
-	
-	private static Boolean evaluate(Expression expression, ArrayList<Alter> alters,
+
+	public static Boolean evaluateAsBool(Expression expression, ArrayList<Alter> alters, 
+			EvaluationContext context) 
+	{
+		return evaluateAsBool(expression,alters,
+				context.qidToQuestion,context.eidToExpression,context.idToOption,
+				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
+				context.qidA1idA2idToAlterPairAnswer);
+	}
+	public static Integer evaluateAsInt(Expression expression, ArrayList<Alter> alters, 
+			EvaluationContext context) 
+	{
+		return evaluateAsInt(expression,alters,
+				context.qidToQuestion,context.eidToExpression,context.idToOption,
+				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
+				context.qidA1idA2idToAlterPairAnswer);
+	}
+
+	private static Boolean evaluateAsBool(Expression expression, ArrayList<Alter> alters,
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
+			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+	{
+		Object result = evaluate(expression, alters,
+				qidToQuestion, eidToExpression, idToOption,
+				qidToEgoAnswer, qidAidToAlterAnswer,
+				qidA1idA2idToAlterPairAnswer);
+		if(result instanceof Boolean) {
+			return (Boolean) result;
+		}
+		if(result instanceof Integer) {
+			return ! result.equals(new Integer(0));
+		}
+		throw new RuntimeException("Unable to coerce "+result.getClass()+" to Boolean: "+result);
+	}
+	
+	private static Integer evaluateAsInt(Expression expression, ArrayList<Alter> alters,
+			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
+			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+	{
+		Object result = evaluate(expression, alters,
+				qidToQuestion, eidToExpression, idToOption,
+				qidToEgoAnswer, qidAidToAlterAnswer,
+				qidA1idA2idToAlterPairAnswer);
+		if(result instanceof Boolean) {
+			return ((Boolean) result) ? 1 : 0;
+		}
+		if(result instanceof Integer) {
+			return (Integer) result;
+		}
+		throw new RuntimeException("Unable to coerce "+result.getClass()+" to Integer: "+result);
+	}
+	
+	private static Object evaluate(Expression expression, ArrayList<Alter> alters,
+			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
 			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
 	{
 		if(expression.getType().equals(Expression.Type.Compound)) {
 			return evaluateCompoundExpression(expression, alters,
-					qidToQuestion, eidToExpression,
+					qidToQuestion, eidToExpression, idToOption,
+					qidToEgoAnswer, qidAidToAlterAnswer,
+					qidA1idA2idToAlterPairAnswer);
+		}
+		if(expression.getType().equals(Expression.Type.Counting)) {
+			return evaluateCountingExpression(expression, alters,
+					qidToQuestion, eidToExpression, idToOption,
+					qidToEgoAnswer, qidAidToAlterAnswer,
+					qidA1idA2idToAlterPairAnswer);
+		}
+		if(expression.getType().equals(Expression.Type.Comparison)) {
+			return evaluateComparisonExpression(expression, alters,
+					qidToQuestion, eidToExpression, idToOption,
 					qidToEgoAnswer, qidAidToAlterAnswer,
 					qidA1idA2idToAlterPairAnswer);
 		}
@@ -219,9 +295,174 @@ public class Expressions {
 		throw new RuntimeException(
 				"evaluateSimpleExpression doesn't know how to evaluate expression of type "+eType);
 	}
+
+	private static Boolean evaluateComparisonExpression(Expression expression, ArrayList<Alter> alters,
+			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
+			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+	{
+		if(! expression.getType().equals(Expression.Type.Comparison)) {
+			throw new RuntimeException("using evaluateComparisonExpression for " +
+					"expression of type "+expression.getType());
+		}
+		Pair<Integer,Long> numberExpr = (Pair<Integer,Long>) expression.getValue();
+		Expression subExpression = eidToExpression.get(numberExpr.getSecond());
+		if(! subExpression.getType().equals(Expression.Type.Counting)) {
+			throw new RuntimeException("Unable to evaluate counting expression " +
+					expression.getName() + " because its subexpression  " +
+					subExpression.getName() + " has type "+expression.getType());
+		}
+		Integer subResult = evaluateCountingExpression(subExpression,alters,
+				qidToQuestion, eidToExpression, idToOption,
+				qidToEgoAnswer, qidAidToAlterAnswer, qidA1idA2idToAlterPairAnswer);
+		Integer number = numberExpr.getFirst();
+		Expression.Operator operator = expression.getOperator();
+
+		if(subResult > number) {
+			return 
+				operator.equals(Expression.Operator.Greater) || 
+				operator.equals(Expression.Operator.GreaterOrEqual);
+		}
+		if(subResult < number) {
+			return 
+				operator.equals(Expression.Operator.Less) || 
+				operator.equals(Expression.Operator.LessOrEqual);
+		}
+		return
+			operator.equals(Expression.Operator.Equals) ||
+			operator.equals(Expression.Operator.GreaterOrEqual) ||
+			operator.equals(Expression.Operator.LessOrEqual);
+	}
 	
+	private static Integer evaluateCountingExpression(Expression expression, ArrayList<Alter> alters,
+			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
+			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+	{
+		if(! expression.getType().equals(Expression.Type.Counting)) {
+			throw new RuntimeException("using evaluateCountingExpression for " +
+					"expression of type "+expression.getType());
+		}
+		Expression.Operator operator = expression.getOperator();
+		Triple<Integer,List<Long>,List<Long>> numberExprsQuests =
+			(Triple<Integer,List<Long>,List<Long>>) expression.getValue();
+		
+		Integer total = 0;
+
+		for(Long expressionId : numberExprsQuests.getSecond()) {
+			Expression subExpression = eidToExpression.get(expressionId);
+			if(subExpression == null) {
+				throw new RuntimeException("Unable to find expression#"+expressionId+
+						" referenced in expression#"+expression.getId()+": "+
+						expression.getName()+"("+expression.getType()+")");
+			}
+			ArrayList<ArrayList<Alter>> alterGroups = Lists.newArrayList();
+			Boolean simple = subExpression.isSimpleExpression();
+			if(simple && qidToQuestion.get(subExpression.getQuestionId()).isAboutAlter()) {
+				for(Alter alter : alters) { // If alter question, needs one alter at a time.
+					alterGroups.add(Lists.newArrayList(alter));
+				}
+			} else {
+				alterGroups.add(alters);
+			}
+			for(ArrayList<Alter> alterGroup : alterGroups) {
+				if(operator.equals(Operator.Count)) {
+					if(evaluateAsBool(subExpression,alterGroup,
+							qidToQuestion,eidToExpression,idToOption,
+							qidToEgoAnswer,qidAidToAlterAnswer,
+							qidA1idA2idToAlterPairAnswer))
+					{
+						total++;
+					}
+				} else if(operator.equals(Operator.Sum)) {
+					total += evaluateAsInt(subExpression,alterGroup,
+							qidToQuestion,eidToExpression,idToOption,
+							qidToEgoAnswer,qidAidToAlterAnswer,
+							qidA1idA2idToAlterPairAnswer);
+				} else {
+					throw new RuntimeException(
+							"Unrecognized operator for counting expression: "+operator);
+				}
+			}
+		}
+
+		for(Long questionId : numberExprsQuests.getThird()) {
+			Question question = qidToQuestion.get(questionId);
+			if(question == null) {
+				throw new RuntimeException("Unable to find expression#"+questionId+
+						" referenced in expression#"+expression.getId()+": "+
+						expression.getName()+"("+expression.getType()+")");
+			}
+			List<Answer> answers = Lists.newArrayList();
+			if(question.isAboutAlter()) {
+				for(Alter alter : alters) { // If alter question, needs one alter at a time.
+					answers.add(qidAidToAlterAnswer.get(
+							new PairUni<Long>(questionId,alter.getId())));
+				}
+			} else if(question.isAboutRelationship() && alters.size() > 1) {
+				answers.add(
+						qidA1idA2idToAlterPairAnswer.get(
+								new TripleUni<Long>(
+										questionId,
+										alters.get(0).getId(),
+										alters.get(1).getId())));
+			} else if(question.isAboutEgo()){
+				answers.add(qidToEgoAnswer.get(questionId));
+			}
+			for(Answer answer : answers) {
+				if(answer.getSkipReason().equals(SkipReason.NONE)) {
+					List<Integer> results = Lists.newArrayList();
+					String answerString = answer.getValue();
+					
+					// set result, depending on question type and answer
+					if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION) ||
+							question.getAnswerType().equals(Answer.AnswerType.SELECTION))
+					{
+						if(! answerString.isEmpty()) {
+							for(String optionIdString : answerString.split(",")) {
+								QuestionOption option = 
+									idToOption.get(Long.parseLong(optionIdString));
+								try {
+									results.add(Integer.parseInt(option.getValue().trim()));
+								} catch(Exception ex) {
+									
+								}
+							}
+						}
+					} else if(question.getAnswerType().equals(Answer.AnswerType.NUMERICAL)) {
+						results.add(Integer.parseInt(answerString));
+					} else if(question.getAnswerType().equals(Answer.AnswerType.TEXTUAL)) {
+						results.add(answerString == null || answerString.isEmpty() ? 0 : 1);
+					} else {
+						throw new RuntimeException(
+								"Unrecognized answer type: "+question.getAnswerType());
+					}
+					
+					// increment total, depending on count vs sum
+					for(Integer result : results) {
+						if(operator.equals(Operator.Count)) {
+							if(! result.equals(new Integer(0))) {
+								total++;
+							}
+						} else if(operator.equals(Operator.Sum)) {
+							total += result;
+						} else {
+							throw new RuntimeException(
+									"Unrecognized operator for counting expression: "+operator);
+						}
+					}
+				}
+			}
+		}
+		
+		return total * numberExprsQuests.getFirst();
+	}
+
 	private static Boolean evaluateCompoundExpression(Expression expression, ArrayList<Alter> alters,
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
+			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
 			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
 	{
@@ -234,7 +475,7 @@ public class Expressions {
 						expression.getName()+"("+expression.getType()+")");
 			}
 			ArrayList<ArrayList<Alter>> alterGroups = Lists.newArrayList();
-			Boolean simple = ! subExpression.getType().equals(Expression.Type.Compound);
+			Boolean simple = subExpression.isSimpleExpression();
 			if(simple && qidToQuestion.get(subExpression.getQuestionId()).isAboutAlter()) {
 				for(Alter alter : alters) { // If alter question, needs one alter at a time.
 					alterGroups.add(Lists.newArrayList(alter));
@@ -244,8 +485,8 @@ public class Expressions {
 			}
 			for(ArrayList<Alter> alterGroup : alterGroups) {
 				Boolean result = 
-					evaluate(subExpression,alterGroup,
-							qidToQuestion,eidToExpression,
+					evaluateAsBool(subExpression,alterGroup,
+							qidToQuestion,eidToExpression,idToOption,
 							qidToEgoAnswer,qidAidToAlterAnswer,
 							qidA1idA2idToAlterPairAnswer);
 				if(result) {

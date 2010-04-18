@@ -8,6 +8,9 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
+import net.sf.functionalj.Function1Impl;
+import net.sf.functionalj.FunctionException;
+import net.sf.functionalj.Functions;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -42,6 +45,16 @@ public class ExpressionsPanel extends Panel {
 			expressionsLastRefreshed = now;
 		}
 		return expressions;
+	}
+	
+	public List<Expression> getCountingExpressions() {
+		return Functions.findAll(
+				new Function1Impl<Boolean,Expression>() {
+					public Boolean call(Expression expr) throws FunctionException {
+						return expr.getType().equals(Expression.Type.Counting);
+					}
+				},
+				getExpressions());
 	}
 	
 	private Form form;
@@ -113,7 +126,7 @@ public class ExpressionsPanel extends Panel {
 		form.add(new DropDownChoice(
 				"comparisonTopicField",
 				comparisonTopicModel,
-				new PropertyModel(this,"expressions")));
+				new PropertyModel(this,"countingExpressions")));
 
 		form.add(
 				new Button("newComparisonExpression")

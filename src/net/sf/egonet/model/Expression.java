@@ -62,6 +62,10 @@ public class Expression extends Entity {
 		return name == null || name.isEmpty() ? "Untitled expression" : name;
 	}
 	
+	public Boolean isSimpleExpression() {
+		return this.getQuestionId() != null;
+	}
+	
 	public Boolean getResultForUnanswered() {
 		return resultForUnanswered == null ? false : resultForUnanswered;
 	}
