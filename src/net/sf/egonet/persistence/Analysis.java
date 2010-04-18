@@ -418,7 +418,7 @@ public class Analysis {
 		{
 			String value = answer.getValue();
 			if(value == null || value.isEmpty()) {
-				return "";
+				return "0";
 			}
 			List<String> selectedOptions = Lists.newArrayList();
 			for(String optionIdString : value.split(",")) {
