@@ -16,6 +16,8 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.functionalj.tuple.Pair;
+import net.sf.functionalj.tuple.Triple;
 
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -426,17 +428,43 @@ public class Archiving {
 		if(expression.getType().equals(Expression.Type.Selection) || 
 				expression.getType().equals(Expression.Type.Compound))
 		{
-			List<Long> localOptionIds = Lists.newArrayList();
+			List<Long> localValueIds = Lists.newArrayList();
 			for(Long remoteValueId : (List<Long>) expression.getValue()) {
 				Map<Long,Long> remoteToLocalValueId = 
 					expression.getType().equals(Expression.Type.Compound) ?
 							remoteToLocalExpressionId : remoteToLocalOptionId;
 				Long localValueId = remoteToLocalValueId.get(remoteValueId);
 				if(localValueId != null) {
-					localOptionIds.add(localValueId);
+					localValueIds.add(localValueId);
 				}
 			}
-			expression.setValue(localOptionIds);
+			expression.setValue(localValueIds);
+		} else if(expression.getType().equals(Expression.Type.Comparison)) {
+			Pair<Integer,Long> remoteNumberExpr = 
+				(Pair<Integer,Long>) expression.getValue();
+			expression.setValue(new Pair<Integer,Long>(
+					remoteNumberExpr.getFirst(),
+					remoteToLocalExpressionId.get(remoteNumberExpr.getSecond())));
+		} else if(expression.getType().equals(Expression.Type.Counting)) {
+			Triple<Integer,List<Long>,List<Long>> remoteNumberExprsQuests =
+				(Triple<Integer,List<Long>,List<Long>>) expression.getValue();
+			List<Long> localExprs = Lists.newArrayList();
+			for(Long remoteExpr : remoteNumberExprsQuests.getSecond()) {
+				Long localExpr = remoteToLocalExpressionId.get(remoteExpr);
+				if(localExpr != null) {
+					localExprs.add(localExpr);
+				}
+			}
+			List<Long> localQuests = Lists.newArrayList();
+			for(Long remoteQuest : remoteNumberExprsQuests.getThird()) {
+				Long localQuest = remoteToLocalQuestionId.get(remoteQuest);
+				if(localQuest != null) {
+					localQuests.add(localQuest);
+				}
+			}
+			expression.setValue(new Triple<Integer,List<Long>,List<Long>>(
+					remoteNumberExprsQuests.getFirst(),
+					localExprs, localQuests));
 		}
 		DB.save(session, expression);
 	}
