@@ -433,7 +433,7 @@ public class Expressions {
 				answers.add(qidToEgoAnswer.get(questionId));
 			}
 			for(Answer answer : answers) {
-				if(answer.getSkipReason().equals(SkipReason.NONE)) {
+				if(answer != null && answer.getSkipReason().equals(SkipReason.NONE)) {
 					List<Integer> results = Lists.newArrayList();
 					String answerString = answer.getValue();
 					
