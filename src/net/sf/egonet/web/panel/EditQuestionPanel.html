@@ -8,17 +8,27 @@
     		<table width="100%">
     	 		<tr>
     	 			<td width="50%">
-    	 				<label for="questionTitleField">Title:</label>
+                        <table>
+                        <tr><td>
+                        <label for="questionTitleField">Title:</label>
     	 				<input wicket:id="questionTitleField" id="questionTitleField" type="text" />
-    	 				<br />
-    	 				<label for="questionResponseTypeField">Response type:</label>
+                        <br />
+                        <label for="questionResponseTypeField">Response type:</label>
     	 				<select wicket:id="questionResponseTypeField" id="questionResponseTypeField" />
-    	 				<br />
-    	 				<label for="questionAnswerReasonField">When to answer question:</label>
+                        <br />
+                        <label for="questionAnswerReasonField">When to answer question:</label>
     	 				<select wicket:id="questionAnswerReasonField" id="questionAnswerReasonField" />
-    	 				<br />
+                        <br />
     	 				<label for="askingStyleListField" wicket:id="askingStyleListLabel">Ask with list of alters:</label>
     	 				<input wicket:id="askingStyleListField" id= "askingStyleListField" type="checkbox" />
+                        </td></tr>
+                        <tr><td>
+                            <div wicket:id="numericLimitsPanel"></div>
+                        </td></tr>
+                        <tr><td>
+                            <div wicket:id="multipleSelectionLimitsPanel"></div>
+                        </td></tr>
+                        </table>
     	 			</td>
     	 			<td width="50%">
     					<label for="questionPromptField">Prompt</label>

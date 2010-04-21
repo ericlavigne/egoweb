@@ -7,6 +7,7 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.Answers;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
@@ -37,7 +38,8 @@ public class InterviewingPanel extends Panel {
 	}
 
 	private void build() {
-
+		String strPrompt;
+		
 		ArrayList<Alter> altersInPrompt = Lists.newArrayList();
 		if(answerFields.size() < 2 && ! answerFields.isEmpty()) {
 			altersInPrompt = answerFields.get(0).getAlters();
@@ -45,7 +47,9 @@ public class InterviewingPanel extends Panel {
 		if(answerFields.size() > 1 && answerFields.get(0).getAlters().size() > 1) {
 			altersInPrompt = Lists.newArrayList(answerFields.get(0).getAlters().get(0));
 		}
-		add(new MultiLineLabel("prompt", question.individualizePrompt(altersInPrompt)));
+		strPrompt = question.individualizePrompt(altersInPrompt);
+		strPrompt = question.variableInsertion(strPrompt, altersInPrompt);
+		add(new MultiLineLabel("prompt", strPrompt));
 		
 		ListView questionsView = new ListView("questions",answerFields) {
 			protected void populateItem(ListItem item) {

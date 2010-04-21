@@ -22,7 +22,16 @@
 		<property name="answerTypeDB" column="response_type" />
 		<property name="askingStyleList" column="asking_style_list" />
 		<property name="ordering" column="ordering" />
-
+	
+ 		<property name="minLimitType" 	column="minLimitType" /> 
+ 		<property name="minLiteral" 	column="minLiteral" /> 
+ 		<property name="minPrevQues" 	column="minPrevQues" type="text" length="255" /> 
+ 		<property name="maxLimitType" 	column="maxLimitType" /> 
+ 		<property name="maxLiteral" 	column="maxLiteral" /> 
+ 		<property name="maxPrevQues" 	column="maxPrevQues" type="text" length="255" /> 	
+		<property name="minCheckableBoxes" column="minCheckableBoxes" />
+		<property name="maxCheckableBoxes" column="maxCheckableBoxes" />
+	
 		<property name="studyId" column="study_id" />
 		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />
 	</class>

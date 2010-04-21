@@ -1,0 +1,32 @@
+<!-- NumericLimitsPanel -->
+<!-- will be embedded with EditQuestionPanel to allow placing bounds on -->
+<!-- numeric answers -->
+<!-- KCN April 10 2010 -->
+
+<!-- <html> -->
+<!-- <head> -->
+<!-- <wicket:head>  -->
+<!-- </wicket:head> -->
+<!-- </head> -->
+<!-- <body> -->
+<wicket:panel wicket:id="numericLimitsPanel" >
+    <form wicket:id = "numericLimitsForm" >
+    	<table border="1"> 
+        	<tr><td colspan="4">Bounds for NUMERICAL Entry:</td></tr>
+        	<tr><span wicket:id="radioMin"><td>Min:</td>
+        	<td><input type="radio" wicket:id="minLiteral" />Literal <input wicket:id="minLiteralEntry" type="text" size="10"/> </td>
+        	<td><input type="radio" wicket:id="minPrev">Previous <select wicket:id="minChoicePQ" /></td>
+        	<td><input type="radio" wicket:id="minNone">None</td>
+        	</span>
+        	</tr>
+          	<tr><span wicket:id="radioMax"><td>Max:</td>
+        	<td><input type="radio" wicket:id="maxLiteral" />Literal <input wicket:id="maxLiteralEntry" type="text" size="10"/> </td>
+        	<td><input type="radio" wicket:id="maxPrev">Previous <select wicket:id="maxChoicePQ" /></td>
+        	<td><input type="radio" wicket:id="maxNone">None</td>
+        	</span>      	
+        	</tr>
+    	</table>
+    </form>
+ </wicket:panel>
+<!-- </body> -->
+<!-- </html> -->

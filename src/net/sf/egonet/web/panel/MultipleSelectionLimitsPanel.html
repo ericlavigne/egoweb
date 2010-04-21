@@ -1,0 +1,18 @@
+<!-- MultipleSelectionLimitsPanel -->
+<!-- will be embedded with EditQuestionPanel to allow placing bounds on -->
+<!-- the number of check boxes that can be checked -->
+<!-- KCN April 17 2010 -->
+
+<wicket:panel wicket:id="multipleSelectionLimitsPanel" >
+    <form wicket:id = "form" >
+    	<table border="1"> 
+        	<tr><td colspan="2">Bounds for MULTIPLE_SELECTION Entry:</td></tr>
+        	<tr><td>Minimum boxes to check:</td>
+        	<td><input wicket:id="minMultipleSelectionEntry" type="text" size="10"/> </td>
+        	</tr>
+        	<tr><td>Maximum boxes to check:</td>
+        	<td><input wicket:id="maxMultipleSelectionEntry" type="text" size="10"/> </td>
+        	</tr>
+        </table>
+    </form>
+ </wicket:panel>

@@ -25,8 +25,42 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.markup.html.form.IOnChangeListener;
 
 public class EditQuestionPanel extends Panel {
+	
+	/**
+	 * private inner class extending DropDownChoice
+	 * This is so it can implement IOnChangeListener and, 
+	 * in effect, list to itself and hide the numericLimits Panel
+	 * when its type is not Numeric
+	 */
+	
+	private class DropDownChoicePlus extends DropDownChoice {
+		
+		public DropDownChoicePlus (String id, Model model, List<Answer.AnswerType> theList ) {
+			super(id, model, theList);
+		}
+		
+		protected void onSelectionChanged(Object newSelection) {
+			boolean numericLimitsVisible = false;
+			boolean multipleSelectionLimitsVisible = false;
+			
+			if ( newSelection==Answer.AnswerType.NUMERICAL) {
+				numericLimitsVisible = true;
+			} else if ( newSelection==Answer.AnswerType.MULTIPLE_SELECTION){
+				multipleSelectionLimitsVisible = true;
+			}
+			numericLimitsPanel.setVisible(numericLimitsVisible);
+			multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);		
+		}
+		
+		protected boolean wantOnSelectionChangedNotifications() { return (true);}
+	}
+	
+	/**
+	 * end of private inner class DropDownChoicePlus
+	 */
 	
 	private Question question;
 
@@ -39,6 +73,9 @@ public class EditQuestionPanel extends Panel {
 	private Model questionResponseTypeModel;
 	private Model questionAnswerReasonModel;
 	private Model askingStyleModel;
+	private DropDownChoicePlus dropDownQuestionTypes;
+	private NumericLimitsPanel numericLimitsPanel;
+	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
 	private static final String answerAlways = "Always";
 	
 	private Component parentThatNeedsUpdating;
@@ -82,6 +119,14 @@ public class EditQuestionPanel extends Panel {
 			form.add(new Label("promptHelpText", ""));
 		}
 		
+		numericLimitsPanel = new NumericLimitsPanel("numericLimitsPanel", question);
+		form.add(numericLimitsPanel);
+		numericLimitsPanel.setVisible(false);
+		
+		multipleSelectionLimitsPanel = new MultipleSelectionLimitsPanel ("multipleSelectionLimitsPanel");
+		form.add(multipleSelectionLimitsPanel);
+		multipleSelectionLimitsPanel.setVisible(false);
+		
 		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
@@ -93,10 +138,12 @@ public class EditQuestionPanel extends Panel {
 		form.add(questionCitationField);
 
 		questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
-		form.add(new DropDownChoice(
+		dropDownQuestionTypes = new DropDownChoicePlus(
 				"questionResponseTypeField",
 				questionResponseTypeModel,
-				Arrays.asList(Answer.AnswerType.values())));
+				Arrays.asList(Answer.AnswerType.values()));
+		
+		form.add(dropDownQuestionTypes);
 
 		questionAnswerReasonModel = new Model(answerAlways);
 		List<Object> answerChoices = new ArrayList<Object>();
@@ -165,6 +212,21 @@ public class EditQuestionPanel extends Panel {
 		askingStyleModel.setObject(question.getAskingStyleList());
 		msg += " -> "+askingStyleModel.getObject()+" (question had "+question.getAskingStyleList()+")";
 		//throw new RuntimeException(msg);
+		
+		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
+			numericLimitsPanel.setVisible(true);
+		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION) {
+			multipleSelectionLimitsPanel.setVisible(true);
+		}
+		numericLimitsPanel.setMinLimitType( question.getMinLimitType());
+		numericLimitsPanel.setMinLiteral  ( question.getMinLiteral());
+		numericLimitsPanel.setMinPrevQues ( question.getMinPrevQues());
+		numericLimitsPanel.setMaxLimitType( question.getMaxLimitType());
+		numericLimitsPanel.setMaxLiteral  ( question.getMaxLiteral());
+		numericLimitsPanel.setMaxPrevQues ( question.getMaxPrevQues());
+		
+		multipleSelectionLimitsPanel.setMinCheckableBoxes ( question.getMinCheckableBoxes());
+		multipleSelectionLimitsPanel.setMaxCheckableBoxes ( question.getMaxCheckableBoxes());
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
@@ -183,6 +245,17 @@ public class EditQuestionPanel extends Panel {
 		question.setAskingStyleList(askingStyle); // TODO: need to trace what happens in this method
 		msg += " -> "+question.getAskingStyleList();
 		// throw new RuntimeException(msg);
+		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
+			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
+			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());
+			question.setMinPrevQues ( numericLimitsPanel.getMinPrevQues());
+			question.setMaxLimitType( numericLimitsPanel.getMaxLimitType());
+			question.setMaxLiteral  ( numericLimitsPanel.getMaxLiteral());
+			question.setMaxPrevQues ( numericLimitsPanel.getMaxPrevQues());
+		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION) {
+			question.setMinCheckableBoxes(multipleSelectionLimitsPanel.getMinCheckableBoxes());
+			question.setMaxCheckableBoxes(multipleSelectionLimitsPanel.getMaxCheckableBoxes());
+		}
 	}
 	
 }

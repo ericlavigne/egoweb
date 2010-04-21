@@ -58,6 +58,18 @@ public class InterviewingEgoIDPage extends EgonetPage {
             {
 				boolean answeredAll = true;
 				List<Answer> answers = Lists.newArrayList();
+				// first, verify that any and all multiple selection questions
+				// are answered fully
+				boolean multipleSelectionsOkay = 
+					AnswerFormFieldPanel.allMultipleSelectionOkay(questions);
+
+				if ( !multipleSelectionsOkay ) {
+					for(AnswerFormFieldPanel answerField : questions) {
+						answerField.setNotification(answerField.getMultipleSelectionNotification());
+					}
+					return;
+				}
+				// if all multiple selection questions are okay, proceed
 				for(AnswerFormFieldPanel question : questions) {
 					if(question.answered()) {
 						answers.add(new Answer(question.getQuestion(),question.getAnswer()));

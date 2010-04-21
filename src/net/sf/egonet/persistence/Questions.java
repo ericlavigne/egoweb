@@ -182,4 +182,46 @@ public class Questions {
 			}
 		});
 	}
+	
+	/**
+	 * given the title of the question, retrieve the question
+	 * @param session database session object
+	 * @param title - String Uniquely identifying the question
+	 * @param iType - the 'section' ( EGO_ID, EGO, ALTER, ALTER_PAIR ) we are looking at.
+	 *  note that it is possible this will be different than the type of the 'original'
+	 *  question.  That is, when used with variable substitution we may be looking for
+	 *  a question with a given title in a different section.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static Question getQuestionUsingTitleAndTypeAndStudy(Session session, 
+			final String title, final Question.QuestionType iType, final Long studyId) {
+		// Yes, this is different from session.load(Study.class, id),
+		// which triggers a lazy initialization exception when any 
+		// field of Study is requested after the session is closed.
+		List<Question> questionList;
+		
+		questionList = session.createQuery("from Question where title = :title and typeDB = :typeDB and studyId = :studyId and active = 1")
+		.setParameter("title", title)
+		.setParameter("typeDB", iType.toString())
+		.setParameter("studyId", studyId)
+		.list();
+		if ( questionList!=null && !questionList.isEmpty())
+			return questionList.get(0);
+		return(null);
+	}
+	
+	/**
+	 * given the title of the question, retrieve the question
+	 * @param title - String Uniquely identifying the question
+	 * @return
+	 */
+	public static Question getQuestionUsingTitleAndTypeAndStudy(final String title, 
+			final Question.QuestionType iType, final Long studyId) {
+		return DB.withTx(new Function<Session,Question>(){
+			public Question apply(Session session) {
+				return getQuestionUsingTitleAndTypeAndStudy(session, title, iType, studyId);
+			}
+		});
+	}
 }

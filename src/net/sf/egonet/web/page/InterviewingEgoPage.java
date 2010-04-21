@@ -41,8 +41,12 @@ public class InterviewingEgoPage extends InterviewingPage {
 					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
+				boolean multipleSelectionsOkay = 
+					AnswerFormFieldPanel.allMultipleSelectionOkay(answerFields);				
 				for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
-					if(okayToContinue) {
+					if ( !multipleSelectionsOkay ) {
+						field.setNotification(field.getMultipleSelectionNotification());
+					} else if(okayToContinue) {
 							Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
 									field.getAnswer(),field.getSkipReason(pageFlags));
 					} else if(consistent) {

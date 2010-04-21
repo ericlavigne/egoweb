@@ -16,6 +16,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -341,7 +342,16 @@ public class Archiving {
 			// in case ordering == null, I use the order they were pulled from the DB
 			.addAttribute("ordering", ordering+"")
 			.addAttribute("answerReasonExpressionId", question.getAnswerReasonExpressionId()+"");
-		addText(questionNode,"preface",question.getPreface());
+		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
+			System.out.println ( "Archiving addQuestionNode " + question.getMinLimitType().toString());
+			questionNode.addAttribute("minLimitType", question.getMinLimitType().toString())
+			.addAttribute("minLiteral", question.getMinLiteral()+"")
+			.addAttribute("minPrevQues", question.getMinPrevQues())
+			.addAttribute("maxLimitType", question.getMaxLimitType().toString())
+			.addAttribute("maxLiteral", question.getMaxLiteral()+"")
+			.addAttribute("maxPrevQues", question.getMaxPrevQues());	
+		}
+		addText(questionNode,"preface",question.getPreface()); 
 		addText(questionNode,"prompt",question.getPrompt());
 		addText(questionNode,"citation",question.getCitation());
 		for(Integer i = 0; i < options.size(); i++) {
@@ -350,9 +360,21 @@ public class Archiving {
 		return questionNode;
 	}
 	
+	/**
+	 * when importing older xml files, the data regarding the numeric checking
+	 * and ranges might not be present.  If an exception is thrown we will just
+	 * assign default values.
+	 * @param session
+	 * @param question
+	 * @param node
+	 * @param studyId
+	 * @param remoteToLocalExpressionId
+	 */
 	private static void updateQuestionFromNode(Session session, Question question, Element node, 
 			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
 	{
+		String strLimitType;
+		
 		question.setStudyId(studyId);
 		question.setTitle(attrString(node,"title"));
 		question.setAnswerTypeDB(attrString(node,"answerType"));
@@ -363,6 +385,34 @@ public class Archiving {
 		question.setPrompt(attrText(node,"prompt"));
 		question.setCitation(attrText(node,"citation"));
 
+		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
+			try {
+			strLimitType = attrText(node,"minLimitType");
+			if (strLimitType==null || strLimitType.length()==0 )
+				question.setMinLimitType(NumericLimitType.NLT_NONE);
+			else
+				question.setMinLimitType(NumericLimitType.valueOf(strLimitType));
+			question.setMinLiteral(attrInt(node,"minLiteral"));
+			question.setMinPrevQues(attrText(node,"minPrevQues"));
+			strLimitType = attrText(node,"maxLimitType");
+			if (strLimitType==null || strLimitType.length()==0 )
+				question.setMaxLimitType(NumericLimitType.NLT_NONE);
+			else
+			    question.setMaxLimitType(NumericLimitType.valueOf(strLimitType));
+			question.setMaxLiteral(attrInt(node,"maxLiteral"));
+			question.setMaxPrevQues(attrText(node,"maxPrevQues"));
+			} catch ( java.lang.RuntimeException rte ) {
+				// if just about anything went wrong, goto defaults
+				question.setMinLimitType(NumericLimitType.NLT_NONE);
+				question.setMinLiteral(0);
+				question.setMinPrevQues("");
+				question.setMaxLimitType(NumericLimitType.NLT_NONE);
+				question.setMaxLiteral(1000);
+				question.setMaxPrevQues("");
+			}
+		}
+		
+		
 		Long remoteReasonId = attrLong(node,"answerReasonExpressionId");
 		question.setAnswerReasonExpressionId(
 				remoteReasonId == null ? null : 

@@ -91,4 +91,5 @@ public class CheckboxesPanel<T> extends Panel {
 		this.autoFocus = true;
 		
 	}
+
 }

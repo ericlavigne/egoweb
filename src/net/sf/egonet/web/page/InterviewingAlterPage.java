@@ -87,8 +87,12 @@ public class InterviewingAlterPage extends InterviewingPage {
 					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
+				boolean multipleSelectionsOkay = 
+					AnswerFormFieldPanel.allMultipleSelectionOkay(answerFields);
 				for(AnswerFormFieldPanel answerField : answerFields) {
-					if(okayToContinue) {
+					if ( !multipleSelectionsOkay ) {
+						answerField.setNotification(answerField.getMultipleSelectionNotification());
+					} else if(okayToContinue) {
 						Answers.setAnswerForInterviewQuestionAlters(
 								subject.interviewId, subject.question, answerField.getAlters(), 
 								answerField.getAnswer(), answerField.getSkipReason(pageFlags));

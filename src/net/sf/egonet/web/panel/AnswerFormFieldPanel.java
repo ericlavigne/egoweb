@@ -6,6 +6,7 @@ import java.util.Collection;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.Answers;
 import static net.sf.egonet.model.Answer.AnswerType;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -103,7 +104,11 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	}
 	
 	public String getPrompt() {
-		return question.individualizePrompt(alters);
+		String strPrompt;
+
+		strPrompt = question.individualizePrompt(alters);
+		strPrompt = question.variableInsertion(strPrompt, alters);
+		return (strPrompt);
 	}
 
 	public abstract void setAutoFocus();
@@ -138,6 +143,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		}
 		return null;
 	}
+	
 	public boolean answered() {
 		return ! (getAnswer() == null || getAnswer().isEmpty());
 	}
@@ -181,8 +187,50 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	okayToContinue(Collection<AnswerFormFieldPanel> panels, Collection<String> pageLevelFlags)
 	{
 		return allConsistent(panels,pageLevelFlags) &&
-			(allAnsweredOrRefused(panels,pageLevelFlags) ||
+			  (allAnsweredOrRefused(panels,pageLevelFlags) ||
 					(someAnswered(panels) && 
-							panels.iterator().next().question.needsMultiSelectionResponse()));
+							panels.iterator().next().question.needsMultiSelectionResponse())) &&
+				allMultipleSelectionOkay(panels);
+	}
+	
+	/**
+	 * some answerforms - specifically MultipleSelection - can have a low bound and
+	 * a high bound set on the number of checkBoxes to select.
+	 * @return 0 if the number of checkboxes is within the predetermined range OR
+	 * the AnswerForm is not of the MultipleSelection kind
+	 */
+	public boolean multipleSelectionOkay() {
+		return(true);
+	}
+	
+	/**
+	 * like the above function multipleSelectionOkay, 
+	 * this function is ad hoc to multiple Selection questions
+	 * @return a string with an error message specific to 
+	 * multiple selection question with an incorrect number of 
+	 * checkboxes selected
+	 */
+	
+	public String getMultipleSelectionNotification() {
+		return("");
+	}
+	
+	/**
+	 * checks all the MultipleSelection question panels, 
+	 * returns false if any one of them has an incorrect number
+	 * of checkboxes selected
+	 * @param panels a collection of AnswerFormFieldPanels
+	 * @return false if any one of the panels is a MultipleSelection
+	 * panel with an incorrect number of boxes checked
+	 */
+	
+	public static boolean 
+	allMultipleSelectionOkay(Collection<AnswerFormFieldPanel> panels ) 
+	{
+		for ( AnswerFormFieldPanel panel : panels ) {
+			if( !panel.multipleSelectionOkay())
+		 		return(false);
+		}
+		return (true);
 	}
 }
