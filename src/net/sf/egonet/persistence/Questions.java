@@ -7,6 +7,7 @@ import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.functionalj.tuple.Triple;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -21,6 +22,7 @@ public class Questions {
 			deleteSimpleExpressionsFor(session,dbQuestion);
 			deleteAllAnswersForQuestion(session, question.getId());
 			deleteOptionsFor(session,dbQuestion);
+			removeReferencesInCountingExpressionsFor(session,dbQuestion);
 			DB.delete(session, dbQuestion);
 		}
 	}
@@ -31,6 +33,30 @@ public class Questions {
 				return null;
 			}
 		});
+	}
+	
+	private static void removeReferencesInCountingExpressionsFor(
+			Session session, Question dbQuestion) 
+	{
+		for(Expression expression : Expressions.forStudy(session,dbQuestion.getStudyId())) {
+			if(expression.getType().equals(Expression.Type.Counting)) {
+				Triple<Integer,List<Long>,List<Long>> numberExprsQuests =
+					(Triple<Integer,List<Long>,List<Long>>) expression.getValue();
+				if(numberExprsQuests.getSecond().contains(dbQuestion.getId())) {
+					List<Long> newQuests = Lists.newArrayList();
+					for(Long quest : numberExprsQuests.getThird()) {
+						if(! quest.equals(dbQuestion.getId())) {
+							newQuests.add(quest);
+						}
+					}
+					expression.setValue(new Triple<Integer,List<Long>,List<Long>>(
+							numberExprsQuests.getFirst(),
+							numberExprsQuests.getSecond(),
+							newQuests));
+					DB.save(session, expression);
+				}
+			}
+		}
 	}
 	
 	private static void deleteAllAnswersForQuestion(Session session, final Long questionId) {

@@ -8,6 +8,9 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
+import net.sf.functionalj.Function1Impl;
+import net.sf.functionalj.FunctionException;
+import net.sf.functionalj.Functions;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -44,10 +47,20 @@ public class ExpressionsPanel extends Panel {
 		return expressions;
 	}
 	
+	public List<Expression> getCountingExpressions() {
+		return Functions.findAll(
+				new Function1Impl<Boolean,Expression>() {
+					public Boolean call(Expression expr) throws FunctionException {
+						return expr.getType().equals(Expression.Type.Counting);
+					}
+				},
+				getExpressions());
+	}
+	
 	private Form form;
 	private Panel editExpressionPanel;
 	private String panelId = "editExpressionPanel";
-	private Model questionSelectionModel;
+	private Model questionSelectionModel,comparisonTopicModel;
 	
 	private void build() {
 		form = new Form("form");
@@ -108,6 +121,37 @@ public class ExpressionsPanel extends Panel {
 					}
 				}
 	        );
+
+		comparisonTopicModel = new Model(); 
+		form.add(new DropDownChoice(
+				"comparisonTopicField",
+				comparisonTopicModel,
+				new PropertyModel(this,"countingExpressions")));
+
+		form.add(
+				new Button("newComparisonExpression")
+	            {
+					@Override
+					public void onSubmit()
+	                {
+						Expression comparisonTopic = (Expression) comparisonTopicModel.getObject();
+						if(comparisonTopic != null) {
+							editExpression(Expression.comparisonAbout(comparisonTopic));
+						}
+					}
+				}
+	        );
+		
+		form.add(
+				new Button("newCountingExpression")
+	            {
+					@Override
+					public void onSubmit()
+	                {
+						editExpression(Expression.countingForStudy(Studies.getStudy(studyId)));
+					}
+				}
+	        );
 		
 		add(form);
 		
@@ -130,6 +174,12 @@ public class ExpressionsPanel extends Panel {
 		}
 		if(expression.getType().equals(Expression.Type.Compound)) {
 			return new CompoundExpressionEditorPanel(panelId,expression);
+		}
+		if(expression.getType().equals(Expression.Type.Comparison)) {
+			return new ComparisonExpressionEditorPanel(panelId,expression);
+		}
+		if(expression.getType().equals(Expression.Type.Counting)) {
+			return new CountingExpressionEditorPanel(panelId,expression);
 		}
 		return new EmptyPanel(panelId);
 	}

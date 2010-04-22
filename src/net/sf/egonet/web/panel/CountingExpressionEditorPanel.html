@@ -1,0 +1,24 @@
+<wicket:panel>
+	
+	<form wicket:id="form">
+		<fieldset>
+			<legend>
+				<span>Counting expression</span>
+			</legend>
+			<div wicket:id="feedback"/>
+			<label for="expressionNameField">Name:</label>
+    	 	<input wicket:id="expressionNameField" id="expressionNameField" type="text" />
+    	 	<br />
+    	 	<br />
+    	 	<input wicket:id="multiplierValueField" type="text" /> times 
+    	 	<select wicket:id="expressionOperatorField" />
+    	 	of the selected expressions and questions below
+    	 	<p style="text-decoration:underline">Expressions</p>
+    	 	<div wicket:id="expressionValueField">List of subexpression checkboxes</div>
+    	 	<p style="text-decoration:underline">Questions</p>
+    	 	<div wicket:id="questionValueField">List of question checkboxes</div>
+    	 	<br />
+    		<input wicket:id="saveExpression" type="submit" value="Save"/>
+		</fieldset>
+	</form>
+</wicket:panel>

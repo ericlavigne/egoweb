@@ -102,7 +102,7 @@ public class Analysis {
 			for(Alter alter2 : alters) {
 				ArrayList<Alter> altersInPair = Lists.newArrayList(alter1,alter2);
 				if(alter1.getId() < alter2.getId() && 
-						(connection == null || Expressions.evaluate(connection, altersInPair, context))) 
+						(connection == null || Expressions.evaluateAsBool(connection, altersInPair, context))) 
 				{
 					edges.add(new PairUni<Alter>(alter1,alter2));
 				}
@@ -388,7 +388,7 @@ public class Analysis {
 		if(exprId != null) {
 			Expression expression = context.eidToExpression.get(exprId);
 			if(expression != null && 
-					! Expressions.evaluate(context.eidToExpression.get(exprId),alters,context))
+					! Expressions.evaluateAsBool(context.eidToExpression.get(exprId),alters,context))
 			{
 				return study.getValueLogicalSkip();
 			}
@@ -418,7 +418,7 @@ public class Analysis {
 		{
 			String value = answer.getValue();
 			if(value == null || value.isEmpty()) {
-				return "";
+				return "0";
 			}
 			List<String> selectedOptions = Lists.newArrayList();
 			for(String optionIdString : value.split(",")) {
