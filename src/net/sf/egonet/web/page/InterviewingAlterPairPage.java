@@ -132,19 +132,19 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 			if(answer == null) {
 				answerFields.add(
 						AnswerFormFieldPanel.getInstance("question", 
-								subject.question, alters));
+								subject.question, alters, subject.interviewId));
 			} else {
 				answerFields.add(
 						AnswerFormFieldPanel.getInstance("question", 
-								subject.question, answer.getValue(), answer.getSkipReason(), alters));
+								subject.question, answer.getValue(), answer.getSkipReason(), alters, subject.interviewId));
 			}
 			if(! answerFields.isEmpty()) {
 				answerFields.get(0).setAutoFocus();
 			}
 		}
-		
+		 
 		interviewingPanel = 
-			new InterviewingPanel("interviewingPanel",subject.question,answerFields);
+			new InterviewingPanel("interviewingPanel",subject.question,answerFields,subject.interviewId);
 		form.add(interviewingPanel);
 		
 		add(form);

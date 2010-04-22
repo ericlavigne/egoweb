@@ -25,15 +25,15 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private Label lblNumberPrompt;
 	private NumberValidator.RangeValidator rangeValidator;
 	
-	public NumberAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) { 
-		super(id,question,Answer.SkipReason.NONE,alters); 
+	public NumberAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) { 
+		super(id,question,Answer.SkipReason.NONE,alters,interviewId); 
 		build("");
 	}
 	
 	public NumberAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{ 
-		super(id,question,skipReason,alters); 
+		super(id,question,skipReason,alters,interviewId); 
 		build(answer);
 	}
 	
@@ -110,7 +110,7 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 			case NLT_NONE:     strReturn += " up"; break;
 			case NLT_LITERAL:  strReturn += question.getMinLiteral(); break;
 			case NLT_PREVQUES: 
-				 strAnswer = question.answerToRangeLimitingQuestion(alters, false);
+				 strAnswer = question.answerToRangeLimitingQuestion(interviewId, alters, false);
 				 strReturn += strAnswer; 
 				 break;
 		}
@@ -119,7 +119,7 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 			case NLT_NONE:     strReturn += " and up"; break;
 			case NLT_LITERAL:  strReturn += " to " + question.getMaxLiteral(); break;
 			case NLT_PREVQUES: 
-				 strAnswer = question.answerToRangeLimitingQuestion(alters, true);
+				 strAnswer = question.answerToRangeLimitingQuestion(interviewId, alters, true);
 				 strReturn += " to " + strAnswer; 
 				 break;
 		}
@@ -155,7 +155,7 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
         	case NLT_NONE: break;
         	case NLT_LITERAL: lowBound = question.getMinLiteral(); break;
         	case NLT_PREVQUES: 
-        		 strAnswer = question.answerToRangeLimitingQuestion(alters, false);
+        		 strAnswer = question.answerToRangeLimitingQuestion(interviewId, alters, false);
         		 try { 
         			 lowBound = Integer.parseInt(strAnswer);
         		 } catch ( NumberFormatException nfe) {
@@ -168,7 +168,7 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
     		case NLT_NONE:    break;
     		case NLT_LITERAL: highBound = question.getMaxLiteral(); break;
     		case NLT_PREVQUES: 
-    			 strAnswer = question.answerToRangeLimitingQuestion(alters, true);
+    			 strAnswer = question.answerToRangeLimitingQuestion(interviewId, alters, true);
     			 try { 
     				 highBound = Integer.parseInt(strAnswer);
     			 } catch ( NumberFormatException nfe) {

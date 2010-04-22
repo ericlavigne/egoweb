@@ -1,6 +1,7 @@
 package net.sf.egonet.web.page;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
@@ -99,9 +100,9 @@ public class InterviewingAlterPromptPage extends InterviewingPage {
         {
 			protected void populateItem(ListItem item) {
 				final Alter alter = (Alter) item.getModelObject();
-
+				
 				item.add(new Label("alterName", alter.getName()));
-
+				item.add(new Label("alterPosition", Integer.toString(item.getIndex()+1)));
 				Link deleteLink = new Link("alterDelete")
                 {
 					public void onClick() {

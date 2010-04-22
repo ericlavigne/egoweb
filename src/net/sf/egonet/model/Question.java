@@ -277,8 +277,8 @@ public class Question extends OrderedEntity
 	 * to retrieve the answer to THIS question
 	 */
 	
-	public String answerToQuestion ( ArrayList<Alter> listOfAlters ) {
-		return ( Question.answerToQuestion(title, type, studyId, listOfAlters));
+	public String answerToQuestion ( Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( Question.answerToQuestion(title, interviewId, type, studyId, listOfAlters));
 	}
 	
 	/**
@@ -291,13 +291,13 @@ public class Question extends OrderedEntity
 	 * @return answer to previous question
 	 */
 	
-	public String answerToRangeLimitingQuestion ( ArrayList<Alter> listOfAlters, boolean getMaximum ) {
+	public String answerToRangeLimitingQuestion ( Long interviewId, ArrayList<Alter> listOfAlters, boolean getMaximum ) {
 		String strPreviousAnswer;
 		
 		if (getMaximum)
-			strPreviousAnswer = Question.answerToQuestion ( maxPrevQues, type, studyId, listOfAlters);
+			strPreviousAnswer = Question.answerToQuestion ( maxPrevQues, interviewId, type, studyId, listOfAlters);
 		else
-			strPreviousAnswer = Question.answerToQuestion ( minPrevQues, type, studyId, listOfAlters);
+			strPreviousAnswer = Question.answerToQuestion ( minPrevQues, interviewId, type, studyId, listOfAlters);
 		// shouldn't happen, but check anyway
 		// *might* want to assign low/high default values if not found, 
 		// for now just assign 0
@@ -321,8 +321,9 @@ public class Question extends OrderedEntity
 	 */
 	
 	public static String answerToQuestion ( String strQuestionTitle, 
-			Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
 		ArrayList<Alter> emptyAlters = new ArrayList<Alter>();
+		Interview currentInterview;
 		StringTokenizer strok;
 		List<QuestionOption> optionsList;
 		Question question = null;
@@ -342,10 +343,11 @@ public class Question extends OrderedEntity
 		}
 		if ( question==null )
 			return (strQuestionTitle);
+		currentInterview = Interviews.getInterview(interviewId);
 		if (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR) {
-			theAnswer = Answers.getAnswerForInterviewQuestionAlters( Interview.getTheInterview(), question, listOfAlters);
+			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
 		} else {
-			theAnswer = Answers.getAnswerForInterviewQuestionAlters( Interview.getTheInterview(), question, emptyAlters);		
+			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, emptyAlters);		
 		}
 				
 		if ( theAnswer==null )
@@ -391,8 +393,8 @@ public class Question extends OrderedEntity
 	 * @param alterId2 id of second person addressed.  may be null
 	 * @return a string with previous answers inserted into place
 	 */
-	public String variableInsertion ( String strPrompt, ArrayList<Alter> listOfAlters ) {
-		return ( Question.variableInsertion(strPrompt, type, studyId, listOfAlters ));
+	public String variableInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( Question.variableInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
 	}
 	
 	/**
@@ -407,8 +409,8 @@ public class Question extends OrderedEntity
 	 * not immediately associated with this question.
 	 */
 
-	public static String variableInsertion (String strInput, Question.QuestionType iType, Long studyId,
-												ArrayList<Alter> listOfAlters ) {
+	public static String variableInsertion (String strInput, 
+			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
 		String strResult = "";
 		String pattern = "<VAR.*?/>";
 		String str;
@@ -460,7 +462,7 @@ public class Question extends OrderedEntity
 			str = theList.get(ix);
 			if ( str.startsWith("<VAR")  &&  str.endsWith("/>")) {
 				strVariableName = str.substring(4, str.length()-2).trim(); // extract question title
-				strVariableValue = answerToQuestion(strVariableName, iType, studyId, listOfAlters );
+				strVariableValue = answerToQuestion(strVariableName, interviewId, iType, studyId, listOfAlters );
 				strResult += strVariableValue;
 			} else {
 				strResult += theList.get(ix);

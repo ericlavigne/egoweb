@@ -41,13 +41,18 @@ public class InterviewingEgoIDPage extends EgonetPage {
 		build();
 	}
 	
+	/**
+	 * third parameter to AnswerFormFieldPanel.getInstance() is the 
+	 * interviewId.  In the EgoId page we're not concerned with this 
+	 * and it's not used, so pass a zero
+	 */
 	private void build() {
 		
 		questions = Lists.newArrayList(Lists.transform(
 			Questions.getQuestionsForStudy(studyId, QuestionType.EGO_ID),
 			new Function<Question,AnswerFormFieldPanel>() {
 				public AnswerFormFieldPanel apply(Question question) {
-					return AnswerFormFieldPanel.getInstance("question",question);
+					return AnswerFormFieldPanel.getInstance("question",question, new Long(0));
 				}
 			}));
 		

@@ -22,6 +22,7 @@ public class InterviewingPanel extends Panel {
 	private Question question;
 	private ArrayList<AnswerFormFieldPanel> answerFields;
 	private CheckboxesPanel<String> refDKCheck;
+	private Long interviewId;
 	
 	private final String 
 		dontKnow = AnswerFormFieldPanel.dontKnow,
@@ -29,11 +30,12 @@ public class InterviewingPanel extends Panel {
 		none = AnswerFormFieldPanel.none;
 	
 	public InterviewingPanel(String id, 
-			Question question, ArrayList<AnswerFormFieldPanel> answerFields) 
+			Question question, ArrayList<AnswerFormFieldPanel> answerFields, Long interviewId) 
 	{
 		super(id);
 		this.question = question;
 		this.answerFields = answerFields;
+		this.interviewId = interviewId;
 		build();
 	}
 
@@ -48,7 +50,7 @@ public class InterviewingPanel extends Panel {
 			altersInPrompt = Lists.newArrayList(answerFields.get(0).getAlters().get(0));
 		}
 		strPrompt = question.individualizePrompt(altersInPrompt);
-		strPrompt = question.variableInsertion(strPrompt, altersInPrompt);
+		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
 		add(new MultiLineLabel("prompt", strPrompt));
 		
 		ListView questionsView = new ListView("questions",answerFields) {
@@ -101,8 +103,8 @@ public class InterviewingPanel extends Panel {
 				alters.add(oneAlter);
 				alters.add(otherAlter);
 			}
-			panels.add(AnswerFormFieldPanel.getInstance("question", question, alters));
+			panels.add(AnswerFormFieldPanel.getInstance("question", question, alters, interview.getId()));
 		}
-		return new InterviewingPanel(id,question,panels);
+		return new InterviewingPanel(id,question,panels, interview.getId());
 	}
 }

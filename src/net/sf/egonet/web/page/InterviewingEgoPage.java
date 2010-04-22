@@ -67,17 +67,17 @@ public class InterviewingEgoPage extends InterviewingPage {
 			}
 		};
 		
-		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question);
+		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question,interviewId);
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
 		if(answer != null) {
 			field = AnswerFormFieldPanel.getInstance("question",
-					question,answer.getValue(),answer.getSkipReason());
+					question,answer.getValue(),answer.getSkipReason(),interviewId);
 		}
 		field.setAutoFocus();
 		form.add(field);
 		
 		interviewingPanel = 
-			new InterviewingPanel("interviewingPanel",question,Lists.newArrayList(field));
+			new InterviewingPanel("interviewingPanel",question,Lists.newArrayList(field),interviewId);
 		form.add(interviewingPanel);
 		
 		add(form);

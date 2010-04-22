@@ -24,16 +24,17 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	private Integer maxCheckable;
 	private Integer minCheckable;
 	
-	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
-		super(id,question,Answer.SkipReason.NONE,alters);
+	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, 
+			ArrayList<Alter> alters, Long interviewId) {
+		super(id,question,Answer.SkipReason.NONE,alters,interviewId);
 		originallySelectedOptions = Lists.newArrayList();
 		build();
 	}
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
-		super(id,question,skipReason,alters);
+		super(id,question,skipReason,alters,interviewId);
 		originallySelectedOptions = Lists.newArrayList();
 		try {
 			for(String answerIdString : answer.split(",")) {

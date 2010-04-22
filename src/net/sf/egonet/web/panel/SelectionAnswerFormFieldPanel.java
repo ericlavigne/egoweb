@@ -20,16 +20,16 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private Model answer;
 	private DropDownChoice dropDownChoice;
 	
-	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
-		super(id,question,Answer.SkipReason.NONE,alters);
+	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
+		super(id,question,Answer.SkipReason.NONE,alters, interviewId);
 		this.answer = new Model();
 		build();
 	}
 	
 	public SelectionAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
-		super(id,question,skipReason,alters);
+		super(id,question,skipReason,alters,interviewId);
 		this.answer = new Model();
 		if(skipReason.equals(Answer.SkipReason.DONT_KNOW)) {
 			this.answer = new Model(dontKnow);

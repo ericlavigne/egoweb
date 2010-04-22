@@ -18,15 +18,15 @@ public class TextAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private TextField textField;
 	private CheckboxesPanel<String> refDKCheck;
 	
-	public TextAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters) {
-		super(id,question,Answer.SkipReason.NONE,alters);
+	public TextAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
+		super(id,question,Answer.SkipReason.NONE,alters, interviewId);
 		build("");
 	}
 	
 	public TextAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters) 
+			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
-		super(id,question,skipReason,alters);
+		super(id,question,skipReason,alters,interviewId);
 		build(answer);
 	}
 	
