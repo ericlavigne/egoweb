@@ -50,24 +50,21 @@
 					</div>
 					
 					<fieldset>
-						<legend>Presets</legend>
-						<ul>
-							<li wicket:id="presets">
-								<a href="#" wicket:id="presetLink">
-									<span wicket:id="presetName">Gender</span>
-								</a>
-							</li>
-						</ul>
-					</fieldset>
-					<fieldset>
-						<legend>Copy from another question</legend>
-						<ul>
-							<li wicket:id="otherQuestions">
-								<a href="#" wicket:id="copyFromOtherQuestion">
-									<span wicket:id="otherQuestionName">Gender</span>
-								</a>
-							</li>
-						</ul>
+						<legend>Replace options</legend>
+						<table>
+							<tr>
+								<form wicket:id="presetForm">
+									<td><select wicket:id="selectPreset" /></td>
+									<td><input wicket:id="applyPreset" type="submit" value="Replace with options from preset"/></td>
+								</form>
+							</tr>
+							<tr>
+								<form wicket:id="copyQuestionForm">
+									<td><select wicket:id="selectQuestion" /></td>
+									<td><input wicket:id="applyQuestion" type="submit" value="Replace with options from other question"/></td>
+								</form>
+							</tr>
+						</table>
 					</fieldset>
 				</td>
 			</tr>

@@ -20,6 +20,7 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -46,6 +47,7 @@ public class EditQuestionOptionsPanel extends Panel {
 	private Label editOptionFormLegend;
 	private TextField editOptionTitleField;
 	private TextField editOptionValueField;
+	private Model selectedPreset, selectedQuestion;
 	
 	public EditQuestionOptionsPanel(String id, Component parentThatNeedsUpdating, Question question) {
 		super(id);
@@ -220,6 +222,59 @@ public class EditQuestionOptionsPanel extends Panel {
 		add(editOptionContainer);
 		editOptionForm.setVisible(false);
 		
+		Form presetForm = new Form("presetForm");
+		selectedPreset = new Model();
+		presetForm.add(
+				new DropDownChoice("selectPreset",selectedPreset,
+						new ArrayList<String>(Presets.get().keySet())));
+		presetForm.add(
+				new AjaxFallbackButton("applyPreset",presetForm) {
+					protected void onSubmit(AjaxRequestTarget target, Form form) {
+						String presetName = (String) selectedPreset.getObject();
+						if(presetName != null) {
+							for(QuestionOption option : getOptions()) {
+								Options.delete(option);
+							}
+							for(String preset : Presets.get().get(presetName)) {
+								QuestionOption option = new QuestionOption(question.getId(),preset);
+								if(preset.equals("Yes")) {
+									option.setValue("1");
+								} else if(preset.equals("No")) {
+									option.setValue("0");
+								}
+								DB.save(option);
+							}
+							editOptionForm.setVisible(false);
+							updateOptionsAndParent(target);
+						}
+					}
+				});
+		add(presetForm);
+		
+		Form copyQuestionForm = new Form("copyQuestionForm");
+		selectedQuestion = new Model();
+		copyQuestionForm.add(
+				new DropDownChoice("selectQuestion",selectedQuestion,
+						getOtherQuestionsWithOptions()));
+		copyQuestionForm.add(
+				new AjaxFallbackButton("applyQuestion",copyQuestionForm) {
+					protected void onSubmit(AjaxRequestTarget target, Form form) {
+						Question otherQuestion = (Question) selectedQuestion.getObject();
+						if(otherQuestion != null) {
+							for(QuestionOption option : getOptions()) {
+								Options.delete(option);
+							}
+							for(QuestionOption option : Options.getOptionsForQuestion(otherQuestion.getId())) {
+								Options.addOption(question.getId(), option.getName(), option.getValue());
+							}
+							editOptionForm.setVisible(false);
+							updateOptionsAndParent(target);
+						}
+					}
+				});
+		add(copyQuestionForm);
+		
+		/*
 		ListView presets = new ListView("presets", new PropertyModel(this,"presetKeys"))
 		{
 			protected void populateItem(ListItem item) {
@@ -247,7 +302,8 @@ public class EditQuestionOptionsPanel extends Panel {
 			}
 		};
 		add(presets);
-		
+		*/
+		/*
 		ListView otherQuestions = new ListView("otherQuestions", new PropertyModel(this,"otherQuestionsWithOptions"))
 		{
 			protected void populateItem(ListItem item) {
@@ -269,6 +325,7 @@ public class EditQuestionOptionsPanel extends Panel {
 			}
 		};
 		add(otherQuestions);
+		*/
 	}
 	
 	private void editOption(AjaxRequestTarget target, QuestionOption option) {
