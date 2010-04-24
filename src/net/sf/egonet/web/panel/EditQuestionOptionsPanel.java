@@ -6,9 +6,9 @@ import java.util.List;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Presets;
@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
@@ -67,20 +68,28 @@ public class EditQuestionOptionsPanel extends Panel {
 		return new ArrayList<String>(Presets.get().keySet());
 	}
 	
+	private ArrayList<Question> selectionQuestions;
+	private DateTime selectionQuestionsRefresh;
+	
 	public List<Question> getOtherQuestionsWithOptions() {
-		List<Question> questionsWithOptions = Lists.newArrayList();
-		for(QuestionType type : QuestionType.values()) {
-			List<Question> questions = 
-				Questions.getQuestionsForStudy(question.getStudyId(), type);
-			for(Question question : questions) {
-				if(! (this.question.getId().equals(question.getId()) || 
-						Options.getOptionsForQuestion(question.getId()).isEmpty())) 
+		DateTime now = new DateTime();
+		if(selectionQuestionsRefresh == null || 
+				selectionQuestionsRefresh.isBefore(now.minusSeconds(1)))
+		{
+			List<Question> questions = Questions.getQuestionsForStudy(question.getStudyId(), null);
+			ArrayList<Question> selectionQuestions = Lists.newArrayList();
+			for(Question question : questions)
+			{
+				if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+						question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
 				{
-					questionsWithOptions.add(question);
+					selectionQuestions.add(question);
 				}
 			}
+			this.selectionQuestions = selectionQuestions;
+			selectionQuestionsRefresh = now;
 		}
-		return questionsWithOptions;
+		return selectionQuestions;
 	}
 	
 	private void build() {
