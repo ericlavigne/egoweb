@@ -123,7 +123,7 @@ public class Interviewing {
 				Long reasonId = question.getAnswerReasonExpressionId();
 				Boolean shouldAnswer = 
 					reasonId == null || 
-					Expressions.evaluate(
+					Expressions.evaluateAsBool(
 							context.eidToExpression.get(reasonId), 
 							new ArrayList<Alter>(), 
 							context);
@@ -149,7 +149,7 @@ public class Interviewing {
 			Long reasonId = question.getAnswerReasonExpressionId();
 			Boolean shouldAnswer = 
 				reasonId == null || 
-				Expressions.evaluate(
+				Expressions.evaluateAsBool(
 						context.eidToExpression.get(reasonId), 
 						new ArrayList<Alter>(), 
 						context);
@@ -457,7 +457,7 @@ public class Interviewing {
 				Long reasonId = question.getAnswerReasonExpressionId();
 				Boolean shouldAnswer =
 					reasonId == null ||
-						Expressions.evaluate(
+						Expressions.evaluateAsBool(
 								context.eidToExpression.get(reasonId), 
 								Lists.newArrayList(alter), 
 								context);
@@ -488,7 +488,7 @@ public class Interviewing {
 						Long reasonId = question.getAnswerReasonExpressionId();
 						Boolean shouldAnswer =
 							reasonId == null ||
-							Expressions.evaluate(
+							Expressions.evaluateAsBool(
 									context.eidToExpression.get(reasonId), 
 									Lists.newArrayList(alter1,alter2), 
 									context);

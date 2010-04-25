@@ -18,6 +18,9 @@ import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
+import net.sf.functionalj.tuple.Pair;
+import net.sf.functionalj.tuple.Triple;
+
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -186,7 +189,8 @@ public class Archiving {
 					if(localExpressionId != null) {
 						Expression expression = localIdToExpression.get(localExpressionId);
 						updateExpressionFromNode(session,expression,expressionElement,
-								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId);
+								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId,
+								remoteToLocalExpressionId);
 					}
 				}
 			}
@@ -455,7 +459,8 @@ public class Archiving {
 	}
 	
 	private static void updateExpressionFromNode(Session session, Expression expression, Element node,
-			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId)
+			Long studyId, Map<Long,Long> remoteToLocalQuestionId, Map<Long,Long> remoteToLocalOptionId,
+			Map<Long,Long> remoteToLocalExpressionId)
 	{
 		expression.setStudyId(studyId);
 		expression.setName(attrString(node,"name"));
@@ -474,14 +479,43 @@ public class Archiving {
 		if(expression.getType().equals(Expression.Type.Selection) || 
 				expression.getType().equals(Expression.Type.Compound))
 		{
-			List<Long> localOptionIds = Lists.newArrayList();
-			for(Long remoteOptionId : (List<Long>) expression.getValue()) {
-				Long localOptionId = remoteToLocalOptionId.get(remoteOptionId);
-				if(localOptionId != null) {
-					localOptionIds.add(localOptionId);
+			List<Long> localValueIds = Lists.newArrayList();
+			for(Long remoteValueId : (List<Long>) expression.getValue()) {
+				Map<Long,Long> remoteToLocalValueId = 
+					expression.getType().equals(Expression.Type.Compound) ?
+							remoteToLocalExpressionId : remoteToLocalOptionId;
+				Long localValueId = remoteToLocalValueId.get(remoteValueId);
+				if(localValueId != null) {
+					localValueIds.add(localValueId);
 				}
 			}
-			expression.setValue(localOptionIds);
+			expression.setValue(localValueIds);
+		} else if(expression.getType().equals(Expression.Type.Comparison)) {
+			Pair<Integer,Long> remoteNumberExpr = 
+				(Pair<Integer,Long>) expression.getValue();
+			expression.setValue(new Pair<Integer,Long>(
+					remoteNumberExpr.getFirst(),
+					remoteToLocalExpressionId.get(remoteNumberExpr.getSecond())));
+		} else if(expression.getType().equals(Expression.Type.Counting)) {
+			Triple<Integer,List<Long>,List<Long>> remoteNumberExprsQuests =
+				(Triple<Integer,List<Long>,List<Long>>) expression.getValue();
+			List<Long> localExprs = Lists.newArrayList();
+			for(Long remoteExpr : remoteNumberExprsQuests.getSecond()) {
+				Long localExpr = remoteToLocalExpressionId.get(remoteExpr);
+				if(localExpr != null) {
+					localExprs.add(localExpr);
+				}
+			}
+			List<Long> localQuests = Lists.newArrayList();
+			for(Long remoteQuest : remoteNumberExprsQuests.getThird()) {
+				Long localQuest = remoteToLocalQuestionId.get(remoteQuest);
+				if(localQuest != null) {
+					localQuests.add(localQuest);
+				}
+			}
+			expression.setValue(new Triple<Integer,List<Long>,List<Long>>(
+					remoteNumberExprsQuests.getFirst(),
+					localExprs, localQuests));
 		}
 		DB.save(session, expression);
 	}

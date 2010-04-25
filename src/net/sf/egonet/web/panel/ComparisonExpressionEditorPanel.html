@@ -1,0 +1,21 @@
+<wicket:panel>
+	
+	<form wicket:id="form">
+		<fieldset>
+			<legend>
+				<span wicket:id="editorLegend">expression about question_name</span>
+			</legend>
+			<div wicket:id="feedback"/>
+			<label for="expressionNameField">Name:</label>
+    	 	<input wicket:id="expressionNameField" id="expressionNameField" type="text" />
+    	 	<br />
+    	 	<br />
+    	 	<span wicket:id="expressionOperatorPreface">Expression is true for an answer that is</span>
+    	 	<select wicket:id="expressionOperatorField" />
+    	 	<input wicket:id="expressionValueField" type="text" />
+    	 	<br />
+    	 	<br />
+    		<input wicket:id="saveExpression" type="submit" value="Save"/>
+		</fieldset>
+	</form>
+</wicket:panel>
