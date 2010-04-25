@@ -1,7 +1,6 @@
 package net.sf.egonet.web.page;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;

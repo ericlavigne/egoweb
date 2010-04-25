@@ -6,7 +6,6 @@ import java.util.Collection;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.persistence.Answers;
 import static net.sf.egonet.model.Answer.AnswerType;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -111,7 +110,10 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		String strPrompt;
 
 		strPrompt = question.individualizePrompt(alters);
+		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
+		strPrompt = question.calculationInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.variableInsertion(strPrompt, interviewId, alters);
+		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);		
 		return (strPrompt);
 	}
 

@@ -1,17 +1,9 @@
 package net.sf.egonet.model;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import net.sf.egonet.controller.InterviewController;
 import net.sf.egonet.model.Answer.AnswerType;
-import net.sf.egonet.persistence.Interviews;
-import net.sf.egonet.persistence.Options;
-import net.sf.egonet.persistence.Questions;
-import net.sf.egonet.persistence.Answers;
+import net.sf.egonet.persistence.TextInsertionUtil;
 import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
 public class Question extends OrderedEntity
@@ -278,7 +270,7 @@ public class Question extends OrderedEntity
 	 */
 	
 	public String answerToQuestion ( Long interviewId, ArrayList<Alter> listOfAlters ) {
-		return ( Question.answerToQuestion(title, interviewId, type, studyId, listOfAlters));
+		return ( TextInsertionUtil.answerToQuestion(title, interviewId, type, studyId, listOfAlters));
 	}
 	
 	/**
@@ -295,9 +287,9 @@ public class Question extends OrderedEntity
 		String strPreviousAnswer;
 		
 		if (getMaximum)
-			strPreviousAnswer = Question.answerToQuestion ( maxPrevQues, interviewId, type, studyId, listOfAlters);
+			strPreviousAnswer = TextInsertionUtil.answerToQuestion ( maxPrevQues, interviewId, type, studyId, listOfAlters);
 		else
-			strPreviousAnswer = Question.answerToQuestion ( minPrevQues, interviewId, type, studyId, listOfAlters);
+			strPreviousAnswer = TextInsertionUtil.answerToQuestion ( minPrevQues, interviewId, type, studyId, listOfAlters);
 		// shouldn't happen, but check anyway
 		// *might* want to assign low/high default values if not found, 
 		// for now just assign 0
@@ -307,167 +299,62 @@ public class Question extends OrderedEntity
 	}
 	
 	/**
-	 * answerToQuestion
-	 * a convenience function for answerInsertion below.
-	 * Given the string that is a question title, it returns
-	 * its answer in string form.  The question is determined
-	 * by the questions title and type ( strQuestionTitle, iType ).
-	 * If questions are not found in the current section of the survey
-	 * 'earlier' questions will be examined.
-	 * If a question is not found in the ALTER or ALTER_PAIR section
-	 *     the EGO section will be searched
-	 * If a question is not found in the EGO section
-	 *     the EGO_ID section will be searched
-	 */
-	
-	public static String answerToQuestion ( String strQuestionTitle, 
-			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
-		ArrayList<Alter> emptyAlters = new ArrayList<Alter>();
-		Interview currentInterview;
-		StringTokenizer strok;
-		List<QuestionOption> optionsList;
-		Question question = null;
-		Answer theAnswer = null;
-		String strAnswer = strQuestionTitle;
-		String strOption;
-		Long   iOptionId;
-	
-		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
-		if ( question==null  && (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR)) {
-			iType = QuestionType.EGO;
-			question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
-		}
-		if ( question==null  &&  iType==QuestionType.EGO ) {
-			iType = QuestionType.EGO_ID;
-			question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
-		}
-		if ( question==null )
-			return (strQuestionTitle);
-		currentInterview = Interviews.getInterview(interviewId);
-		if (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR) {
-			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
-		} else {
-			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, emptyAlters);		
-		}
-				
-		if ( theAnswer==null )
-			return(strQuestionTitle);
-	
-		switch ( theAnswer.getAnswerType()) {
-			case SELECTION:
-			case MULTIPLE_SELECTION:
-				 strAnswer = "";
-				 optionsList = Options.getOptionsForQuestion(question.getId());
-				 strok = new StringTokenizer(theAnswer.getValue(), ",");
-				 while ( strok.hasMoreElements()) {
-					 strOption = strok.nextToken();
-					 try {
-						 iOptionId = Long.parseLong(strOption);
-					 } catch ( NumberFormatException nfe ) {
-						 iOptionId = -1L;
-					 }
-					 for ( QuestionOption qo : optionsList ) {
-						 if ( qo.getId().equals(iOptionId)) {
-							 if ( strAnswer.length()>1 )
-								 strAnswer += ", ";
-							 strAnswer += qo.getName();
-						 }
-					 }
-				 }
-				 break;
-			case TEXTUAL:
-			case NUMERICAL:
-				 strAnswer = theAnswer.getValue();
-				 break;
-		}
-	return(strAnswer);
-	}
-	
-	/**
-	 * a convenience function that turns around and called the static function
-	 * variableInsertion below.  Most commonly we will want to do it on the 
+	 * a convenience function that turns around and called the TextInsertionUtil static function
+	 * variableInsertion.  Most commonly we will want to do it on the 
 	 * prompt of this question but in this case the prompt is an individualized 
-	 * prompt that has had appropriate strings already substituted into place
+	 * prompt that has had appropriate strings already substituted into place.
+	 * This deals with variable insertion using tags of the format <VAR Q1 />
 	 * @param strPrompt text of question
 	 * @param alterId1 id of one person addressed.  may be null
 	 * @param alterId2 id of second person addressed.  may be null
 	 * @return a string with previous answers inserted into place
 	 */
 	public String variableInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
-		return ( Question.variableInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
+		return ( TextInsertionUtil.variableInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
 	}
 	
 	/**
-	 * variableInsertion
-	 * this will accept any arbitrary string and, if markers of the format <VAR ... />
-	 * are found, will create a new string by substituting in answers.
-	 * For example, if Question Q1 asked how many times last week a person smoked crack,
-	 * a later question might be "Of the ${Q1} times you smoked crack last week, how many
-	 * times did you also drink?"
-	 * The pattern for embedded variables is <VAR ... />
-	 * This is a static function in anticipation of cases where it has to be used on strings
-	 * not immediately associated with this question.
+	 * a convenience function that turns around and called the TextInsertionUtil static function
+	 * calculationInsertion.  Most commonly we will want to do it on the 
+	 * prompt of this question but in this case the prompt is an individualized 
+	 * prompt that has had appropriate strings already substituted into place.
+	 * This deals with variable insertion using tags of the format <CALC Q1+Q2 />
+	 * @param strPrompt text of question
+	 * @param interviewId uniquely identifies this interview
+	 * @param listOfAlters - used in retrieving question answers
+	 * @return a string with previous answers inserted into place
 	 */
-
-	public static String variableInsertion (String strInput, 
-			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
-		String strResult = "";
-		String pattern = "<VAR.*?/>";
-		String str;
-		String strVariableName;
-		String strVariableValue;
-		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE );
-		Matcher matcher;
-		ArrayList<String> theList = new ArrayList<String>();
-		boolean found = false;
-		int iVarCount = 0;
-		int iStartIndex = 0;
-		int iVarStart;
-		int iVarEnd;
-		int ix;
-
-		// First, check for special cases
-		if ( strInput==null || strInput.length()==0)
-			return(strInput);
-		
-		matcher = p.matcher(strInput);
-		
-		// another special check
-		found = matcher.find(iStartIndex);
-		if ( !found )
-			return(strInput);
-		
-		// Second, split the input string into substrings, which will be 
-		// literal portions and variable portions ( <VAR.../>  )
-		while ( found ) {
-			found = matcher.find(iStartIndex);
-			if ( found ) {
-				++iVarCount;
-				iVarStart = matcher.start();
-				iVarEnd = matcher.end();
-				if ( iVarStart>iStartIndex )
-					theList.add( strInput.substring(iStartIndex,iVarStart));
-				theList.add(strInput.substring(iVarStart,iVarEnd));
-				iStartIndex = iVarEnd;
-			} else {
-				theList.add(strInput.substring(iStartIndex));
-			}
-		}
-		// At this point we have an array list with literal strings
-		// alternating with variable markers .
-		// now construct the output string by replace the
-		// question names between the <VAR /> markers with the answer from
-		// that question
-		for ( ix=0 ; ix<theList.size(); ++ix ) {
-			str = theList.get(ix);
-			if ( str.startsWith("<VAR")  &&  str.endsWith("/>")) {
-				strVariableName = str.substring(4, str.length()-2).trim(); // extract question title
-				strVariableValue = answerToQuestion(strVariableName, interviewId, iType, studyId, listOfAlters );
-				strResult += strVariableValue;
-			} else {
-				strResult += theList.get(ix);
-			}
-		} 
-		return(strResult);
-	}	
+	public String calculationInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( TextInsertionUtil.calculationInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
+	}
+	
+	/**
+	 * a convenience function that turns around and called the TextInsertionUtil static function
+	 * calculationInsertion.  Most commonly we will want to do it on the 
+	 * prompt of this question but in this case the prompt is an individualized 
+	 * prompt that has had appropriate strings already substituted into place
+	 * This deals with variable insertion using tags of the format <COUNT Q1 "answer"/>
+	 * @param strPrompt text of question
+	 * @param interviewId uniquely identifies this interview
+	 * @param listOfAlters - a list of ALL alters in the study
+	 * @return a string with previous answers inserted into place
+	 */
+	public String answerCountInsertion ( String strPrompt, Long interviewId ) {
+		return ( TextInsertionUtil.answerCountInsertion(strPrompt, interviewId, studyId ));
+	}
+	
+	/**
+	 * a convenience function that turns around and called the TextInsertionUtil static function
+	 * conditionalTextInsertion.  Most commonly we will want to do it on the 
+	 * prompt of this question but in this case the prompt is an individualized 
+	 * prompt that has had appropriate strings already substituted into place
+	 * This deals with variable insertion using tags of the format <IF Q1>3  "more than three"/>
+	 * @param strPrompt text of question
+	 * @param alterId1 id of one person addressed.  may be null
+	 * @param alterId2 id of second person addressed.  may be null
+	 * @return a string with previous answers inserted into place
+	 */
+	public String conditionalTextInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( TextInsertionUtil.conditionalTextInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
+	}
 }

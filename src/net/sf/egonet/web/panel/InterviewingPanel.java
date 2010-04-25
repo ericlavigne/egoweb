@@ -7,7 +7,6 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.persistence.Answers;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
@@ -49,8 +48,12 @@ public class InterviewingPanel extends Panel {
 		if(answerFields.size() > 1 && answerFields.get(0).getAlters().size() > 1) {
 			altersInPrompt = Lists.newArrayList(answerFields.get(0).getAlters().get(0));
 		}
+		
 		strPrompt = question.individualizePrompt(altersInPrompt);
+		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
+		strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
+		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);
 		add(new MultiLineLabel("prompt", strPrompt));
 		
 		ListView questionsView = new ListView("questions",answerFields) {
