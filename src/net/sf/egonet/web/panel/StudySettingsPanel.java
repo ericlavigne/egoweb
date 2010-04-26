@@ -22,6 +22,8 @@ public class StudySettingsPanel extends Panel {
 	
 	private Form form;
 	
+	private TextField nameField;
+	
 	private TextArea introductionField;
 	private TextArea egoIdField;
 	private TextArea alterPromptField;
@@ -48,6 +50,7 @@ public class StudySettingsPanel extends Panel {
 		
 		form = new Form("form");
 		
+		nameField = new TextField("nameField", new Model(""));
 		introductionField = new TextArea("introductionField", new Model(""));
 		egoIdField = new TextArea("egoIdField", new Model(""));
 		alterPromptField = new TextArea("alterPromptField", new Model(""));
@@ -55,10 +58,12 @@ public class StudySettingsPanel extends Panel {
 		
 		introductionField.add(new FocusOnLoadBehavior());
 		
+		nameField.setRequired(true);
 		egoIdField.setRequired(true);
 		alterPromptField.setRequired(true);
 		conclusionField.setRequired(true);
 		
+		form.add(nameField);
 		form.add(introductionField);
 		form.add(egoIdField);
 		form.add(alterPromptField);
@@ -100,6 +105,7 @@ public class StudySettingsPanel extends Panel {
 	}
 	
 	private void setFormFieldsFromStudy() {
+		nameField.setModelObject(study.getName());
 		introductionField.setModelObject(study.getIntroduction());
 		egoIdField.setModelObject(study.getEgoIdPrompt());
 		alterPromptField.setModelObject(study.getAlterPrompt());
@@ -120,6 +126,7 @@ public class StudySettingsPanel extends Panel {
 	}
 	
 	private void setStudyFieldsFromForm() {
+		study.setName(nameField.getModelObjectAsString());
 		study.setIntroduction(introductionField.getText());
 		study.setEgoIdPrompt(egoIdField.getText());
 		study.setAlterPrompt(alterPromptField.getText());
