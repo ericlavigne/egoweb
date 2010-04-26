@@ -21,7 +21,6 @@ import net.sf.egonet.persistence.ExpressionNode.MathOp;
  * This class contains static functions that will perform this 
  * 'insertion' of variable text
  * @author Kevin
- * TODO -move to persistence?
  */
 public class TextInsertionUtil {
 	
@@ -37,6 +36,12 @@ public class TextInsertionUtil {
 	 *     the EGO section will be searched
 	 * If a question is not found in the EGO section
 	 *     the EGO_ID section will be searched
+	 * @param strQuestionTitle - title of question we want the answer to 
+	 * @param interviewId - needed to look up variable values ( answers to previous questions )
+	 * @param iType - needed to look up variable values ( answers to previous questions )
+	 * @param studyId - needed to look up variable values ( answers to previous questions )
+	 * @param listOfAlters - needed to look up variable values ( answers to previous questions )
+	 * @return the questions answer in string form
 	 */
 	
 	public static String answerToQuestion ( String strQuestionTitle, 
@@ -50,7 +55,10 @@ public class TextInsertionUtil {
 		String strAnswer = strQuestionTitle;
 		String strOption;
 		Long   iOptionId;
-	
+		
+		if ( interviewId==null )
+			return (strQuestionTitle);
+		currentInterview = Interviews.getInterview(interviewId);
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 		if ( question==null  && (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR)) {
 			iType = QuestionType.EGO;
@@ -62,7 +70,7 @@ public class TextInsertionUtil {
 		}
 		if ( question==null )
 			return (strQuestionTitle);
-		currentInterview = Interviews.getInterview(interviewId);
+
 		if (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR) {
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
 		} else {
@@ -104,6 +112,7 @@ public class TextInsertionUtil {
 	
 	/**
 	 * variableInsertion
+	 * used with the tag <VAR ... />
 	 * this will accept any arbitrary string and, if markers of the format <VAR ... />
 	 * are found, will create a new string by substituting in answers.
 	 * For example, if Question Q1 asked how many times last week a person smoked crack,
@@ -112,6 +121,12 @@ public class TextInsertionUtil {
 	 * The pattern for embedded variables is <VAR ... />
 	 * This is a static function in anticipation of cases where it has to be used on strings
 	 * not immediately associated with this question.
+	 * @param strInput - the original string to (possibly) alter
+	 * @param interviewId - needed to look up variable values ( answers to previous questions )
+	 * @param iType - needed to look up variable values ( answers to previous questions )
+	 * @param studyId - needed to look up variable values ( answers to previous questions )
+	 * @param listOfAlters - needed to look up variable values ( answers to previous questions )
+	 * @return strInput but with any <VAR /> tags replaced with that variables value
 	 */
 
 	public static String variableInsertion (String strInput, 
@@ -123,7 +138,11 @@ public class TextInsertionUtil {
 		String str;
 		ArrayList<String> theList;
 		int ix;
-
+		
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
 		theList = parseExpressionList ( strInput, pattern);
 		if (theList==null)
 			return(strInput);
@@ -138,6 +157,8 @@ public class TextInsertionUtil {
 			strVariableName = trimPrefixAndSuffix ( str, "<VAR", "/>"); 
 			if ( strVariableName!=null ) {
 				strVariableValue = answerToQuestion(strVariableName, interviewId, iType, studyId, listOfAlters );
+				if ( strVariableValue == null || strVariableValue.length()==0 )
+					strVariableValue = "(unanswered)";
 				strResult += " " + strVariableValue + " ";
 			} else {
 				strResult += str;
@@ -149,6 +170,7 @@ public class TextInsertionUtil {
 
 	/**
 	 * calculationInsertion
+	 * used with the tag <CALC ... />
 	 * this will accept any arbitrary string and, if markers of the format <CALC ... />
 	 * are found, will create a new string by substituting in the results of simple
 	 * calculations based on previous numeric answers.
@@ -159,6 +181,12 @@ public class TextInsertionUtil {
 	 * The pattern for embedded calculations is <CALC ... />
 	 * This is a static function in anticipation of cases where it has to be used on strings
 	 * not immediately associated with this question.
+	 * @param strInput - the original string to (possibly) alter
+	 * @param interviewId - needed to look up variable values ( answers to previous questions )
+	 * @param iType - needed to look up variable values ( answers to previous questions )
+	 * @param studyId - needed to look up variable values ( answers to previous questions )
+	 * @param listOfAlters - needed to look up variable values ( answers to previous questions )
+	 * @return strInput, but with any <CALC /> tags replaced by the appropriate calculation
 	 */
 
 	public static String calculationInsertion (String strInput, 
@@ -171,8 +199,12 @@ public class TextInsertionUtil {
 		ArrayList<String> theList = null;
 		int ix;
 
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
+		
 		theList = parseExpressionList(strInput, pattern);
-
 		if ( theList==null )
 			return(strInput);
 		
@@ -186,6 +218,8 @@ public class TextInsertionUtil {
 			strExpression = trimPrefixAndSuffix(str, "<CALC", "/>");
 			if ( strExpression!=null) {
 				strExpressionValue = calculateSimpleExpression(strExpression, interviewId, iType, studyId, listOfAlters );
+				if ( strExpressionValue==null || strExpressionValue.length()==0 )
+					strExpressionValue = " (CALC error) ";
 				strResult += " " +strExpressionValue + " ";
 			} else {
 				strResult += str;
@@ -200,12 +234,14 @@ public class TextInsertionUtil {
 	 * previously asked numeric answer questions, calculates the results and returns
 	 * it as a string
 	 * USES LEFT-TO-RIGHT 'CALCULATOR' PRECEDENCE  NOT ALGEBRAIC
-	 * @param strInput
-	 * @param interviewId
-	 * @param iType
-	 * @param studyId
-	 * @param listOfAlters
-	 * @return
+	 * @param strInput - string containing a simple mathematical expression such as
+	 *  "Q1 + Q2"
+	 *  TODO: combine with similar parsing function SimpleLogicMgr.parseComparisonList ???
+	 * @param interviewId - needed to lookup variables (answers to previous questions)
+	 * @param iType - needed to lookup variables (answers to previous questions)
+	 * @param studyId - needed to lookup variables (answers to previous questions)
+	 * @param listOfAlters - needed to lookup variables (answers to previous questions)
+	 * @return the arithmetic result of the expression in string form
 	 */
 	
 	private static String calculateSimpleExpression (String strInput, 
@@ -241,6 +277,7 @@ public class TextInsertionUtil {
 			} else {
 				// first, attempt to treat str as a literal integer value
 				// if the parse fails assume it is a question title.
+				// ( question titles are our variables )
 				try {
 					iTemp = Integer.parseInt(str);
 				} catch ( NumberFormatException e ) { // this catch is actually the normal flow
@@ -262,7 +299,12 @@ public class TextInsertionUtil {
 				   case ADD: iResult += iTemp; break;
 				   case SUB: iResult -= iTemp; break;
 				   case MUL: iResult *= iTemp; break;
-				   case DIV: iResult /= iTemp; break;
+				   case DIV: 
+					    // special check for divide-by-zero
+					    if ( iTemp==0 )
+					    	return (" (Divide By Zero Error) ");
+					    iResult /= iTemp; 
+					    break;
 				}
 			}
 		}
@@ -275,6 +317,7 @@ public class TextInsertionUtil {
 
 	/**
 	 * answerCountInsertion
+	 * used with tags of the type <COUNT ... ... />
 	 * this will accept any arbitrary string and, if markers of the format 
 	 * <COUNT Question Answer />
 	 * are found, will create a new string by substituting in the number of
@@ -285,6 +328,14 @@ public class TextInsertionUtil {
 	 * The pattern for embedded calculations is <CALC ... />
 	 * This is a static function in anticipation of cases where it has to be used on strings
 	 * not immediately associated with this question.
+	 * Note that is function does not need as much information as other functions that
+	 * need to look up answers to perform the text substitution, as the COUNT tags
+	 * will need to examine ALL answers to a given question, not just the answer given
+	 * by one alter or an alter pair
+	 * @param strInput - the full prompt to examine
+	 * @param interviewId - needed to look up answers
+	 * @param studyId - needed to look up answers
+	 * @return a new version of strInput with tags <COUNT .../> replaced with appropriate values
 	 */
 
 	public static String answerCountInsertion (String strInput, 
@@ -300,6 +351,10 @@ public class TextInsertionUtil {
 		int iCountValue;
 		int ix;
 
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
 		theList = parseExpressionList( strInput, pattern);
 		if ( theList==null )
 			return(strInput);
@@ -348,8 +403,6 @@ public class TextInsertionUtil {
 	 * @param strSurveyAnswer answer to count ( "male" in example )
 	 * @param interviewId - needed for query
 	 * @param studyId - needed for query
-	 * @param listOfAlters - not the 'usual' list of alters, a list of ALL alters
-	 * listed in the study
 	 * @return - a count of the times this answer was given to this question, -1 on error
 	 */
 	public static int getAnswerCountToQuestion ( String strQuestionTitle, String strSurveyAnswer, 
@@ -425,6 +478,12 @@ public class TextInsertionUtil {
 	 * The pattern for embedded variables is <VAR ... />
 	 * This is a static function in anticipation of cases where it has to be used on strings
 	 * not immediately associated with this question.
+	 * @param strInput - the original string to (possibly) alter
+	 * @param interviewId - needed to look up variable values ( answers to previous questions )
+	 * @param iType - needed to look up variable values ( answers to previous questions )
+	 * @param studyId - needed to look up variable values ( answers to previous questions )
+	 * @param listOfAlters - needed to look up variable values ( answers to previous questions )
+	 * @return strInput, but with any <IF /> tags either removed or replaced by text
 	 */
 
 	public static String conditionalTextInsertion (String strInput, 
@@ -441,6 +500,10 @@ public class TextInsertionUtil {
 		int iFirstQuote;
 		int ix;
 
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
 		theList = parseExpressionList ( strInput, pattern);
 		if (theList==null)
 			return(strInput);
@@ -506,7 +569,7 @@ public class TextInsertionUtil {
 			return(theList);
 		theList = new ArrayList<String>();
 		// Second, split the input string into substrings, which will be 
-		// literal portions and variable portions ( <VAR.../>  )
+		// literal portions and variable portions ( <VAR.../>  ) (or the strRegExp)
 		while ( found ) {
 			found = matcher.find(iStartIndex);
 			if ( found ) {

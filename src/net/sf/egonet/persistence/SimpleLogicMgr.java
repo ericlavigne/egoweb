@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
-import net.sf.egonet.model.Question.QuestionType;
-
+ 
 public class SimpleLogicMgr {
 
 	/**
@@ -33,6 +32,13 @@ public class SimpleLogicMgr {
 		return(mainNode);
 	}
 	
+	/**
+	 * parses a string into an arrayList of string tokens representing symbols
+	 * in a simple conditional expression
+	 * @param strExpression a string with a (very simple) conditional expression
+	 * such as "Q1>=4"
+	 * @return the trunk of a tree of ExpressionNode ready for evaluation
+	 */
 	public static ExpressionNode createSimpleExpression ( String strExpression ) {
 		 ArrayList<String> expressionList;
 		 
@@ -40,6 +46,17 @@ public class SimpleLogicMgr {
 		 return ( createSimpleExpression(expressionList));
 	}
 	
+	/**
+	 * takes a string that is a simple conditional expression, parses it into an
+	 * arrayList of strings, creates an ExpressionNode tree from those strings, 
+	 * and evaluates it with using the current settings of any and all vars.
+	 * @param strExpression the expression in string form such as "EGO_AGE>=18"
+	 * @param interviewId - needed to look up answers
+	 * @param iType - needed to look up answers
+	 * @param studyId - needed to look up answers
+	 * @param listOfAlters - needed to look up answers
+	 * @return 1 if the expression is true, 0 if it is false
+	 */
 	public static int createSimpleExpressionAndEvaluate ( String strExpression,
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters) {
 		
