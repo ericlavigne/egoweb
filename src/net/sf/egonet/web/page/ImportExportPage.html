@@ -8,7 +8,12 @@
 		<form wicket:id="studyImportForm">
 			<br />
 			<p>
-				<input wicket:id="studyImportField" type="file" />
+				<label for="studyImportNameField">New name (optional):</label>
+				<input wicket:id="studyImportNameField" id="studyImportNameField" type="text" />
+			</p>
+			<p>
+				<label for="studyImportFileField">File:</label>
+				<input wicket:id="studyImportFileField" id="studyImportFileField" type="file" />
 			</p>
 			<p>
 				<input type="submit" value="Import" />

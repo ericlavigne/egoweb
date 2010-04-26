@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Archiving;
 import net.sf.egonet.persistence.Studies;
+import net.sf.egonet.web.component.TextField;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -38,14 +39,14 @@ public class ImportExportPage extends EgonetPage {
 	}
 
 	private Form buildStudyImportForm() {
-
-		final FileUploadField studyImportField = new FileUploadField("studyImportField");
+		final TextField studyImportNameField = new TextField("studyImportNameField",new Model());
+		final FileUploadField studyImportFileField = new FileUploadField("studyImportFileField");
 		Form studyImportForm = new Form("studyImportForm") {
 			public void onSubmit() {
 				try {
-					String uploadText = uploadText(studyImportField);
+					String uploadText = uploadText(studyImportFileField);
 					if(uploadText != null) {
-						Archiving.loadStudyXML(null, uploadText);
+						Archiving.loadStudyXML(null, uploadText,studyImportNameField.getText());
 					}
 					setResponsePage(new ImportExportPage());
 				} catch(Exception ex) {
@@ -53,8 +54,9 @@ public class ImportExportPage extends EgonetPage {
 				}
 			}
 		};
+		studyImportForm.add(studyImportNameField);
 		studyImportForm.setMultiPart(true);
-		studyImportForm.add(studyImportField);
+		studyImportForm.add(studyImportFileField);
 		studyImportForm.setMaxSize(Bytes.megabytes(100));
 		
 		return studyImportForm;
@@ -71,7 +73,7 @@ public class ImportExportPage extends EgonetPage {
 					String uploadText = uploadText(studyImportField);
 					Study study = getStudy(studyToModify);
 					if(uploadText != null && study != null) {
-						Archiving.loadStudyXML(study, uploadText);
+						Archiving.loadStudyXML(study, uploadText,null);
 						setResponsePage(new ImportExportPage());
 					}
 					if(uploadText == null) {

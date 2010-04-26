@@ -88,10 +88,10 @@ public class Archiving {
 		}
 	}
 
-	public static Study loadStudyXML(final Study study, final String studyXML) {
+	public static Study loadStudyXML(final Study study, final String studyXML, final String name) {
 		return new DB.Action<Study>() {
 			public Study get() {
-				return loadStudyXML(session, study,studyXML,true,false);
+				return loadStudyXML(session, study,studyXML,name,true,false);
 			}
 		}.execute();
 	}
@@ -99,13 +99,13 @@ public class Archiving {
 	public static Study loadRespondentXML(final Study study, final String studyXML) {
 		return new DB.Action<Study>() {
 			public Study get() {
-				return loadStudyXML(session, study,studyXML,false,true);
+				return loadStudyXML(session, study,studyXML,null,false,true);
 			}
 		}.execute();
 	}
 	
 	public static Study loadStudyXML(final Session session, 
-			Study studyToUpdate, String studyXML, 
+			Study studyToUpdate, String studyXML, String newName,
 			Boolean updateStudy, Boolean updateRespondentData)
 	{
 		try {
@@ -130,7 +130,7 @@ public class Archiving {
 					fnCreateExpression(), fnDeleteExpression(session));
 			
 			if(updateStudy) {
-				updateStudyFromNode(session,study,studyElement,remoteToLocalExpressionId);
+				updateStudyFromNode(session,study,studyElement,remoteToLocalExpressionId,newName);
 			}
 			
 			List<Element> questionElements = studyElement.element("questions").elements("question");
@@ -312,9 +312,10 @@ public class Archiving {
 	}
 	
 	private static void updateStudyFromNode(Session session, Study study, Element studyElement, 
-			Map<Long,Long> remoteToLocalExpressionId) 
+			Map<Long,Long> remoteToLocalExpressionId, String newName) 
 	{
-		study.setName(attrString(studyElement,"name"));
+		study.setName(newName == null || newName.isEmpty() ? 
+				attrString(studyElement,"name") : newName);
 		study.setRandomKey(attrLong(studyElement,"key"));
 		study.setMinAlters(attrInt(studyElement,"minAlters"));
 		study.setMaxAlters(attrInt(studyElement,"maxAlters"));
