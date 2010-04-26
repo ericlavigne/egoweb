@@ -6,6 +6,7 @@ import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextArea;
+import net.sf.egonet.web.page.EditStudyPage;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -97,6 +98,7 @@ public class StudySettingsPanel extends Panel {
 				setStudyFieldsFromForm();
 				DB.save(study);
 				form.setVisible(false);
+				setResponsePage(new EditStudyPage(study));
 			}
 		};
 		form.add(button);
