@@ -55,7 +55,22 @@ public class Archiving {
 	}
 	
 	private static void addText(Element root, String elementName, String elementText) {
-		root.addElement(elementName).addText(elementText == null ? "" : elementText);
+		root.addElement(elementName).addText(replaceProblemCharacters(elementText));
+	}
+	
+	private static void addAttribute(Element element, String attrKey, Object attrValue) {
+		element.addAttribute(attrKey, replaceProblemCharacters(attrValue));
+	}
+	
+	private static String replaceProblemCharacters(Object object) {
+		String string = object == null ? "" : object.toString();
+		// smart double-quotes
+		string = string.replaceAll("[\\u201c\\u201d\\u201e\\u201f\\u2033\\u2036]", "\"");
+		// smart single-quotes and apostrophes
+		string = string.replaceAll("[\\u2018\\u2019\\u201a\\u201b\\u2032\\u2035]", "'");
+		// unusual dash types
+		string = string.replaceAll("[\\u2012\\u2013\\u2014\\u2015]","-");
+		return string;
 	}
 	
 	public static String getStudyXML(Session session, Study study, Boolean includeInterviews) {
@@ -293,17 +308,17 @@ public class Archiving {
 	}
 
 	private static Element addStudyNode(Document document, Study study) {
-		Element studyNode = document.addElement("study")
-			.addAttribute("id", study.getId()+"")
-			.addAttribute("name", study.getName())
-			.addAttribute("key", study.getRandomKey()+"")
-			.addAttribute("minAlters", study.getMinAlters()+"")
-			.addAttribute("maxAlters", study.getMaxAlters()+"")
-			.addAttribute("valueDontKnow", study.getValueDontKnow())
-			.addAttribute("valueLogicalSkip", study.getValueLogicalSkip())
-			.addAttribute("valueNotYetAnswered", study.getValueNotYetAnswered())
-			.addAttribute("valueRefusal", study.getValueRefusal())
-			.addAttribute("adjacencyExpressionId", study.getAdjacencyExpressionId()+"");
+		Element studyNode = document.addElement("study");
+		addAttribute(studyNode,"id", study.getId());
+		addAttribute(studyNode,"name", study.getName());
+		addAttribute(studyNode,"key", study.getRandomKey()+"");
+		addAttribute(studyNode,"minAlters", study.getMinAlters()+"");
+		addAttribute(studyNode,"maxAlters", study.getMaxAlters()+"");
+		addAttribute(studyNode,"valueDontKnow", study.getValueDontKnow());
+		addAttribute(studyNode,"valueLogicalSkip", study.getValueLogicalSkip());
+		addAttribute(studyNode,"valueNotYetAnswered", study.getValueNotYetAnswered());
+		addAttribute(studyNode,"valueRefusal", study.getValueRefusal());
+		addAttribute(studyNode,"adjacencyExpressionId", study.getAdjacencyExpressionId());
 		addText(studyNode,"introduction",study.getIntroduction());
 		addText(studyNode,"egoIdPrompt",study.getEgoIdPrompt());
 		addText(studyNode,"alterPrompt",study.getAlterPrompt());
@@ -337,24 +352,24 @@ public class Archiving {
 	private static Element addQuestionNode(Element questionsNode, 
 			Question question, List<QuestionOption> options, Integer ordering) 
 	{
-		Element questionNode = questionsNode.addElement("question")
-			.addAttribute("id", question.getId()+"")
-			.addAttribute("title", question.getTitle())
-			.addAttribute("key", question.getRandomKey()+"")
-			.addAttribute("answerType", question.getAnswerTypeDB())
-			.addAttribute("subjectType", question.getTypeDB())
-			.addAttribute("askingStyleList", question.getAskingStyleList()+"")
+		Element questionNode = questionsNode.addElement("question");
+		addAttribute(questionNode,"id", question.getId());
+		addAttribute(questionNode,"title", question.getTitle());
+		addAttribute(questionNode,"key", question.getRandomKey());
+		addAttribute(questionNode,"answerType", question.getAnswerTypeDB());
+		addAttribute(questionNode,"subjectType", question.getTypeDB());
+		addAttribute(questionNode,"askingStyleList", question.getAskingStyleList());
 			// in case ordering == null, I use the order they were pulled from the DB
-			.addAttribute("ordering", ordering+"")
-			.addAttribute("answerReasonExpressionId", question.getAnswerReasonExpressionId()+"");
+		addAttribute(questionNode,"ordering", ordering);
+		addAttribute(questionNode,"answerReasonExpressionId", question.getAnswerReasonExpressionId());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
 			System.out.println ( "Archiving addQuestionNode " + question.getMinLimitType().toString());
-			questionNode.addAttribute("minLimitType", question.getMinLimitType().toString())
-			.addAttribute("minLiteral", question.getMinLiteral()+"")
-			.addAttribute("minPrevQues", question.getMinPrevQues())
-			.addAttribute("maxLimitType", question.getMaxLimitType().toString())
-			.addAttribute("maxLiteral", question.getMaxLiteral()+"")
-			.addAttribute("maxPrevQues", question.getMaxPrevQues());	
+			addAttribute(questionNode,"minLimitType", question.getMinLimitType());
+			addAttribute(questionNode,"minLiteral", question.getMinLiteral());
+			addAttribute(questionNode,"minPrevQues", question.getMinPrevQues());
+			addAttribute(questionNode,"maxLimitType", question.getMaxLimitType());
+			addAttribute(questionNode,"maxLiteral", question.getMaxLiteral());
+			addAttribute(questionNode,"maxPrevQues", question.getMaxPrevQues());	
 		}
 		addText(questionNode,"preface",question.getPreface()); 
 		addText(questionNode,"prompt",question.getPrompt());
@@ -428,12 +443,13 @@ public class Archiving {
 	private static Element addOptionNode(Element questionNode, 
 			QuestionOption option, Integer ordering) 
 	{
-		return questionNode.addElement("option")
-			.addAttribute("id", option.getId()+"")
-			.addAttribute("name", option.getName())
-			.addAttribute("key", option.getRandomKey()+"")
-			.addAttribute("value", option.getValue())
-			.addAttribute("ordering", ordering+"");
+		Element optionNode = questionNode.addElement("option");
+		addAttribute(optionNode,"id", option.getId());
+		addAttribute(optionNode,"name", option.getName());
+		addAttribute(optionNode,"key", option.getRandomKey());
+		addAttribute(optionNode,"value", option.getValue());
+		addAttribute(optionNode,"ordering", ordering);
+		return optionNode;
 	}
 	
 	private static void updateOptionFromNode(Session session, QuestionOption option, Element node, 
@@ -447,14 +463,14 @@ public class Archiving {
 	}
 	
 	private static Element addExpressionNode(Element parent, Expression expression) {
-		Element expressionNode = parent.addElement("expression")
-			.addAttribute("id", expression.getId()+"")
-			.addAttribute("name", expression.getName())
-			.addAttribute("key", expression.getRandomKey()+"")
-			.addAttribute("questionId", expression.getQuestionId()+"")
-			.addAttribute("resultForUnanswered", expression.getResultForUnanswered()+"")
-			.addAttribute("type", expression.getTypeDB()+"")
-			.addAttribute("operator", expression.getOperatorDB()+"");
+		Element expressionNode = parent.addElement("expression");
+		addAttribute(expressionNode,"id", expression.getId());
+		addAttribute(expressionNode,"name", expression.getName());
+		addAttribute(expressionNode,"key", expression.getRandomKey());
+		addAttribute(expressionNode,"questionId", expression.getQuestionId());
+		addAttribute(expressionNode,"resultForUnanswered", expression.getResultForUnanswered());
+		addAttribute(expressionNode,"type", expression.getTypeDB());
+		addAttribute(expressionNode,"operator", expression.getOperatorDB());
 		addText(expressionNode,"value",expression.getValueDB());
 		return expressionNode;
 	}
@@ -524,9 +540,9 @@ public class Archiving {
 	private static Element addInterviewNode(Element parent, 
 			Interview interview, List<Alter> alters, List<Answer> answers)
 	{
-		Element interviewNode = parent.addElement("interview")
-			.addAttribute("id", interview.getId()+"")
-			.addAttribute("key", interview.getRandomKey()+"");
+		Element interviewNode = parent.addElement("interview");
+		addAttribute(interviewNode,"id", interview.getId());
+		addAttribute(interviewNode,"key", interview.getRandomKey());
 		Element altersNode = interviewNode.addElement("alters");
 		for(Alter alter : alters) {
 			addAlterNode(altersNode,alter);
@@ -545,10 +561,11 @@ public class Archiving {
 	}
 	
 	private static Element addAlterNode(Element parent, Alter alter) {
-		return parent.addElement("alter")
-			.addAttribute("id", alter.getId()+"")
-			.addAttribute("name", alter.getName())
-			.addAttribute("key", alter.getRandomKey()+"");
+		Element alterNode = parent.addElement("alter");
+		addAttribute(alterNode,"id", alter.getId());
+		addAttribute(alterNode,"name", alter.getName());
+		addAttribute(alterNode,"key", alter.getRandomKey()+"");
+		return alterNode;
 	}
 	
 	private static void updateAlterFromNode(Session session, Alter alter, Element node, Long interviewId) {
@@ -558,15 +575,15 @@ public class Archiving {
 	}
 	
 	private static Element addAnswerNode(Element parent, Answer answer) {
-		Element answerNode = parent.addElement("answer")
-			.addAttribute("id", answer.getId()+"")
-			.addAttribute("key", answer.getRandomKey()+"")
-			.addAttribute("questionId", answer.getQuestionId()+"")
-			.addAttribute("questionType", answer.getQuestionTypeDB())
-			.addAttribute("skipReason", answer.getSkipReasonDB())
-			.addAttribute("answerType", answer.getAnswerTypeDB())
-			.addAttribute("alterId1", answer.getAlterId1()+"")
-			.addAttribute("alterId2", answer.getAlterId2()+"");
+		Element answerNode = parent.addElement("answer");
+		addAttribute(answerNode,"id", answer.getId());
+		addAttribute(answerNode,"key", answer.getRandomKey());
+		addAttribute(answerNode,"questionId", answer.getQuestionId());
+		addAttribute(answerNode,"questionType", answer.getQuestionTypeDB());
+		addAttribute(answerNode,"skipReason", answer.getSkipReasonDB());
+		addAttribute(answerNode,"answerType", answer.getAnswerTypeDB());
+		addAttribute(answerNode,"alterId1", answer.getAlterId1());
+		addAttribute(answerNode,"alterId2", answer.getAlterId2());
 		addText(answerNode,"value",answer.getValue());
 		return answerNode;
 	}
