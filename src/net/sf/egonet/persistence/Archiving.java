@@ -675,7 +675,14 @@ public class Archiving {
 		}
 		Attribute attribute = element.attribute(name);
 		if(attribute == null) {
-			throw new RuntimeException("Element does not contain the requested attribute: "+name);
+			String others = "";
+			for(Object attrObj : element.attributes()) {
+				Attribute attr = (Attribute) attrObj;
+				others += ((others.isEmpty() ? "" : ", ") + "[" +
+						(attr.getName()+" : "+attr.getValue()) + "]");
+			}
+			throw new RuntimeException("Element does not contain the requested attribute "+name+
+					", but does contain: "+others);
 		}
 		String attr = attribute.getValue();
 		return
