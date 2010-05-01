@@ -116,7 +116,10 @@ public class EditStudyQuestionsPanel extends Panel {
 					}
 				};
 
-				questionLink.add(new Label("questionTitle", question.getTitle()));
+				String questionTitle = question.getTitle();
+				questionLink.add(new Label("questionTitle", 
+						questionTitle == null || questionTitle.trim().isEmpty() ? "__*__" :
+							questionTitle));
 				item.add(questionLink);
 				questionOptionsLink.add(
 						new Label("questionOptionsLabel", 

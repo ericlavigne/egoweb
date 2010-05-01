@@ -3,6 +3,7 @@ package net.sf.egonet.persistence;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
+import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 
 import org.hibernate.Session;
@@ -92,18 +93,18 @@ public class Options {
 		});
 	}
 	
-	public static void addOption(final Long questionId, final String optionName, final String optionValue) {
+	public static void addOption(final Question question, final String optionName, final String optionValue) {
 		new DB.Action<Object>() {
 			public Object get() {
-				addOption(session, questionId, optionName, optionValue);
+				addOption(session, question, optionName, optionValue);
 				return null;
 			}
 		}.execute();
 	}
 	
-	public static void addOption(Session session, Long questionId, String optionName, String optionValue) {
-		List<QuestionOption> options = getOptionsForQuestion(session,questionId);
-		QuestionOption newOption = new QuestionOption(questionId,optionName);
+	public static void addOption(Session session, Question question, String optionName, String optionValue) {
+		List<QuestionOption> options = getOptionsForQuestion(session,question.getId());
+		QuestionOption newOption = new QuestionOption(question.getId(),optionName);
 		if(optionValue == null || optionValue.isEmpty()) {
 			for(Integer possibleValue = options.size()+1; possibleValue > 0; possibleValue--) {
 				Boolean foundMatch = false;
@@ -122,6 +123,7 @@ public class Options {
 		options.add(newOption);
 		for(Integer i = 0; i < options.size(); i++) {
 			options.get(i).setOrdering(i);
+			options.get(i).setStudyId(question.getStudyId());
 			DB.save(session, options.get(i));
 		}
 	}
@@ -139,8 +141,16 @@ public class Options {
 			options.set(i, options.get(i-1));
 			options.set(i-1, swap);
 		}
+		Long studyId = null;
 		for(Integer j = 0; j < options.size(); j++) {
-			options.get(j).setOrdering(j);
+			QuestionOption thisOption = options.get(j);
+			thisOption.setOrdering(j);
+			if(thisOption.getStudyId() == null) {
+				if(studyId == null) {
+					studyId = Questions.getQuestion(session,option.getQuestionId()).getStudyId();
+				}
+				thisOption.setStudyId(studyId);
+			}
 			DB.save(options.get(j));
 		}
 	}

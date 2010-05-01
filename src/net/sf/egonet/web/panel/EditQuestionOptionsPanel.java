@@ -167,7 +167,7 @@ public class EditQuestionOptionsPanel extends Panel {
 			new AjaxFallbackButton("addOption",addOptionForm)
             {
 				protected void onSubmit(AjaxRequestTarget target, Form f) {
-					Options.addOption(question.getId(), 
+					Options.addOption(question, 
 							optionTitleField.getText(), 
 							optionValueField.getText());
 					optionTitleField.setModelObject("");
@@ -243,6 +243,7 @@ public class EditQuestionOptionsPanel extends Panel {
 								} else if(preset.equals("No")) {
 									option.setValue("0");
 								}
+								option.setStudyId(question.getStudyId());
 								DB.save(option);
 							}
 							editOptionForm.setVisible(false);
@@ -266,7 +267,7 @@ public class EditQuestionOptionsPanel extends Panel {
 								Options.delete(option);
 							}
 							for(QuestionOption option : Options.getOptionsForQuestion(otherQuestion.getId())) {
-								Options.addOption(question.getId(), option.getName(), option.getValue());
+								Options.addOption(question, option.getName(), option.getValue());
 							}
 							editOptionForm.setVisible(false);
 							updateOptionsAndParent(target);

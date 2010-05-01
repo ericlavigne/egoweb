@@ -190,7 +190,8 @@ public class Archiving {
 							Long localId = remoteToLocalOptionId.get(attrId(optionElement));
 							if(localId != null) {
 								QuestionOption optionEntity = idToOptionEntity.get(localId);
-								updateOptionFromNode(session,optionEntity,optionElement,question.getId());
+								updateOptionFromNode(session,optionEntity,optionElement,
+										study,question);
 							}
 						}
 					}
@@ -453,11 +454,12 @@ public class Archiving {
 	}
 	
 	private static void updateOptionFromNode(Session session, QuestionOption option, Element node, 
-			Long questionId) 
+			Study study, Question question) 
 	{
-		option.setQuestionId(questionId);
+		option.setQuestionId(question.getId());
 		option.setName(attrString(node,"name"));
 		option.setValue(attrString(node,"value"));
+		option.setStudyId(study.getId());
 		option.setOrdering(attrInt(node,"ordering"));
 		DB.save(session, option);
 	}
@@ -675,7 +677,14 @@ public class Archiving {
 		}
 		Attribute attribute = element.attribute(name);
 		if(attribute == null) {
-			throw new RuntimeException("Element does not contain the requested attribute: "+name);
+			String others = "";
+			for(Object attrObj : element.attributes()) {
+				Attribute attr = (Attribute) attrObj;
+				others += ((others.isEmpty() ? "" : ", ") + "[" +
+						(attr.getName()+" : "+attr.getValue()) + "]");
+			}
+			throw new RuntimeException("Element does not contain the requested attribute "+name+
+					", but does contain: "+others);
 		}
 		String attr = attribute.getValue();
 		return
