@@ -6,12 +6,12 @@ import java.util.List;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.component.TextField;
 
+import net.sf.egonet.model.AnswerListMgr;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
-import net.sf.egonet.persistence.Presets;
 import net.sf.egonet.persistence.Questions;
 
 import org.apache.wicket.Component;
@@ -53,6 +53,7 @@ public class EditQuestionOptionsPanel extends Panel {
 		super(id);
 		this.question = question;
 		this.parentThatNeedsUpdating = parentThatNeedsUpdating;
+		AnswerListMgr.loadAnswerListsForStudy(question.getStudyId());
 		build();
 	}
 	
@@ -67,7 +68,7 @@ public class EditQuestionOptionsPanel extends Panel {
 	}
 	
 	public List<String> getPresetKeys() {
-		return new ArrayList<String>(Presets.get().keySet());
+		return new ArrayList<String>(/*Presets*/AnswerListMgr.get().keySet());
 	}
 	
 	private ArrayList<Question> selectionQuestions;
@@ -226,7 +227,7 @@ public class EditQuestionOptionsPanel extends Panel {
 		selectedPreset = new Model();
 		presetForm.add(
 				new DropDownChoice("selectPreset",selectedPreset,
-						new ArrayList<String>(Presets.get().keySet())));
+						new ArrayList<String>(/*Presets*/AnswerListMgr.get().keySet())));
 		presetForm.add(
 				new AjaxFallbackButton("applyPreset",presetForm) {
 					protected void onSubmit(AjaxRequestTarget target, Form form) {
@@ -235,7 +236,7 @@ public class EditQuestionOptionsPanel extends Panel {
 							for(QuestionOption option : getOptions()) {
 								Options.delete(option);
 							}
-							for(String preset : Presets.get().get(presetName)) {
+							for(String preset : /*Presets*/AnswerListMgr.get().get(presetName)) {
 								QuestionOption option = new QuestionOption(question.getId(),preset);
 								if(preset.equals("Yes")) {
 									option.setValue("1");

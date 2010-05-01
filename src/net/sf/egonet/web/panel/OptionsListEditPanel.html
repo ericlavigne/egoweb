@@ -1,0 +1,75 @@
+<!-- OptionsListEditPanel.html -->
+<!-- panel to allow authors to create/edit -->
+<!-- lists of options for selection and    -->
+<!-- multiple selection questions -->
+
+<wicket:panel >
+    <div>
+    <form wicket:id="outerForm">
+	        <legend>Options Lists for Selection Questions THIS DOES NOT SAVE ANY WORK !!!!!!!</legend>
+	        <table>
+	        <tr><td>
+	        <form wicket:id="titlesForm" >
+	        <fieldset>
+	        	<table>
+	        	<tr><td colspan="2"><b>Option Lists</b></td></tr>
+	        	<tr wicket:id="presetTitlesList">
+	        	<td><a href="#" wicket:id="presetTitleLink">
+	        	<span wicket:id="presetTitle" >name</span></a></td>
+	        	<td><a href="#" wicket:id="deleteTitleLink">
+	        	<span wicket:id ="deleteTitle" >delete</span></a></td>
+	        	</tr>
+	        	<tr><td><input wicket:id="newTitleEntry" type="text" size="20" 	/></td>
+	        	<td><input wicket:id="btnAddTitle" type="submit" value="Add" /></td><td></td></tr>
+	        	</table>
+	        </fieldset>
+	        </form>
+	        </td>
+	        <td>
+	        <form wicket:id="optionsForm" >
+	        <fieldset>
+		    	<table>
+	        	<tr>
+	        	<td align="right">Option Names for</td>
+	        	<td align="left" colspan="2" wicket:id="valuesTitle">XXX</td></tr>
+	        	<tr wicket:id="presetValuesList">
+	        	<td wicket:id="presetValue">name</td>
+	        	<td><a href="#" wicket:id="deleteValueLink">
+	        	<span wicket:id ="deleteValue" >delete</span></a></td>
+	        	<td><a href="#" wicket:id="moveUpLink">
+	        	<span wicket:id ="moveUp" >Move Up</span></a></td>
+	        	<td><a href="#" wicket:id="editOptionLink">
+	        	<span wicket:id ="editOption">Edit</span></a></td>
+	        	</tr>
+	        	<tr><td><input wicket:id="textNewOptionName" type="text" size="20" /></td>
+	        	<td><input wicket:id="newValueButton" type="submit" value="Add" /></td><td></td></tr>
+	        	</table>
+	        	</fieldset>
+	        	</form>
+	        </td>
+	        <td>
+	        <div wicket:id="editOptionContainer">
+	        <form wicket:id="editOptionForm" >
+	        <fieldset>
+	           <table>
+	           <tr><td colspan="5">Change Option Name</td></tr>
+	           <tr><td colspan="5" >
+	           <input wicket:id="editOptionName" type="text" size="20" />
+	           </td></tr>
+	           <tr><td></td>
+	           <td><input wicket:id="btnOkayEdit" type="submit" value="Okay" /></td>
+	           <td></td>
+	           <td><input wicket:id="btnCancelEdit" type="submit" value="Cancel" /></td>
+	           <td></td>
+	           </tr>
+	           </table>
+	           </fieldset>
+	           </form>
+	           </div>
+	        </td>
+	        </tr>
+	        </table>
+<input wicket:id="saveButton" type="submit" value="Save" />
+</form>
+</div>
+</wicket:panel> 	        

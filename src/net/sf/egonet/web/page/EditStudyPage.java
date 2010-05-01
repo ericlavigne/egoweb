@@ -15,6 +15,7 @@ import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.EditStudyQuestionsPanel;
 import net.sf.egonet.web.panel.ExpressionsPanel;
 import net.sf.egonet.web.panel.StudySettingsPanel;
+import net.sf.egonet.web.panel.OptionsListEditPanel;
 
 public class EditStudyPage extends EgonetPage
 {
@@ -64,6 +65,12 @@ public class EditStudyPage extends EgonetPage
 			}
 		});
 
+		add(new Link("optionsListLink") {
+			public void onClick() {
+				setSubPanel(new OptionsListEditPanel("questionEditor",studyId));
+			}
+		});
+		
 		questionEditorPanel = new EmptyPanel("questionEditor");
 		add(questionEditorPanel);
 	}
