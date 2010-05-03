@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -36,8 +37,12 @@ public class CheckboxesPanel<T> extends Panel {
 		super(id);
 		
 		this.items = Lists.newArrayList();
-		for(T item : items) {
-			this.items.add(new CheckableWrapper(item).setSelected(selected.contains(item)));
+		for(Integer i = 0; i < items.size(); i++) {
+			T item = items.get(i);
+			this.items.add(
+					new CheckableWrapper(item)
+					.setSelected(selected.contains(item))
+					.setIndex(i));
 		}
 		build();
 	}
@@ -48,7 +53,10 @@ public class CheckboxesPanel<T> extends Panel {
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
-				item.add(new Label("checkLabel",wrapper.getName()));
+				String accessKey = (wrapper.getIndex()+1)+"";
+				Boolean hasAccessKey = items.size() < 10;
+				item.add(new Label("checkLabel",wrapper.getName()+
+						(hasAccessKey ? " ("+accessKey+")" : "")));
 				CheckBox checkBox = new CheckBox("checkField", new PropertyModel(wrapper, "selected"));
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&
@@ -56,6 +64,9 @@ public class CheckboxesPanel<T> extends Panel {
 					{
 						checkBox.add(new FocusOnLoadBehavior());
 					}
+				}
+				if(hasAccessKey) {
+					checkBox.add(new SimpleAttributeModifier("accessKey",accessKey));
 				}
 				item.add(checkBox);
 			}
@@ -67,6 +78,7 @@ public class CheckboxesPanel<T> extends Panel {
 	public class CheckableWrapper implements Serializable {
 		private T item;
 		private Boolean selected;
+		private Integer index;
 		
 		public CheckableWrapper(T item) {
 			this.item = item;
@@ -75,6 +87,13 @@ public class CheckboxesPanel<T> extends Panel {
 		public CheckableWrapper setSelected(Boolean selected) {
 			this.selected = selected;
 			return this;
+		}
+		public CheckableWrapper setIndex(Integer index) {
+			this.index = index;
+			return this;
+		}
+		public Integer getIndex() {
+			return index;
 		}
 		public Boolean getSelected() {
 			return selected;
