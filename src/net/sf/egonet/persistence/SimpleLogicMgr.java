@@ -8,7 +8,7 @@ import net.sf.egonet.model.Question;
 public class SimpleLogicMgr {
 
 	/**
-	 * VERY redimentary expression tree creator
+	 * VERY rudimentary expression tree creator
 	 * the strExpression list is of the type created by parseComparisonList
 	 * @param strExpression
 	 * @return
@@ -27,8 +27,8 @@ public class SimpleLogicMgr {
 		rightNode = new ExpressionNode ( strExpression.get(2));
 		mainNode.setLeftChild(leftNode);
 		mainNode.setRightChild(rightNode);
-		System.out.println ( "Expression = " + mainNode.toString(false));
-		System.out.println ( "Expression = " + mainNode.toString(true));	
+		// System.out.println ( "Expression = " + mainNode.toString(false));
+		// System.out.println ( "Expression = " + mainNode.toString(true));	
 		return(mainNode);
 	}
 	
@@ -103,10 +103,10 @@ public class SimpleLogicMgr {
 	if ( strInput.length()>0)
 		theList.add(strInput);
 	
-	System.out.println ( "parseComparisionList");
-	for ( String str:theList ) {
-		System.out.println(str);
-	}
+	// System.out.println ( "parseComparisionList");
+	// for ( String str:theList ) {
+	// 	System.out.println(str);
+	// }
 	
 	return(theList);
 	}	
