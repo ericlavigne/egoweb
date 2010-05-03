@@ -71,7 +71,7 @@ public class TextInsertionUtil {
 		if ( question==null )
 			return (strQuestionTitle);
 
-		if (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR) {
+		if ( iType==QuestionType.ALTER || iType==QuestionType.ALTER_PAIR) {
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
 		} else {
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, emptyAlters);		

@@ -116,6 +116,7 @@ public class NumericLimitsPanel extends Panel {
 	 */
 	
 	private void build() {		
+		setOutputMarkupId(true);
 		numericLimitsForm = new Form("numericLimitsForm");
 		radioMinimum = new RadioGroupPlus("radioMin", new Model());
 		radioMaximum = new RadioGroupPlus("radioMax", new Model());

@@ -26,6 +26,7 @@ public class MultipleSelectionLimitsPanel extends Panel {
 	 */
 	
 	private void build() {		
+		setOutputMarkupId(true);
 		Form form = new Form("form");
 		textMinCheckableBoxes = new TextField("minMultipleSelectionEntry", new PropertyModel(this, "minCheckableBoxes"), Integer.class);
 		form.add(textMinCheckableBoxes); 

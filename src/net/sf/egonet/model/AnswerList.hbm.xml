@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="net.sf.egonet.model.AnswerList" table="answerList">
+		<id name="id" column="id">
+			<generator class="increment" />
+		</id>
+		<property name="randomKey" 	column="random_key" />
+		<property name="active" 	column="active" />
+		<property name="listName" 	column="listName"  type="text" length="255" />
+		<property name="studyId" 	column="study_id" />
+	    <property name="listOptionNamesDB" column="listOptionNames" type="text" length="32672" />
+	</class>
+</hibernate-mapping>
