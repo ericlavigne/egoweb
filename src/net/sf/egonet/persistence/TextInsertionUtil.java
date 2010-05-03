@@ -58,6 +58,14 @@ public class TextInsertionUtil {
 		
 		if ( interviewId==null )
 			return (strQuestionTitle);
+		// if listOfAlters is null
+		// that indicates this is being used in a preface.
+		// In the case of a preface look ONLY in EGO and EGO_ID 
+		// for answers, regardless of where we come from
+		if ( listOfAlters==null && ( iType==QuestionType.ALTER || iType==QuestionType.ALTER_PAIR)) {
+			iType = QuestionType.EGO;
+		}
+		
 		currentInterview = Interviews.getInterview(interviewId);
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 		if ( question==null  && (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR)) {
@@ -526,8 +534,8 @@ public class TextInsertionUtil {
 				}
 				strExpression = strContents.substring(0,iFirstQuote);
 				strText = strContents.substring(iFirstQuote+1, iLastQuote);
-				System.out.println ( "strExpression=" + strExpression);
-				System.out.println ("strText=" + strText);
+				// System.out.println ( "strExpression=" + strExpression);
+				// System.out.println ("strText=" + strText);
 				iExpressionResult = SimpleLogicMgr.createSimpleExpressionAndEvaluate ( 
 						strExpression, interviewId, iType, studyId, listOfAlters );
 			    if ( iExpressionResult != 0 )

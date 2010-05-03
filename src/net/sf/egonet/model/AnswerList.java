@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.StringTokenizer;
-import java.util.Random;
 
 public class AnswerList extends Entity implements Serializable {
 	/**
