@@ -5,7 +5,7 @@
 
 <hibernate-mapping>
 	<class name="net.sf.egonet.model.Question" table="question">
-		<id name="id" column="id">
+		<id name="id" column="id"> 
 			<generator class="increment" />
 		</id>
 		<property name="randomKey" column="random_key" />
@@ -23,10 +23,11 @@
 		<property name="askingStyleList" column="asking_style_list" />
 		<property name="ordering" column="ordering" />
 	
- 		<property name="minLimitType" 	column="minLimitType" /> 
+		<property name="useIfExpression" column="useIfExpression" type="text" length="255" /> 
+ 		<property name="minLimitTypeDB" column="minLimitType" /> 
  		<property name="minLiteral" 	column="minLiteral" /> 
  		<property name="minPrevQues" 	column="minPrevQues" type="text" length="255" /> 
- 		<property name="maxLimitType" 	column="maxLimitType" /> 
+ 		<property name="maxLimitTypeDB" column="maxLimitType" /> 
  		<property name="maxLiteral" 	column="maxLiteral" /> 
  		<property name="maxPrevQues" 	column="maxPrevQues" type="text" length="255" /> 	
 		<property name="minCheckableBoxes" column="minCheckableBoxes" />

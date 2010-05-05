@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<study id="1" name="testOne" key="773470289966582911" minAlters="0" maxAlters="null" valueDontKnow="-2" valueLogicalSkip="-3" valueNotYetAnswered="-4" valueRefusal="-1" adjacencyExpressionId="">
+  <introduction></introduction>
+  <egoIdPrompt>Please identify yourself to start or continue an interview.</egoIdPrompt>
+  <alterPrompt>Please list some people that you know.</alterPrompt>
+  <conclusion>Thank you for completing this interview.</conclusion>
+  <questions>
+    <question id="7" title="alter_pair_1" key="4581127530593533877" answerType="TEXTUAL" subjectType="ALTER_PAIR" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="">
+      <preface></preface>
+      <prompt>First alter pair question $$1 and $$2.</prompt>
+      <citation></citation>
+    </question>
+    <question id="6" title="alter_1" key="4710759743627429331" answerType="TEXTUAL" subjectType="ALTER" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="">
+      <preface></preface>
+      <prompt>First alter question.</prompt>
+      <citation></citation>
+    </question>
+    <question id="5" title="ego_1" key="-5922619454208250329" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="">
+      <preface></preface>
+      <prompt>First ego question</prompt>
+      <citation></citation>
+    </question>
+    <question id="1" title="What is your name:" key="-5186207008154680415" answerType="TEXTUAL" subjectType="EGO_ID" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="">
+      <preface></preface>
+      <prompt>What is your name?</prompt>
+      <citation></citation>
+    </question>
+    <question id="31" title="ego_2" key="-1023027993000134029" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" minCheckableBoxes="2" maxCheckableBoxes="3">
+      <preface></preface>
+      <prompt>what relatives are living?</prompt>
+      <citation></citation>
+      <option id="1" name="Grand Mother" key="-6448418450632710709" value="1" ordering="0"/>
+      <option id="2" name="Grand Father" key="2593433025614163187" value="2" ordering="1"/>
+      <option id="3" name="Mother" key="-3392005131033814389" value="3" ordering="2"/>
+      <option id="4" name="Father" key="5131099515115468430" value="4" ordering="3"/>
+      <option id="5" name="Grand Son" key="6407049530104573009" value="5" ordering="4"/>
+      <option id="6" name="Grand Daughter" key="-1260088974572017736" value="6" ordering="5"/>
+      <option id="7" name="Son" key="-7273927805030372914" value="7" ordering="6"/>
+      <option id="8" name="Daughter" key="-1433560011386051239" value="8" ordering="7"/>
+      <option id="9" name="Sister" key="-6688001760657794771" value="9" ordering="8"/>
+      <option id="10" name="Brother" key="1308703552689491683" value="10" ordering="9"/>
+      <option id="11" name="Aunt" key="-1088531051224516408" value="11" ordering="10"/>
+      <option id="12" name="Uncle" key="-7974191536425399966" value="12" ordering="11"/>
+      <option id="13" name="Niece" key="-6007920180408915456" value="13" ordering="12"/>
+      <option id="14" name="Nephew" key="-4472459533903778839" value="14" ordering="13"/>
+      <option id="15" name="Cousin" key="178689542548109767" value="15" ordering="14"/>
+      <option id="16" name="Mother-in-Law" key="8818670836095244385" value="16" ordering="15"/>
+      <option id="17" name="Father-in-Law" key="-1109451334899941728" value="17" ordering="16"/>
+      <option id="18" name="Sister-in-Law" key="-1748176737551080387" value="18" ordering="17"/>
+      <option id="19" name="Brother-in-Law" key="-935560163299458754" value="19" ordering="18"/>
+      <option id="20" name="Step Son" key="5320398503871094411" value="20" ordering="19"/>
+      <option id="21" name="Step Daughter" key="5371823966564289110" value="21" ordering="20"/>
+      <option id="22" name="Half-Brother" key="3438441123041640530" value="22" ordering="21"/>
+      <option id="23" name="Half-Sister" key="4320664458455902589" value="23" ordering="22"/>
+    </question>
+    <question id="2" title="ego_age" key="6509270478992234384" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="100" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your age?</prompt>
+      <citation></citation>
+    </question>
+    <question id="18" title="ego_iq" key="7879191235514348810" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="2" answerReasonExpressionId="" useIf="" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="210" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your iq?</prompt>
+      <citation></citation>
+    </question>
+  </questions>
+  <expressions/>
+</study>

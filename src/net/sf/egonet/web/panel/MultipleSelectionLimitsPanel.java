@@ -5,7 +5,7 @@ import net.sf.egonet.web.component.TextField;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
-
+ 
 public class MultipleSelectionLimitsPanel extends Panel {
 
 	private Integer minCheckableBoxes;

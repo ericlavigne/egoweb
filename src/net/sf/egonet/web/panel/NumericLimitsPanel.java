@@ -114,7 +114,7 @@ public class NumericLimitsPanel extends Panel {
 	 * builds the panel
 	 * creates the form an all input widgets
 	 */
-	
+	 
 	private void build() {		
 		setOutputMarkupId(true);
 		numericLimitsForm = new Form("numericLimitsForm");
@@ -191,6 +191,7 @@ public class NumericLimitsPanel extends Panel {
 	public void setMinLimitType (NumericLimitType minLimitType ) {
 		this.minLimitType = minLimitType;
 
+		// System.out.println ( "NumericLimitsPanel, setting minLimitType to" + minLimitType);
 		switch ( this.minLimitType ) {
 			case NLT_LITERAL:  radioMinimum.setModel(new Model("minLiteral")); break;
 			case NLT_PREVQUES: radioMinimum.setModel(new Model("minPrev")); break;

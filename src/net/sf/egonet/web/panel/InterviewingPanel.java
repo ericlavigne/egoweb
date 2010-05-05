@@ -51,6 +51,7 @@ public class InterviewingPanel extends Panel {
 		
 		strPrompt = question.individualizePrompt(altersInPrompt);
 		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
+		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);

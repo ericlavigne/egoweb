@@ -72,6 +72,7 @@ public class EditQuestionPanel extends Panel {
 	private Model questionResponseTypeModel;
 	private Model questionAnswerReasonModel;
 	private Model askingStyleModel;
+	private TextField questionUseIfField;
 	private DropDownChoicePlus dropDownQuestionTypes;
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
@@ -168,6 +169,9 @@ public class EditQuestionPanel extends Panel {
 			askingStyleListField.setVisible(false);
 		}
 		
+		questionUseIfField = new TextField("questionUseIfField", new Model(""));
+		form.add(questionUseIfField);
+		
 		form.add(
 			new AjaxFallbackButton("submitQuestion",form)
             {
@@ -211,7 +215,7 @@ public class EditQuestionPanel extends Panel {
 		askingStyleModel.setObject(question.getAskingStyleList());
 		msg += " -> "+askingStyleModel.getObject()+" (question had "+question.getAskingStyleList()+")";
 		//throw new RuntimeException(msg);
-		
+		questionUseIfField.setModelObject(question.getUseIfExpression());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION) {
@@ -244,6 +248,7 @@ public class EditQuestionPanel extends Panel {
 		question.setAskingStyleList(askingStyle); // TODO: need to trace what happens in this method
 		msg += " -> "+question.getAskingStyleList();
 		// throw new RuntimeException(msg);
+		question.setUseIfExpression((String) questionUseIfField.getModelObject());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());

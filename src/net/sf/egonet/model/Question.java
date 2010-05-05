@@ -22,6 +22,9 @@ public class Question extends OrderedEntity
 	private QuestionType type;
 	private Boolean askingStyleList;
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
+	// an 'additional logic' expression in string form
+	// to be evaluated if answerReasonExpressionId is null
+	private String useIfExpression;
 	// variables that will be specific to numeric answers, 
 	// and (optionally) limiting them to a range
 	private NumericLimitType minLimitType;
@@ -40,6 +43,7 @@ public class Question extends OrderedEntity
 		type = QuestionType.EGO;
 		askingStyleList = false;
 		
+		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
 		minLiteral = 0;
 		minPrevQues = "";
@@ -202,6 +206,16 @@ public class Question extends OrderedEntity
 		return askingStyleList == null ? false : askingStyleList;
 	}
 	
+	
+	public void setUseIfExpression ( String useIfExpression ) {
+		this.useIfExpression = (useIfExpression==null) ? "" : useIfExpression;
+	}
+	public String getUseIfExpression() {
+		if ( useIfExpression==null )
+			useIfExpression = "";
+		return (useIfExpression);
+	}
+	
 	/* ****************************************************************** */
 	/* next set of functions deal with setting limits on NUMERICAL        */
 	/* questions                                                          */
@@ -216,6 +230,21 @@ public class Question extends OrderedEntity
 	}
 	public NumericLimitType getMinLimitType() { return(minLimitType);}
 	
+	public String getMinLimitTypeDB() {
+		NumericLimitType nlType = getMinLimitType();
+		return ( nlType==null ? NumericLimitType.NLT_NONE.name() : nlType.name() );
+	}
+
+	public void setMinLimitTypeDB ( String val ) {
+	    NumericLimitType nlType;
+	   
+	    if ( val==null || val.length()==0 ) 
+	        nlType = NumericLimitType.NLT_NONE;
+	    else
+		    nlType = NumericLimitType.valueOf(val);
+	    setMinLimitType(nlType);
+	}
+	  
 	public void setMinLiteral ( Integer minLiteral ) {
 		this.minLiteral = (minLiteral==null)?0:minLiteral;
 	}
@@ -230,6 +259,22 @@ public class Question extends OrderedEntity
 		this.maxLimitType = (maxLimitType==null)?NumericLimitType.NLT_NONE:maxLimitType;
 	}
 	public NumericLimitType getMaxLimitType() { return(maxLimitType);}
+	
+	
+	public String getMaxLimitTypeDB() {
+		NumericLimitType nlType = getMaxLimitType();
+		return ( nlType==null ? NumericLimitType.NLT_NONE.name() : nlType.name() );
+	}
+
+	public void setMaxLimitTypeDB ( String val ) {
+	    NumericLimitType nlType;
+	  
+	    if ( val==null || val.length()==0 ) 
+	        nlType = NumericLimitType.NLT_NONE;
+	    else
+		    nlType = NumericLimitType.valueOf(val);
+	    setMaxLimitType(nlType);
+	}
 	
 	public void setMaxLiteral ( Integer maxLiteral ) {
 		this.maxLiteral = (maxLiteral==null)?10000:maxLiteral;
@@ -341,6 +386,20 @@ public class Question extends OrderedEntity
 	 */
 	public String answerCountInsertion ( String strPrompt, Long interviewId ) {
 		return ( TextInsertionUtil.answerCountInsertion(strPrompt, interviewId, studyId ));
+	}
+	/**
+	 * a convenience function that turns around and called the TextInsertionUtil static function
+	 * questionContainsAnswerInsertion.  Most commonly we will want to do it on the 
+	 * prompt of this question but in this case the prompt is an individualized 
+	 * prompt that has had appropriate strings already substituted into place.
+	 * This deals with variable insertion using tags of the format <CONTAINS question answer />
+	 * @param strPrompt text of question
+	 * @param interviewId uniquely identifies this interview
+	 * @param listOfAlters - used in retrieving question answers
+	 * @return a string with previous answers inserted into place
+	 */
+	public String questionContainsAnswerInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( TextInsertionUtil.questionContainsAnswerInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
 	}
 	
 	/**

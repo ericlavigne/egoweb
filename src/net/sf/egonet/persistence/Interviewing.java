@@ -127,6 +127,29 @@ public class Interviewing {
 							context.eidToExpression.get(reasonId), 
 							new ArrayList<Alter>(), 
 							context);
+				
+				if ( reasonId==null ) {
+					String strUseIf;
+					int iEvaluate;
+					ArrayList<Alter> emptyAlterList = new ArrayList<Alter>();
+					
+					System.out.println ( "Interviewing.java, nextEgoQuestionForInterview");
+					strUseIf = question.getUseIfExpression();
+					if ( strUseIf!=null && strUseIf.length()>0 ) {
+						System.out.println ( strUseIf);
+						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
+						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, emptyAlterList);
+						strUseIf = question.calculationInsertion(strUseIf, interviewId, emptyAlterList);
+						strUseIf = question.variableInsertion(strUseIf, interviewId, emptyAlterList);
+						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
+								strUseIf, interviewId, 
+								question.getType(), question.getStudyId(), emptyAlterList);
+						System.out.println ("iEvaluate=" + iEvaluate);
+						if (iEvaluate==0)
+							shouldAnswer = false;
+					}
+				}
+				
 				if(shouldAnswer) {
 					return question;
 				}
@@ -461,6 +484,27 @@ public class Interviewing {
 								context.eidToExpression.get(reasonId), 
 								Lists.newArrayList(alter), 
 								context);
+				
+				if ( reasonId==null ) {
+					String strUseIf;
+					int iEvaluate;
+					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
+					
+					strUseIf = question.getUseIfExpression();
+					if ( strUseIf!=null && strUseIf.length()>0 ) {
+						System.out.println ( "==== in alterQuestionsForInterview " + strUseIf);
+						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
+						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
+						strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);
+						strUseIf = question.variableInsertion(strUseIf, interviewId, singleAlterList);
+						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
+								strUseIf, interviewId, 
+								question.getType(), question.getStudyId(), singleAlterList);
+						if (iEvaluate==0)
+							shouldAnswer = false;
+					}
+				}
+				
 				if(shouldAnswer) {
 					resultAlters.add(alter);
 				}
@@ -492,6 +536,28 @@ public class Interviewing {
 									context.eidToExpression.get(reasonId), 
 									Lists.newArrayList(alter1,alter2), 
 									context);
+						
+						if ( reasonId==null ) {
+							String strUseIf;
+							int iEvaluate;
+							ArrayList<Alter> twoAlterList = Lists.newArrayList(alter1,alter2);
+							
+							strUseIf = question.getUseIfExpression();
+							if ( strUseIf!=null && strUseIf.length()>0 ) {
+								System.out.println ( strUseIf);
+								strUseIf = question.answerCountInsertion(strUseIf, interviewId);
+								strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, twoAlterList);
+								strUseIf = question.calculationInsertion(strUseIf, interviewId, twoAlterList);
+								strUseIf = question.variableInsertion(strUseIf, interviewId, twoAlterList);
+								iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
+										strUseIf, interviewId, 
+										question.getType(), question.getStudyId(), twoAlterList);
+								if (iEvaluate==0)
+									shouldAnswer = false;
+							}
+						}
+						
+						
 						if(shouldAnswer) {
 							secondAlters.add(alter2);
 						}

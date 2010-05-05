@@ -14,21 +14,35 @@ public class SimpleLogicMgr {
 	 * @return
 	 */
 	public static ExpressionNode createSimpleExpression ( ArrayList<String> strExpression) {
-		ExpressionNode mainNode;
+		int iExpressionSize;
+		ExpressionNode mainNode = null;
 		ExpressionNode leftNode;
 		ExpressionNode rightNode;
 		
-		if ( strExpression.size() != 3 ) {
-			System.out.println ("SimpleLogicMgr can only handle 3 nodes right now.");
-			return(null);
+		iExpressionSize = strExpression.size();
+		
+		if ( iExpressionSize != 3  &&  iExpressionSize != 1 ) {
+			System.out.println ("SimpleLogicMgr can only handle 1 OR 3 nodes right now not " + iExpressionSize);
+			for ( String str:strExpression )
+				System.out.println ( str);
+			return(mainNode);
 		}
-		leftNode = new ExpressionNode ( strExpression.get(0));
-		mainNode = new ExpressionNode ( strExpression.get(1));
-		rightNode = new ExpressionNode ( strExpression.get(2));
-		mainNode.setLeftChild(leftNode);
-		mainNode.setRightChild(rightNode);
-		// System.out.println ( "Expression = " + mainNode.toString(false));
-		// System.out.println ( "Expression = " + mainNode.toString(true));	
+		switch ( iExpressionSize ) {
+		    case 1:
+		    	 mainNode = new ExpressionNode ( strExpression.get(0));
+		    	 System.out.println ( "Expression = " + mainNode.toString(false));
+		    	 System.out.println ( "Expression = " + mainNode.toString(true));
+		    	 break;
+		    case 3:
+		    	 leftNode = new ExpressionNode ( strExpression.get(0));
+		    	 mainNode = new ExpressionNode ( strExpression.get(1));
+		    	 rightNode = new ExpressionNode ( strExpression.get(2));
+		    	 mainNode.setLeftChild(leftNode);
+		    	 mainNode.setRightChild(rightNode);
+		    	 // System.out.println ( "Expression = " + mainNode.toString(false));
+		    	 // System.out.println ( "Expression = " + mainNode.toString(true));	
+		    	 break;
+			}
 		return(mainNode);
 	}
 	
@@ -82,6 +96,8 @@ public class SimpleLogicMgr {
 	int iNextCompareOp;
 	    
 
+	if ( strInput==null || strInput.length()==0 )
+		return(theList);
 	iWordEnd = 0;
 	while ( strInput.length()>0  &&  iWordEnd != Integer.MAX_VALUE) {
 	    iWordEnd = ExpressionNode.indexOfNextComparisonOp ( strInput );
@@ -101,12 +117,12 @@ public class SimpleLogicMgr {
 	    }
 	}
 	if ( strInput.length()>0)
-		theList.add(strInput);
+		theList.add(strInput.trim());
 	
-	// System.out.println ( "parseComparisionList");
-	// for ( String str:theList ) {
-	// 	System.out.println(str);
-	// }
+	System.out.println ( "parseComparisionList");
+	for ( String str:theList ) {
+	 	System.out.println(str);
+	}
 	
 	return(theList);
 	}	

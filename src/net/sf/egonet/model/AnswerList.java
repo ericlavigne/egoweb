@@ -37,7 +37,7 @@ public class AnswerList extends Entity implements Serializable {
 		getRandomKey();
 		this.listName = listName;
 		this.studyId = studyId;
-		this.listOptionNames = new String[0];	
+		listOptionNames = new String[0];	
 	}
 		
 	public void setListName ( String listName ) {
@@ -49,6 +49,16 @@ public class AnswerList extends Entity implements Serializable {
 		this.studyId = (studyId==null)?0L:studyId;
 	}
 	public Long getStudyId() { return studyId;}
+	
+	public String toString() {
+		String strReturn = listName + " for study #" + studyId + "[";
+		
+		for ( String str:listOptionNames ) {
+			strReturn += str + ", ";
+		}
+		strReturn += "]";
+		return(strReturn);
+		}
 	
 	/**
 	 * set / get the array of listOptionNames as an array
@@ -102,17 +112,6 @@ public class AnswerList extends Entity implements Serializable {
 		}
 		// System.out.println ( "exitting getListOptionNamesDB " + strb.toString());
 		return ( strb.toString());
-	}
-	
-	
-	public String toString() {
-		String strReturn = listName + " for study #" + studyId + "[";
-		
-		for ( String str:listOptionNames ) {
-			strReturn += str + ", ";
-		}
-		strReturn += "]";
-		return(strReturn);
-		}
+	}	
 	
 }

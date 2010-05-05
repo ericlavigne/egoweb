@@ -363,14 +363,17 @@ public class Archiving {
 			// in case ordering == null, I use the order they were pulled from the DB
 		addAttribute(questionNode,"ordering", ordering);
 		addAttribute(questionNode,"answerReasonExpressionId", question.getAnswerReasonExpressionId());
+		addAttribute(questionNode,"useIf", question.getUseIfExpression());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
-			System.out.println ( "Archiving addQuestionNode " + question.getMinLimitType().toString());
-			addAttribute(questionNode,"minLimitType", question.getMinLimitType());
+			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
 			addAttribute(questionNode,"minLiteral", question.getMinLiteral());
 			addAttribute(questionNode,"minPrevQues", question.getMinPrevQues());
-			addAttribute(questionNode,"maxLimitType", question.getMaxLimitType());
+			addAttribute(questionNode,"maxLimitType", question.getMaxLimitTypeDB());
 			addAttribute(questionNode,"maxLiteral", question.getMaxLiteral());
 			addAttribute(questionNode,"maxPrevQues", question.getMaxPrevQues());	
+		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION ) {
+			addAttribute(questionNode,"minCheckableBoxes", question.getMinCheckableBoxes());
+			addAttribute(questionNode,"maxCheckableBoxes", question.getMaxCheckableBoxes());
 		}
 		addText(questionNode,"preface",question.getPreface()); 
 		addText(questionNode,"prompt",question.getPrompt());
@@ -393,9 +396,7 @@ public class Archiving {
 	 */
 	private static void updateQuestionFromNode(Session session, Question question, Element node, 
 			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
-	{
-		String strLimitType;
-		
+	{	
 		question.setStudyId(studyId);
 		question.setTitle(attrString(node,"title"));
 		question.setAnswerTypeDB(attrString(node,"answerType"));
@@ -405,21 +406,14 @@ public class Archiving {
 		question.setPreface(attrText(node,"preface"));
 		question.setPrompt(attrText(node,"prompt"));
 		question.setCitation(attrText(node,"citation"));
-
+		question.setUseIfExpression(attrText(node,"useIf"));
+		
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
 			try {
-			strLimitType = attrText(node,"minLimitType");
-			if (strLimitType==null || strLimitType.length()==0 )
-				question.setMinLimitType(NumericLimitType.NLT_NONE);
-			else
-				question.setMinLimitType(NumericLimitType.valueOf(strLimitType));
+			question.setMinLimitTypeDB(attrString(node,"minLimitType"));
 			question.setMinLiteral(attrInt(node,"minLiteral"));
 			question.setMinPrevQues(attrText(node,"minPrevQues"));
-			strLimitType = attrText(node,"maxLimitType");
-			if (strLimitType==null || strLimitType.length()==0 )
-				question.setMaxLimitType(NumericLimitType.NLT_NONE);
-			else
-			    question.setMaxLimitType(NumericLimitType.valueOf(strLimitType));
+			question.setMaxLimitTypeDB(attrString(node,"maxLimitType"));
 			question.setMaxLiteral(attrInt(node,"maxLiteral"));
 			question.setMaxPrevQues(attrText(node,"maxPrevQues"));
 			} catch ( java.lang.RuntimeException rte ) {
@@ -433,6 +427,16 @@ public class Archiving {
 			}
 		}
 		
+		if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION ) {
+			try {
+				question.setMinCheckableBoxes(attrInt(node,"minCheckableBoxes"));
+				question.setMaxCheckableBoxes(attrInt(node,"maxCheckableBoxes"));
+			} catch ( java.lang.RuntimeException rte2 ) {
+			    // if anything went wrong, assign reasonable defaults
+				question.setMinCheckableBoxes(0);
+				question.setMaxCheckableBoxes(100);
+			}
+		}
 		
 		Long remoteReasonId = attrLong(node,"answerReasonExpressionId");
 		question.setAnswerReasonExpressionId(

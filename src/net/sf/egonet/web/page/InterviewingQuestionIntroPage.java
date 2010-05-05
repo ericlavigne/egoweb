@@ -28,6 +28,7 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
         // we only want answers from ego and ego_id sections,
         if ( question!=null ) {
         	// text = question.answerCountInsertion(text, interviewId);
+        	
         	text = question.calculationInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.variableInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.conditionalTextInsertion(text, interviewId, (ArrayList<Alter>)null);	

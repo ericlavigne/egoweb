@@ -65,6 +65,12 @@ public class TextInsertionUtil {
 		if ( listOfAlters==null && ( iType==QuestionType.ALTER || iType==QuestionType.ALTER_PAIR)) {
 			iType = QuestionType.EGO;
 		}
+		// if alter or alter_pair questions are used in a 'list of alters'
+		// format the listOfAlters will be null, or empty.
+		// in this case we can only deal with ego or ego_id questions.
+		if (( iType==QuestionType.ALTER || iType==QuestionType.ALTER_PAIR) && listOfAlters.isEmpty()) {
+			iType = QuestionType.EGO;
+		}
 		
 		currentInterview = Interviews.getInterview(interviewId);
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
@@ -77,7 +83,7 @@ public class TextInsertionUtil {
 			question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 		}
 		if ( question==null )
-			return (strQuestionTitle);
+			return ("[ " +strQuestionTitle + " NOT FOUND]");
 
 		if ( iType==QuestionType.ALTER || iType==QuestionType.ALTER_PAIR) {
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
@@ -86,7 +92,7 @@ public class TextInsertionUtil {
 		}
 				
 		if ( theAnswer==null )
-			return(strQuestionTitle);
+			return("[ no answer to " + strQuestionTitle + " found]");
 	
 		switch ( theAnswer.getAnswerType()) {
 			case SELECTION:
@@ -166,7 +172,7 @@ public class TextInsertionUtil {
 			if ( strVariableName!=null ) {
 				strVariableValue = answerToQuestion(strVariableName, interviewId, iType, studyId, listOfAlters );
 				if ( strVariableValue == null || strVariableValue.length()==0 )
-					strVariableValue = "(unanswered)";
+					strVariableValue = "[no value for " + strVariableName + "]";
 				strResult += " " + strVariableValue + " ";
 			} else {
 				strResult += str;
@@ -324,6 +330,21 @@ public class TextInsertionUtil {
 	
 
 	/**
+	 * removes leading/trailing spaces and quotes from a string
+	 * @param str the string to really trim
+	 * @return str without quotes
+	 */
+	public static String trimQuotes ( String str ) {
+		str = str.trim();
+	    if ( str.startsWith("\""))
+	    	str = str.substring(1);
+	    if ( str.endsWith("\""))
+	    	str = str.substring(0,str.length()-1);
+	    str = str.trim();
+	    return(str);
+	}
+	
+	/**
 	 * answerCountInsertion
 	 * used with tags of the type <COUNT ... ... />
 	 * this will accept any arbitrary string and, if markers of the format 
@@ -354,9 +375,9 @@ public class TextInsertionUtil {
 		String strExpression;
 		String strQuestionTitle;
 		String strAnswerToCount;
+		String strCountValue;
 		ArrayList<String> theList = null;
 		int firstSpace;
-		int iCountValue;
 		int ix;
 
 		// if no interviewId we are previewing the question
@@ -377,24 +398,21 @@ public class TextInsertionUtil {
 			strExpression = trimPrefixAndSuffix(str, "<COUNT", "/>");
 			if ( strExpression != null ) {
 				firstSpace = strExpression.indexOf(" "); // split strExpression into question title and answer
-				
-				// flips and twists to deal with whitespace and (optional) quotes
-				strQuestionTitle = strExpression.substring(0,firstSpace).trim();
-				strAnswerToCount = strExpression.substring(firstSpace).trim();
-				if ( strQuestionTitle.startsWith("\""))
-					strQuestionTitle = strQuestionTitle.substring(1);
-				if ( strQuestionTitle.endsWith("\""))
-					strQuestionTitle = strQuestionTitle.substring(0,strQuestionTitle.length()-1);
-				if ( strAnswerToCount.startsWith("\""))
-					strAnswerToCount = strAnswerToCount.substring(1);
-				if ( strAnswerToCount.endsWith("\""))
-					strAnswerToCount = strAnswerToCount.substring(0,strAnswerToCount.length()-1);
-				strQuestionTitle = strQuestionTitle.trim();
-				strAnswerToCount = strAnswerToCount.trim();
-				// end of flips & twists to remove ' ' and '"'
-				
-				iCountValue = getAnswerCountToQuestion(strQuestionTitle, strAnswerToCount, interviewId, studyId );
-				strResult += " " + iCountValue + " ";
+				if ( firstSpace <= 0 ) {
+					strResult += "[Error " + strExpression + " COUNT needs question and answer]";
+				} else {
+				    // flips and twists to deal with whitespace and (optional) quotes
+				    strQuestionTitle = strExpression.substring(0,firstSpace).trim();
+				    strAnswerToCount = strExpression.substring(firstSpace).trim();
+				    strQuestionTitle = trimQuotes(strQuestionTitle);
+				    strAnswerToCount = trimQuotes(strAnswerToCount);
+				    if ( strQuestionTitle.length()==0 || strAnswerToCount.length()==0 ) {
+						strResult += "[Error " + strExpression + " COUNT needs Question and Answer]";
+				    } else {
+				    	strCountValue = getAnswerCountToQuestion(strQuestionTitle, strAnswerToCount, interviewId, studyId );
+				        strResult += " " + strCountValue + " ";
+				    }
+				}
 			} else {
 				strResult += str;
 			}
@@ -402,6 +420,75 @@ public class TextInsertionUtil {
 		return(strResult);
 	}		
 
+	/**
+	 * scan the input string for tags of the format <CONTAINS question "answer" /> and 
+	 * replaces the text with the number of times this alter ( or alter-pair, or ego )
+	 * answered the question with the answer.  The result should be zero or one.
+	 * This will mostly be used in "Use If" expressions.
+	 * @param strInput
+	 * @param interviewId
+	 * @param iType
+	 * @param studyId
+	 * @param listOfAlters
+	 * @return
+	 */
+	public static String questionContainsAnswerInsertion (String strInput, 
+			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters) {
+		String strResult = "";
+		String pattern = "<CONTAINS.*?/>";
+		String str;
+		String strExpression;
+		String strQuestionTitle;
+		String strAnswerToCount;
+		String strCountValue;
+		ArrayList<String> theList = null;
+		int firstSpace;
+		int ix;
+
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
+		theList = parseExpressionList( strInput, pattern);
+		if ( theList==null )
+			return(strInput);
+		
+		// At this point we have an array list with literal strings
+		// alternating with variable markers .
+		// now construct the output string by replace the
+		// question names between the <VAR /> markers with the answer from
+		// that question
+		for ( ix=0 ; ix<theList.size(); ++ix ) {
+			str = theList.get(ix);
+			strExpression = trimPrefixAndSuffix(str, "<CONTAINS", "/>");
+			if ( strExpression != null ) {
+				firstSpace = strExpression.indexOf(" "); // split strExpression into question title and answer
+				if ( firstSpace <= 0 ) {
+					strResult += "[Error " + strExpression + " CONTAINS needs question and answer]";
+				} else {
+				    // flips and twists to deal with whitespace and (optional) quotes
+				    strQuestionTitle = strExpression.substring(0,firstSpace).trim();
+				    strAnswerToCount = strExpression.substring(firstSpace).trim();
+				    strQuestionTitle = trimQuotes(strQuestionTitle);
+				    strAnswerToCount = trimQuotes(strAnswerToCount);
+				    // System.out.println ( "question=" + strQuestionTitle);
+				    // System.out.println ( "  answer=" + strAnswerToCount);
+				    if ( strQuestionTitle.length()==0 || strAnswerToCount.length()==0 ) {
+						strResult += "[Error " + strExpression + " CONTAINS needs Question and Answer]";
+				    } else {
+				    	strCountValue = getQuestionContains(strQuestionTitle, strAnswerToCount, 
+				        		interviewId, iType, studyId, listOfAlters );
+				        strResult += " " + strCountValue + " ";
+				    }
+				}
+			} else {
+				strResult += str;
+			}
+		} 
+		return(strResult);
+	}		
+
+	
 	/**
 	 * used to find how many of a given answer where given in response to a specific
 	 * question.  This is used only in the ALTER section.  For example, if a question
@@ -413,7 +500,7 @@ public class TextInsertionUtil {
 	 * @param studyId - needed for query
 	 * @return - a count of the times this answer was given to this question, -1 on error
 	 */
-	public static int getAnswerCountToQuestion ( String strQuestionTitle, String strSurveyAnswer, 
+	public static String getAnswerCountToQuestion ( String strQuestionTitle, String strSurveyAnswer, 
 			Long interviewId, Long studyId ) {
 		List<Alter> listOfAlters = Alters.getForInterview(interviewId);
 		ArrayList<Alter> alterPair;
@@ -424,13 +511,14 @@ public class TextInsertionUtil {
 		Answer theAnswer = null;
 		String strAnswer = strQuestionTitle;
 		Long   iOptionId;
+		boolean bAnswerFound = false;
 		int iCount = 0;
 
 		strSurveyAnswer = strSurveyAnswer.trim();
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, QuestionType.ALTER, studyId);
 	
 		if ( question==null )
-			return (-1); 
+			return ("[ question " + strQuestionTitle + " not found]"); 
 		currentInterview = Interviews.getInterview(interviewId);
 		optionsList = Options.getOptionsForQuestion(question.getId());
 		 
@@ -439,7 +527,8 @@ public class TextInsertionUtil {
 			alterPair.add(alter);
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, alterPair);
 			
-			if ( theAnswer!=null ) {	
+			if ( theAnswer!=null ) {
+				bAnswerFound = true;
 			    switch ( theAnswer.getAnswerType()) {
 				    case SELECTION:
 				    case MULTIPLE_SELECTION:
@@ -455,8 +544,9 @@ public class TextInsertionUtil {
 					     // Now find the option that this ID refers to
 					     answerOption = null;
 					     for ( QuestionOption qo : optionsList ) {
-						     if ( qo.getId().equals(iOptionId)) 
+						     if ( qo.getId().equals(iOptionId)) {
 						    	 answerOption = qo;
+						     }
 					     }
 					     // lastly, if this answer matches the answer we 
 					     // are counting up increment our count
@@ -473,7 +563,76 @@ public class TextInsertionUtil {
 			    }
 			}
 		}
-	return(iCount);
+	return(Integer.toString(iCount));
+	}
+	
+	/**
+	 * this is similar to getAnswerCountToQuestion above, but tests to see if 
+	 * the answer to a question contains a string for just one alter ( or alter pair)
+	 * this is so the <CONTAINS logic can be used for skipping questions
+	 * @param strQuestionTitle
+	 * @param strSurveyAnswer
+	 * @param interviewId
+	 * @param iType
+	 * @param studyId
+	 * @param listOfAlters
+	 * @return
+	 */
+	public static String getQuestionContains ( String strQuestionTitle, String strSurveyAnswer, 
+			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters   ) {
+		Interview currentInterview;
+		QuestionOption answerOption;
+		List<QuestionOption> optionsList = null;
+		Question question = null;
+		Answer theAnswer = null;
+		String strAnswer = strQuestionTitle;
+		Long   iOptionId;
+		int iCount = 0;
+
+		strSurveyAnswer = strSurveyAnswer.trim();
+		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
+	
+		if ( question==null )
+			return ("[ " + strQuestionTitle + " not found]");
+		
+		currentInterview = Interviews.getInterview(interviewId);
+		optionsList = Options.getOptionsForQuestion(question.getId()); 
+		theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, listOfAlters);
+			
+		if ( theAnswer!=null ) {	
+		    switch ( theAnswer.getAnswerType()) {
+			    case SELECTION:
+			    case MULTIPLE_SELECTION:
+			         strAnswer = "";
+			         // the answer is a list of comma separated ids
+			         // that is, a list of optionIDs
+			         for ( String strOption : theAnswer.getValue().split(",")) {
+		   		         try {
+				             iOptionId = Long.parseLong(strOption);
+				         } catch ( NumberFormatException nfe ) {
+				            iOptionId = -1L;
+				         }
+				     // Now find the option that this ID refers to
+				     answerOption = null;
+				     for ( QuestionOption qo : optionsList ) {
+					     if ( qo.getId().equals(iOptionId)) 
+					    	 answerOption = qo;
+				     }
+				     // lastly, if this answer matches the answer we 
+				     // are counting up increment our count
+				     if ((answerOption != null) && strSurveyAnswer.equalsIgnoreCase(answerOption.getName().trim()))
+					     ++iCount;
+			         }
+			         break;
+		        case TEXTUAL:
+		        case NUMERICAL:
+			         strAnswer = theAnswer.getValue().trim();
+			         if ( strSurveyAnswer.equals(strAnswer))
+				         ++iCount;
+			        break;
+		    }
+		}
+	return(Integer.toString(iCount)); // Should be zero or one
 	}
 
 	/**

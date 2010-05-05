@@ -39,7 +39,6 @@ public class OptionsListEditPanel extends Panel {
 	private TextField textNewOptionName;
 	private TextField textEditOptionName;
 	
-	// private AnswerListMgr answerListMgr;
 	
 	/**
 	 * constructor
@@ -52,7 +51,6 @@ public class OptionsListEditPanel extends Panel {
 
 		this.studyId = studyId;
 		AnswerListMgr.loadAnswerListsForStudy(this.studyId);
-		// = new AnswerListMgr(studyId);
 		listPresetTitles = AnswerListMgr.getTitlesAsList(studyId);
 		if ( !listPresetTitles.isEmpty() ) {
 			strCurrentListTitle = listPresetTitles.get(0);
@@ -143,11 +141,11 @@ public class OptionsListEditPanel extends Panel {
 		
 		// construct the table on the right, that will have the
 		// values available for the currently selected preset list			
-		lvPresetOptionNames = new ListView ("presetValuesList", new PropertyModel(this, "listOptionNames"))
+		lvPresetOptionNames = new ListView ("presetNamesList", new PropertyModel(this, "listOptionNames"))
 			{
 			protected void populateItem(final ListItem item) {
 				final String strValue = item.getModelObjectAsString();
-				item.add(new Label("presetValue", strValue));
+				item.add(new Label("presetName", strValue));
 		
 			    // add the link that will delete this value
 			    Link deleteValueLink = new AjaxFallbackLink("deleteValueLink")

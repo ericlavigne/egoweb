@@ -109,8 +109,10 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public String getPrompt() {
 		String strPrompt;
 
+		System.out.println ( "alters=" + alters);
 		strPrompt = question.individualizePrompt(alters);
 		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
+		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.variableInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);		
