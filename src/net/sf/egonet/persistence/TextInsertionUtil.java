@@ -94,6 +94,15 @@ public class TextInsertionUtil {
 		if ( theAnswer==null )
 			return("[ no answer to " + strQuestionTitle + " found]");
 	
+		if ( theAnswer.getValue()==null ) {
+			switch ( theAnswer.getSkipReason()) {
+			case REFUSE: return ("(refuse)"); 
+			case DONT_KNOW: return ("(don't know)");
+			case NONE:
+			default:	return("(unanswered)");
+			}
+		}
+		
 		switch ( theAnswer.getAnswerType()) {
 			case SELECTION:
 			case MULTIPLE_SELECTION:

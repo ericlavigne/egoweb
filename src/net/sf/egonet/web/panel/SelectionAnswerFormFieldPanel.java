@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.basic.Label;
+
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.collect.Lists;
 
@@ -19,6 +23,9 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	private Model answer;
 	private DropDownChoice dropDownChoice;
+	private Label otherSpecifyLabel;
+	private TextField otherSpecifyTextField;
+	private String otherText;
 	
 	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
 		super(id,question,Answer.SkipReason.NONE,alters, interviewId);
@@ -58,6 +65,12 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		}
 		dropDownChoice = new DropDownChoice("answer",answer,choices);
 		add(dropDownChoice);
+		// features that will be visible only for
+		// 'other/specify' questions
+//		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
+//		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherText"));
+//		add(otherSpecifyLabel);
+//		add(otherSpecifyTextField);
 	}
 
 	public String getAnswer() {
@@ -83,4 +96,12 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	public boolean refused() {
 		return answer.getObject() != null && answer.getObject().equals(refuse);
 	}
+	
+	public void setOtherText ( String otherText ) {
+		this.otherText = (otherText==null) ? "" : otherText;
+	}
+	public String getOtherText() {
+		return (( otherText==null) ? "" : otherText ) ;
+	}
+
 }

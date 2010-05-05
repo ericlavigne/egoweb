@@ -364,6 +364,7 @@ public class Archiving {
 		addAttribute(questionNode,"ordering", ordering);
 		addAttribute(questionNode,"answerReasonExpressionId", question.getAnswerReasonExpressionId());
 		addAttribute(questionNode,"useIf", question.getUseIfExpression());
+		addAttribute(questionNode,"otherSpecify", question.getOtherSpecify());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
 			addAttribute(questionNode,"minLiteral", question.getMinLiteral());
@@ -397,6 +398,8 @@ public class Archiving {
 	private static void updateQuestionFromNode(Session session, Question question, Element node, 
 			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
 	{	
+		Answer.AnswerType aType = question.getAnswerType();
+		
 		question.setStudyId(studyId);
 		question.setTitle(attrString(node,"title"));
 		question.setAnswerTypeDB(attrString(node,"answerType"));
@@ -408,7 +411,7 @@ public class Archiving {
 		question.setCitation(attrText(node,"citation"));
 		question.setUseIfExpression(attrText(node,"useIf"));
 		
-		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
+		if ( aType==Answer.AnswerType.NUMERICAL ) {
 			try {
 			question.setMinLimitTypeDB(attrString(node,"minLimitType"));
 			question.setMinLiteral(attrInt(node,"minLiteral"));
@@ -427,7 +430,7 @@ public class Archiving {
 			}
 		}
 		
-		if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION ) {
+		if ( aType==Answer.AnswerType.MULTIPLE_SELECTION ) {
 			try {
 				question.setMinCheckableBoxes(attrInt(node,"minCheckableBoxes"));
 				question.setMaxCheckableBoxes(attrInt(node,"maxCheckableBoxes"));
@@ -435,6 +438,14 @@ public class Archiving {
 			    // if anything went wrong, assign reasonable defaults
 				question.setMinCheckableBoxes(0);
 				question.setMaxCheckableBoxes(100);
+			}
+		}
+		
+		if ( aType==Answer.AnswerType.MULTIPLE_SELECTION || aType==Answer.AnswerType.SELECTION) {
+			try {
+				question.setOtherSpecify(attrBool(node,"otherSpecify"));
+			} catch ( java.lang.RuntimeException rte3 ) {
+				question.setOtherSpecify(false);
 			}
 		}
 		

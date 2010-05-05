@@ -21,6 +21,7 @@ public class Question extends OrderedEntity
 	private AnswerType answerType;
 	private QuestionType type;
 	private Boolean askingStyleList;
+	private Boolean otherSpecify;  // if true, selection of 'Other' brings up text box
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
 	// an 'additional logic' expression in string form
 	// to be evaluated if answerReasonExpressionId is null
@@ -42,6 +43,7 @@ public class Question extends OrderedEntity
 		answerType = AnswerType.TEXTUAL;
 		type = QuestionType.EGO;
 		askingStyleList = false;
+		otherSpecify = false;
 		
 		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
@@ -206,6 +208,14 @@ public class Question extends OrderedEntity
 		return askingStyleList == null ? false : askingStyleList;
 	}
 	
+	public void setOtherSpecify (Boolean otherSpecify) {
+		this.otherSpecify = (otherSpecify==null)? false:true;
+	}
+	public Boolean getOtherSpecify() {
+		if ( otherSpecify==null )
+			otherSpecify = false;
+		return(otherSpecify);
+	}
 	
 	public void setUseIfExpression ( String useIfExpression ) {
 		this.useIfExpression = (useIfExpression==null) ? "" : useIfExpression;
