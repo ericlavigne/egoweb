@@ -43,14 +43,22 @@ public class DB {
 	}
 
 	static <E> E withTx(Function<Session,E> f) {
-		Session session = Main.getDBSessionFactory().openSession();
-		Transaction tx = session.beginTransaction();
-
-		E result = f.apply(session);
-
-		tx.commit();
-		session.close();
-
+		Session session = null;
+		Transaction tx = null;
+		E result = null;
+		try {
+			session = Main.getDBSessionFactory().openSession();
+			tx = session.beginTransaction();
+			result = f.apply(session);
+			tx.commit();
+		} catch(Exception ex) {
+			if(tx != null) {
+				tx.rollback();
+			}
+			throw new RuntimeException("Egoweb transaction failed.",ex);
+		} finally {
+			session.close();
+		}
 		return result;
 	}
 	
