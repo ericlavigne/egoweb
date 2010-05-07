@@ -53,13 +53,13 @@ public class EditQuestionPanel extends Panel {
 			numericLimitsPanel.setVisible(numericLimitsVisible);
 			multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
 			
-//			if ( newSelection==Answer.AnswerType.SELECTION  ||  newSelection==Answer.AnswerType.MULTIPLE_SELECTION) {
-//				otherSpecifyLabel.setVisible(true); 
-//				otherSpecifyCheckBox.setVisible(true);
-//			} else {
-//				otherSpecifyLabel.setVisible(false); 
-//				otherSpecifyCheckBox.setVisible(false);	
-//			}
+			if ( newSelection==Answer.AnswerType.SELECTION  ||  newSelection==Answer.AnswerType.MULTIPLE_SELECTION) {
+				otherSpecifyLabel.setVisible(true); 
+				otherSpecifyCheckBox.setVisible(true);
+			} else {
+				otherSpecifyLabel.setVisible(false); 
+				otherSpecifyCheckBox.setVisible(false);	
+			}
 		}
 		
 		protected boolean wantOnSelectionChangedNotifications() { return (true);}
@@ -180,12 +180,12 @@ public class EditQuestionPanel extends Panel {
 			askingStyleListField.setVisible(false);
 		}
 
-//		otherSpecifyLabel = new Label("otherSpecifyLabel", "Other/Specify Type Question?: ");
-//		otherSpecifyModel = new Model();
-//		otherSpecifyModel.setObject(Boolean.FALSE);
-//		otherSpecifyCheckBox = new CheckBox("otherSpecifyField", otherSpecifyModel);
-//		form.add(otherSpecifyLabel);
-//		form.add(otherSpecifyCheckBox);
+		otherSpecifyLabel = new Label("otherSpecifyLabel", "Other/Specify Type Question?: ");
+		otherSpecifyModel = new Model();
+		otherSpecifyModel.setObject(Boolean.FALSE);
+		otherSpecifyCheckBox = new CheckBox("otherSpecifyField", otherSpecifyModel);
+		form.add(otherSpecifyLabel);
+		form.add(otherSpecifyCheckBox);
 		
 		questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		form.add(questionUseIfField);
@@ -236,19 +236,19 @@ public class EditQuestionPanel extends Panel {
 		msg += " -> "+askingStyleModel.getObject()+" (question had "+question.getAskingStyleList()+")";
 		//throw new RuntimeException(msg);
 		questionUseIfField.setModelObject(question.getUseIfExpression());
-//		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
+		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( aType==Answer.AnswerType.MULTIPLE_SELECTION) {
 			multipleSelectionLimitsPanel.setVisible(true);
 		}
-//		if ( aType==Answer.AnswerType.SELECTION  ||  aType==Answer.AnswerType.MULTIPLE_SELECTION) {
-//			otherSpecifyLabel.setVisible(true); 
-//			otherSpecifyCheckBox.setVisible(true);
-//		} else {
-//			otherSpecifyLabel.setVisible(false); 
-//			otherSpecifyCheckBox.setVisible(false);	
-//		}
+		if ( aType==Answer.AnswerType.SELECTION  ||  aType==Answer.AnswerType.MULTIPLE_SELECTION) {
+			otherSpecifyLabel.setVisible(true); 
+			otherSpecifyCheckBox.setVisible(true);
+		} else {
+			otherSpecifyLabel.setVisible(false); 
+			otherSpecifyCheckBox.setVisible(false);	
+		}
 		numericLimitsPanel.setMinLimitType( question.getMinLimitType());
 		numericLimitsPanel.setMinLiteral  ( question.getMinLiteral());
 		numericLimitsPanel.setMinPrevQues ( question.getMinPrevQues());
@@ -277,7 +277,7 @@ public class EditQuestionPanel extends Panel {
 		msg += " -> "+question.getAskingStyleList();
 		// throw new RuntimeException(msg);
 		question.setUseIfExpression((String) questionUseIfField.getModelObject());
-//		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
+		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());

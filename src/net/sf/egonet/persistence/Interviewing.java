@@ -133,7 +133,6 @@ public class Interviewing {
 					int iEvaluate;
 					ArrayList<Alter> emptyAlterList = new ArrayList<Alter>();
 					
-					System.out.println ( "Interviewing.java, nextEgoQuestionForInterview");
 					strUseIf = question.getUseIfExpression();
 					if ( strUseIf!=null && strUseIf.length()>0 ) {
 						System.out.println ( strUseIf);
@@ -144,7 +143,6 @@ public class Interviewing {
 						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
 								strUseIf, interviewId, 
 								question.getType(), question.getStudyId(), emptyAlterList);
-						System.out.println ("iEvaluate=" + iEvaluate);
 						if (iEvaluate==0)
 							shouldAnswer = false;
 					}
@@ -492,7 +490,6 @@ public class Interviewing {
 					
 					strUseIf = question.getUseIfExpression();
 					if ( strUseIf!=null && strUseIf.length()>0 ) {
-						System.out.println ( "==== in alterQuestionsForInterview " + strUseIf);
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
 						strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);

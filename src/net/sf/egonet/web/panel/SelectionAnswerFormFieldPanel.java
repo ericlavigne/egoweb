@@ -21,23 +21,66 @@ import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
+	/**
+	 * private inner class extending DropDownChoice
+	 * This is so it can implement IOnChangeListener and, 
+	 * in effect, list to itself and hide the numericLimits Panel
+	 * when its type is not Numeric
+	 */
+	
+	private class DropDownChoicePlus extends DropDownChoice {
+		
+		public DropDownChoicePlus (String id, Model model, List<Object> theList ) {
+			super(id, model, theList);
+		}
+		
+		protected void onSelectionChanged(Object newSelection) {
+			String strNewSelection;
+			
+			if ( newSelection instanceof String ) {
+				strNewSelection = (String)newSelection;
+			} else if ( newSelection instanceof QuestionOption ) {
+				strNewSelection = ((QuestionOption)newSelection).getName();
+			} else {
+				strNewSelection = newSelection.toString();
+			}
+			
+			if (strNewSelection.trim().startsWith("OTHER SPECIFY")) {
+				otherSpecifyLabel.setVisible(true);
+				otherSpecifyTextField.setVisible(true);	
+			} else {
+				otherSpecifyLabel.setVisible(false);
+				otherSpecifyTextField.setVisible(false);
+			}
+		}
+		
+		protected boolean wantOnSelectionChangedNotifications() { return (otherSpecifyStyle);}
+	}
+	
+	/**
+	 * end of private inner class DropDownChoicePlus
+	 */
+	
 	private Model answer;
-	private DropDownChoice dropDownChoice;
+	private DropDownChoicePlus dropDownChoice;
 	private Label otherSpecifyLabel;
 	private TextField otherSpecifyTextField;
-	private String otherText;
+	private String otherSpecifyText;
+	private boolean otherSpecifyStyle;
 	
 	public SelectionAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
 		super(id,question,Answer.SkipReason.NONE,alters, interviewId);
 		this.answer = new Model();
+		otherSpecifyText = "";
 		build();
 	}
 	
 	public SelectionAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
+			Question question, String answer, String otherSpecAnswer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
 		super(id,question,skipReason,alters,interviewId);
 		this.answer = new Model();
+		otherSpecifyText = otherSpecAnswer;
 		if(skipReason.equals(Answer.SkipReason.DONT_KNOW)) {
 			this.answer = new Model(dontKnow);
 		} else if(skipReason.equals(Answer.SkipReason.REFUSE)) {
@@ -63,14 +106,25 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		if(! question.getType().equals(Question.QuestionType.EGO_ID)) {
 			choices.addAll(Lists.newArrayList(dontKnow,refuse));
 		}
-		dropDownChoice = new DropDownChoice("answer",answer,choices);
+		dropDownChoice = new DropDownChoicePlus("answer",answer,choices);
 		add(dropDownChoice);
 		// features that will be visible only for
 		// 'other/specify' questions
-//		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
-//		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherText"));
-//		add(otherSpecifyLabel);
-//		add(otherSpecifyTextField);
+		otherSpecifyStyle = question.getOtherSpecify();
+		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
+		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherSpecifyText"));
+		add(otherSpecifyLabel);
+		add(otherSpecifyTextField);
+		otherSpecifyLabel.setOutputMarkupId(true);
+		otherSpecifyTextField.setOutputMarkupId(true);
+		
+		if ( answerContainsOTHERSPECIFY()) {
+		    otherSpecifyLabel.setVisible(true);
+		    otherSpecifyTextField.setVisible(true);	
+		} else {
+		    otherSpecifyLabel.setVisible(false);
+		    otherSpecifyTextField.setVisible(false);
+		}
 	}
 
 	public String getAnswer() {
@@ -97,11 +151,30 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		return answer.getObject() != null && answer.getObject().equals(refuse);
 	}
 	
-	public void setOtherText ( String otherText ) {
-		this.otherText = (otherText==null) ? "" : otherText;
+	private String getAnswerOptionName() {
+		Object selected = answer.getObject();
+		return selected != null && selected instanceof QuestionOption ? 
+				((QuestionOption) selected).getName() : null;	
+	}
+	/**
+	 * checks to see if the answer from a previous use
+	 * of this question starts with the string OTHER SPECIFY
+	 * @return true if a saved answer starts with OTHER SPECIFY
+	 */
+	private boolean answerContainsOTHERSPECIFY() {
+		String strAnswerName = getAnswerOptionName();
+		if ( strAnswerName==null )
+			return(false);
+		if ( strAnswerName.trim().startsWith("OTHER SPECIFY")) 
+			return(true);
+		return(false);
+	 }
+	 
+	public void setOtherText ( String otherSpecifyText ) {
+		this.otherSpecifyText = (otherSpecifyText==null) ? "" : otherSpecifyText;
 	}
 	public String getOtherText() {
-		return (( otherText==null) ? "" : otherText ) ;
+		return (( otherSpecifyText==null) ? "" : otherSpecifyText ) ;
 	}
 
 }

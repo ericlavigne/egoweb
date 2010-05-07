@@ -24,6 +24,7 @@
 		<property name="ordering" column="ordering" />
 	
 		<property name="otherSpecify" 	 column="otherSpecify" />
+
 		<property name="useIfExpression" column="useIfExpression" type="text" length="255" /> 
  		<property name="minLimitTypeDB" column="minLimitType" /> 
  		<property name="minLiteral" 	column="minLiteral" /> 

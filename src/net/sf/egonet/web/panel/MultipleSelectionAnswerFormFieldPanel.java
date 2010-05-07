@@ -2,6 +2,8 @@ package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -12,9 +14,12 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.persistence.Options;
 
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.PropertyModel;
 
-public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
+public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
+	implements ActionListener {
 
 	private CheckboxesPanel<Object> answerField;
 	private ArrayList<QuestionOption> originallySelectedOptions;
@@ -23,6 +28,12 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	private Label checkBoxPrompt;
 	private Integer maxCheckable;
 	private Integer minCheckable;
+	// these variables deal with the textbox
+	// that appears if the 'Other' checkbox is selected;
+	private Label otherSpecifyLabel;
+	private TextField otherSpecifyTextField;
+	private String otherText;
+	private boolean otherSpecifyStyle;
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, 
 			ArrayList<Alter> alters, Long interviewId) {
@@ -32,10 +43,11 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 	}
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
+			Question question, String answer, String otherSpecText, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
 		super(id,question,skipReason,alters,interviewId);
 		originallySelectedOptions = Lists.newArrayList();
+		setOtherText(otherSpecText);
 		try {
 			for(String answerIdString : answer.split(",")) {
 				Long answerId = Long.parseLong(answerIdString);
@@ -78,6 +90,31 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 			}
 		};
 		add(answerField);
+		// features that will be visible only for
+		// 'other/specify' questions
+		otherSpecifyStyle = question.getOtherSpecify();
+		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
+		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherText"));
+		add(otherSpecifyLabel);
+		add(otherSpecifyTextField);
+		otherSpecifyLabel.setOutputMarkupId(true);
+		otherSpecifyTextField.setOutputMarkupId(true);
+		if ( otherSpecifyStyle && answerField.getOtherSelected()) {
+			System.out.println ("setting visibility true");
+			otherSpecifyLabel.setVisible(true);
+			otherSpecifyTextField.setVisible(true);	
+		} else {
+			System.out.println ( "settng visibility FALSE");
+			otherSpecifyLabel.setVisible(false);
+			otherSpecifyTextField.setVisible(false);
+		}
+		
+		if ( otherSpecifyStyle ) {
+			answerField.addActionListener(this);
+			answerField.setOtherSpecifyStyle(true);
+		} else {
+			answerField.setOtherSpecifyStyle(false);
+		}		
 	}
 
 	public String getAnswer() {
@@ -171,7 +208,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 		}
 	}
 	
-	/**
+	/** 
 	 * if the user selected dontKnow or refused to answer a question
 	 * don't bother counting the responses.
 	 */
@@ -180,4 +217,29 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel 
 			return (true);
 		return ( (multipleSelectionCountStatus()==0)?true:false);
 	}
+	
+	/**
+	 * responds to ActionEvents.
+	 * The only object that is apt to send any events is the
+	 * answerField.  We will use this interaction to avoid any
+	 * hard-coded references to MultipleSelectionAnswerFormat
+	 * and maintain loose-binding.
+	 */
+	public void actionPerformed (ActionEvent event) {
+		Object src = event.getSource();
+		boolean on = (event.getID()==0) ? false: true;
+		// String strCommand = event.getActionCommand();
+		
+		if ( src==answerField ) {
+			otherSpecifyLabel.setVisible(on);
+			otherSpecifyTextField.setVisible(on);
+		}
+	}
+	
+	public void setOtherText ( String otherText ) {
+		this.otherText = (otherText==null) ? "" : otherText;
+	}
+	public String getOtherText() {
+		return (( otherText==null) ? "" : otherText ) ;
+	}	
 }

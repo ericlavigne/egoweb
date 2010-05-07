@@ -48,7 +48,8 @@ public class InterviewingEgoPage extends InterviewingPage {
 						field.setNotification(field.getMultipleSelectionNotification());
 					} else if(okayToContinue) {
 							Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-									field.getAnswer(),field.getSkipReason(pageFlags));
+									field.getAnswer(),field.getOtherText(),
+									field.getSkipReason(pageFlags));
 					} else if(consistent) {
 						field.setNotification(
 								field.answeredOrRefused(pageFlags) ?
@@ -71,7 +72,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
 		if(answer != null) {
 			field = AnswerFormFieldPanel.getInstance("question",
-					question,answer.getValue(),answer.getSkipReason(),interviewId);
+					question,answer.getValue(),answer.getOtherSpecifyText(),answer.getSkipReason(),interviewId);
 		}
 		field.setAutoFocus();
 		form.add(field);

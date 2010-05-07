@@ -104,7 +104,8 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 					} else if(okayToContinue) {
 						Answers.setAnswerForInterviewQuestionAlters(
 								subject.interviewId, subject.question, answerField.getAlters(), 
-								answerField.getAnswer(), answerField.getSkipReason(pageFlags));
+								answerField.getAnswer(), answerField.getOtherText(),
+								answerField.getSkipReason(pageFlags));
 					} else if(consistent) {
 						answerField.setNotification(
 								answerField.answeredOrRefused(pageFlags) ?
@@ -136,7 +137,8 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 			} else {
 				answerFields.add(
 						AnswerFormFieldPanel.getInstance("question", 
-								subject.question, answer.getValue(), answer.getSkipReason(), alters, subject.interviewId));
+								subject.question, answer.getValue(), answer.getOtherSpecifyText(),
+								answer.getSkipReason(), alters, subject.interviewId));
 			}
 			if(! answerFields.isEmpty()) {
 				answerFields.get(0).setAutoFocus();

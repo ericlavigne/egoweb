@@ -153,11 +153,11 @@ public class Answers {
 	
 	public static void setAnswerForInterviewAndQuestion(
 			Session session, Interview interview, Question question, ArrayList<Alter> alters, 
-			String answerString, Answer.SkipReason skipReason) 
+			String answerString, String otherSpecText, Answer.SkipReason skipReason) 
 	{
 		Answer answer = getAnswerForInterviewQuestionAlters(session,interview,question,alters);
 		if(answer == null) {
-			answer = new Answer(interview,question,answerString);
+			answer = new Answer(interview,question,answerString, otherSpecText);
 			if(new Integer(1).equals(alters.size())) {
 				answer.setAlterId1(alters.get(0).getId());
 			}
@@ -168,6 +168,7 @@ public class Answers {
 			}
 		} else {
 			answer.setValue(answerString);
+			answer.setOtherSpecifyText(otherSpecText);
 		}
 		answer.setSkipReason(skipReason);
 		DB.save(answer);
@@ -175,23 +176,23 @@ public class Answers {
 	
 	public static void setAnswerForInterviewAndQuestion(
 			final Long interviewId, final Question question, 
-			final String answerString, final Answer.SkipReason skipReason) 
+			final String answerString, final String otherSpecText, final Answer.SkipReason skipReason) 
 	{
 		setAnswerForInterviewQuestionAlters(interviewId,
 				question,new ArrayList<Alter>(),
-				answerString,skipReason);
+				answerString,otherSpecText,skipReason);
 	}
 	
 	public static void setAnswerForInterviewQuestionAlters(
 			final Long interviewId, final Question question, final ArrayList<Alter> alters, 
-			final String answerString, final Answer.SkipReason skipReason) 
+			final String answerString, final String otherSpecText, final Answer.SkipReason skipReason) 
 	{
 		DB.withTx(new DB.Action<Object>() {
 			public Object get() {
 				setAnswerForInterviewAndQuestion(
 						session,
 						Interviews.getInterview(session, interviewId),
-						question,alters,answerString,skipReason);
+						question,alters,answerString,otherSpecText,skipReason);
 				return null;
 			}
 		});

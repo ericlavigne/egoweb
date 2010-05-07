@@ -23,7 +23,8 @@ public class Answer extends Entity
 	// question as an argument.
 	protected String value;
 	protected String valueOld;
-
+	protected String otherSpecifyText; // for those questions of the Selection or Multiple Selection
+	                            // that respond to 'other/specify' questions.
 	private SkipReason skipReason;
 	
 	public Answer() {
@@ -56,6 +57,19 @@ public class Answer extends Entity
 		this.setAnswerType(question.getAnswerType());
 	}
 
+	/**
+	 * constructor with the 'other specify' text that can accompany
+	 * Selection and MultipleSelection questions
+	 * @param interview - identifies this interview
+	 * @param question - the question the was answered
+	 * @param answer - string representation of the answer 
+	 * @param otherSpecText - text from 'Specify Other:' text box
+	 */
+	public Answer(Interview interview, Question question, String answer, String otherSpecText ) {
+		this ( interview, question, answer);
+		this.setOtherSpecifyText(otherSpecText);
+	}
+	
 	// TODO: Extra constructors that include alter1 and alter2 parameters,
 	// with check that question type allows them.
 
@@ -167,5 +181,14 @@ public class Answer extends Entity
 	protected String getValueOld() {
 		return null;
 	}
-
+	
+	public void setOtherSpecifyText (String otherSpecifyText) {
+		this.otherSpecifyText = (otherSpecifyText==null)?"":otherSpecifyText;
+	}
+	public String getOtherSpecifyText() {
+		if ( otherSpecifyText==null )
+			otherSpecifyText = "";
+		return(otherSpecifyText);
+	}
+	
 }

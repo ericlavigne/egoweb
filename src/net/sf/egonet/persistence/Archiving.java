@@ -398,7 +398,7 @@ public class Archiving {
 	private static void updateQuestionFromNode(Session session, Question question, Element node, 
 			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
 	{	
-		Answer.AnswerType aType = question.getAnswerType();
+		Answer.AnswerType aType;
 		
 		question.setStudyId(studyId);
 		question.setTitle(attrString(node,"title"));
@@ -411,6 +411,7 @@ public class Archiving {
 		question.setCitation(attrText(node,"citation"));
 		question.setUseIfExpression(attrText(node,"useIf"));
 		
+		aType = question.getAnswerType();
 		if ( aType==Answer.AnswerType.NUMERICAL ) {
 			try {
 			question.setMinLimitTypeDB(attrString(node,"minLimitType"));
@@ -601,6 +602,7 @@ public class Archiving {
 		addAttribute(answerNode,"answerType", answer.getAnswerTypeDB());
 		addAttribute(answerNode,"alterId1", answer.getAlterId1());
 		addAttribute(answerNode,"alterId2", answer.getAlterId2());
+		addAttribute(answerNode,"otherSpecifyText", answer.getOtherSpecifyText());
 		addText(answerNode,"value",answer.getValue());
 		return answerNode;
 	}
@@ -655,6 +657,7 @@ public class Archiving {
 		} else {
 			answer.setValue(answerString);
 		}
+		answer.setOtherSpecifyText(attrString(node,"otherSpecifyText"));
 		DB.save(session, answer);
 	}
 	

@@ -72,12 +72,12 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	}
 	
 	public static AnswerFormFieldPanel getInstance(String id, Question question, String answer, 
-			                       Answer.SkipReason skipReason, Long interviewId) {
-		return getInstance(id,question,answer,skipReason,new ArrayList<Alter>(), interviewId);
+			String otherSpecAnswer, Answer.SkipReason skipReason, Long interviewId) {
+		return getInstance(id,question,answer,otherSpecAnswer,skipReason,new ArrayList<Alter>(), interviewId);
 	}
 	
 	public static AnswerFormFieldPanel getInstance(String id, 
-			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
+			Question question, String answer, String otherSpecAnswer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{
 		AnswerType type = question.getAnswerType();
 		
@@ -88,10 +88,10 @@ public abstract class AnswerFormFieldPanel extends Panel {
 			return new NumberAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
 		}
 		if(type.equals(AnswerType.SELECTION)) {
-			return new SelectionAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
+			return new SelectionAnswerFormFieldPanel(id,question,answer,otherSpecAnswer,skipReason,alters,interviewId);
 		}
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
-			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
+			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,otherSpecAnswer,skipReason,alters,interviewId);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
@@ -101,7 +101,16 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	}
 	
 	public abstract String getAnswer();
-	
+	/**
+	 * the 'otherText' is for Other/Specify types of questions
+	 * which will only affect Selection and Multiple Selection questions
+	 * with the otherSpecifyStyle flag set
+	 * @return string of ad-hoc 'other' text, which will be processed
+	 * separately from the regular answers
+	 */
+	public String getOtherText() {
+		return("");
+	}
 	public ArrayList<Alter> getAlters() {
 		return alters;
 	}
@@ -109,7 +118,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	public String getPrompt() {
 		String strPrompt;
 
-		System.out.println ( "alters=" + alters);
+		// System.out.println ( "alters=" + alters);
 		strPrompt = question.individualizePrompt(alters);
 		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
 		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, alters);

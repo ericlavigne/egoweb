@@ -21,11 +21,13 @@ public class Question extends OrderedEntity
 	private AnswerType answerType;
 	private QuestionType type;
 	private Boolean askingStyleList;
-	private Boolean otherSpecify;  // if true, selection of 'Other' brings up text box
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
 	// an 'additional logic' expression in string form
 	// to be evaluated if answerReasonExpressionId is null
 	private String useIfExpression;
+	// variables that deal with Selection / Multiple Selection questions
+	// using the 'other-specify' option
+	private Boolean otherSpecify;  // if true, selection of 'Other' brings up text box
 	// variables that will be specific to numeric answers, 
 	// and (optionally) limiting them to a range
 	private NumericLimitType minLimitType;
@@ -44,7 +46,6 @@ public class Question extends OrderedEntity
 		type = QuestionType.EGO;
 		askingStyleList = false;
 		otherSpecify = false;
-		
 		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
 		minLiteral = 0;
@@ -208,8 +209,13 @@ public class Question extends OrderedEntity
 		return askingStyleList == null ? false : askingStyleList;
 	}
 	
+	/**
+	 * get/set the 'otherSpecify' flag which will deal with
+	 * a text entry box appearing when 'Other' is selected
+	 * @param otherSpecify
+	 */
 	public void setOtherSpecify (Boolean otherSpecify) {
-		this.otherSpecify = (otherSpecify==null)? false:true;
+		this.otherSpecify = (otherSpecify==null)? false:otherSpecify;
 	}
 	public Boolean getOtherSpecify() {
 		if ( otherSpecify==null )

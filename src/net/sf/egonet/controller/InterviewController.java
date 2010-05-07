@@ -397,7 +397,7 @@ public class InterviewController implements EgonetMonitor
             interview = Interviewing.findOrCreateMatchingInterviewForStudy( dbStudyID, answers );
             dbInterviewID = interview.getId();
             Answers.setAnswerForInterviewAndQuestion( dbInterviewID, egoIDQuestionType,
-                                                      clientCaseID, Answer.SkipReason.NONE );
+                                                      clientCaseID, "", Answer.SkipReason.NONE );
         }
         return dbInterviewID;
     }

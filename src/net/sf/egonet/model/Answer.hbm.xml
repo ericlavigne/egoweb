@@ -18,6 +18,7 @@
 		
 		<property name="value" column="value_text" type="text" length="32672" />
 		<property name="valueOld" column="value" />
+		<property name="otherSpecifyText" column="otherSpecifyText" type="text" length="255" />
 		
 		<property name="skipReasonDB" column="skipReason" />
 		
