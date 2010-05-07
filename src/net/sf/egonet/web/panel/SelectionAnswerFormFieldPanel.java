@@ -118,7 +118,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		otherSpecifyLabel.setOutputMarkupId(true);
 		otherSpecifyTextField.setOutputMarkupId(true);
 		
-		if ( answerContainsOTHERSPECIFY()) {
+		if ( otherSpecifyStyle && answerContainsOTHERSPECIFY()) {
 		    otherSpecifyLabel.setVisible(true);
 		    otherSpecifyTextField.setVisible(true);	
 		} else {
@@ -163,11 +163,11 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 */
 	private boolean answerContainsOTHERSPECIFY() {
 		String strAnswerName = getAnswerOptionName();
-		if ( strAnswerName==null )
-			return(false);
-		if ( strAnswerName.trim().startsWith("OTHER SPECIFY")) 
-			return(true);
-		return(false);
+		boolean retVal = false;
+		
+		if ( strAnswerName!=null && strAnswerName.trim().startsWith("OTHER SPECIFY")) 
+			retVal = true;
+		return(retVal);
 	 }
 	 
 	public void setOtherText ( String otherSpecifyText ) {
