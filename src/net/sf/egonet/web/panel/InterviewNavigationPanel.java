@@ -88,8 +88,12 @@ public class InterviewNavigationPanel extends Panel {
 			return page;
 		}
 		public String toString() {
-			return "Alter : "+subject.question.getTitle()+
-			(subject.alters.size() > 1 ? "" : " : "+subject.getAlter().getName());
+			if(subject == null) {
+				return "** Alter link with no subject **";
+			}
+			return "Alter : "+
+			(subject.question == null ? "** no question **" : subject.question.getTitle())+
+			(subject.getAlter() == null ? "" : " : "+subject.getAlter().getName());
 		}
 	}
 	public static class AlterPairLink implements InterviewLink {
@@ -105,8 +109,13 @@ public class InterviewNavigationPanel extends Panel {
 			return page;
 		}
 		public String toString() {
-			return "Alter Pair : "+subject.question.getTitle()+" : "+subject.firstAlter+
-			(subject.secondAlters.size() > 1 ? "" : " : "+subject.getSecondAlter().getName());
+			if(subject == null) {
+				return "** Alter pair link with no subject **";
+			}
+			return "Alter Pair : "+
+			(subject.question == null ? "** no question **" : subject.question.getTitle())+
+			" : "+subject.firstAlter+
+			(subject.getSecondAlter() == null ? "" : " : "+subject.getSecondAlter().getName());
 		}
 	}
 	
