@@ -8,26 +8,14 @@ import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Presets;
 import net.sf.egonet.persistence.AnswerLists;
 
-/**
- * this class is rather a cross between Presets in the
- * Persistence package and QuestionOption in the 
- * Model package
- * 
- * it will use static functions for testing, it 
- * may move to Persistence and make more use
- * of Hibernate and the database
- * might change name to AnswerLists to keep with naming
- * convention
- * @author Kevin
- *
- */
-
 	/**
 	 * TitleAndStudy is a convenience class for tracking
 	 * lists of answers by title and study ID.
 	 * Once this data is in the database much of the
 	 * logic will likely be refactored to do filters
 	 * using Hibernate SQL commands
+	 * TODO : this could be replaced by the more general
+	 * purpose NameAndValue class.
 	 */
 	class TitleAndStudy implements Comparable<TitleAndStudy> {
 		String title;
@@ -67,7 +55,43 @@ import net.sf.egonet.persistence.AnswerLists;
 	}
 	
 
+/* ******************************************************** */
+/*            main public class, AnswerListMgr              */
+/* ******************************************************** */
+	
 public class AnswerListMgr extends Entity  {
+	
+	
+//	private class AnswerListIterator implements Iterator<AnswerList> {
+//		String[] strTitles;
+//		int index;
+//		
+//		/**
+//		 * inner class Iterator so the outside world can step
+//		 * through all the AnswerLists with ease
+//		 * @param sID identifies the study to work with
+//		 */
+//		AnswerListIterator( Long sID) {
+//			strTitles = getTitles ( sID);
+//			index = 0;
+//		}
+//		
+//		public boolean hasNext() {
+//			return(index<strTitles.length);
+//		}
+//		
+//		public AnswerList next() {
+//			AnswerList retList = answerListTree.get(strTitles[index]);
+//			++index;
+//			return(retList);
+//		}
+//		
+//		public void remove() {} // not implemented	
+//		}	
+//	
+	
+
+	
 	/**
 	 * this will maintain two very similar data structures.
 	 * answerListTree will be used during the creation and
@@ -77,14 +101,15 @@ public class AnswerListMgr extends Entity  {
 	 */
 	private static Long studyId;
 	private static TreeMap<TitleAndStudy,AnswerList> answerListTree;
-	private static TreeMap<String,String[]> answerLists;
+	private static TreeMap<String,NameAndValue[]> answerLists;
+	private static TreeMap<String,String[]> originalPresets;
 	private static boolean needsUpdate;
 	
 
 
 	/**
 	 * simple loads all the answer lists for a specified study
-	 * @param sId
+	 * @param sId identifyes the study
 	 * @return
 	 */
      public static boolean loadAnswerListsForStudy ( Long sId) {
@@ -109,7 +134,7 @@ public class AnswerListMgr extends Entity  {
     	 }
     	 
 		answerListTree = new TreeMap<TitleAndStudy,AnswerList>();
-		answerLists = new TreeMap<String,String[]>();
+		answerLists = new TreeMap<String,NameAndValue[]>();
 		
 		for ( AnswerList answerList : listAnswerLists ) {
 			titleAndStudy = new TitleAndStudy ( answerList.getListName() , studyId);
@@ -130,10 +155,21 @@ public class AnswerListMgr extends Entity  {
 		TitleAndStudy titleAndStudy;
 		AnswerList answerList;
 		
-		answerLists = Presets.get();
+		originalPresets = Presets.get();
+		listPresetTitles = new String[originalPresets.size()];
+		listPresetTitles = originalPresets.keySet().toArray(listPresetTitles);
+		
+		// from the originalPresets, consisting of arrays of strings
+		// keyed by a string name, create answerLists which will have
+		// arrays of (strings+Integers) keyed by a string name, the
+		// integers getting default values
+		answerLists = new TreeMap<String,NameAndValue[]>();
+		for ( String strTitle : listPresetTitles ) {
+			answerLists.put(strTitle, NameAndValue.createArray(originalPresets.get(strTitle)));
+		}
+		
+		
 		answerListTree = new TreeMap<TitleAndStudy,AnswerList>();
-		listPresetTitles = new String[answerLists.size()];
-		listPresetTitles = answerLists.keySet().toArray(listPresetTitles);
 		for ( String strTitle : listPresetTitles ) {
 			answerList = new AnswerList ( strTitle, studyId, answerLists.get(strTitle));
 			titleAndStudy = new TitleAndStudy (strTitle, studyId );
@@ -164,6 +200,11 @@ public class AnswerListMgr extends Entity  {
 		return(retArray);
 	}
 	
+	/**
+	 * returns the list of titles as an array list
+	 * @param studyId identifies the study
+	 * @return ArrayList of titles ( names of preset answer groups )
+	 */
 	public static ArrayList<String> getTitlesAsList ( Long studyId) {
 		ArrayList<String> workArray = new ArrayList<String>();
 		
@@ -245,23 +286,29 @@ public class AnswerListMgr extends Entity  {
      * and Multiple Selection questions) for a given title and studyId
      */
 	
-	public static String[] getOptionNames ( String strTitle, Long studyId ) {
+	public static NameAndValue[] getOptionNames ( String strTitle, Long studyId ) {
 		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
 		AnswerList answerList;
 		
 		answerList = answerListTree.get(titleAndStudy);
 		if ( answerList==null ) {
 			System.out.println ( titleAndStudy + " not found in AnswerListMgr.getOptionNames");
-			return(new String[0]);
+			return(new NameAndValue[0]);
 		}
 		return(answerList.getListOptionNames());
 	}
 	
-	public static ArrayList<String> getOptionNamesAsList (String strTitle, Long studyId ) {
-		String[] optionNames = getOptionNames(strTitle,studyId);
-		ArrayList<String> retList = new ArrayList<String>(optionNames.length);
+	/**
+	 * returns the list of name/value pairs as an Arraylist
+	 * @param strTitle the name of the group
+	 * @param studyId identifies the study we are interested in
+	 * @return arraylist of name/value answer pairs
+	 */
+	public static ArrayList<NameAndValue> getOptionNamesAsList (String strTitle, Long studyId ) {
+		NameAndValue[] optionNames = getOptionNames(strTitle,studyId);
+		ArrayList<NameAndValue> retList = new ArrayList<NameAndValue>(optionNames.length);
 
-		for ( String str:optionNames) {
+		for ( NameAndValue str:optionNames) {
 			retList.add(str);
 		}
 		return(retList);
@@ -272,13 +319,14 @@ public class AnswerListMgr extends Entity  {
 	 * @param strTitle title of the list of options we are dealing with
 	 * @param studyId id of the study we are dealing with
 	 * @param optionName the option name within the list we are dealing with
-	 * @param newName the new value of the option name
+	 * @param optionValue the value we want the option to have
 	 * @return true if any changes take place
 	 */
-	public static boolean addOptionName ( String strTitle, Long studyId, String optionName ) {
+	public static boolean addOptionName ( String strTitle, Long studyId, 
+			String optionName, Integer optionValue ) {
 		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
 		AnswerList answerList;
-		ArrayList<String> strList;
+		ArrayList<NameAndValue> strList;
 			
 		answerList = answerListTree.get(titleAndStudy);
 		if ( answerList==null ) {
@@ -288,7 +336,7 @@ public class AnswerListMgr extends Entity  {
 		strList = answerList.getListOptionNamesAsList();
 		if ( strList.contains(optionName))
 			return(false);
-		strList.add(optionName);
+		strList.add(new NameAndValue(optionName, optionValue));
 		answerList.setListOptionNamesFromList(strList);
 		needsUpdate = true;
 		return(true);
@@ -302,21 +350,17 @@ public class AnswerListMgr extends Entity  {
 	 * @param newName the new value of the option name
 	 * @return true if any changes take place
 	 */
-	public static boolean removeOptionName ( String strTitle, Long studyId, String optionName ) {
+	public static boolean removeOptionName ( String strTitle, Long studyId, 
+			String optionName, Integer optionValue ) {
 		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
 		AnswerList answerList;
-		ArrayList<String> strList;
 			
 		answerList = answerListTree.get(titleAndStudy);
 		if ( answerList==null ) {
 			System.out.println ( titleAndStudy + " not found in AnswerListMgr.removeOptionName");
 			return(false);
 		}
-		strList = answerList.getListOptionNamesAsList();
-		if ( !strList.contains(optionName))
-			return(false);
-		strList.remove(optionName);
-		answerList.setListOptionNamesFromList(strList);
+		answerList.removeNameAndValue(optionName, optionValue);
 		needsUpdate = true;
 		return(true);
 	}
@@ -330,30 +374,23 @@ public class AnswerListMgr extends Entity  {
 	 * @return true if any changes take place
 	 */
 	public static boolean replaceOptionName ( String strTitle, Long studyId, 
-			String optionName, String newName ) {
+			String optionName, Integer optionValue, String newName, Integer newValue ) {
+		boolean retVal = false;
 		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
 		AnswerList answerList;
-		ArrayList<String> strList;
-		int index;
 		
 		// special check, if the new name == the old name
 		// don't need to do anything
-		if ( optionName.equals(newName))
-			return(false);
+		if ( optionName.equals(newName) && optionValue.equals(newValue))
+			return(retVal);
 		answerList = answerListTree.get(titleAndStudy);
 		if ( answerList==null ) {
 			System.out.println ( titleAndStudy + " not found in AnswerListMgr.replaceOptionName");
-			return(false);
+			return(retVal);
 		}
-		strList = answerList.getListOptionNamesAsList();
-		index = strList.indexOf(optionName);
-		if (index<0)
-			return(false);
-		strList.remove(optionName);
-		strList.add(index, newName);
-		answerList.setListOptionNamesFromList(strList);
+		retVal = answerList.replaceNameAndValue(optionName, optionValue, newName, newValue);
 		needsUpdate = true;
-		return(true);
+		return(retVal);
 	}
 	
 	/**
@@ -364,24 +401,17 @@ public class AnswerListMgr extends Entity  {
 	 * @param optionName the option name within the list we are dealing with
 	 * @return true if any changes take place 
 	 */
-	public static boolean moveOptionNameUp ( String strTitle, Long studyId, String optionName ) {
+	public static boolean moveOptionNameUp ( String strTitle, Long studyId, 
+			String optionName, Integer optionValue ) {
 		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
 		AnswerList answerList;
-		ArrayList<String> strList;
-		int index;
-		
+
 		answerList = answerListTree.get(titleAndStudy);
 		if ( answerList==null ) {
 			System.out.println ( titleAndStudy + " not found in AnswerListMgr.moveOptionNameUp");
 			return(false);
 		}
-		strList = answerList.getListOptionNamesAsList();
-		index = strList.indexOf(optionName);
-		if (index<=0) // ( if it is zero index it can't move back )
-			return(false);
-		strList.remove(optionName);
-		strList.add(index-1, optionName);
-		answerList.setListOptionNamesFromList(strList);
+		answerList.moveUp( optionName, optionValue);
 		needsUpdate = true;
 		return(true);
 	}	
@@ -399,46 +429,69 @@ public class AnswerListMgr extends Entity  {
 		}
 	}
 	
-	public static AnswerList getAnswerListFor ( String strTitle, Long studyId ) {
-		TitleAndStudy titleAndStudy = new TitleAndStudy (strTitle, studyId );
-		AnswerList answerList;
-		
-		answerList = answerListTree.get(titleAndStudy);
-		return(answerList);	
-	}
-	
 	/**
 	 * now the non-editting functions, 
 	 * for when this data is used to help construct questions
+	 * this is used in the editquestion page as a drop-in
+	 * replacement for the old presets.
 	 */
 	
-	public static TreeMap<String,String[]> get() {
+	public static TreeMap<String,NameAndValue[]> get() {
 		if (needsUpdate)
 			update();
 		return(answerLists);
 	}
 	
-	
+	/** 
+	 * save all the preset answer lists data for this study
+	 * @param studyId identifies the study
+	 * @return true if all goes well, false if things go bad-wrong
+	 */
 	public static boolean saveAllAnswerListsForStudy(Long studyId) {
 		boolean bRetVal = true;
+		TitleAndStudy titleAndStudy;
 		String[] strTitles = getTitles ( studyId);
 		AnswerList answerList;
 		
 		for ( String str:strTitles ) {
-			answerList = getAnswerListFor(str, studyId);
-			// System.out.println ( answerList);
+			titleAndStudy = new TitleAndStudy (str, studyId );
+			answerList = answerListTree.get(titleAndStudy);;
 			try {
 			    DB.save(answerList);
 			} catch ( org.hibernate.MappingException me ) {
 				me.printStackTrace();
 				bRetVal = false;
-			//	return(false);
 			} 
-			//catch ( java.sql.SQLException sqle ) {
-			//	sqle.printStackTrace();
-			//}
 		}
 		return(bRetVal);
 	}
 
+	/**
+	 * returns the contents of the answerListTree as an Array
+	 * so they can be processed sequentially quickly.
+	 * Used in the Archiving to XML section
+	 * @param sID identifies the study to save
+	 * @return Array of all answerLists
+	 */
+	
+	public static AnswerList[] getAnswerLists(Long sID) {
+		AnswerList[] returnArray;
+		
+		loadAnswerListsForStudy (sID);
+		returnArray = new AnswerList[answerListTree.size()];
+		returnArray = answerListTree.values().toArray(returnArray);
+		return(returnArray);
+	}
+	
+	/**
+	 * outside world can use this to deal with answerLists without
+	 * dealing with the internals of how things are stored.
+	 * 
+	 * @param sID study ID we are dealing with
+	 * @return an iterator
+	 */
+//	public static Iterator<AnswerList> getIterator(Long sID) {
+//		
+//		return ( new AnswerListMgr().new AnswerListIterator(sID));
+//	}
 }

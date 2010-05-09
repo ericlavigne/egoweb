@@ -38,6 +38,7 @@
 		</form>
 	</fieldset>
 	</td>
+	<td></td>
 	</tr>
 	<tr>
 	<td>
@@ -70,6 +71,20 @@
 			</p>
 			<p>
 				<input wicket:id="respondentDataExport" type="submit" value="Export respondent data" />
+			</p>
+		</form>
+	</fieldset>
+	</td>
+	<td>
+	<fieldset>
+		<legend>Export 'Other/Specify' data</legend>
+		<form wicket:id="exportOSForm">
+			<p>
+				<label for="studyToOSExport">Study:</label>
+				<select id="studyToOSExport" wicket:id="studyToOSExport" />
+			</p>
+			<p>
+				<input wicket:id="studyOSExport" type="submit" value="Export Other/Specify Data" />
 			</p>
 		</form>
 	</fieldset>

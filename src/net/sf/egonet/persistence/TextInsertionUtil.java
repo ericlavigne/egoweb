@@ -47,6 +47,8 @@ public class TextInsertionUtil {
 	public static String answerToQuestion ( String strQuestionTitle, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
 		ArrayList<Alter> emptyAlters = new ArrayList<Alter>();
+		boolean isOtherSpecifyQuestion;
+		String otherSpecifyText;
 		Interview currentInterview;
 		StringTokenizer strok;
 		List<QuestionOption> optionsList;
@@ -94,6 +96,7 @@ public class TextInsertionUtil {
 		if ( theAnswer==null )
 			return("[ no answer to " + strQuestionTitle + " found]");
 	
+		isOtherSpecifyQuestion = question.getOtherSpecify();
 		if ( theAnswer.getValue()==null ) {
 			switch ( theAnswer.getSkipReason()) {
 			case REFUSE: return ("(refuse)"); 
@@ -120,7 +123,15 @@ public class TextInsertionUtil {
 						 if ( qo.getId().equals(iOptionId)) {
 							 if ( strAnswer.length()>1 )
 								 strAnswer += ", ";
-							 strAnswer += qo.getName();
+							 // special check for 'other/specify' questions.
+							 otherSpecifyText = null;
+							 if ( isOtherSpecifyQuestion &&
+								  qo.getName().trim().startsWith("OTHER SPECIFY"))
+								 	otherSpecifyText = theAnswer.getOtherSpecifyText();
+							 if ( otherSpecifyText!=null && otherSpecifyText.length()>0 )
+						         strAnswer += otherSpecifyText;
+							 else
+							     strAnswer += qo.getName();
 						 }
 					 }
 				 }
@@ -520,7 +531,7 @@ public class TextInsertionUtil {
 		Answer theAnswer = null;
 		String strAnswer = strQuestionTitle;
 		Long   iOptionId;
-		boolean bAnswerFound = false;
+
 		int iCount = 0;
 
 		strSurveyAnswer = strSurveyAnswer.trim();
@@ -537,7 +548,6 @@ public class TextInsertionUtil {
 			theAnswer = Answers.getAnswerForInterviewQuestionAlters( currentInterview, question, alterPair);
 			
 			if ( theAnswer!=null ) {
-				bAnswerFound = true;
 			    switch ( theAnswer.getAnswerType()) {
 				    case SELECTION:
 				    case MULTIPLE_SELECTION:

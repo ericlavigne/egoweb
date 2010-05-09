@@ -250,4 +250,39 @@ public class Questions {
 			}
 		});
 	}
+	
+	/**
+	 * next couple of functions are specific to the 
+	 * Export 'Other/Specify' text file option, which 
+	 * will export all the questions with the other/specify
+	 * flag set, and answers to them
+	 * @param session
+	 * @param studyId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Question> getQuestionsWithOtherSpecifyForStudy(
+			Session session, final Long studyId) 
+	{
+		try {
+			Query query = session.createQuery("from Question q where q.active = 1 and q.studyId = :studyId " +
+					"and q.otherSpecify = :otherSpecify  order by q.ordering")
+					.setLong("studyId", studyId)
+					.setBoolean("otherSpecify", true);
+			return query.list();
+		} catch(Exception ex) {
+			throw new RuntimeException(
+					"Unable to getQuestionsForStudy("+studyId+")",
+					ex);
+		}
+	}
+
+	public static List<Question> getQuestionsWithOtherSpecifyForStudy(final Long studyId) {
+		return DB.withTx(new Function<Session,List<Question>>() {
+			public List<Question> apply(Session session) {
+				return getQuestionsWithOtherSpecifyForStudy(session,studyId);
+			}
+		});
+	}
+	
 }
