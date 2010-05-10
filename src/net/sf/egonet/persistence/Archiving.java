@@ -158,9 +158,19 @@ public class Archiving {
 				updateStudyFromNode(session,study,studyElement,remoteToLocalExpressionId,newName);
 			}
 			
-			List<Element> answerListElements = studyElement.element("answerLists").elements("answerList");
-			for ( Element element : answerListElements ) {
-				updateAnswerListFromNode(session, new AnswerList(), element, study.getId());
+			// older XML files might not have the answerLists section
+			// in this case pass over the answerList updates, they will get
+			// initialized from the presets
+			List<Element> answerListElements;
+			try {
+			    answerListElements = studyElement.element("answerLists").elements("answerList");
+			} catch ( java.lang.NullPointerException npe ) {
+				answerListElements = null;
+			}
+			if ( answerListElements != null ) {
+				for ( Element element : answerListElements ) {
+					updateAnswerListFromNode(session, new AnswerList(), element, study.getId());
+				}
 			}
 			
 			List<Element> questionElements = studyElement.element("questions").elements("question");
