@@ -170,6 +170,8 @@ public class ImportExportPage extends EgonetPage {
 		return new Button("studyOSExport") {
 			public void onSubmit() {
 				Study study = getStudy(exportOSDropdown);
+				if ( study==null )
+					return;
 				downloadText(
 						study.getName()+"OS.txt",
 						"application/octet-stream",

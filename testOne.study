@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<study id="2" name="testOne" key="773470289966582911" minAlters="0" maxAlters="null" valueDontKnow="-2" valueLogicalSkip="-3" valueNotYetAnswered="-4" valueRefusal="-1" adjacencyExpressionId="">
+  <introduction></introduction>
+  <egoIdPrompt>Please identify yourself to start or continue an interview.</egoIdPrompt>
+  <alterPrompt>Please list some people that you know.</alterPrompt>
+  <conclusion>Thank you for completing this interview.</conclusion>
+  <questions>
+    <question id="31" title="alter_pair_1" key="4581127530593533877" answerType="TEXTUAL" subjectType="ALTER_PAIR" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>First alter pair question $$1 and $$2.</prompt>
+      <citation></citation>
+    </question>
+    <question id="25" title="alter_sex" key="-1335806251701656932" answerType="MULTIPLE_SELECTION" subjectType="ALTER" askingStyleList="true" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="1" maxCheckableBoxes="1">
+      <preface></preface>
+      <prompt>$$ what is your sex?</prompt>
+      <citation></citation>
+      <option id="46" name="Male" key="-5561996281128781245" value="1" ordering="0"/>
+      <option id="45" name="Female" key="-7572549520085884860" value="2" ordering="1"/>
+      <option id="47" name="OTHER SPECIFY" key="-754691741140973476" value="3" ordering="2"/>
+    </question>
+    <question id="22" title="What is your name:" key="-5186207008154680415" answerType="TEXTUAL" subjectType="EGO_ID" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>What is your name?</prompt>
+      <citation></citation>
+    </question>
+    <question id="20" title="ego_1" key="-5922619454208250329" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>First ego question</prompt>
+      <citation></citation>
+    </question>
+    <question id="32" title="ego_age" key="6509270478992234384" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="100" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your age?</prompt>
+      <citation></citation>
+    </question>
+    <question id="30" title="ALTER_PAIR_2" key="4078881465223761424" answerType="SELECTION" subjectType="ALTER_PAIR" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="true">
+      <preface></preface>
+      <prompt>$$1 and $$2, what is the sex of yor child?</prompt>
+      <citation></citation>
+      <option id="49" name="Male" key="-3618979506615554391" value="1" ordering="0"/>
+      <option id="48" name="Female" key="-4253988938579765558" value="2" ordering="1"/>
+      <option id="50" name="OTHER SPECIFY" key="-708135170562043370" value="3" ordering="2"/>
+    </question>
+    <question id="29" title="ego_3" key="3698121657168166749" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="1" maxCheckableBoxes="1">
+      <preface></preface>
+      <prompt>What is your sex?</prompt>
+      <citation></citation>
+      <option id="52" name="Male" key="-563206790196432954" value="1" ordering="0"/>
+      <option id="53" name="Female" key="350210147305779246" value="2" ordering="1"/>
+      <option id="51" name="OTHER SPECIFY" key="-4832293188888886561" value="3" ordering="2"/>
+    </question>
+    <question id="28" title="test" key="2738966204688302011" answerType="TEXTUAL" subjectType="ALTER" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>$$ there were &lt;COUNT alter_sex "Male"/&gt; males and &lt;COUNT alter_sex "Female" /&gt; females in the study.  You answered Other &lt;CONTAINS alter_sex "Other" /&gt; times.  Can you elaborate?</prompt>
+      <citation></citation>
+    </question>
+    <question id="33" title="ego_iq" key="7879191235514348810" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="20" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="240" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your iq?</prompt>
+      <citation></citation>
+    </question>
+    <question id="24" title="ego_3a" key="-1623974696270388414" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>Are you sure your sex is &lt;VAR ego_3/&gt;?  I mean, that just sounds weird.</prompt>
+      <citation></citation>
+    </question>
+    <question id="18" title="test2" key="-8857909914144421281" answerType="TEXTUAL" subjectType="ALTER" askingStyleList="true" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>$$ you say you are a boy.  Are you sure?</prompt>
+      <citation></citation>
+    </question>
+    <question id="26" title="ego_2" key="-1023027993000134029" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="3" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="0" maxCheckableBoxes="100">
+      <preface></preface>
+      <prompt>what relatives are living?</prompt>
+      <citation></citation>
+      <option id="57" name="Grand Mother" key="-6448418450632710709" value="1" ordering="0"/>
+      <option id="69" name="Grand Father" key="2593433025614163187" value="2" ordering="1"/>
+      <option id="60" name="Mother" key="-3392005131033814389" value="3" ordering="2"/>
+      <option id="73" name="Father" key="5131099515115468430" value="4" ordering="3"/>
+      <option id="76" name="Grand Son" key="6407049530104573009" value="5" ordering="4"/>
+      <option id="63" name="Grand Daughter" key="-1260088974572017736" value="6" ordering="5"/>
+      <option id="55" name="Son" key="-7273927805030372914" value="7" ordering="6"/>
+      <option id="62" name="Daughter" key="-1433560011386051239" value="8" ordering="7"/>
+      <option id="56" name="Sister" key="-6688001760657794771" value="9" ordering="8"/>
+      <option id="68" name="Brother" key="1308703552689491683" value="10" ordering="9"/>
+      <option id="65" name="Aunt" key="-1088531051224516408" value="11" ordering="10"/>
+      <option id="54" name="Uncle" key="-7974191536425399966" value="12" ordering="11"/>
+      <option id="58" name="Niece" key="-6007920180408915456" value="13" ordering="12"/>
+      <option id="59" name="Nephew" key="-4472459533903778839" value="14" ordering="13"/>
+      <option id="67" name="Cousin" key="178689542548109767" value="15" ordering="14"/>
+      <option id="77" name="Mother-in-Law" key="8818670836095244385" value="16" ordering="15"/>
+      <option id="64" name="Father-in-Law" key="-1109451334899941728" value="17" ordering="16"/>
+      <option id="61" name="Sister-in-Law" key="-1748176737551080387" value="18" ordering="17"/>
+      <option id="66" name="Brother-in-Law" key="-935560163299458754" value="19" ordering="18"/>
+      <option id="74" name="Step Son" key="5320398503871094411" value="20" ordering="19"/>
+      <option id="75" name="Step Daughter" key="5371823966564289110" value="21" ordering="20"/>
+      <option id="71" name="Half-Brother" key="3438441123041640530" value="22" ordering="21"/>
+      <option id="72" name="Half-Sister" key="4320664458455902589" value="23" ordering="22"/>
+      <option id="70" name="OTHER SPECIFY a living relative..." key="2611688662050853198" value="24" ordering="23"/>
+    </question>
+    <question id="27" title="ego_4" key="295565233137681853" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="4" answerReasonExpressionId="" useIf="" otherSpecify="false" minCheckableBoxes="0" maxCheckableBoxes="100">
+      <preface></preface>
+      <prompt>The value of ego_3 is &lt;VAR ego_3 /&gt; oh boy.</prompt>
+      <citation></citation>
+      <option id="83" name="one" key="1493482108225219470" value="1" ordering="0"/>
+      <option id="82" name="two" key="592149482129943918" value="2" ordering="1"/>
+      <option id="79" name="five" key="-5701191311120107058" value="3" ordering="2"/>
+      <option id="81" name="three" key="410869735691590645" value="4" ordering="3"/>
+      <option id="80" name="four" key="-19512017264226495" value="33" ordering="4"/>
+      <option id="78" name="zillion" key="-7126495806713581722" value="10" ordering="5"/>
+    </question>
+    <question id="21" title="ego_5" key="-5194064789167646218" answerType="SELECTION" subjectType="EGO" askingStyleList="false" ordering="5" answerReasonExpressionId="" useIf="" otherSpecify="true">
+      <preface></preface>
+      <prompt>what sex is your father?</prompt>
+      <citation></citation>
+      <option id="86" name="Male" key="4388301252430244237" value="1" ordering="0"/>
+      <option id="85" name="Female" key="1028270463562093555" value="2" ordering="1"/>
+      <option id="84" name="OTHER SPECIFY" key="-1148577455596554193" value="3" ordering="2"/>
+    </question>
+    <question id="19" title="ego_6" key="-7914790858050388359" answerType="SELECTION" subjectType="EGO" askingStyleList="false" ordering="6" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>what sex is your mother?</prompt>
+      <citation></citation>
+      <option id="88" name="Male" key="7686599591235605824" value="1" ordering="0"/>
+      <option id="87" name="Female" key="3647947741961084202" value="2" ordering="1"/>
+    </question>
+    <question id="34" title="NumericLimit" key="8131740088468988797" answerType="NUMERICAL" subjectType="EGO" askingStyleList="false" ordering="7" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="1000" maxPrevQues="">
+      <preface></preface>
+      <prompt>Please enter a number</prompt>
+      <citation></citation>
+    </question>
+    <question id="23" title="ego_4b" key="-2107407855671486982" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="8" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>Your answer to ego_4 is &lt;VAR ego_4 /&gt;</prompt>
+      <citation></citation>
+    </question>
+  </questions>
+  <expressions/>
+  <answerLists>
+    <answerList id="" key="3634359516674072692" listName="Gender" listOptionNames="Male=1,Female=2"/>
+    <answerList id="" key="-8322782816371546987" listName="Kin" listOptionNames="Grand Mother=1,Grand Father=2,Mother=3,Father=4,Grand Son=5,Grand Daughter=6,Son=7,Daughter=8,Sister=9,Brother=10,Aunt=11,Uncle=12,Niece=13,Nephew=14,Cousin=15,Mother-in-Law=16,Father-in-Law=17,Sister-in-Law=18,Brother-in-Law=19,Step Son=20,Step Daughter=21,Half-Brother=22,Half-Sister=23"/>
+    <answerList id="" key="-871694074206025149" listName="States" listOptionNames="Alabama=1,Alaska=2,Arizona=3,Arkansas=4,California=5,Colorado=6,Connecticut=7,Deleware=8,Florida=9,Georgia=10,Hawaii=11,Idaho=12,Illinois=13,Indiana=14,Iowa=15,Kansas=16,Kentucky=17,Louisiana=18,Maine=19,Maryland=20,Massachusetts=21,Michigan=22,Minnesota=23,Mississippi=24,Missouri=25,Montana=26,Nebraska=27,Nevada=28,New Hampshire=29,New Jersey=30,New Mexico=31,New York=32,North Carolina=33,North Dakota=34,Ohio=35,Oklahoma=36,Oregon=37,Pennsylvania=38,Rhode Island=39,South Carolina=40,South Dakota=41,Tennessee=42,Texas=43,Utah=44,Vermont=45,Virginia=46,Washington=47,West Virginia=48,Wisconsin=49,Wyoming=50"/>
+    <answerList id="" key="-5409651637158679764" listName="Yes/No" listOptionNames="Yes=1,No=0"/>
+  </answerLists>
+</study>

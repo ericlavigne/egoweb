@@ -878,34 +878,38 @@ public class Archiving {
 		
 		strb.append("Other/Specify text responses for " + study.getName() + cr);
 		listOfQuestions = Questions.getQuestionsWithOtherSpecifyForStudy(study.getId());
-		for ( Question question : listOfQuestions ) {
-			answerSorter.newQuestion();
-			listOfAnswers = Answers.getAnswersForQuestion(question.getId());
-			if ( answerSorter.addData(listOfAnswers)) {
+		for ( Question.QuestionType questType : Question.QuestionType.values() ) {
+			for ( Question question : listOfQuestions ) {
 				qType = question.getType();
-				strb.append(cr);
-				strb.append( "       QUESTION: " + question.getTitle() + "  (" + qType.toString() + ")" + cr);
-				strb.append( "QUESTION PROMPT: " + question.getPrompt() + cr);	
-				ids = answerSorter.getIDs();
-				for ( Long interviewId : ids) {
-					strb.append ("         EGO ID: " + Interviews.getEgoNameForInterview(interviewId) + cr);
-					listOfAnswers = answerSorter.getAnswersForID(interviewId);
-					for ( Answer answer : listOfAnswers ) {
-						otherSpecText = answer.getOtherSpecifyText();
-						strb.append("   SPECIFY TEXT: " + otherSpecText + cr);
-						switch ( qType ) {
-							case ALTER:
-								 strb.append( "       ALTER ID: " + answer.getAlterId1() + cr);
-								 break;
-							case ALTER_PAIR:
-								 strb.append("     ALTER PAIR: " + answer.getAlterId1() + " , " + answer.getAlterId2() + cr);
-								 break;
+				if ( qType.equals(questType )) {
+					answerSorter.newQuestion();
+					listOfAnswers = Answers.getAnswersForQuestion(question.getId());
+					if ( answerSorter.addData(listOfAnswers)) {
+						strb.append(cr);
+						strb.append( "       QUESTION: " + question.getTitle() + "  (" + qType.toString() + ")" + cr);
+						strb.append( "QUESTION PROMPT: " + question.getPrompt() + cr);	
+						ids = answerSorter.getIDs();
+						for ( Long interviewId : ids) {
+							strb.append ("         EGO ID: " + Interviews.getEgoNameForInterview(interviewId) + cr);
+							listOfAnswers = answerSorter.getAnswersForID(interviewId);
+							for ( Answer answer : listOfAnswers ) {
+								otherSpecText = answer.getOtherSpecifyText();
+								strb.append("   SPECIFY TEXT: " + otherSpecText + cr);
+								switch ( qType ) {
+								case ALTER:
+									 strb.append( "       ALTER ID: " + answer.getAlterId1() + cr);
+									 break;
+								case ALTER_PAIR:
+									 strb.append("     ALTER PAIR: " + answer.getAlterId1() + " , " + answer.getAlterId2() + cr);
+									 break;
 										 
-						}
-					}
-				}
-			}
-		}
+								} // end case ( qType...
+							} // end for ( Answer ...
+						} // end for ( Long interviewId
+					} // end if ( answerSorter.addData...
+				} // end if ( qType.equals...
+			} // end for question...
+		}  // end for questType...
 		return(strb.toString());
 	}
 }
