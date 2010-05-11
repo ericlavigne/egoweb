@@ -24,11 +24,10 @@ public class CheckboxesPanel<T> extends Panel {
 	 * private inner class extending CheckBox.
 	 * This implements IOnChangeListener and in effect
 	 * listens to itself do it can make some GUI fields
-	 * visible when 'Other' is selected
+	 * visible when 'OTHER SPECIFY' is selected
 	 * @author Kevin
 	 *
 	 */
-	private static boolean otherSelected;
 	
 	private class CheckBoxPlus extends CheckBox {
 		
@@ -50,26 +49,7 @@ public class CheckboxesPanel<T> extends Panel {
 		
 		protected boolean wantOnSelectionChangedNotifications() { return (otherSpecifyStyle);}	
 		
-		/**
-		 * this checks the list of checkbox items, looking for one named 'Other'
-		 * and, if found, returns is selected status.
-		 * returns false if a checkbox names 'Other' is not located
-		 * @return selection status of 'Other' checkbox
-		 */
-		private boolean isOtherSelected() {
-			
-			if ( !otherSpecifyStyle )
-				return(false);
-			for ( CheckableWrapper checkWrapper:items ) {
-				System.out.println ( "CheckBoxesPanel name=" + checkWrapper.getName());
-				if ( checkWrapper.getName().trim().startsWith("OTHER SPECIFY")) {
-					System.out.println ( "isOtherSelected returning " + checkWrapper.getSelected());
-					return(checkWrapper.getSelected());
-				}
-			}
-			System.out.println ("isOtherSelected returning FALSE");
-			return(false);
-		}
+
 	}
 	/* end of private class CheckBoxPlus */
 	/* ********************************* */
@@ -79,7 +59,8 @@ public class CheckboxesPanel<T> extends Panel {
 	}
 	
 	private List<CheckableWrapper> items;
-	private Boolean otherSpecifyStyle = false;
+	private Boolean otherSpecifyStyle;
+	private Boolean otherSelected;
 	private ArrayList<ActionListener> actionListeners;
 	
 	public List<T> getSelected() {
@@ -96,6 +77,8 @@ public class CheckboxesPanel<T> extends Panel {
 		super(id);
 		
 		actionListeners = new ArrayList<ActionListener>();
+		otherSpecifyStyle = false;
+		otherSelected = false;
 		this.items = Lists.newArrayList();
 		for(Integer i = 0; i < items.size(); i++) {
 			T item = items.get(i);
@@ -222,8 +205,28 @@ public class CheckboxesPanel<T> extends Panel {
 			aListener.actionPerformed(ae);
 		}
 	}
+	/**
+	 * this checks the list of checkbox items, looking for one named 'Other'
+	 * and, if found, returns is selected status.
+	 * returns false if a checkbox names 'Other' is not located
+	 * @return selection status of 'Other' checkbox
+	 */
 	
-	public boolean getOtherSelected() {
+	private boolean isOtherSelected() {
+		
+		if ( !otherSpecifyStyle )
+			return(false);
+		for ( CheckableWrapper checkWrapper:items ) {
+			if ( checkWrapper.getName().trim().startsWith("OTHER SPECIFY")) {
+				return(checkWrapper.getSelected());
+			}
+		}
+		return(false);
+	}
+	
+	public boolean getOtherSelected(boolean forceRecalcuation) {
+		if ( forceRecalcuation )
+			otherSelected = isOtherSelected();
 		return(otherSelected);
 	}
 }

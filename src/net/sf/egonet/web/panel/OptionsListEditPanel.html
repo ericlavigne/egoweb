@@ -31,17 +31,20 @@
 		    	<table>
 	        	<tr>
 	        	<td align="right">Option Names for</td>
-	        	<td align="left" colspan="2" wicket:id="valuesTitle">XXX</td></tr>
+	        	<td align="left" colspan="3" wicket:id="valuesTitle">XXX</td></tr>
+	        	<tr><td>Name</td><td>Value</td></tr>
 	        	<tr wicket:id="presetNamesList">
 	        	<td wicket:id="presetName">name</td>
+	        	<td wicket:id="presetValue">value</td>
 	        	<td><a href="#" wicket:id="deleteValueLink">
 	        	<span wicket:id ="deleteValue" >delete</span></a></td>
 	        	<td><a href="#" wicket:id="moveUpLink">
 	        	<span wicket:id ="moveUp" >Move Up</span></a></td>
 	        	<td><a href="#" wicket:id="editOptionLink">
 	        	<span wicket:id ="editOption">Edit</span></a></td>
-	        	</tr>
-	        	<tr><td><input wicket:id="textNewOptionName" type="text" size="20" /></td>
+	        	</tr><tr>
+	        	<td><input wicket:id="textNewOptionName" type="text" size="20" /></td>
+	        	<td><input wicket:id="textNewOptionValue" type="text" size="5" /></td>
 	        	<td><input wicket:id="newValueButton" type="submit" value="Add" /></td><td></td></tr>
 	        	</table>
 	        	</fieldset>
@@ -52,11 +55,18 @@
 	        <form wicket:id="editOptionForm" >
 	        <fieldset>
 	           <table>
-	           <tr><td colspan="5">Change Option Name</td></tr>
-	           <tr><td colspan="5" >
+	           <tr><td colspan="5">Change Option Name</td>
+	           </tr><tr>
+	           <td colspan="2" align="right">Name: </td>
+	           <td colspan="3" >
 	           <input wicket:id="editOptionName" type="text" size="20" />
-	           </td></tr>
-	           <tr><td></td>
+	           </td>
+	           </tr><tr>
+	           <td colspan="2" align="right">Value: </td>
+	           <td colspan="3" >
+	           <input wicket:id="editOptionValue" type="text" size="5" />
+	           </td>
+	           </tr><tr>
 	           <td><input wicket:id="btnOkayEdit" type="submit" value="Okay" /></td>
 	           <td></td>
 	           <td><input wicket:id="btnCancelEdit" type="submit" value="Cancel" /></td>

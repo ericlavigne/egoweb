@@ -143,7 +143,11 @@ public class InterviewingEgoPage extends InterviewingPage {
 		if(max != null && max > 0) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		return InterviewingAlterPage.askNext(interviewId,null,null,comeFrom);
+		// KCN May 7 - using the >> button at the bottom of the screen
+		// to advance through the ego questions to the first alter question
+		// was causing the program to crash, this should fix that problem:
+		// return InterviewingAlterPage.askNext(interviewId,null,null,comeFrom);
+		return InterviewingAlterPage.askNext(interviewId,null,false,comeFrom);
 	}
 	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion, EgonetPage comeFrom) {
 		Question previousEgoQuestion = 

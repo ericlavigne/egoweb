@@ -39,6 +39,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 			ArrayList<Alter> alters, Long interviewId) {
 		super(id,question,Answer.SkipReason.NONE,alters,interviewId);
 		originallySelectedOptions = Lists.newArrayList();
+		setOtherText("");
 		build();
 	}
 	
@@ -89,7 +90,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 							option.toString();
 			}
 		};
-		add(answerField);
+		add(answerField); 
 		// features that will be visible only for
 		// 'other/specify' questions
 		otherSpecifyStyle = question.getOtherSpecify();
@@ -99,22 +100,21 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		add(otherSpecifyTextField);
 		otherSpecifyLabel.setOutputMarkupId(true);
 		otherSpecifyTextField.setOutputMarkupId(true);
-		if ( otherSpecifyStyle && answerField.getOtherSelected()) {
-			System.out.println ("setting visibility true");
-			otherSpecifyLabel.setVisible(true);
-			otherSpecifyTextField.setVisible(true);	
-		} else {
-			System.out.println ( "settng visibility FALSE");
-			otherSpecifyLabel.setVisible(false);
-			otherSpecifyTextField.setVisible(false);
-		}
-		
 		if ( otherSpecifyStyle ) {
 			answerField.addActionListener(this);
 			answerField.setOtherSpecifyStyle(true);
 		} else {
 			answerField.setOtherSpecifyStyle(false);
-		}		
+		}	
+		if ( otherSpecifyStyle && answerField.getOtherSelected(true)) {
+			otherSpecifyLabel.setVisible(true);
+			otherSpecifyTextField.setVisible(true);	
+		} else {
+			otherSpecifyLabel.setVisible(false);
+			otherSpecifyTextField.setVisible(false);
+		}
+		
+	
 	}
 
 	public String getAnswer() {

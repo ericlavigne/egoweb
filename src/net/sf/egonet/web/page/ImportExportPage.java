@@ -27,6 +27,7 @@ public class ImportExportPage extends EgonetPage {
 		add(buildStudyModifyForm());
 		add(buildRespondentDataImportForm());
 		add(buildExportForm());
+		add(buildExportOSForm());
 	}
 	
 	private DropDownChoice createStudyDropdown(String wicketId) {
@@ -163,6 +164,28 @@ public class ImportExportPage extends EgonetPage {
 						study.getName()+".responses",
 						"application/octet-stream",
 						Archiving.getRespondentDataXML(study));
+			}
+		};
+	}
+	
+	private DropDownChoice exportOSDropdown;
+	
+	private Form buildExportOSForm() {
+		Form exportOSForm = new Form("exportOSForm");
+		exportOSDropdown = createStudyDropdown("studyToOSExport");
+		exportOSForm.add(exportOSDropdown);
+		exportOSForm.add(buildStudyOSExportButton());
+		return exportOSForm;
+	} 
+	
+	private Button buildStudyOSExportButton() {
+		return new Button("studyOSExport") {
+			public void onSubmit() {
+				Study study = getStudy(exportOSDropdown);
+				downloadText(
+						study.getName()+"OS.txt",
+						"application/octet-stream",
+						Archiving.getOtherSpecifyReport(study));
 			}
 		};
 	}

@@ -16,6 +16,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 
 import net.sf.egonet.web.component.TextField;
 import net.sf.egonet.model.AnswerListMgr;
+import net.sf.egonet.model.NameAndValue;
 
 public class OptionsListEditPanel extends Panel {
 
@@ -26,18 +27,23 @@ public class OptionsListEditPanel extends Panel {
 	private Form editOptionForm;
 	private WebMarkupContainer editOptionContainer;
 	private ArrayList<String> listPresetTitles;
-	private ArrayList<String> listOptionNames; // for the Currently Selected preset
+	private ArrayList<NameAndValue> listOptionNames; // for the Currently Selected preset
 	private String strCurrentListTitle;
 	private ListView lvPresetTitles;
 	private ListView lvPresetOptionNames;
 	private Label lblTitle;
 	private String newTitle;
 	private String newOptionName;
+	private Integer newOptionValue;
 	private String editOptionName;
 	private String editOptionOldName;
+	private Integer editOptionValue;
+	private Integer editOptionOldValue;
 	private TextField textNewTitle;
 	private TextField textNewOptionName;
+	private TextField textNewOptionValue;
 	private TextField textEditOptionName;
+	private TextField textEditOptionValue;
 	
 	
 	/**
@@ -57,7 +63,8 @@ public class OptionsListEditPanel extends Panel {
 			setListOptionNames( AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));
 		}
 		setNewTitle("(new title)");
-		setNewOptionName("(new value)");
+		setNewOptionName("(new name)");
+		setNewOptionValue(0);		
 		build();
 	}
 	
@@ -92,6 +99,7 @@ public class OptionsListEditPanel extends Panel {
 						setListOptionNames(AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));
 						target.addComponent(titlesForm);
 						target.addComponent(optionsForm);
+						editOptionForm.setVisible(false);
 					}
 				};
 				presetTitleLink.add(new Label("presetTitle", strPresetName));
@@ -104,6 +112,7 @@ public class OptionsListEditPanel extends Panel {
 						    target.addComponent(titlesForm);
 						    target.addComponent(optionsForm);
 						}
+						editOptionForm.setVisible(false);
 					}
 				};
 				deleteTitleLink.add(new Label("deleteTitle", "delete"));
@@ -126,6 +135,7 @@ public class OptionsListEditPanel extends Panel {
 					target.addComponent(titlesForm);	
 					target.addComponent(optionsForm);
 				}
+				editOptionForm.setVisible(false);
 			}
 		};
 		titlesForm.add(btnAddTitle);
@@ -144,15 +154,19 @@ public class OptionsListEditPanel extends Panel {
 		lvPresetOptionNames = new ListView ("presetNamesList", new PropertyModel(this, "listOptionNames"))
 			{
 			protected void populateItem(final ListItem item) {
-				final String strValue = item.getModelObjectAsString();
-				item.add(new Label("presetName", strValue));
-		
+				final NameAndValue nameAndValue = (NameAndValue)(item.getModelObject());
+				final String strName = nameAndValue.getName();
+				final String strValue = nameAndValue.getValue().toString();
+				
+				item.add(new Label("presetName", strName));
+				item.add(new Label("presetValue", strValue));
 			    // add the link that will delete this value
 			    Link deleteValueLink = new AjaxFallbackLink("deleteValueLink")
 			    {
 				    public void onClick(AjaxRequestTarget target) {
-					    if (deleteValue(strValue))
+					    if (deleteValue(strName,strValue))
 					         target.addComponent(optionsForm);
+					    editOptionForm.setVisible(false);
 				    }
 			     };
 			    deleteValueLink.add(new Label("deleteValue", "delete"));
@@ -162,8 +176,9 @@ public class OptionsListEditPanel extends Panel {
 			    Link moveValueLink = new AjaxFallbackLink ("moveUpLink")
 			    {
 			    	public void onClick(AjaxRequestTarget target) {
-			    		if (moveUpValue(strValue))
+			    		if (moveUpValue(strName, strValue))
 			    			target.addComponent(optionsForm);
+			    		editOptionForm.setVisible(false);
 			    	}
 			    };
 			    moveValueLink.add(new Label("moveUp", "Move Up"));
@@ -174,8 +189,7 @@ public class OptionsListEditPanel extends Panel {
 			    {
 			    	public void onClick(AjaxRequestTarget target) {
 			    		editOptionForm.setVisible(true);
-			    		System.out.println ("visibility=" + editOptionForm.isVisible());
-			    		beginEdit(strValue);
+			    		beginEdit(strName, strValue);
 			    		target.addComponent(editOptionForm);
 			    		target.addComponent(editOptionContainer);
 			    	}
@@ -193,13 +207,18 @@ public class OptionsListEditPanel extends Panel {
 		textNewOptionName.setOutputMarkupId(true);
 		optionsForm.add(textNewOptionName);
 
+		textNewOptionValue = new TextField("textNewOptionValue", new PropertyModel(this, "newOptionValue"), Integer.class); 
+		textNewOptionValue.setOutputMarkupId(true);
+		optionsForm.add(textNewOptionValue);		
+		
 		// and the button that will take care of adding the
 		// name entered in textNewOptionName to the current list
 		AjaxFallbackButton btnAddOptionName = new AjaxFallbackButton("newValueButton",optionsForm)
 		{
 			protected void onSubmit ( AjaxRequestTarget target, Form f) {
 				if ( addNewValue())
-					target.addComponent(optionsForm);	
+					target.addComponent(optionsForm);
+				editOptionForm.setVisible(false);
 			}
 		};
 		optionsForm.add(btnAddOptionName);
@@ -214,6 +233,10 @@ public class OptionsListEditPanel extends Panel {
 		textEditOptionName.setOutputMarkupId(true);
 		editOptionForm.add(textEditOptionName);
 		
+		textEditOptionValue = new TextField("editOptionValue", new PropertyModel(this, "editOptionValue"), Integer.class); 
+		textEditOptionValue.setOutputMarkupId(true);
+		editOptionForm.add(textEditOptionValue);
+
 		// and the button that will take care of adding the
 		// name entered in textNewOptionName to the current list
 		AjaxFallbackButton btnOkayEdit = new AjaxFallbackButton("btnOkayEdit",editOptionForm)
@@ -293,7 +316,6 @@ public class OptionsListEditPanel extends Panel {
 	private boolean deleteTitle(String strTitle) {
 		int index;
 		
-		// System.out.println ( "Delete the list named " + strTitle);
 		if ( strTitle==null || strTitle.length()==0)
 			return(false);
 		
@@ -312,12 +334,11 @@ public class OptionsListEditPanel extends Panel {
 			}
 			if ( listPresetTitles.size()==0 ) {
 				setStrCurrentListTitle("");
-				setListOptionNames(new ArrayList<String>(0));
+				setListOptionNames(new ArrayList<NameAndValue>(0));
 			} else {
 				setStrCurrentListTitle( listPresetTitles.get(index));
 				setListOptionNames(AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));				
 			}
-			// System.out.println ( "new current list=" + strCurrentListTitle);
 		}
 		return(true);
 	}
@@ -336,7 +357,11 @@ public class OptionsListEditPanel extends Panel {
 		newOptionName = newOptionName.trim();
 		if ( newOptionName.length()==0)
 			return(false);
-		if ( !AnswerListMgr.addOptionName(strCurrentListTitle, studyId, newOptionName)) {
+		
+		if ( newOptionValue==null )
+			newOptionValue = new Integer(0);
+		
+		if ( !AnswerListMgr.addOptionName(strCurrentListTitle, studyId, newOptionName, newOptionValue)) {
 			setNewOptionName("");
 			return(false);
 		}
@@ -351,12 +376,18 @@ public class OptionsListEditPanel extends Panel {
 	 * @param strValue the value to delete
 	 * @return true if deletion takes place, false otherwise
 	 */
-	private boolean deleteValue(String strValue) {
+	private boolean deleteValue(String strName, String strValue) {
+		Integer value;
 		
-		// System.out.println ( "Delete the value " + strValue);
-		if ( strValue==null || strValue.length()==0)
+		if ( strName==null || strValue==null || strName.length()==0 || strValue.length()==0 )
 			return(false);
-		if ( !AnswerListMgr.removeOptionName(strCurrentListTitle, studyId, strValue))
+		try {
+			value = Integer.parseInt(strValue);
+		} catch ( NumberFormatException nfe) {
+			System.out.println ( "OptionsListEditPanel.deleteValue " + strValue + " invalid integer");
+			value = 0;
+		}
+		if ( !AnswerListMgr.removeOptionName(strCurrentListTitle, studyId, strName, value))
 			return(false);
 		setListOptionNames(AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));			
 		return(true);
@@ -368,11 +399,18 @@ public class OptionsListEditPanel extends Panel {
 	 * @param strValue the string values to move up in the list
 	 * @return true if the string is found and moved, false otherwise
 	 */
-	private boolean moveUpValue(String strValue) {
-
-		if ( strValue==null || strValue.length()==0)
+	private boolean moveUpValue(String strName, String strValue) {
+		Integer value;
+		
+		if ( strName==null || strValue==null || strName.length()==0 || strValue.length()==0 )
 			return(false);
-		if ( !AnswerListMgr.moveOptionNameUp(strCurrentListTitle, studyId, strValue))
+		try {
+			value = Integer.parseInt(strValue);
+		} catch ( NumberFormatException nfe) {
+			System.out.println ( "OptionsListEditPanel.moveUpValue " + strValue + " invalid integer");
+			value = 0;
+		}
+		if ( !AnswerListMgr.moveOptionNameUp(strCurrentListTitle, studyId, strName, value))
 			return(false);
 		setListOptionNames(AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));			
 		return(true);
@@ -385,9 +423,15 @@ public class OptionsListEditPanel extends Panel {
 	 * @param strValue the option Name to edit
 	 * @return true
 	 */
-	private boolean beginEdit(String strValue) {
-		editOptionOldName = strValue;
-		setEditOptionName(strValue);
+	private boolean beginEdit(String strName, String strValue) {
+		editOptionOldName = strName;
+		try {
+			editOptionOldValue = Integer.parseInt(strValue);
+		} catch ( NumberFormatException nfe ) {
+			editOptionOldValue = 0;
+		}
+		setEditOptionName(strName);
+		setEditOptionValue(editOptionOldValue);
 		return(true);
 	} 
 	
@@ -402,7 +446,7 @@ public class OptionsListEditPanel extends Panel {
 	private boolean endEdit(boolean save) {
 		if ( save ) {
 			if ( AnswerListMgr.replaceOptionName(strCurrentListTitle, studyId, 
-					editOptionOldName, editOptionName))
+					editOptionOldName, editOptionOldValue, editOptionName, editOptionValue ))
 			    setListOptionNames(AnswerListMgr.getOptionNamesAsList(strCurrentListTitle, studyId));
 		}
 		return(true);
@@ -437,10 +481,17 @@ public class OptionsListEditPanel extends Panel {
 		return(editOptionName);
 	}
 	
-	public void setListOptionNames ( ArrayList<String> listOptionNames ) {
+	public void setEditOptionValue ( Integer editOptionValue ) {
+		this.editOptionValue = editOptionValue;
+	}
+	public Integer getEditOptionValue() {
+		return(editOptionValue);
+	}
+	
+	public void setListOptionNames ( ArrayList<NameAndValue> listOptionNames ) {
 		this.listOptionNames = listOptionNames;
 	}
-	public ArrayList<String> getListOptionNames() { 
+	public ArrayList<NameAndValue> getListOptionNames() { 
 		return(listOptionNames);
 	}
 	
@@ -452,10 +503,16 @@ public class OptionsListEditPanel extends Panel {
 	}
 	
 	public void setNewOptionName ( String newOptionName ) {
-		this.newOptionName = newOptionName;
+		this.newOptionName = (newOptionName==null) ? "" : newOptionName;
 	}
 	public String getNewOptionName() {
 		return(newOptionName);
 	}
 
+	public void setNewOptionValue ( Integer newOptionValue ) {
+		this.newOptionValue = (newOptionValue==null) ? 0 : newOptionValue;
+	}
+	public Integer getNewOptionValue () {
+		return(newOptionValue);
+	}
 }

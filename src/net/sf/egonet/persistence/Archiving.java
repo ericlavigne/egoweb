@@ -5,7 +5,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Set;
+import java.util.ArrayList;
 
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
@@ -16,6 +18,8 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.egonet.model.AnswerList;
+import net.sf.egonet.model.AnswerListMgr;
 import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
 import net.sf.functionalj.tuple.Pair;
@@ -89,6 +93,12 @@ public class Archiving {
 			for(Expression expression : Expressions.forStudy(session, study.getId())) {
 				addExpressionNode(expressionsNode,expression);
 			}
+			
+			Element answerListsNode = studyNode.addElement("answerLists");
+			AnswerList[] answerListArray = AnswerListMgr.getAnswerLists(study.getId());
+			for ( AnswerList answerList : answerListArray )
+				addAnswerListNode(answerListsNode,answerList);
+			
 			if(includeInterviews) {
 				Element interviewsNode = studyNode.addElement("interviews");
 				for(Interview interview : Interviews.getInterviewsForStudy(session, study.getId())) {
@@ -146,6 +156,21 @@ public class Archiving {
 			
 			if(updateStudy) {
 				updateStudyFromNode(session,study,studyElement,remoteToLocalExpressionId,newName);
+			}
+			
+			// older XML files might not have the answerLists section
+			// in this case pass over the answerList updates, they will get
+			// initialized from the presets
+			List<Element> answerListElements;
+			try {
+			    answerListElements = studyElement.element("answerLists").elements("answerList");
+			} catch ( java.lang.NullPointerException npe ) {
+				answerListElements = null;
+			}
+			if ( answerListElements != null ) {
+				for ( Element element : answerListElements ) {
+					updateAnswerListFromNode(session, new AnswerList(), element, study.getId());
+				}
 			}
 			
 			List<Element> questionElements = studyElement.element("questions").elements("question");
@@ -812,5 +837,135 @@ public class Archiving {
 				return null;
 			}
 		};
+	}
+	
+	private static Element addAnswerListNode(Element parent, AnswerList answerList) {
+		Element answerListNode = parent.addElement("answerList");
+		addAttribute(answerListNode,"id", answerList.getId());
+		addAttribute(answerListNode,"key", answerList.getRandomKey());
+		addAttribute(answerListNode,"listName", answerList.getListName());
+		addAttribute(answerListNode,"listOptionNames", answerList.getListOptionNamesDB());
+		return answerListNode;
+	}
+	
+	private static void updateAnswerListFromNode(Session session, AnswerList answerList, 
+			Element node, Long studyId )
+	{
+		answerList.setStudyId(studyId);
+		answerList.setListName(attrString(node,"listName"));
+		answerList.setListOptionNamesDB(attrString(node,"listOptionNames"));
+		DB.save(session, answerList);
+	}
+	
+	/**
+	 * this creates a plain text report, 
+	 * but might be altered to XML format.
+	 * This creates the report dealing with the Other/Specify types of questions 
+	 * and their answers
+	 * @param study to examine
+	 * @return a huge string containing the report
+	 */
+	
+	public static String getOtherSpecifyReport ( Study study ) {
+		String cr = System.getProperty("line.separator");
+		Question.QuestionType qType;
+		Long[] ids;
+		StringBuilder strb = new StringBuilder();
+		List<Question> listOfQuestions;
+		List<Answer> listOfAnswers;
+		AnswerSorter answerSorter = new AnswerSorter();
+		String otherSpecText;
+		
+		strb.append("Other/Specify text responses for " + study.getName() + cr);
+		listOfQuestions = Questions.getQuestionsWithOtherSpecifyForStudy(study.getId());
+		for ( Question question : listOfQuestions ) {
+			answerSorter.newQuestion();
+			listOfAnswers = Answers.getAnswersForQuestion(question.getId());
+			if ( answerSorter.addData(listOfAnswers)) {
+				qType = question.getType();
+				strb.append(cr);
+				strb.append( "       QUESTION: " + question.getTitle() + "  (" + qType.toString() + ")" + cr);
+				strb.append( "QUESTION PROMPT: " + question.getPrompt() + cr);	
+				ids = answerSorter.getIDs();
+				for ( Long interviewId : ids) {
+					strb.append ("         EGO ID: " + Interviews.getEgoNameForInterview(interviewId) + cr);
+					listOfAnswers = answerSorter.getAnswersForID(interviewId);
+					for ( Answer answer : listOfAnswers ) {
+						otherSpecText = answer.getOtherSpecifyText();
+						strb.append("   SPECIFY TEXT: " + otherSpecText + cr);
+						switch ( qType ) {
+							case ALTER:
+								 strb.append( "       ALTER ID: " + answer.getAlterId1() + cr);
+								 break;
+							case ALTER_PAIR:
+								 strb.append("     ALTER PAIR: " + answer.getAlterId1() + " , " + answer.getAlterId2() + cr);
+								 break;
+										 
+						}
+					}
+				}
+			}
+		}
+		return(strb.toString());
+	}
+}
+
+/**
+ * a simple convenience class to sort answers to a question
+ * by the interview ID. Used exclusively by getOtherSpecifyReport
+ *
+ */
+class AnswerSorter {
+	private TreeMap <Long,ArrayList<Answer>> answersByEgoId;
+	private boolean anyData;
+	
+	public AnswerSorter() {
+		answersByEgoId = new TreeMap<Long, ArrayList<Answer>>();
+		anyData = false;
+	}
+	
+	public void newQuestion() {
+		answersByEgoId.clear();
+		anyData = false;
+	}
+	
+	public boolean addData ( List<Answer> listOfAnswers ) {
+		ArrayList<Answer> answerList;
+		String otherSpecText;
+		Long id;
+		
+		if ( listOfAnswers==null || listOfAnswers.isEmpty())
+			return(anyData);
+		for ( Answer answer : listOfAnswers ) {
+			otherSpecText = answer.getOtherSpecifyText();
+			if ( otherSpecText!=null && otherSpecText.length()>0 ) {
+				id = answer.getInterviewId();
+				if ( !answersByEgoId.containsKey(id)) {
+					answerList = new ArrayList<Answer>();
+					answersByEgoId.put(id, answerList);
+				} else {
+					answerList = answersByEgoId.get(id);
+				}
+				if ( answerList != null ) {
+					answerList.add(answer);
+					anyData = true;
+				}
+			}
+		}
+		return(anyData);
+	}
+	
+	public boolean isAnyData() { return ( anyData);}
+	
+	public Long[] getIDs() {
+		Set<Long> keySet = answersByEgoId.keySet();
+		Long[] returnArray = new Long[keySet.size()];
+	
+		returnArray = keySet.toArray(returnArray);
+		return(returnArray);
+	}
+	
+	public ArrayList<Answer> getAnswersForID ( Long id ) {
+		return ( answersByEgoId.get(id));
 	}
 }
