@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
 
@@ -30,9 +31,18 @@ public class ImportExportPage extends EgonetPage {
 	}
 	
 	private DropDownChoice createStudyDropdown(String wicketId) {
-		return new DropDownChoice(wicketId,
-				studies.size() == 1 ? new Model(studies.get(0)) : new Model(),
-				studies);
+		DropDownChoice dropdown = 
+			new DropDownChoice(wicketId,
+					studies.size() == 1 ? new Model(studies.get(0)) : new Model(),
+					studies);
+		dropdown.setRequired(true);
+		return dropdown;
+	}
+	
+	private FileUploadField createFileUpload(String wicketId) {
+		FileUploadField field = new FileUploadField(wicketId);
+		field.setRequired(true);
+		return field;
 	}
 	
 	private Study getStudy(DropDownChoice studyDropdown) {
@@ -41,7 +51,7 @@ public class ImportExportPage extends EgonetPage {
 
 	private Form buildStudyImportForm() {
 		final TextField studyImportNameField = new TextField("studyImportNameField",new Model());
-		final FileUploadField studyImportFileField = new FileUploadField("studyImportFileField");
+		final FileUploadField studyImportFileField = createFileUpload("studyImportFileField");
 		Form studyImportForm = new Form("studyImportForm") {
 			public void onSubmit() {
 				try {
@@ -65,9 +75,11 @@ public class ImportExportPage extends EgonetPage {
 	
 	private Form buildStudyModifyForm() {
 
+		add(new FeedbackPanel("feedback"));
+		
 		final DropDownChoice studyToModify = createStudyDropdown("studyToModify");
 		
-		final FileUploadField studyImportField = new FileUploadField("studyModifyField");
+		final FileUploadField studyImportField = createFileUpload("studyModifyField");
 		Form studyImportForm = new Form("studyModifyForm") {
 			public void onSubmit() {
 				try {
@@ -99,7 +111,7 @@ public class ImportExportPage extends EgonetPage {
 	private Form buildRespondentDataImportForm() {
 
 		final DropDownChoice studyToPopulate = createStudyDropdown("studyToPopulate");
-		final FileUploadField respondentDataImportField = new FileUploadField("respondentDataImportField");
+		final FileUploadField respondentDataImportField = createFileUpload("respondentDataImportField");
 		
 		Form respondentDataImportForm = new Form("respondentDataImportForm") {
 			public void onSubmit() {
