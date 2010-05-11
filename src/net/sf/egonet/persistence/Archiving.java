@@ -441,10 +441,10 @@ public class Archiving {
 			try {
 			question.setMinLimitTypeDB(attrString(node,"minLimitType"));
 			question.setMinLiteral(attrInt(node,"minLiteral"));
-			question.setMinPrevQues(attrText(node,"minPrevQues"));
+			question.setMinPrevQues(attrString(node,"minPrevQues"));
 			question.setMaxLimitTypeDB(attrString(node,"maxLimitType"));
 			question.setMaxLiteral(attrInt(node,"maxLiteral"));
-			question.setMaxPrevQues(attrText(node,"maxPrevQues"));
+			question.setMaxPrevQues(attrString(node,"maxPrevQues"));
 			} catch ( java.lang.RuntimeException rte ) {
 				// if just about anything went wrong, goto defaults
 				question.setMinLimitType(NumericLimitType.NLT_NONE);
