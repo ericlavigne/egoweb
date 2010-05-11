@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<study id="1" name="testOne" key="773470289966582911" minAlters="0" maxAlters="null" valueDontKnow="-2" valueLogicalSkip="-3" valueNotYetAnswered="-4" valueRefusal="-1" adjacencyExpressionId="">
+  <introduction></introduction>
+  <egoIdPrompt>Please identify yourself to start or continue an interview.</egoIdPrompt>
+  <alterPrompt>Please list some people that you know.</alterPrompt>
+  <conclusion>Thank you for completing this interview.</conclusion>
+  <questions>
+    <question id="14" title="alter_pair_1" key="4581127530593533877" answerType="TEXTUAL" subjectType="ALTER_PAIR" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>First alter pair question $$1 and $$2.</prompt>
+      <citation></citation>
+    </question>
+    <question id="8" title="alter_sex" key="-1335806251701656932" answerType="MULTIPLE_SELECTION" subjectType="ALTER" askingStyleList="true" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="1" maxCheckableBoxes="1">
+      <preface></preface>
+      <prompt>$$ what is your sex?</prompt>
+      <citation></citation>
+      <option id="2" name="Male" key="-5561996281128781245" value="1" ordering="0"/>
+      <option id="1" name="Female" key="-7572549520085884860" value="2" ordering="1"/>
+      <option id="3" name="OTHER SPECIFY" key="-754691741140973476" value="3" ordering="2"/>
+    </question>
+    <question id="5" title="What is your name:" key="-5186207008154680415" answerType="TEXTUAL" subjectType="EGO_ID" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>What is your name?</prompt>
+      <citation></citation>
+    </question>
+    <question id="3" title="ego_1" key="-5922619454208250329" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="0" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>First ego question</prompt>
+      <citation></citation>
+    </question>
+    <question id="15" title="ego_age" key="6509270478992234384" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="100" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your age?</prompt>
+      <citation></citation>
+    </question>
+    <question id="13" title="ALTER_PAIR_2" key="4078881465223761424" answerType="SELECTION" subjectType="ALTER_PAIR" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="true">
+      <preface></preface>
+      <prompt>$$1 and $$2, what is the sex of yor child?</prompt>
+      <citation></citation>
+      <option id="5" name="Male" key="-3618979506615554391" value="1" ordering="0"/>
+      <option id="4" name="Female" key="-4253988938579765558" value="2" ordering="1"/>
+      <option id="6" name="OTHER SPECIFY" key="-708135170562043370" value="3" ordering="2"/>
+    </question>
+    <question id="12" title="ego_3" key="3698121657168166749" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="1" maxCheckableBoxes="1">
+      <preface></preface>
+      <prompt>What is your sex?</prompt>
+      <citation></citation>
+      <option id="8" name="Male" key="-563206790196432954" value="1" ordering="0"/>
+      <option id="9" name="Female" key="350210147305779246" value="2" ordering="1"/>
+      <option id="7" name="OTHER SPECIFY" key="-4832293188888886561" value="3" ordering="2"/>
+    </question>
+    <question id="11" title="test" key="2738966204688302011" answerType="TEXTUAL" subjectType="ALTER" askingStyleList="false" ordering="1" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>$$ there were &lt;COUNT alter_sex "Male"/&gt; males and &lt;COUNT alter_sex "Female" /&gt; females in the study.  You answered Other &lt;CONTAINS alter_sex "Other" /&gt; times.  Can you elaborate?</prompt>
+      <citation></citation>
+    </question>
+    <question id="16" title="ego_iq" key="7879191235514348810" answerType="NUMERICAL" subjectType="EGO_ID" askingStyleList="false" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="20" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="240" maxPrevQues="">
+      <preface></preface>
+      <prompt>What is your iq?</prompt>
+      <citation></citation>
+    </question>
+    <question id="7" title="ego_3a" key="-1623974696270388414" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>Are you sure your sex is &lt;VAR ego_3/&gt;?  I mean, that just sounds weird.</prompt>
+      <citation></citation>
+    </question>
+    <question id="1" title="test2" key="-8857909914144421281" answerType="TEXTUAL" subjectType="ALTER" askingStyleList="true" ordering="2" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>$$ you say you are a boy.  Are you sure?</prompt>
+      <citation></citation>
+    </question>
+    <question id="9" title="ego_2" key="-1023027993000134029" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="3" answerReasonExpressionId="" useIf="" otherSpecify="true" minCheckableBoxes="0" maxCheckableBoxes="100">
+      <preface></preface>
+      <prompt>what relatives are living?</prompt>
+      <citation></citation>
+      <option id="13" name="Grand Mother" key="-6448418450632710709" value="1" ordering="0"/>
+      <option id="25" name="Grand Father" key="2593433025614163187" value="2" ordering="1"/>
+      <option id="16" name="Mother" key="-3392005131033814389" value="3" ordering="2"/>
+      <option id="29" name="Father" key="5131099515115468430" value="4" ordering="3"/>
+      <option id="32" name="Grand Son" key="6407049530104573009" value="5" ordering="4"/>
+      <option id="19" name="Grand Daughter" key="-1260088974572017736" value="6" ordering="5"/>
+      <option id="11" name="Son" key="-7273927805030372914" value="7" ordering="6"/>
+      <option id="18" name="Daughter" key="-1433560011386051239" value="8" ordering="7"/>
+      <option id="12" name="Sister" key="-6688001760657794771" value="9" ordering="8"/>
+      <option id="24" name="Brother" key="1308703552689491683" value="10" ordering="9"/>
+      <option id="21" name="Aunt" key="-1088531051224516408" value="11" ordering="10"/>
+      <option id="10" name="Uncle" key="-7974191536425399966" value="12" ordering="11"/>
+      <option id="14" name="Niece" key="-6007920180408915456" value="13" ordering="12"/>
+      <option id="15" name="Nephew" key="-4472459533903778839" value="14" ordering="13"/>
+      <option id="23" name="Cousin" key="178689542548109767" value="15" ordering="14"/>
+      <option id="33" name="Mother-in-Law" key="8818670836095244385" value="16" ordering="15"/>
+      <option id="20" name="Father-in-Law" key="-1109451334899941728" value="17" ordering="16"/>
+      <option id="17" name="Sister-in-Law" key="-1748176737551080387" value="18" ordering="17"/>
+      <option id="22" name="Brother-in-Law" key="-935560163299458754" value="19" ordering="18"/>
+      <option id="30" name="Step Son" key="5320398503871094411" value="20" ordering="19"/>
+      <option id="31" name="Step Daughter" key="5371823966564289110" value="21" ordering="20"/>
+      <option id="27" name="Half-Brother" key="3438441123041640530" value="22" ordering="21"/>
+      <option id="28" name="Half-Sister" key="4320664458455902589" value="23" ordering="22"/>
+      <option id="26" name="OTHER SPECIFY a living relative..." key="2611688662050853198" value="24" ordering="23"/>
+    </question>
+    <question id="10" title="ego_4" key="295565233137681853" answerType="MULTIPLE_SELECTION" subjectType="EGO" askingStyleList="false" ordering="4" answerReasonExpressionId="" useIf="" otherSpecify="false" minCheckableBoxes="0" maxCheckableBoxes="100">
+      <preface></preface>
+      <prompt>The value of ego_3 is &lt;VAR ego_3 /&gt; oh boy.</prompt>
+      <citation></citation>
+      <option id="39" name="one" key="1493482108225219470" value="1" ordering="0"/>
+      <option id="38" name="two" key="592149482129943918" value="2" ordering="1"/>
+      <option id="35" name="five" key="-5701191311120107058" value="3" ordering="2"/>
+      <option id="37" name="three" key="410869735691590645" value="4" ordering="3"/>
+      <option id="36" name="four" key="-19512017264226495" value="33" ordering="4"/>
+      <option id="34" name="zillion" key="-7126495806713581722" value="10" ordering="5"/>
+    </question>
+    <question id="4" title="ego_5" key="-5194064789167646218" answerType="SELECTION" subjectType="EGO" askingStyleList="false" ordering="5" answerReasonExpressionId="" useIf="" otherSpecify="true">
+      <preface></preface>
+      <prompt>what sex is your father?</prompt>
+      <citation></citation>
+      <option id="42" name="Male" key="4388301252430244237" value="1" ordering="0"/>
+      <option id="41" name="Female" key="1028270463562093555" value="2" ordering="1"/>
+      <option id="40" name="OTHER SPECIFY" key="-1148577455596554193" value="3" ordering="2"/>
+    </question>
+    <question id="2" title="ego_6" key="-7914790858050388359" answerType="SELECTION" subjectType="EGO" askingStyleList="false" ordering="6" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>what sex is your mother?</prompt>
+      <citation></citation>
+      <option id="44" name="Male" key="7686599591235605824" value="1" ordering="0"/>
+      <option id="43" name="Female" key="3647947741961084202" value="2" ordering="1"/>
+    </question>
+    <question id="17" title="NumericLimit" key="8131740088468988797" answerType="NUMERICAL" subjectType="EGO" askingStyleList="false" ordering="7" answerReasonExpressionId="" useIf="" otherSpecify="false" minLimitType="NLT_LITERAL" minLiteral="10" minPrevQues="" maxLimitType="NLT_LITERAL" maxLiteral="1000" maxPrevQues="">
+      <preface></preface>
+      <prompt>Please enter a number</prompt>
+      <citation></citation>
+    </question>
+    <question id="6" title="ego_4b" key="-2107407855671486982" answerType="TEXTUAL" subjectType="EGO" askingStyleList="false" ordering="8" answerReasonExpressionId="" useIf="" otherSpecify="false">
+      <preface></preface>
+      <prompt>Your answer to ego_4 is &lt;VAR ego_4 /&gt;</prompt>
+      <citation></citation>
+    </question>
+  </questions>
+  <expressions/>
+  <answerLists>
+    <answerList id="1" key="1925309957790483693" listName="Gender" listOptionNames="Male=1,Female=2"/>
+    <answerList id="2" key="-7179739956221942160" listName="Kin" listOptionNames="Grand Mother=1,Grand Father=2,Mother=3,Father=4,Grand Son=5,Grand Daughter=6,Son=7,Daughter=8,Sister=9,Brother=10,Aunt=11,Uncle=12,Niece=13,Nephew=14,Cousin=15,Mother-in-Law=16,Father-in-Law=17,Sister-in-Law=18,Brother-in-Law=19,Step Son=20,Step Daughter=21,Half-Brother=22,Half-Sister=23"/>
+    <answerList id="3" key="8350940786889858637" listName="States" listOptionNames="Alabama=1,Alaska=2,Arizona=3,Arkansas=4,California=5,Colorado=6,Connecticut=7,Deleware=8,Florida=9,Georgia=10,Hawaii=11,Idaho=12,Illinois=13,Indiana=14,Iowa=15,Kansas=16,Kentucky=17,Louisiana=18,Maine=19,Maryland=20,Massachusetts=21,Michigan=22,Minnesota=23,Mississippi=24,Missouri=25,Montana=26,Nebraska=27,Nevada=28,New Hampshire=29,New Jersey=30,New Mexico=31,New York=32,North Carolina=33,North Dakota=34,Ohio=35,Oklahoma=36,Oregon=37,Pennsylvania=38,Rhode Island=39,South Carolina=40,South Dakota=41,Tennessee=42,Texas=43,Utah=44,Vermont=45,Virginia=46,Washington=47,West Virginia=48,Wisconsin=49,Wyoming=50"/>
+    <answerList id="4" key="-1063572454244610741" listName="Yes/No" listOptionNames="Yes=1,No=0"/>
+  </answerLists>
+  <interviews>
+    <interview id="1" key="8987779514519326004">
+      <alters>
+        <alter id="1" name="one" key="136576142507900313"/>
+        <alter id="2" name="two" key="-4742118720128069126"/>
+        <alter id="3" name="three" key="3580598812182067247"/>
+        <alter id="4" name="four" key="-5795173867953790963"/>
+        <alter id="5" name="five" key="4152464357074116483"/>
+        <alter id="6" name="six" key="-681367427663432306"/>
+        <alter id="7" name="seven" key="1737104109219418857"/>
+      </alters>
+      <answers>
+        <answer id="1" key="-462919602410013223" questionId="5" questionType="EGO_ID" skipReason="NONE" answerType="TEXTUAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>Kevin</value>
+        </answer>
+        <answer id="2" key="-8891844307750401291" questionId="15" questionType="EGO_ID" skipReason="NONE" answerType="NUMERICAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>12</value>
+        </answer>
+        <answer id="3" key="-1613295974103709803" questionId="16" questionType="EGO_ID" skipReason="NONE" answerType="NUMERICAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>34</value>
+        </answer>
+        <answer id="4" key="8038802551308195511" questionId="3" questionType="EGO" skipReason="NONE" answerType="TEXTUAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>first answer</value>
+        </answer>
+        <answer id="5" key="-1005936129208788542" questionId="12" questionType="EGO" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="" alterId2="" otherSpecifyText="junk male">
+          <value>7</value>
+        </answer>
+        <answer id="6" key="1250794676780670995" questionId="7" questionType="EGO" skipReason="NONE" answerType="TEXTUAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="7" key="8237762495403808633" questionId="9" questionType="EGO" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="" alterId2="" otherSpecifyText="asdf">
+          <value>25,11,26</value>
+        </answer>
+        <answer id="8" key="-124726610321670352" questionId="10" questionType="EGO" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="" alterId2="" otherSpecifyText="">
+          <value>38</value>
+        </answer>
+        <answer id="9" key="-5969286678489138907" questionId="4" questionType="EGO" skipReason="NONE" answerType="SELECTION" alterId1="" alterId2="" otherSpecifyText="">
+          <value>42</value>
+        </answer>
+        <answer id="10" key="-2451630444263743125" questionId="2" questionType="EGO" skipReason="NONE" answerType="SELECTION" alterId1="" alterId2="" otherSpecifyText="">
+          <value>43</value>
+        </answer>
+        <answer id="11" key="-4626628299297606348" questionId="17" questionType="EGO" skipReason="NONE" answerType="NUMERICAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>12</value>
+        </answer>
+        <answer id="12" key="-6015769948570114327" questionId="6" questionType="EGO" skipReason="NONE" answerType="TEXTUAL" alterId1="" alterId2="" otherSpecifyText="">
+          <value>12</value>
+        </answer>
+        <answer id="13" key="-811237849553285247" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="1" alterId2="" otherSpecifyText="">
+          <value>2</value>
+        </answer>
+        <answer id="14" key="-176856766890231403" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="2" alterId2="" otherSpecifyText="">
+          <value>2</value>
+        </answer>
+        <answer id="15" key="-1567666240185601517" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="3" alterId2="" otherSpecifyText="">
+          <value>1</value>
+        </answer>
+        <answer id="16" key="8296780632641350924" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="4" alterId2="" otherSpecifyText="four sex">
+          <value>3</value>
+        </answer>
+        <answer id="17" key="3601587465077558020" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="5" alterId2="" otherSpecifyText="">
+          <value>1</value>
+        </answer>
+        <answer id="18" key="-3659138530330418375" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="6" alterId2="" otherSpecifyText="">
+          <value>2</value>
+        </answer>
+        <answer id="19" key="639094822810889726" questionId="8" questionType="ALTER" skipReason="NONE" answerType="MULTIPLE_SELECTION" alterId1="7" alterId2="" otherSpecifyText="">
+          <value>2</value>
+        </answer>
+        <answer id="20" key="1336436737859225543" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="21" key="6927188259422122667" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="22" key="6249893173278830601" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="23" key="-6167804083597359161" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="4" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="24" key="-5197535263468631033" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="5" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="25" key="-5607475741247111559" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="6" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="26" key="-4652475856876921684" questionId="11" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="7" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="27" key="-7850441293204777726" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="28" key="8935274550550354558" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="29" key="1476258725257227737" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="" otherSpecifyText="">
+          <value>sdaf</value>
+        </answer>
+        <answer id="30" key="-2803879258800275113" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="4" alterId2="" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="31" key="-3485759948910787882" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="5" alterId2="" otherSpecifyText="">
+          <value>sadf</value>
+        </answer>
+        <answer id="32" key="5164988764902504752" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="6" alterId2="" otherSpecifyText="">
+          <value>sdf</value>
+        </answer>
+        <answer id="33" key="5329899875419280520" questionId="1" questionType="ALTER" skipReason="NONE" answerType="TEXTUAL" alterId1="7" alterId2="" otherSpecifyText="">
+          <value>sadf</value>
+        </answer>
+        <answer id="34" key="-1734812737407689854" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="2" otherSpecifyText="">
+          <value>one two</value>
+        </answer>
+        <answer id="35" key="8821244846861471971" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="2" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="36" key="-7768550558769212842" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="3" otherSpecifyText="">
+          <value>one three</value>
+        </answer>
+        <answer id="37" key="-8182444935995497226" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="3" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="38" key="-4700715629124097849" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="4" otherSpecifyText="">
+          <value>one four</value>
+        </answer>
+        <answer id="39" key="6210701337061092727" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="4" otherSpecifyText="">
+          <value>4</value>
+        </answer>
+        <answer id="40" key="-3407875658546381758" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="5" otherSpecifyText="">
+          <value>one five</value>
+        </answer>
+        <answer id="41" key="8278108714601776831" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="5" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="42" key="6391791426662776342" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="6" otherSpecifyText="">
+          <value>asdf</value>
+        </answer>
+        <answer id="43" key="-8462429195164530530" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="6" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="44" key="-2009301286003132232" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="1" alterId2="7" otherSpecifyText="">
+          <value>one seven</value>
+        </answer>
+        <answer id="45" key="-2946341162852552788" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="1" alterId2="7" otherSpecifyText="">
+          <value>4</value>
+        </answer>
+        <answer id="46" key="-6350853157464870893" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="3" otherSpecifyText="">
+          <value>one three</value>
+        </answer>
+        <answer id="47" key="-4446357838006909988" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="2" alterId2="3" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="48" key="5840206640398905627" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="4" otherSpecifyText="">
+          <value>one four</value>
+        </answer>
+        <answer id="49" key="2702056198749902256" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="2" alterId2="4" otherSpecifyText="">
+          <value>4</value>
+        </answer>
+        <answer id="50" key="2388583777149175940" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="5" otherSpecifyText="">
+          <value>two five</value>
+        </answer>
+        <answer id="51" key="-3918999924097778504" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="2" alterId2="5" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="52" key="-2563485565902856099" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="6" otherSpecifyText="">
+          <value>two six</value>
+        </answer>
+        <answer id="53" key="-3942774706195012012" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="2" alterId2="6" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="54" key="-4638342954240003275" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="2" alterId2="7" otherSpecifyText="">
+          <value>two seven</value>
+        </answer>
+        <answer id="55" key="635609360713839091" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="2" alterId2="7" otherSpecifyText="">
+          <value>4</value>
+        </answer>
+        <answer id="56" key="-461092119693536714" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="4" otherSpecifyText="">
+          <value>three four</value>
+        </answer>
+        <answer id="57" key="8356581719875290808" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="3" alterId2="4" otherSpecifyText="">
+          <value>4</value>
+        </answer>
+        <answer id="58" key="-3273874082396304136" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="5" otherSpecifyText="">
+          <value>three five</value>
+        </answer>
+        <answer id="59" key="3880103475586677095" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="3" alterId2="5" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="60" key="2722175853506173199" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="6" otherSpecifyText="">
+          <value>three six</value>
+        </answer>
+        <answer id="61" key="4480619380322658285" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="3" alterId2="6" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="62" key="6136660963367164956" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="3" alterId2="7" otherSpecifyText="">
+          <value>three seven</value>
+        </answer>
+        <answer id="63" key="8365998358638605306" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="3" alterId2="7" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="64" key="-5291032899342977862" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="4" alterId2="5" otherSpecifyText="">
+          <value>four five</value>
+        </answer>
+        <answer id="65" key="-5749058621066373650" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="4" alterId2="5" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="66" key="-3645699659427623537" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="4" alterId2="6" otherSpecifyText="">
+          <value>four six</value>
+        </answer>
+        <answer id="67" key="-4913792135089684043" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="4" alterId2="6" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="68" key="-7125384859482337784" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="4" alterId2="7" otherSpecifyText="">
+          <value>four seven</value>
+        </answer>
+        <answer id="69" key="1441641407155615447" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="4" alterId2="7" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="70" key="119838100653918917" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="5" alterId2="6" otherSpecifyText="">
+          <value>five sx</value>
+        </answer>
+        <answer id="71" key="-3490377740939510945" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="5" alterId2="6" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="72" key="-2798720242590218308" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="5" alterId2="7" otherSpecifyText="">
+          <value>five seven</value>
+        </answer>
+        <answer id="73" key="4161554915647033790" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="5" alterId2="7" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+        <answer id="74" key="7809372246656625378" questionId="14" questionType="ALTER_PAIR" skipReason="NONE" answerType="TEXTUAL" alterId1="6" alterId2="7" otherSpecifyText="">
+          <value>six seven</value>
+        </answer>
+        <answer id="75" key="-1434716696537805624" questionId="13" questionType="ALTER_PAIR" skipReason="NONE" answerType="SELECTION" alterId1="6" alterId2="7" otherSpecifyText="">
+          <value>5</value>
+        </answer>
+      </answers>
+    </interview>
+  </interviews>
+</study>

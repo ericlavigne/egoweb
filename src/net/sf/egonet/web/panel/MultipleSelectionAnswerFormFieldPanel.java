@@ -96,6 +96,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		otherSpecifyStyle = question.getOtherSpecify();
 		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
 		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherText"));
+		otherSpecifyTextField.setRequired(true);
 		add(otherSpecifyLabel);
 		add(otherSpecifyTextField);
 		otherSpecifyLabel.setOutputMarkupId(true);
@@ -238,6 +239,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	
 	public void setOtherText ( String otherText ) {
 		this.otherText = (otherText==null) ? "" : otherText;
+		this.otherText = this.otherText.trim();
 	}
 	public String getOtherText() {
 		return (( otherText==null) ? "" : otherText ) ;
