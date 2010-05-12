@@ -16,6 +16,8 @@ import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -27,47 +29,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
 public class EditQuestionPanel extends Panel {
-	
-	/**
-	 * private inner class extending DropDownChoice
-	 * This is so it can implement IOnChangeListener and, 
-	 * in effect, list to itself and hide the numericLimits Panel
-	 * when its type is not Numeric
-	 */
-	
-	private class DropDownChoicePlus extends DropDownChoice {
-		
-		public DropDownChoicePlus (String id, Model model, List<Answer.AnswerType> theList ) {
-			super(id, model, theList);
-		}
-		
-		protected void onSelectionChanged(Object newSelection) {
-			boolean numericLimitsVisible = false;
-			boolean multipleSelectionLimitsVisible = false;
-			
-			if ( newSelection==Answer.AnswerType.NUMERICAL) {
-				numericLimitsVisible = true;
-			} else if ( newSelection==Answer.AnswerType.MULTIPLE_SELECTION){
-				multipleSelectionLimitsVisible = true;
-			}
-			numericLimitsPanel.setVisible(numericLimitsVisible);
-			multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
-			
-			if ( newSelection==Answer.AnswerType.SELECTION  ||  newSelection==Answer.AnswerType.MULTIPLE_SELECTION) {
-				otherSpecifyLabel.setVisible(true); 
-				otherSpecifyCheckBox.setVisible(true);
-			} else {
-				otherSpecifyLabel.setVisible(false); 
-				otherSpecifyCheckBox.setVisible(false);	
-			}
-		}
-		
-		protected boolean wantOnSelectionChangedNotifications() { return (true);}
-	}
-	
-	/**
-	 * end of private inner class DropDownChoicePlus
-	 */
 	
 	private Question question;
 
@@ -84,7 +45,7 @@ public class EditQuestionPanel extends Panel {
 	private TextField questionUseIfField;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
-	private DropDownChoicePlus dropDownQuestionTypes;
+	private DropDownChoice dropDownQuestionTypes;
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
 	private static final String answerAlways = "Always";
@@ -133,10 +94,12 @@ public class EditQuestionPanel extends Panel {
 		numericLimitsPanel = new NumericLimitsPanel("numericLimitsPanel", question);
 		form.add(numericLimitsPanel);
 		numericLimitsPanel.setVisible(false);
+		numericLimitsPanel.setOutputMarkupId(true);
 		
 		multipleSelectionLimitsPanel = new MultipleSelectionLimitsPanel ("multipleSelectionLimitsPanel");
 		form.add(multipleSelectionLimitsPanel);
 		multipleSelectionLimitsPanel.setVisible(false);
+		multipleSelectionLimitsPanel.setOutputMarkupId(true);
 		
 		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
@@ -149,10 +112,18 @@ public class EditQuestionPanel extends Panel {
 		form.add(questionCitationField);
 
 		questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
-		dropDownQuestionTypes = new DropDownChoicePlus(
+		dropDownQuestionTypes = new DropDownChoice(
 				"questionResponseTypeField",
 				questionResponseTypeModel,
 				Arrays.asList(Answer.AnswerType.values()));
+				
+		dropDownQuestionTypes.add(new AjaxFormComponentUpdatingBehavior("onchange") {
+		    protected void onUpdate(AjaxRequestTarget target)
+		    	{
+		        onSelectionChanged( Integer.parseInt(dropDownQuestionTypes.getModelValue()));
+		        target.addComponent(form);
+		        }
+		   	});
 		
 		form.add(dropDownQuestionTypes);
 
@@ -186,7 +157,8 @@ public class EditQuestionPanel extends Panel {
 		otherSpecifyCheckBox = new CheckBox("otherSpecifyField", otherSpecifyModel);
 		form.add(otherSpecifyLabel);
 		form.add(otherSpecifyCheckBox);
-		
+		otherSpecifyLabel.setOutputMarkupId(true);
+		otherSpecifyCheckBox.setOutputMarkupId(true);
 		questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		form.add(questionUseIfField);
 		
@@ -288,6 +260,36 @@ public class EditQuestionPanel extends Panel {
 		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION) {
 			question.setMinCheckableBoxes(multipleSelectionLimitsPanel.getMinCheckableBoxes());
 			question.setMaxCheckableBoxes(multipleSelectionLimitsPanel.getMaxCheckableBoxes());
+		}
+	}
+	
+	/**
+	 * called by the dropdownchoice when its selection changes to 
+	 * hide/make visible panels that deal with range limits and the
+	 * 'Other/Specify' check box
+	 * the value we get from the ajax onUpdate getModelValue()
+	 * is a string indicating the position of the selected choice in 
+	 * the drop down
+	 * @param iValue
+	 */
+	protected void onSelectionChanged(int iValue) {
+		boolean numericLimitsVisible = false;
+		boolean multipleSelectionLimitsVisible = false;
+		
+		if ( iValue==1) {
+			numericLimitsVisible = true;
+		} else if ( iValue==3){
+			multipleSelectionLimitsVisible = true;
+		}
+		numericLimitsPanel.setVisible(numericLimitsVisible);
+		multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
+		
+		if ( iValue==2  ||  iValue==3) {
+			otherSpecifyLabel.setVisible(true); 
+			otherSpecifyCheckBox.setVisible(true);
+		} else {
+			otherSpecifyLabel.setVisible(false); 
+			otherSpecifyCheckBox.setVisible(false);	
 		}
 	}
 	

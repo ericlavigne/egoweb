@@ -97,10 +97,10 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				boolean multipleSelectionsOkay = 
-					AnswerFormFieldPanel.allMultipleSelectionOkay(answerFields);				
+					AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
 				for(AnswerFormFieldPanel answerField : answerFields) {
 					if ( !multipleSelectionsOkay ) {
-						answerField.setNotification(answerField.getMultipleSelectionNotification());
+						answerField.setNotification(answerField.getRangeCheckNotification());
 					} else if(okayToContinue) {
 						Answers.setAnswerForInterviewQuestionAlters(
 								subject.interviewId, subject.question, answerField.getAlters(), 

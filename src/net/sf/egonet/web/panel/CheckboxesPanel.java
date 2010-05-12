@@ -10,50 +10,18 @@ import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.Component;
 
 import com.google.common.collect.Lists;
 
 public class CheckboxesPanel<T> extends Panel {
 
-	/**
-	 * private inner class extending CheckBox.
-	 * This implements IOnChangeListener and in effect
-	 * listens to itself do it can make some GUI fields
-	 * visible when 'OTHER SPECIFY' is selected
-	 * @author Kevin
-	 *
-	 */
-	
-	private class CheckBoxPlus extends CheckBox {
-		
-		public CheckBoxPlus ( String id, PropertyModel propertyModel ) {
-			super ( id, propertyModel );
-			if ( otherSpecifyStyle )
-			    otherSelected = isOtherSelected();
-		}
-		
-		protected void onSelectionChanged(Object newSelection) {
-			boolean otherNowSelected = false;
-	
-			otherNowSelected = isOtherSelected();
-			if ( otherNowSelected != otherSelected ) {
-				fireActionEvent (otherNowSelected, "OTHER SPECIFY" );
-				otherSelected = otherNowSelected;
-			}
-		}
-		
-		protected boolean wantOnSelectionChangedNotifications() { return (otherSpecifyStyle);}	
-		
-
-	}
-	/* end of private class CheckBoxPlus */
-	/* ********************************* */
-	
 	protected String showItem(T item) {
 		return item.toString();
 	}
@@ -62,6 +30,7 @@ public class CheckboxesPanel<T> extends Panel {
 	private Boolean otherSpecifyStyle;
 	private Boolean otherSelected;
 	private ArrayList<ActionListener> actionListeners;
+	private ArrayList<Component> componentsToUpdate;
 	
 	public List<T> getSelected() {
 		List<T> result = Lists.newArrayList();
@@ -77,6 +46,7 @@ public class CheckboxesPanel<T> extends Panel {
 		super(id);
 		
 		actionListeners = new ArrayList<ActionListener>();
+		componentsToUpdate = new ArrayList<Component>();
 		otherSpecifyStyle = false;
 		otherSelected = false;
 		this.items = Lists.newArrayList();
@@ -100,7 +70,20 @@ public class CheckboxesPanel<T> extends Panel {
 				Boolean hasAccessKey = items.size() < 10;
 				item.add(new Label("checkLabel",wrapper.getName()+
 						(hasAccessKey ? " ("+accessKey+")" : "")));
-				CheckBoxPlus checkBox = new CheckBoxPlus("checkField", new PropertyModel(wrapper, "selected"));
+				AjaxCheckBox checkBox = new AjaxCheckBox("checkField", new PropertyModel(wrapper, "selected"))
+				{
+				 protected void onUpdate(AjaxRequestTarget target) {
+						boolean otherNowSelected = false;
+						
+						otherNowSelected = isOtherSelected();
+						if ( otherNowSelected != otherSelected ) {
+							for ( Component component : componentsToUpdate) {
+							 	target.addComponent(component);
+							}			
+							fireActionEvent (otherNowSelected, "OTHER SPECIFY" );
+							otherSelected = otherNowSelected;
+						}
+				 }};
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&
 							wrapper.getName().equals(items.get(0).getName()))
@@ -192,6 +175,26 @@ public class CheckboxesPanel<T> extends Panel {
 		actionListeners.remove(aListener);
 	}
 	
+	/**
+	 * similar to the list of actionlisteners, 
+	 * keep a list of components to update.
+	 * These will in reality only be 'Other/Specify' items
+	 * in a multiple selection question with an OTHER SPECIFY item
+	 * @param component
+	 */
+	public void addComponentToUpdate(Component component) {
+		if ( !componentsToUpdate.contains(component))
+			componentsToUpdate.add(component);
+	}
+	
+	/**
+	 * simply removes an component from the list of
+	 * componentsToUpdate
+	 * @param component Component to remove
+	 */
+	public void removeComponentToUpdate(Component component) {
+		componentsToUpdate.remove(component);
+	}
 	/**
 	 * fires an actionEvent to all listeners
 	 * @param id 0 or 1 depending on whether a checkbox is selected

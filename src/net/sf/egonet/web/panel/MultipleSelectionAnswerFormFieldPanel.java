@@ -65,6 +65,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	}
 	
 	private void build() {
+		this.setOutputMarkupId(true);
 		checkBoxPrompt = new Label ("checkBoxPrompt",getCheckRangePrompt());
 		add(checkBoxPrompt);
 
@@ -96,13 +97,13 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		otherSpecifyStyle = question.getOtherSpecify();
 		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
 		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherText"));
-		otherSpecifyTextField.setRequired(true);
 		add(otherSpecifyLabel);
 		add(otherSpecifyTextField);
 		otherSpecifyLabel.setOutputMarkupId(true);
 		otherSpecifyTextField.setOutputMarkupId(true);
 		if ( otherSpecifyStyle ) {
 			answerField.addActionListener(this);
+			answerField.addComponentToUpdate(this);		
 			answerField.setOtherSpecifyStyle(true);
 		} else {
 			answerField.setOtherSpecifyStyle(false);
@@ -171,7 +172,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	 * enough checkboxes, <0 if too many are selected 
 	 */
 	
-	public int multipleSelectionCountStatus() {
+	private int multipleSelectionCountStatus() {
 		int iSelectedCount;
 		
 		// if we somehow got in a state where min/max are
@@ -194,29 +195,39 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	 * are selected to prompt the user to check more or fewer
 	 */
 	
-	public String getMultipleSelectionNotification() {
+	public String getRangeCheckNotification() {
 		int iCheckBoxStatus;
+		String strNotification = "";
 		
 		if ( dontKnow() || refused())
-			return("");
+			return(strNotification);
 		iCheckBoxStatus = multipleSelectionCountStatus();
 		if ( iCheckBoxStatus<0 ) {
-			return ("Too many responses selected"); 
+			strNotification = "Too many responses selected"; 
 		} else if ( iCheckBoxStatus>0 ) {
-			return("Not enough responses selected");
-		} else {
-			return ("");
-		}
+			strNotification = "Not enough responses selected";
+		} 
+		if ( otherSpecifyStyle && otherSpecifyTextField.isVisible() &&
+			( otherText==null || otherText.length()==0 ))
+			strNotification += " Specify Other blank";
+		return(strNotification);
 	}
 	
 	/** 
 	 * if the user selected dontKnow or refused to answer a question
 	 * don't bother counting the responses.
 	 */
-	public boolean multipleSelectionOkay() {
+	public boolean rangeCheckOkay() {
+		boolean bOkay = true;
+		
 		if ( dontKnow() || refused())
-			return (true);
-		return ( (multipleSelectionCountStatus()==0)?true:false);
+			return (bOkay);
+		if (multipleSelectionCountStatus()!=0)
+			bOkay = false;
+		if ( otherSpecifyStyle && otherSpecifyTextField.isVisible()
+			&& ( otherText==null || otherText.length()==0 ))
+			bOkay = false;
+		return(bOkay);
 	}
 	
 	/**
@@ -229,11 +240,12 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	public void actionPerformed (ActionEvent event) {
 		Object src = event.getSource();
 		boolean on = (event.getID()==0) ? false: true;
-		// String strCommand = event.getActionCommand();
 		
 		if ( src==answerField ) {
 			otherSpecifyLabel.setVisible(on);
 			otherSpecifyTextField.setVisible(on);
+			if ( !on )
+				setNotification("");
 		}
 	}
 	

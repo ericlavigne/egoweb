@@ -206,46 +206,55 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		return allConsistent(panels,pageLevelFlags) &&
 			  (allAnsweredOrRefused(panels,pageLevelFlags) ||
 					(someAnswered(panels) && 
-							panels.iterator().next().question.needsMultiSelectionResponse())) &&
-				allMultipleSelectionOkay(panels);
+							panels.iterator().next().question.needsMultiSelectionResponse())) && 
+				allRangeChecksOkay(panels);
 	}
 	
 	/**
 	 * some answerforms - specifically MultipleSelection - can have a low bound and
 	 * a high bound set on the number of checkBoxes to select.
+	 * In a similar vein, numeric answer text boxes can have a low and a high limit
+	 * on the number entered.  A range check will have to be performed on the value
+	 * entered
 	 * @return 0 if the number of checkboxes is within the predetermined range OR
-	 * the AnswerForm is not of the MultipleSelection kind
+	 * if a text answer IS within the allowed range OR
+	 * the AnswerForm is not of the MultipleSelection OR Numeric kind
 	 */
-	public boolean multipleSelectionOkay() {
+	public boolean rangeCheckOkay() {
 		return(true);
 	}
 	
 	/**
-	 * like the above function multipleSelectionOkay, 
+	 * like the above function rangeChecksOkay, 
 	 * this function is ad hoc to multiple Selection questions
+	 * and numeric questions.
 	 * @return a string with an error message specific to 
 	 * multiple selection question with an incorrect number of 
-	 * checkboxes selected
+	 * checkboxes selected or numeric answers that are out of 
+	 * a specified range
 	 */
 	
-	public String getMultipleSelectionNotification() {
+	public String getRangeCheckNotification() {
 		return("");
 	}
 	
 	/**
 	 * checks all the MultipleSelection question panels, 
 	 * returns false if any one of them has an incorrect number
-	 * of checkboxes selected
+	 * of checkboxes selected.
+	 * Also checks numeric entry panels, returns false if they
+	 * contain a number out of range 
 	 * @param panels a collection of AnswerFormFieldPanels
 	 * @return false if any one of the panels is a MultipleSelection
-	 * panel with an incorrect number of boxes checked
+	 * panel with an incorrect number of boxes checked OR
+	 * any panel is a numeric entry with a value out of range
 	 */
 	
 	public static boolean 
-	allMultipleSelectionOkay(Collection<AnswerFormFieldPanel> panels ) 
+	allRangeChecksOkay(Collection<AnswerFormFieldPanel> panels ) 
 	{
 		for ( AnswerFormFieldPanel panel : panels ) {
-			if( !panel.multipleSelectionOkay())
+			if( !panel.rangeCheckOkay())
 		 		return(false);
 		}
 		return (true);

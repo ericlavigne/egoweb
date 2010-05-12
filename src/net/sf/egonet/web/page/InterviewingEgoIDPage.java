@@ -66,11 +66,11 @@ public class InterviewingEgoIDPage extends EgonetPage {
 				// first, verify that any and all multiple selection questions
 				// are answered fully
 				boolean multipleSelectionsOkay = 
-					AnswerFormFieldPanel.allMultipleSelectionOkay(questions);
+					AnswerFormFieldPanel.allRangeChecksOkay(questions);
 
 				if ( !multipleSelectionsOkay ) {
 					for(AnswerFormFieldPanel answerField : questions) {
-						answerField.setNotification(answerField.getMultipleSelectionNotification());
+						answerField.setNotification(answerField.getRangeCheckNotification());
 					}
 					return;
 				}

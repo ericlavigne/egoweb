@@ -20,17 +20,22 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private TextField textField;
 	private CheckboxesPanel<String> refDKCheck;
 	private Label lblNumberPrompt;
-	private NumberValidator.RangeValidator rangeValidator;
+	private int lowBound; // values used for range Validation
+	private int highBound;
 	
 	public NumberAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) { 
 		super(id,question,Answer.SkipReason.NONE,alters,interviewId); 
+		lowBound  = Integer.MIN_VALUE;
+		highBound = Integer.MAX_VALUE;
 		build("");
 	}
 	
 	public NumberAnswerFormFieldPanel(String id, 
 			Question question, String answer, Answer.SkipReason skipReason, ArrayList<Alter> alters, Long interviewId) 
 	{ 
-		super(id,question,skipReason,alters,interviewId); 
+		super(id,question,skipReason,alters,interviewId);
+		lowBound  = Integer.MIN_VALUE;
+		highBound = Integer.MAX_VALUE;
 		build(answer);
 	}
 	
@@ -136,8 +141,9 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		NumericLimitType maxLimitType;
 		boolean hasLowBound; 
         boolean hasHighBound; 
-        int lowBound = 0;
-        int highBound = 10000;
+        
+        lowBound = -10000;
+        highBound = 10000;
         
         minLimitType = question.getMinLimitType();
         maxLimitType = question.getMaxLimitType();
@@ -178,10 +184,77 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
         // play it safe and don't set any bounds;
         if ( lowBound>highBound )
         	return(false);
-		rangeValidator = new 
-		NumberValidator.RangeValidator(lowBound,highBound);
-		textField.add(rangeValidator);
+		// rangeValidator = new NumberValidator.RangeValidator(lowBound,highBound);
+		// textField.add(rangeValidator);
 		return(true);
 	}
+	
+	/** 
+	 * performs simple verification that the number entered into the text field
+	 * was within the limits.  Returns an integer so we have the option of
+	 * rather detailed error messages such as "Your value of 14 is too high", but
+	 * for the most part we're concerned whether or not this returns 0
+	 * @return 0 if we are in the range , >0 if answer is too low
+	 * <0 if answer is too high 
+	 */
+	
+	private int numericAnswerStatus() {
+		String strAnswer;
+		int    iAnswer;
+		
+		strAnswer = getAnswer().trim();
+		try {
+			iAnswer = Integer.parseInt(strAnswer);
+		} catch ( NumberFormatException e ) {
+			iAnswer = 0;
+		}
+		
+		// System.out.println ( "numericAnswerStatus lowBound=" + lowBound + " highBound=" + highBound + " answer=" + iAnswer);
+		// if we somehow got in a state where lowBound>highBound are
+		// incompatible, play it safe and do NO error checking
+		if ( lowBound>highBound )
+			return(0);
+		if ( lowBound==Integer.MIN_VALUE && highBound==Integer.MAX_VALUE)
+			return(0);
+		
+		if ( iAnswer < lowBound ) {
+			return(lowBound - iAnswer);
+		}
+		if (iAnswer > highBound ) {
+			return(highBound - iAnswer);
+		}
+		return(0);
+	}
+	/**
+	 * returns the string used if an incorrect number of checkboxes
+	 * are selected to prompt the user to check more or fewer
+	 */
+	
+	public String getRangeCheckNotification() {
+		int iAnswerStatus;
+		String strNotification = "";
+		
+		if ( dontKnow() || refused())
+			return(strNotification);
+		
+		iAnswerStatus = numericAnswerStatus();
+		if ( iAnswerStatus<0 ) {
+			strNotification  = "Answer is above upper limit of " + highBound + "."; 
+		} else if ( iAnswerStatus>0 ) {
+			strNotification = "Answer is below lower limit of " + lowBound + ".";
+		} 
+		return (strNotification);
+	}
+	
+	/** 
+	 * if the user selected dontKnow or refused to answer a question
+	 * don't bother counting the responses.
+	 */
+	public boolean rangeCheckOkay() {
+		if ( dontKnow() || refused())
+			return (true);
+		return ( (numericAnswerStatus()==0)?true:false);
+	}
+	
 }
 

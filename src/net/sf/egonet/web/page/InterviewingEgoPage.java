@@ -42,10 +42,10 @@ public class InterviewingEgoPage extends InterviewingPage {
 				boolean consistent = 
 					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 				boolean multipleSelectionsOkay = 
-					AnswerFormFieldPanel.allMultipleSelectionOkay(answerFields);				
+					AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
 				for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
 					if ( !multipleSelectionsOkay ) {
-						field.setNotification(field.getMultipleSelectionNotification());
+						field.setNotification(field.getRangeCheckNotification());
 					} else if(okayToContinue) {
 							Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
 									field.getAnswer(),field.getOtherText(),

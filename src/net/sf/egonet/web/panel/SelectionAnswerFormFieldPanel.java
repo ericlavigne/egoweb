@@ -49,6 +49,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 				otherSpecifyLabel.setVisible(true);
 				otherSpecifyTextField.setVisible(true);	
 			} else {
+				setNotification("");
 				otherSpecifyLabel.setVisible(false);
 				otherSpecifyTextField.setVisible(false);
 			}
@@ -113,7 +114,6 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		otherSpecifyStyle = question.getOtherSpecify();
 		otherSpecifyLabel = new Label("otherSpecifyLabel", "Specify Other: ");
 		otherSpecifyTextField = new TextField("otherSpecifyTextField", new PropertyModel(this, "otherSpecifyText"));
-		otherSpecifyTextField.setRequired(true);
 		add(otherSpecifyLabel);
 		add(otherSpecifyTextField);
 		otherSpecifyLabel.setOutputMarkupId(true);
@@ -157,6 +157,42 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		return selected != null && selected instanceof QuestionOption ? 
 				((QuestionOption) selected).getName() : null;	
 	}
+	
+	/**
+	 * returns the string used if an incorrect number of checkboxes
+	 * are selected to prompt the user to check more or fewer
+	 */
+	
+	public String getRangeCheckNotification() {
+		int iCheckBoxStatus;
+		String strNotification = "";
+		
+		if ( dontKnow() || refused())
+			return(strNotification);
+
+		if ( otherSpecifyStyle && otherSpecifyTextField.isVisible() &&
+			( otherSpecifyText==null || otherSpecifyText.length()==0 ))
+			strNotification = "Specify Other blank";
+		return(strNotification);
+	}
+	
+	/** 
+	 * if the user selected dontKnow or refused to answer a question
+	 * don't bother counting the responses.
+	 */
+	public boolean rangeCheckOkay() {
+		boolean bOkay = true;
+		
+		if ( dontKnow() || refused())
+			return (bOkay);
+		
+		if ( otherSpecifyStyle && otherSpecifyTextField.isVisible()
+			&& ( otherSpecifyText==null || otherSpecifyText.length()==0 ))
+			bOkay = false;
+		return(bOkay);
+	}
+	
+	
 	/**
 	 * checks to see if the answer from a previous use
 	 * of this question starts with the string OTHER SPECIFY
