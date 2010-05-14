@@ -6,6 +6,7 @@ import java.util.Collection;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.SimpleLogicMgr;
 import static net.sf.egonet.model.Answer.AnswerType;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -124,7 +125,10 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.variableInsertion(strPrompt, interviewId, alters);
-		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);		
+		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);
+		if ( SimpleLogicMgr.hasError()) {
+			System.out.println ("USE IF error in " + question.getTitle());
+		}
 		return (strPrompt);
 	}
 

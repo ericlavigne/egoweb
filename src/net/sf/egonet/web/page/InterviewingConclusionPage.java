@@ -13,7 +13,8 @@ public class InterviewingConclusionPage extends EgonetPage {
 				+Interviews.getEgoNameForInterview(interviewId)
 				+" (respondent #"+interviewId+")");
 		
-        add(new MultiLineLabel("conclusion", Studies.getStudyForInterview(interviewId).getConclusion()));
+        add(new MultiLineLabel("conclusion", Studies.getStudyForInterview(interviewId).getConclusion())
+        		.setEscapeModelStrings(false));
         
         Application application = getApplication();
         if (application instanceof Main)

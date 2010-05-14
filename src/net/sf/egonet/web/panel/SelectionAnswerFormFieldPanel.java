@@ -164,7 +164,6 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 */
 	
 	public String getRangeCheckNotification() {
-		int iCheckBoxStatus;
 		String strNotification = "";
 		
 		if ( dontKnow() || refused())

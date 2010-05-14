@@ -95,7 +95,8 @@ public class InterviewingEgoIDPage extends EgonetPage {
             }
         };
 		
-        form.add(new MultiLineLabel("prompt", Studies.getStudy(studyId).getEgoIdPrompt()));
+        form.add(new MultiLineLabel("prompt", Studies.getStudy(studyId).getEgoIdPrompt())
+        		.setEscapeModelStrings(false));
         
 		questionsView = new ListView("questions", questions)
         {

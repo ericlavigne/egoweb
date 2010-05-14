@@ -434,7 +434,7 @@ public class Archiving {
 		question.setPreface(attrText(node,"preface"));
 		question.setPrompt(attrText(node,"prompt"));
 		question.setCitation(attrText(node,"citation"));
-		question.setUseIfExpression(attrText(node,"useIf"));
+		question.setUseIfExpression(attrString(node,"useIf"));
 		
 		aType = question.getAnswerType();
 		if ( aType==Answer.AnswerType.NUMERICAL ) {

@@ -56,7 +56,7 @@ public class InterviewingAlterPromptPage extends InterviewingPage {
 	private void build() {
 		final Study study = getStudy();
 		
-		add(new MultiLineLabel("alterPrompt",study.getAlterPrompt())); 
+		add(new MultiLineLabel("alterPrompt",study.getAlterPrompt()).setEscapeModelStrings(false)); 
 		
 		add(new FeedbackPanel("feedback"));
 		

@@ -17,6 +17,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.form.Form;
 
 import com.google.common.collect.Lists;
 
@@ -31,7 +32,6 @@ public class CheckboxesPanel<T> extends Panel {
 	private Boolean otherSelected;
 	private ArrayList<ActionListener> actionListeners;
 	private ArrayList<Component> componentsToUpdate;
-	
 	public List<T> getSelected() {
 		List<T> result = Lists.newArrayList();
 		for(CheckableWrapper wrapper : items) {
@@ -68,8 +68,8 @@ public class CheckboxesPanel<T> extends Panel {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
 				String accessKey = (wrapper.getIndex()+1)+"";
 				Boolean hasAccessKey = items.size() < 10;
-				item.add(new Label("checkLabel",wrapper.getName()+
-						(hasAccessKey ? " ("+accessKey+")" : "")));
+				item.add(new Label("checkLabel",
+						(hasAccessKey ? wrapper.getAccessKey() : "") + wrapper.getName()));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkField", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
@@ -97,6 +97,7 @@ public class CheckboxesPanel<T> extends Panel {
 				item.add(checkBox);
 			}
 		};
+		
 		checkboxes.setReuseItems(true);
 		add(checkboxes);
 	}
@@ -129,6 +130,23 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		public String getName() {
 			return showItem(item);
+		}
+		/**
+		 * Don't Know and Refuse should not have
+		 * access keys, otherwise the access key is
+		 * the index+1
+		 * @return a string showing the integer access
+		 * key for this Selection
+		 */
+		public String getAccessKey() {
+			String name = getName().trim();
+			int accessKey = getIndex()+1;
+			
+			if ( name.equals(AnswerFormFieldPanel.dontKnow) || name.equals(AnswerFormFieldPanel.refuse))
+				return("");
+			if ( accessKey>=10 )
+				return("");
+			return ( " (" + accessKey + ") ");
 		}
 	}
 	

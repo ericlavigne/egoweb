@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Interviewing;
+import net.sf.egonet.persistence.SimpleLogicMgr;
 
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
@@ -31,12 +32,15 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
         	
         	text = question.calculationInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.variableInsertion(text, interviewId, (ArrayList<Alter>)null);
-        	text = question.conditionalTextInsertion(text, interviewId, (ArrayList<Alter>)null);	
+        	text = question.conditionalTextInsertion(text, interviewId, (ArrayList<Alter>)null);
+			if ( SimpleLogicMgr.hasError()) {
+				System.out.println ("USE IF error in " + question.getTitle());
+			}
         }
         
         this.text = text;
         
-        add(new MultiLineLabel("text", this.text));
+        add(new MultiLineLabel("text", this.text).setEscapeModelStrings(false));
 
 		add(new Link("backwardLink") {
 			public void onClick() {

@@ -419,7 +419,7 @@ public class TextInsertionUtil {
 			if ( strExpression != null ) {
 				firstSpace = strExpression.indexOf(" "); // split strExpression into question title and answer
 				if ( firstSpace <= 0 ) {
-					strResult += "[Error " + strExpression + " COUNT needs question and answer]";
+					strResult += "[ERROR " + strExpression + " COUNT needs question and answer]";
 				} else {
 				    // flips and twists to deal with whitespace and (optional) quotes
 				    strQuestionTitle = strExpression.substring(0,firstSpace).trim();
@@ -427,7 +427,7 @@ public class TextInsertionUtil {
 				    strQuestionTitle = trimQuotes(strQuestionTitle);
 				    strAnswerToCount = trimQuotes(strAnswerToCount);
 				    if ( strQuestionTitle.length()==0 || strAnswerToCount.length()==0 ) {
-						strResult += "[Error " + strExpression + " COUNT needs Question and Answer]";
+						strResult += "[ERROR " + strExpression + " COUNT needs Question and Answer]";
 				    } else {
 				    	strCountValue = getAnswerCountToQuestion(strQuestionTitle, strAnswerToCount, interviewId, studyId );
 				        strResult += " " + strCountValue + " ";
@@ -484,7 +484,7 @@ public class TextInsertionUtil {
 			if ( strExpression != null ) {
 				firstSpace = strExpression.indexOf(" "); // split strExpression into question title and answer
 				if ( firstSpace <= 0 ) {
-					strResult += "[Error " + strExpression + " CONTAINS needs question and answer]";
+					strResult += "[ERROR " + strExpression + " CONTAINS needs question and answer]";
 				} else {
 				    // flips and twists to deal with whitespace and (optional) quotes
 				    strQuestionTitle = strExpression.substring(0,firstSpace).trim();
@@ -494,7 +494,7 @@ public class TextInsertionUtil {
 				    // System.out.println ( "question=" + strQuestionTitle);
 				    // System.out.println ( "  answer=" + strAnswerToCount);
 				    if ( strQuestionTitle.length()==0 || strAnswerToCount.length()==0 ) {
-						strResult += "[Error " + strExpression + " CONTAINS needs Question and Answer]";
+						strResult += "[ERROR " + strExpression + " CONTAINS needs Question and Answer]";
 				    } else {
 				    	strCountValue = getQuestionContains(strQuestionTitle, strAnswerToCount, 
 				        		interviewId, iType, studyId, listOfAlters );
@@ -707,7 +707,8 @@ public class TextInsertionUtil {
 				iFirstQuote = strContents.lastIndexOf("\"", iLastQuote-1);
 				// System.out.println ( "quotes=" + iFirstQuote + "," + iLastQuote);
 				if ( iLastQuote<0 || iFirstQuote<0) {
-					System.out.println ("Problem in TextInsertionUtil.conditionalTextInsertion");
+					System.out.println ("ERROR Problem in TextInsertionUtil.conditionalTextInsertion, missing quotes");
+					System.out.println ("Returning " + strResult);
 					return(strResult);
 				}
 				strExpression = strContents.substring(0,iFirstQuote);

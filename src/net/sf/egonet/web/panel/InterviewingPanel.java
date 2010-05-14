@@ -7,6 +7,7 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.SimpleLogicMgr;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
@@ -41,6 +42,8 @@ public class InterviewingPanel extends Panel {
 	private void build() {
 		String strPrompt;
 		
+		add (new Label("questionTitle", question.getTitle()));
+		
 		ArrayList<Alter> altersInPrompt = Lists.newArrayList();
 		if(answerFields.size() < 2 && ! answerFields.isEmpty()) {
 			altersInPrompt = answerFields.get(0).getAlters();
@@ -55,7 +58,10 @@ public class InterviewingPanel extends Panel {
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);
-		add(new MultiLineLabel("prompt", strPrompt));
+		if ( SimpleLogicMgr.hasError()) {
+			System.out.println ("USE IF error in " + question.getTitle());
+		}
+		add(new MultiLineLabel("prompt", strPrompt).setEscapeModelStrings(false));
 		
 		ListView questionsView = new ListView("questions",answerFields) {
 			protected void populateItem(ListItem item) {

@@ -7,6 +7,8 @@ import net.sf.egonet.model.Question;
  
 public class SimpleLogicMgr {
 
+	static boolean error = false;
+	
 	/**
 	 * VERY rudimentary expression tree creator
 	 * the strExpression list is of the type created by parseComparisonList
@@ -22,7 +24,8 @@ public class SimpleLogicMgr {
 		iExpressionSize = strExpression.size();
 		
 		if ( iExpressionSize != 3  &&  iExpressionSize != 1 ) {
-			System.out.println ("SimpleLogicMgr can only handle 1 OR 3 nodes right now not " + iExpressionSize);
+			error = true;
+			System.out.println ("ERROR - SimpleLogicMgr can only handle 1 OR 3 nodes right now not " + iExpressionSize);
 			for ( String str:strExpression )
 				System.out.println ( str);
 			return(mainNode);
@@ -30,8 +33,8 @@ public class SimpleLogicMgr {
 		switch ( iExpressionSize ) {
 		    case 1:
 		    	 mainNode = new ExpressionNode ( strExpression.get(0));
-		    	 System.out.println ( "Expression = " + mainNode.toString(false));
-		    	 System.out.println ( "Expression = " + mainNode.toString(true));
+		    	 // System.out.println ( "Expression = " + mainNode.toString(false));
+		    	 // System.out.println ( "Expression = " + mainNode.toString(true));
 		    	 break;
 		    case 3:
 		    	 leftNode = new ExpressionNode ( strExpression.get(0));
@@ -73,9 +76,22 @@ public class SimpleLogicMgr {
 	 */
 	public static int createSimpleExpressionAndEvaluate ( String strExpression,
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters) {
+		int iEvaluate;
 		
 		ExpressionNode expressionNode = createSimpleExpression ( strExpression);
-		return ( expressionNode.evaluate(interviewId, iType, studyId, listOfAlters));
+		if ( expressionNode==null ) {
+			error = true;
+			System.out.println ( "ERROR SimpleLogicMgr.createSimpleExpressionAndEvaluate returning 1");
+			System.out.println ( "Input expression=" + strExpression );
+			return(1);
+		}
+		iEvaluate =  expressionNode.evaluate(interviewId, iType, studyId, listOfAlters);
+		if ( iEvaluate==Integer.MAX_VALUE ) {
+			System.out.println ( "ERROR SimpleLogicMgr.createSimpleExpressionAndEvaluate returning 1");
+			System.out.println ( "Problem in evaluating arithmetic expression");
+			System.out.println ( "Input expression=" + strExpression );	
+		}
+		return (iEvaluate);
 	}
 
 
@@ -96,8 +112,9 @@ public class SimpleLogicMgr {
 	int iNextCompareOp;
 	    
 
-	if ( strInput==null || strInput.length()==0 )
-		return(theList);
+	if ( strInput==null || strInput.length()==0 ) {
+ 		return(theList);
+	}
 	iWordEnd = 0;
 	while ( strInput.length()>0  &&  iWordEnd != Integer.MAX_VALUE) {
 	    iWordEnd = ExpressionNode.indexOfNextComparisonOp ( strInput );
@@ -108,6 +125,9 @@ public class SimpleLogicMgr {
 	    	iNextCompareOp = ExpressionNode.typeOfNextCompareOp(strInput);
 	    	if ( iNextCompareOp<0 || iNextCompareOp>=6 ) {
 	    		System.out.println ("Something bad-wrong in parseComparisonList " + iNextCompareOp);
+	    		for ( String str:theList ) {
+	    			System.out.println(str);
+	    		}
 	    		return(theList);
 	    	}
 	    	strNextComparisonOp = ExpressionNode.CompareOpStr[iNextCompareOp];
@@ -119,11 +139,18 @@ public class SimpleLogicMgr {
 	if ( strInput.length()>0)
 		theList.add(strInput.trim());
 	
-	System.out.println ( "parseComparisionList");
-	for ( String str:theList ) {
-	 	System.out.println(str);
-	}
+	// System.out.println ( "parseComparisionList");
+	// for ( String str:theList ) {
+	// 	System.out.println(str);
+	// }
 	
 	return(theList);
 	}	
+	
+	public static boolean hasError() {
+		boolean bRetVal = error;
+		
+		error = false;
+		return(bRetVal);
+	}
 }

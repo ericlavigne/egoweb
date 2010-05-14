@@ -115,8 +115,6 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 			otherSpecifyLabel.setVisible(false);
 			otherSpecifyTextField.setVisible(false);
 		}
-		
-	
 	}
 
 	public String getAnswer() {

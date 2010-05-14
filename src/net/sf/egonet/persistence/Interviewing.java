@@ -143,6 +143,9 @@ public class Interviewing {
 						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
 								strUseIf, interviewId, 
 								question.getType(), question.getStudyId(), emptyAlterList);
+						if ( SimpleLogicMgr.hasError()) {
+							System.out.println ("USE IF error in " + question.getTitle());
+						}
 						if (iEvaluate==0)
 							shouldAnswer = false;
 					}
@@ -497,6 +500,9 @@ public class Interviewing {
 						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
 								strUseIf, interviewId, 
 								question.getType(), question.getStudyId(), singleAlterList);
+						if ( SimpleLogicMgr.hasError()) {
+							System.out.println ("USE IF error in " + question.getTitle());
+						}
 						if (iEvaluate==0)
 							shouldAnswer = false;
 					}
@@ -549,6 +555,9 @@ public class Interviewing {
 								iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
 										strUseIf, interviewId, 
 										question.getType(), question.getStudyId(), twoAlterList);
+								if ( SimpleLogicMgr.hasError()) {
+									System.out.println ("USE IF error in " + question.getTitle());
+								}
 								if (iEvaluate==0)
 									shouldAnswer = false;
 							}

@@ -25,7 +25,8 @@ public class InterviewingIntroductionPage extends EgonetPage {
 
 	private void build() {
 
-        add(new MultiLineLabel("introduction", study.getIntroduction() == null ? "" : study.getIntroduction()));
+        add(new MultiLineLabel("introduction", study.getIntroduction() == null ? "" : 
+        			study.getIntroduction()).setEscapeModelStrings(false));
         
         add(new BookmarkablePageLink("egoIDPageLink", InterviewingEgoIDPage.class, parameters));
 	}

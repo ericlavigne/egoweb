@@ -163,16 +163,16 @@ public class ExpressionNode {
 			 strQuestionVariable = TextInsertionUtil.answerToQuestion ( varName, 
 						interviewId, iType, studyId, listOfAlters );
 			 if ( strQuestionVariable==null || strQuestionVariable.length()==0 ) {
-				 System.out.println ( "math variable " + varName + " not found");
-				 intResult = 0;
+				 System.out.println ( "ERROR math variable " + varName + " not found");
+				 intResult = Integer.MAX_VALUE;
 				 break;
 			 }
 			 try {
 				 intResult = Integer.parseInt(strQuestionVariable);
 			 } catch ( NumberFormatException nfe ) {
-				 System.out.println ( "In ExpressionNode.evaluate strQuestionVariable was NOT an integer");
-				 System.out.println ( "strQuestionVariable =" + strQuestionVariable + " variable name=" + varName);
-				 intResult = 0;
+				 System.out.println ( "ERROR In ExpressionNode.evaluate strQuestionVariable was NOT an integer");
+				 System.out.println ( "ERROR strQuestionVariable =" + strQuestionVariable + " variable name=" + varName);
+				 intResult = Integer.MAX_VALUE;
 				 break; 
 			 }
 			 break;
