@@ -11,8 +11,7 @@ $(document).ready(function(){
 		// Handle keydown event for keys 1-9.
 		$(document).keydown(function(event) {
 			if(event.keyCode > 48 && event.keyCode < 58 
-				&& $('input[type=text].focus').length === 0
-				&& $('textarea.focus').length === 0) 
+				&& $('.textfocus').length === 0) 
 			{
 				$("input.hotkey").each(function(i) {
 					if(i == event.keyCode - 49) {
@@ -29,20 +28,13 @@ $(document).ready(function(){
 				return t;
 			}
 		});
-		// Mark text input fields with the focus class when they are in focus.
-		$('input')
+		// Mark text input fields with the textfocus class when they are in focus.
+		$('input[type=text],textarea')
 		.blur(function() {
-			$(this).removeClass("focus");
+			$(this).removeClass("textfocus");
 		})
 		.focus(function() {
-			$(this).addClass("focus");
-		});
-		$('textarea')
-		.blur(function() {
-			$(this).removeClass("focus");
-		})
-		.focus(function() {
-			$(this).addClass("focus");
+			$(this).addClass("textfocus");
 		});
 	}
 });
