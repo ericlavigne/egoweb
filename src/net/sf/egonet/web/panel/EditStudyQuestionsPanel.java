@@ -9,6 +9,7 @@ import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
@@ -140,6 +141,26 @@ public class EditStudyQuestionsPanel extends Panel {
 				if(QuestionType.EGO_ID.equals(question.getType())) {
 					questionPreview.setVisible(false);
 				}
+				item.add(new AjaxFallbackLink("questionDuplicate") {
+					public void onClick(AjaxRequestTarget target) {
+						Question newQ = question.copy();
+						newQ.setOrdering(
+								question.getOrdering() == null ? 0 : 
+									question.getOrdering()+1);
+						List<Question> questions = 
+							Questions.getQuestionsForStudy(studyId, question.getType());
+						int qIndex = questions.indexOf(question);
+						questions.add(qIndex+1, newQ);
+						for(int i = qIndex; i < questions.size(); i++) {
+							questions.get(i).setOrdering(i);
+							DB.save(questions.get(i));
+						}
+						for(QuestionOption option : Options.getOptionsForQuestion(question.getId())) {
+							Options.addOption(newQ, option.getName(), option.getValue());
+						}
+						target.addComponent(questionsContainer);
+					}
+				});
 				item.add(new AjaxFallbackLink("questionMoveUp") {
 					public void onClick(AjaxRequestTarget target) {
 						Questions.moveEarlier(question);
