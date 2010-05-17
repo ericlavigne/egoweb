@@ -69,6 +69,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
 			return new MultipleSelectionAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
+		if ( type.equals(AnswerType.DATE_TIME_SPAN)) {
+			return new DateAnswerFormFieldPanel(id,question,alters, interviewId);
+		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
 	
@@ -93,6 +96,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		}
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
 			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,otherSpecAnswer,skipReason,alters,interviewId);
+		}
+		if ( type.equals(AnswerType.DATE_TIME_SPAN)) {
+			return new DateAnswerFormFieldPanel(id,question,answer,skipReason,alters, interviewId);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
@@ -127,7 +133,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		strPrompt = question.variableInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);
 		if ( SimpleLogicMgr.hasError()) {
-			System.out.println ("USE IF error in " + question.getTitle());
+			System.out.println ("Var Insertion error in " + question.getTitle());
 		}
 		return (strPrompt);
 	}

@@ -3,7 +3,6 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 
 import org.apache.wicket.model.Model;
-import org.apache.wicket.validation.validator.NumberValidator;
 import org.apache.wicket.markup.html.basic.Label;
 import com.google.common.collect.Lists;
 

@@ -17,7 +17,7 @@ import net.sf.egonet.persistence.ExpressionNode.MathOp;
 
 /**
  * the survey question prompts can be altered at runtime using special tags,
- * <VAR ... />  <COUNT ... />   <CALC ... />  and <IF .. />
+ * <VAR ... />  <COUNT ... />   <CALC ... />  <CONTAINS ... /> and <IF .. />
  * This class contains static functions that will perform this 
  * 'insertion' of variable text
  * @author Kevin
@@ -605,10 +605,12 @@ public class TextInsertionUtil {
 		Question question = null;
 		Answer theAnswer = null;
 		String strAnswer = strQuestionTitle;
+		String   userAnswer;
+		String[] answersToLookFor;
 		Long   iOptionId;
 		int iCount = 0;
 
-		strSurveyAnswer = strSurveyAnswer.trim();
+		answersToLookFor = strSurveyAnswer.trim().split(":");
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 	
 		if ( question==null )
@@ -639,15 +641,25 @@ public class TextInsertionUtil {
 				     }
 				     // lastly, if this answer matches the answer we 
 				     // are counting up increment our count
-				     if ((answerOption != null) && strSurveyAnswer.equalsIgnoreCase(answerOption.getName().trim()))
-					     ++iCount;
+				     // if ((answerOption != null) && strSurveyAnswer.equalsIgnoreCase(answerOption.getName().trim()))
+					 //    ++iCount;
+			         // }
+				     if ( answerOption != null ) {
+				    	 userAnswer = answerOption.getName().trim();
+				    	 for ( String str : answersToLookFor ) {
+				    		 if ( str.equalsIgnoreCase(userAnswer))
+				    			 ++iCount;
+				    	 }
+				     }
 			         }
 			         break;
 		        case TEXTUAL:
 		        case NUMERICAL:
 			         strAnswer = theAnswer.getValue().trim();
-			         if ( strSurveyAnswer.equals(strAnswer))
-				         ++iCount;
+			         for ( String str : answersToLookFor ) {
+			        	 if ( str.equals(strAnswer))
+			        		 ++iCount;
+			         	}
 			        break;
 		    }
 		}
@@ -713,8 +725,8 @@ public class TextInsertionUtil {
 				}
 				strExpression = strContents.substring(0,iFirstQuote);
 				strText = strContents.substring(iFirstQuote+1, iLastQuote);
-				// System.out.println ( "strExpression=" + strExpression);
-				// System.out.println ("strText=" + strText);
+				// System.out.println ( "strExpression=#" + strExpression + "#");
+				// System.out.println ("strText=#" + strText + "#");
 				iExpressionResult = SimpleLogicMgr.createSimpleExpressionAndEvaluate ( 
 						strExpression, interviewId, iType, studyId, listOfAlters );
 			    if ( iExpressionResult != 0 )

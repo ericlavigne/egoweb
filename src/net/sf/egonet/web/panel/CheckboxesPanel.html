@@ -1,4 +1,17 @@
+<!-- CheckboxesPanel.html -->
+<!-- This needs to support both horizontal formats where items -->
+<!-- are laid out left to right and the browswer takes care of -->
+<!-- wrapping, and a vertical format.                          -->
+<!-- The ONLY difference between these is a <BR /> tag to      -->
+<!-- force checkboxes to the next line but I found no way to   -->
+<!-- make this tag optional, the result being two complete     -->
+<!-- forms, one of which will be made invisible.               -->
+<!-- Making matters even more difficult is the fact that you   -->
+<!-- can't declare wicket tags and not fill them in the        -->
+<!-- associated java                                           -->
+
 <wicket:panel>
+	<form wicket:id="horizontalForm" >
 	<span wicket:id="checkboxes" style="margin-right:3em;">
 		<span style="white-space:nowrap;">
 			<input wicket:id="checkField" type="checkbox" />
@@ -6,6 +19,19 @@
 		</span>
 		<span style="whitespace:pre-wrap; color:#ffffff"> . . </span>
 	</span>
+	</form>
+
+	<form wicket:id="verticalForm" >
+	<span wicket:id="checkboxesVertical" style="margin-right:3em;">
+		<span style="white-space:nowrap;">
+		    <br />
+			<input wicket:id="checkFieldVertical" type="checkbox" />
+			<span  wicket:id="checkLabelVertical">Label</span>
+		</span>
+		<span style="whitespace:pre-wrap; color:#ffffff"> . . </span>
+	</span>
+	</form>
+	
 	<div style="clear:both"></div>
 	<br />
 </wicket:panel>

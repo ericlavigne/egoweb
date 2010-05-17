@@ -135,6 +135,7 @@ public class Expressions {
 		EvaluationContext context = new EvaluationContext();
 		Long studyId = interview.getStudyId();
 		Long interviewId = interview.getId();
+		
 		for(Question question : Questions.getQuestionsForStudy(session, studyId, null)) {
 			context.qidToQuestion.put(question.getId(), question);
 		}
@@ -171,6 +172,7 @@ public class Expressions {
 							answer.getAlterId1()), 
 					answer);
 		}
+
 		return context;
 	}
 	

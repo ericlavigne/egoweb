@@ -1,0 +1,24 @@
+<!-- DateAnswerFormFieldPanel.html            -->
+<!-- for for inputting date/time span answers -->
+<!-- KCN May 16 2010                          -->
+
+<wicket:extend >
+    <table>
+        <tr>
+        <td><input wicket:id="Year" type="text" /></td>
+        <td align="left">Year ( 0 or yyyy )</td>
+        </tr><tr>
+        <td><input wicket:id="Month" type="text" /></td>
+        <td align="left">Month (0 or 1-12 )</td>
+        </tr><tr>
+        <td><input wicket:id="Day" type="text" /></td>
+        <td align="left">Day (0 or 1-31 )</td> 
+        </tr><tr>
+        <td colspan="2"><b>Dates</b> should not have any zeros</td>
+        </tr><tr>
+        <td colspan="2"><b>Time Spans</b> can have zeros but at least one non-zero</td>
+        </tr>
+     </table>
+    
+	<span wicket:id="refDKCheck">Refuse and dont know checkboxes</span>
+</wicket:extend>

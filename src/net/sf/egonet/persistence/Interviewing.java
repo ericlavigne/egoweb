@@ -127,7 +127,7 @@ public class Interviewing {
 							context.eidToExpression.get(reasonId), 
 							new ArrayList<Alter>(), 
 							context);
-				
+
 				if ( reasonId==null ) {
 					String strUseIf;
 					int iEvaluate;
@@ -135,7 +135,7 @@ public class Interviewing {
 					
 					strUseIf = question.getUseIfExpression();
 					if ( strUseIf!=null && strUseIf.length()>0 ) {
-						System.out.println ( strUseIf);
+						// System.out.println ( strUseIf);
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, emptyAlterList);
 						strUseIf = question.calculationInsertion(strUseIf, interviewId, emptyAlterList);
@@ -145,6 +145,7 @@ public class Interviewing {
 								question.getType(), question.getStudyId(), emptyAlterList);
 						if ( SimpleLogicMgr.hasError()) {
 							System.out.println ("USE IF error in " + question.getTitle());
+							System.out.println ("USE IF =" + question.getUseIfExpression());
 						}
 						if (iEvaluate==0)
 							shouldAnswer = false;
@@ -502,6 +503,7 @@ public class Interviewing {
 								question.getType(), question.getStudyId(), singleAlterList);
 						if ( SimpleLogicMgr.hasError()) {
 							System.out.println ("USE IF error in " + question.getTitle());
+							System.out.println ("USE IF =" + question.getUseIfExpression());
 						}
 						if (iEvaluate==0)
 							shouldAnswer = false;
@@ -557,6 +559,7 @@ public class Interviewing {
 										question.getType(), question.getStudyId(), twoAlterList);
 								if ( SimpleLogicMgr.hasError()) {
 									System.out.println ("USE IF error in " + question.getTitle());
+									System.out.println ("USE IF =" + question.getUseIfExpression());
 								}
 								if (iEvaluate==0)
 									shouldAnswer = false;

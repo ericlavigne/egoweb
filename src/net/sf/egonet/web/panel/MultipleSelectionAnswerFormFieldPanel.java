@@ -34,12 +34,14 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	private TextField otherSpecifyTextField;
 	private String otherText;
 	private boolean otherSpecifyStyle;
+	private boolean horizontalLayout = false;
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, 
 			ArrayList<Alter> alters, Long interviewId) {
 		super(id,question,Answer.SkipReason.NONE,alters,interviewId);
 		originallySelectedOptions = Lists.newArrayList();
 		setOtherText("");
+		setHorizontalLayout ( question.getAskingStyleList());
 		build();
 	}
 	
@@ -61,6 +63,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		} catch(Exception ex) {
 			// Most likely failed to parse answer. Fall back to no existing answer.
 		}
+		setHorizontalLayout ( question.getAskingStyleList());
 		build();
 	}
 	
@@ -115,6 +118,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 			otherSpecifyLabel.setVisible(false);
 			otherSpecifyTextField.setVisible(false);
 		}
+		answerField.setHorizontalLayout(horizontalLayout);
 	}
 
 	public String getAnswer() {
@@ -253,5 +257,14 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	}
 	public String getOtherText() {
 		return (( otherText==null) ? "" : otherText ) ;
-	}	
+	}
+	
+	public void setHorizontalLayout ( boolean horizontalLayout ) {
+		this.horizontalLayout = horizontalLayout;
+		if ( answerField!=null )
+		    answerField.setHorizontalLayout(horizontalLayout);
+	}
+	public boolean getHorizontalLayout() {
+		return(horizontalLayout);
+	}
 }

@@ -278,7 +278,7 @@ public class EditQuestionPanel extends Panel {
 		
 		if ( iValue==1) {
 			numericLimitsVisible = true;
-		} else if ( iValue==3){
+		} else if ( iValue==3) {
 			multipleSelectionLimitsVisible = true;
 		}
 		numericLimitsPanel.setVisible(numericLimitsVisible);

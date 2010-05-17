@@ -13,11 +13,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.form.Form;
 
 import com.google.common.collect.Lists;
 
@@ -32,6 +32,10 @@ public class CheckboxesPanel<T> extends Panel {
 	private Boolean otherSelected;
 	private ArrayList<ActionListener> actionListeners;
 	private ArrayList<Component> componentsToUpdate;
+	private Form horizontalForm;
+	private Form verticalForm;
+	private boolean horizontalLayout = false;
+	
 	public List<T> getSelected() {
 		List<T> result = Lists.newArrayList();
 		for(CheckableWrapper wrapper : items) {
@@ -59,10 +63,13 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		build();
 	}
-	
+		
 	private Boolean autoFocus = false;
 	
 	private void build() {
+		horizontalForm = new Form ("horizontalForm");
+		add(horizontalForm);
+		
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
@@ -99,7 +106,63 @@ public class CheckboxesPanel<T> extends Panel {
 		};
 		
 		checkboxes.setReuseItems(true);
-		add(checkboxes);
+		horizontalForm.add(checkboxes);
+		add(horizontalForm);
+		
+		verticalForm = new Form ("verticalForm");
+		add(verticalForm);
+		
+		ListView checkboxesVertical = new ListView("checkboxesVertical",items) {
+			protected void populateItem(ListItem item) {
+				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
+				String accessKey = (wrapper.getIndex()+1)+"";
+				Boolean hasAccessKey = items.size() < 10;
+				item.add(new Label("checkLabelVertical",
+						(hasAccessKey ? wrapper.getAccessKey() : "") + wrapper.getName()));				
+				AjaxCheckBox checkBox = new AjaxCheckBox("checkFieldVertical", new PropertyModel(wrapper, "selected"))
+				{
+				 protected void onUpdate(AjaxRequestTarget target) {
+						boolean otherNowSelected = false;
+						
+						otherNowSelected = isOtherSelected();
+						if ( otherNowSelected != otherSelected ) {
+							for ( Component component : componentsToUpdate) {
+							 	target.addComponent(component);
+							}			
+							fireActionEvent (otherNowSelected, "OTHER SPECIFY" );
+							otherSelected = otherNowSelected;
+						}
+				 }};
+				if(autoFocus) {
+					if(wrapper.getName() != null && items.get(0).getName() != null &&
+							wrapper.getName().equals(items.get(0).getName()))
+					{
+						checkBox.add(new FocusOnLoadBehavior());
+					}
+				}
+				if(hasAccessKey) {
+					checkBox.add(new SimpleAttributeModifier("accessKey",accessKey));
+				}
+				item.add(checkBox);
+			}
+		};
+		checkboxesVertical.setReuseItems(true);
+		verticalForm.add(checkboxesVertical);
+		add(verticalForm);
+		
+		if ( horizontalLayout )
+			horizontalForm.setVisible(true);
+		else
+			verticalForm.setVisible(false);
+	}
+	
+	public void setHorizontalLayout ( boolean horizontalLayout ) {
+		this.horizontalLayout = horizontalLayout;
+		horizontalForm.setVisible(horizontalLayout);
+		verticalForm.setVisible(!horizontalLayout);
+	}
+	public boolean getHorizontalLayout() {
+		return(horizontalLayout);
 	}
 	
 	public class CheckableWrapper implements Serializable {

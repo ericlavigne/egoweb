@@ -87,6 +87,7 @@ public class SimpleLogicMgr {
 		}
 		iEvaluate =  expressionNode.evaluate(interviewId, iType, studyId, listOfAlters);
 		if ( iEvaluate==Integer.MAX_VALUE ) {
+			error = true;
 			System.out.println ( "ERROR SimpleLogicMgr.createSimpleExpressionAndEvaluate returning 1");
 			System.out.println ( "Problem in evaluating arithmetic expression");
 			System.out.println ( "Input expression=" + strExpression );	
