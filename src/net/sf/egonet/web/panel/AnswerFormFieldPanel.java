@@ -69,7 +69,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
 			return new MultipleSelectionAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
-		if ( type.equals(AnswerType.DATE_TIME_SPAN)) {
+		if ( type.equals(AnswerType.DATE)) {
 			return new DateAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
@@ -97,7 +97,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		if(type.equals(AnswerType.MULTIPLE_SELECTION)) {
 			return new MultipleSelectionAnswerFormFieldPanel(id,question,answer,otherSpecAnswer,skipReason,alters,interviewId);
 		}
-		if ( type.equals(AnswerType.DATE_TIME_SPAN)) {
+		if ( type.equals(AnswerType.DATE)) {
 			return new DateAnswerFormFieldPanel(id,question,answer,skipReason,alters, interviewId);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);

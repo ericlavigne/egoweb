@@ -17,6 +17,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 
 import com.google.common.collect.Lists;
 
@@ -110,7 +111,7 @@ public class CheckboxesPanel<T> extends Panel {
 				String accessKey = (wrapper.getIndex()+1)+"";
 				Boolean hasAccessKey = items.size() < 10;
 				item.add(new Label("checkLabelVertical",
-						(hasAccessKey ? wrapper.getAccessKey() : "") + wrapper.getName()));				
+						(hasAccessKey ? accessKey : "") + wrapper.getName()));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkFieldVertical", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
@@ -169,6 +170,9 @@ public class CheckboxesPanel<T> extends Panel {
 			this.selected = selected;
 			return this;
 		}
+		public Integer getIndex() {
+			return 0 /*index*/;
+		}	
 		public Boolean getSelected() {
 			return selected;
 		}
