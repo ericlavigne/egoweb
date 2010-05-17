@@ -1,0 +1,15 @@
+<launch4jConfig>
+	<headerType>gui</headerType>
+	<outfile>dist/egoweb.exe</outfile>
+	<jar>dist/egoweb.jar</jar>
+	<singleInstance>
+		<mutexName>egoweb</mutexName>
+		<windowTitle>Egoweb is already running.</windowTitle>
+	</singleInstance>
+	<jre>
+		<minVersion>1.6.0</minVersion>
+		<initialHeapSize>256</initialHeapSize>
+		<maxHeapSize>512</maxHeapSize>
+		<maxHeapPercent>30</maxHeapPercent>
+	</jre>
+</launch4jConfig>
