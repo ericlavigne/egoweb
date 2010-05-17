@@ -61,6 +61,34 @@ public class Question extends OrderedEntity
 	public String toString() {
 		return (title == null ? "Untitled question" : title)+" ("+type+")";
 	}
+	
+	// Copy all attributes except identifiers: id and key
+	// Change name just slightly to not conflict with existing names
+	public Question copy() {
+		Question c = new Question();
+		c.setAnswerReasonExpressionId(getAnswerReasonExpressionId());
+		c.setAnswerType(getAnswerType());
+		c.setAskingStyleList(getAskingStyleList());
+		c.setCitation(getCitation());
+		c.setMaxCheckableBoxes(getMaxCheckableBoxes());
+		c.setMaxLimitTypeDB(getMaxLimitTypeDB());
+		c.setMaxLiteral(getMaxLiteral());
+		c.setMaxPrevQues(getMaxPrevQues());
+		c.setMinCheckableBoxes(getMinCheckableBoxes());
+		c.setMinLimitTypeDB(getMinLimitTypeDB());
+		c.setMinLiteral(getMinLiteral());
+		c.setMinPrevQues(getMinPrevQues());
+		c.setOrdering(getOrdering());
+		c.setOtherSpecify(getOtherSpecify());
+		c.setPreface(getPreface());
+		c.setPrompt(getPrompt());
+		c.setStudyId(getStudyId());
+		c.setTitle(getTitle().replaceAll("\\s+c\\d+", "")+" c"+(Math.abs(c.getRandomKey())%1000));
+		c.setTypeDB(getTypeDB());
+		c.setUseIfExpression(getUseIfExpression());
+		return c;
+	}
+	
 	@Override
 	public int compareTo(OrderedEntity entity) {
 		if(entity instanceof Question) {

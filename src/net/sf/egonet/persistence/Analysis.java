@@ -179,8 +179,11 @@ public class Analysis {
 			Statistics<Alter> statistics = new Statistics<Alter>(network);
 			EvaluationContext context = Expressions.getContext(session, interview);
 			List<Alter> alters = Alters.getForInterview(interview.getId());
-			for(Integer alterIndex = 1; alterIndex < alters.size()+1; alterIndex++) {
-				Alter alter = alters.get(alterIndex-1);
+			for(Integer alterIndex = 1; 
+				alterIndex < (alters.isEmpty() ? 1 : alters.size())+1; 
+				alterIndex++) 
+			{
+				Alter alter = alters.isEmpty() ? null : alters.get(alterIndex-1);
 				List<String> output = Lists.newArrayList();
 				output.add(interviewIndex.toString());
 				
@@ -198,8 +201,10 @@ public class Analysis {
 				output.add(statistics.density()+"");
 				
 				for(String centralityProperty : Statistics.centralityProperties) {
-					output.add(statistics.maxCentralityNode(centralityProperty)+"");
-					output.add(statistics.maxCentrality(centralityProperty)+"");
+					output.add(alters.isEmpty() ? "" : 
+						statistics.maxCentralityNode(centralityProperty)+"");
+					output.add(alters.isEmpty() ? "" :
+						statistics.maxCentrality(centralityProperty)+"");
 				}
 				output.add(statistics.cliques().size()+"");
 				output.add(statistics.components().size()+"");
@@ -212,16 +217,18 @@ public class Analysis {
 				output.add(statistics.isolates().size()+"");
 				output.add(statistics.dyads().size()+"");
 				
-				output.add(alterIndex.toString());
-				output.add(alter.getName());
+				output.add(alters.isEmpty() ? "" : alterIndex.toString());
+				output.add(alter == null ? "" : alter.getName());
 				for(Question question : alterQuestions) {
-					output.add(showAnswer(study, context, question,
+					output.add(alter == null ? "" :
+						showAnswer(study, context, question,
 							context.qidAidToAlterAnswer.get(
 									new PairUni<Long>(question.getId(),alter.getId())), 
 							alter, null, optionIdToValue));
 				}
 				for(String centralityProperty : Statistics.centralityProperties) {
-					output.add(statistics.centrality(centralityProperty, alter)+"");
+					output.add(alter == null ? "" :
+						statistics.centrality(centralityProperty, alter)+"");
 				}
 				writer.writeNext(output.toArray(new String[]{}));
 			}

@@ -7,6 +7,7 @@
 	<property name="build.dir" value="build"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="main.class.web" value="net.sf.egonet.web.ServerGui" />
+	<property name="launch4j.dir" location="lib/launch4j" />
 	
 	<path id="build.classpath">
 		<fileset dir="${lib.dir}">
@@ -14,6 +15,19 @@
 		</fileset>
 	</path>
 
+	<path id="launch4j.classpath">
+		<fileset dir="launch4j">
+			<include name="launch4j.jar" />
+		</fileset>
+		<fileset dir="launch4j/lib">
+			<include name="xstream.jar" />
+		</fileset>
+	</path>
+	
+	<taskdef name="launch4j"
+		classname="net.sf.launch4j.ant.Launch4jTask"
+		classpath="${launch4j.dir}/launch4j.jar:${launch4j.dir}/lib/xstream.jar" />
+	
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false"/>
 		<delete dir="${dist.dir}" failonerror="false"/>
@@ -43,7 +57,7 @@
 		</java>
 	</target>
 	
-	<target name="dist" depends="compile">
+	<target name="jar" depends="compile">
 		<jar jarfile="${dist.dir}/egoweb.jar" duplicate="preserve">
 			<manifest>
 				<attribute name="Main-Class" value="${main.class.web}" />
@@ -78,8 +92,11 @@
 			<zipfileset src="${lib.dir}/slf4j-api-1.5.8.jar" />
 			<zipfileset src="${lib.dir}/uncommons-maths-1.2.jar" />
 			<zipfileset src="${lib.dir}/wicket-1.3.6.jar" />
-
 		</jar>
+	</target>
+	
+	<target name="dist" depends="jar">
+		<launch4j configFile="winwrap.xml" />
 	</target>
 </project>
 

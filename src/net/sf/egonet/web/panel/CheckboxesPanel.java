@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
-import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -54,12 +53,10 @@ public class CheckboxesPanel<T> extends Panel {
 		otherSpecifyStyle = false;
 		otherSelected = false;
 		this.items = Lists.newArrayList();
-		for(Integer i = 0; i < items.size(); i++) {
-			T item = items.get(i);
+		for(T item : items) {
 			this.items.add(
 					new CheckableWrapper(item)
-					.setSelected(selected.contains(item))
-					.setIndex(i));
+					.setSelected(selected.contains(item)));
 		}
 		build();
 	}
@@ -73,10 +70,8 @@ public class CheckboxesPanel<T> extends Panel {
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
-				String accessKey = (wrapper.getIndex()+1)+"";
-				Boolean hasAccessKey = items.size() < 10;
-				item.add(new Label("checkLabel",
-						(hasAccessKey ? wrapper.getAccessKey() : "") + wrapper.getName()));				
+				
+				item.add(new Label("checkLabel", wrapper.getName()));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkField", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
@@ -97,9 +92,6 @@ public class CheckboxesPanel<T> extends Panel {
 					{
 						checkBox.add(new FocusOnLoadBehavior());
 					}
-				}
-				if(hasAccessKey) {
-					checkBox.add(new SimpleAttributeModifier("accessKey",accessKey));
 				}
 				item.add(checkBox);
 			}
@@ -168,7 +160,6 @@ public class CheckboxesPanel<T> extends Panel {
 	public class CheckableWrapper implements Serializable {
 		private T item;
 		private Boolean selected;
-		private Integer index;
 		
 		public CheckableWrapper(T item) {
 			this.item = item;
@@ -178,13 +169,6 @@ public class CheckboxesPanel<T> extends Panel {
 			this.selected = selected;
 			return this;
 		}
-		public CheckableWrapper setIndex(Integer index) {
-			this.index = index;
-			return this;
-		}
-		public Integer getIndex() {
-			return index;
-		}
 		public Boolean getSelected() {
 			return selected;
 		}
@@ -193,23 +177,6 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		public String getName() {
 			return showItem(item);
-		}
-		/**
-		 * Don't Know and Refuse should not have
-		 * access keys, otherwise the access key is
-		 * the index+1
-		 * @return a string showing the integer access
-		 * key for this Selection
-		 */
-		public String getAccessKey() {
-			String name = getName().trim();
-			int accessKey = getIndex()+1;
-			
-			if ( name.equals(AnswerFormFieldPanel.dontKnow) || name.equals(AnswerFormFieldPanel.refuse))
-				return("");
-			if ( accessKey>=10 )
-				return("");
-			return ( " (" + accessKey + ") ");
 		}
 	}
 	

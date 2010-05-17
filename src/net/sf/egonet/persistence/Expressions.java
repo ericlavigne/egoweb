@@ -73,11 +73,11 @@ public class Expressions {
 				List<Long> expressionIds = (List<Long>) otherExpression.getValue();
 				expressionIds.remove(expression.getId());
 				otherExpression.setValue(expressionIds);
-				DB.save(otherExpression);
+				DB.save(session,otherExpression);
 			} else if(otherExpression.getType().equals(Expression.Type.Comparison)) {
 				Pair<Integer,Long> numberExpr = (Pair<Integer,Long>) otherExpression.getValue();
 				if(numberExpr.getSecond().equals(expression.getId())) {
-					delete(otherExpression);
+					delete(session,otherExpression);
 				}
 			} else if(otherExpression.getType().equals(Expression.Type.Counting)) {
 				Triple<Integer,List<Long>,List<Long>> numberExprsQuests =
@@ -111,7 +111,7 @@ public class Expressions {
 				question.setAnswerReasonExpressionId(null);
 			}
 		}
-		DB.delete(expression);
+		DB.delete(session,expression);
 	}
 	
 	public static class EvaluationContext {
