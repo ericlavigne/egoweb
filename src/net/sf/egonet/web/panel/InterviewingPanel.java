@@ -70,7 +70,8 @@ public class InterviewingPanel extends Panel {
 				ArrayList<Alter> alters = wrapper.getAlters();
 				Alter lastAlter = alters.isEmpty() ? null : alters.get(alters.size()-1);
 				item.add(new Label("alter",
-						answerFields.size() < 2 || lastAlter == null ? 
+						(answerFields.size() < 2 && ! question.getAskingStyleList()) 
+						|| lastAlter == null ? 
 								"" : lastAlter.getName()));
 			}
 		};
