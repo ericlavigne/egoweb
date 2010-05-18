@@ -138,6 +138,8 @@ public class TextInsertionUtil {
 				 break;
 			case TEXTUAL:
 			case NUMERICAL:
+			case DATE:
+			case TIME_SPAN:
 				 strAnswer = theAnswer.getValue();
 				 break;
 		}

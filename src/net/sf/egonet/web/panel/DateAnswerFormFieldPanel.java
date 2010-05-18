@@ -2,8 +2,12 @@ package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 
 import com.google.common.collect.Lists;
 
@@ -16,12 +20,14 @@ import net.sf.egonet.web.component.TextField;
 
 public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
-	public static enum DATE_FIELDS { DF_YEAR, DF_MONTH , DF_DAY, DF_HOUR, DF_MINUTE };
-	private Integer[] theDate;
+	private static final List MONTHS = Arrays.asList(new String[] 
+	   {"Jan", "Feb", "Mar", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec" });
+	private Integer   theYear;
+	private String    theMonth;
+	private Integer   theDay;
 	private TextField inputYear;
-	private TextField inputMonth;
+	private DropDownChoice inputMonth;
 	private TextField inputDay;
-	private Calendar  calendarDay;
 	private CheckboxesPanel<String> refDKCheck;
 	
 	public DateAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
@@ -40,35 +46,42 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	/**
 	 * 'our' string representation of a date will be
-	 * YYYY MM DD
+	 * MMM DD YYYY
+	 * where MMM is month in a string form (see MONTHS above)
 	 * This is a tremendous simplification over any of the string 
 	 * representations intrinsic to the calendar class
 	 * @param strDate a date or time span, in string format
 	 * @return
 	 */
 	private boolean stringToCalendar ( String strDate ) {
-		int ix = 0;
-		int iSize = DATE_FIELDS.values().length;
+		int iTokens;
 		String[] dateStrings;
+		StringTokenizer strk;
 		
-		calendarDay = Calendar.getInstance();
-		theDate = new Integer[iSize];
-		
-		for ( ix=0 ; ix<iSize ; ++ix )
-			theDate[ix] = new Integer(0);
-		
+		theYear = new Integer(0);
+		theMonth = "Jan";
+		theDay = new Integer(0);
+			
 		if ( strDate!=null && strDate.length()>0 ) {
-			dateStrings = strDate.trim().split(" ");
-			for ( ix=0 ; ix<iSize && ix<dateStrings.length ; ++ix ) {
+			strk = new StringTokenizer(strDate.trim());
+			iTokens =  strk.countTokens();
+			if ( iTokens>0 )
+				theMonth = strk.nextToken();
+			if ( iTokens>1 ) {
 				try {
-					theDate[ix] = Integer.parseInt(dateStrings[ix].trim());
-				} catch ( NumberFormatException nfe ) {
-					theDate[ix] = 0;
+					theDay = new Integer(strk.nextToken());
+				} catch ( NumberFormatException nfe1 ) {
+					theDay = new Integer(0);
+				}
+			}
+			if ( iTokens>2 ) {
+				try { 
+					theYear = new Integer(strk.nextToken());
+				} catch ( NumberFormatException nfe2 ) {
+					theYear = new Integer(0);
 				}
 			}
 		}
-	
-		calendarDay.set(theDate[0], theDate[1], theDate[2], theDate[3], theDate[4]);
 		return(true);
 	}
 	
@@ -81,7 +94,7 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private String calendarToString() {
 		String strDate = new String();
 		
-		strDate = String.format("%d %d %d", theDate[0], theDate[1], theDate[2]);
+		strDate = String.format("%s %d %d", theMonth, theDay, theYear);
 		return(strDate);
 	}
 	
@@ -89,7 +102,8 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private void build(String answer) {
 		
 		inputYear = new TextField ("Year", new PropertyModel(this, "theYear"), Integer.class);
-		inputMonth = new TextField ("Month", new PropertyModel(this,"theMonth"), Integer.class);
+		inputMonth = new DropDownChoice("Month", new PropertyModel(this,"theMonth"), MONTHS);
+		add(inputMonth);
 		inputDay = new TextField("Day", new PropertyModel(this,"theDay"), Integer.class);
 	
 		add(inputYear);
@@ -122,17 +136,13 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
-		if ( theDate[0] < 0 )
+		if ( theYear < 0 )
 			strNotification += "Year too low ";
-		if ( theDate[0] > 3000 ) 
-			strNotification += "Year too high";
-		if ( theDate[1]<0 )
-			strNotification += "Month too low ";
-		if ( theDate[1]>12 )
-			strNotification += "Month too high ";
-		if ( theDate[2]<0 )
+		if ( theYear > 3000 ) 
+			strNotification += "Year too high ";
+		if ( theDay<1 )
 			strNotification += "Day too low ";
-		if (theDate[2]>31 )
+		if (theDay>31 )
 			strNotification += "Day too high ";
 		return(strNotification);
 	}
@@ -145,11 +155,9 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return (true);
-		if ( theDate[0] < 0 || theDate[0] > 3000 ) 
+		if ( theYear < 0 || theYear > 3000 ) 
 			return(false);
-		if ( theDate[1]<0 || theDate[1]>12 )
-			return(false);
-		if ( theDate[2]<0 || theDate[2]>31 )
+		if ( theDay<1 || theDay>31 )
 			return(false);
 		return(true);
 	}
@@ -159,19 +167,19 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	public void setTheYear ( Integer theYear ) {
-		theDate[0] = (theYear==null)?new Integer(0) : theYear;
+		this.theYear = (theYear==null)?new Integer(0) : theYear;
 	}
-	public Integer getTheYear() { return (theDate[0]);}
+	public Integer getTheYear() { return (theYear);}
 	
-	public void setTheMonth ( Integer theMonth ) {
-		theDate[1] = (theMonth==null)?new Integer(0) : theMonth;
+	public void setTheMonth ( String theMonth ) {
+		this.theMonth = (theMonth==null) ? "Jan" : theMonth;
 	}
-	public Integer getTheMonth() { return (theDate[1]);}
+	public String getTheMonth() { return (theMonth);}
 	
 	public void setTheDay ( Integer theDay ) {
-		theDate[2] = (theDay==null)?new Integer(0) : theDay;
+		this.theDay = (theDay==null)?new Integer(0) : theDay;
 	}
-	public Integer getTheDay() { return (theDate[2]);}
+	public Integer getTheDay() { return (theDay);}
 	
 	
 	public void setAutoFocus() {

@@ -72,6 +72,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		if ( type.equals(AnswerType.DATE)) {
 			return new DateAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
+		if ( type.equals(AnswerType.TIME_SPAN)) {
+			return new TimeSpanAnswerFormFieldPanel(id,question,alters,interviewId);
+		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}
 	
@@ -99,6 +102,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		}
 		if ( type.equals(AnswerType.DATE)) {
 			return new DateAnswerFormFieldPanel(id,question,answer,skipReason,alters, interviewId);
+		}
+		if ( type.equals(AnswerType.TIME_SPAN)) {
+			return new TimeSpanAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
 		}
 		throw new RuntimeException("Unable to create AnswerFormFieldPanel for AnswerType="+type);
 	}

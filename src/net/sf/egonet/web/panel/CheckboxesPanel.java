@@ -17,7 +17,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
 
 import com.google.common.collect.Lists;
 
@@ -26,7 +25,7 @@ public class CheckboxesPanel<T> extends Panel {
 	protected String showItem(T item) {
 		return item.toString();
 	}
-	
+
 	private List<CheckableWrapper> items;
 	private Boolean otherSpecifyStyle;
 	private Boolean otherSelected;
@@ -45,10 +44,10 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		return result;
 	}
-	
+
 	public CheckboxesPanel(String id, List<T> items, List<T> selected) {
 		super(id);
-		
+
 		actionListeners = new ArrayList<ActionListener>();
 		componentsToUpdate = new ArrayList<Component>();
 		otherSpecifyStyle = false;
@@ -61,9 +60,9 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		build();
 	}
-		
+
 	private Boolean autoFocus = false;
-	
+
 	private void build() {
 		horizontalForm = new Form ("horizontalForm");
 		add(horizontalForm);
@@ -71,13 +70,13 @@ public class CheckboxesPanel<T> extends Panel {
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
-				
+
 				item.add(new Label("checkLabel", wrapper.getName()));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkField", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
 						boolean otherNowSelected = false;
-						
+
 						otherNowSelected = isOtherSelected();
 						if ( otherNowSelected != otherSelected ) {
 							for ( Component component : componentsToUpdate) {
@@ -97,7 +96,7 @@ public class CheckboxesPanel<T> extends Panel {
 				item.add(checkBox);
 			}
 		};
-		
+
 		checkboxes.setReuseItems(true);
 		horizontalForm.add(checkboxes);
 		add(horizontalForm);
@@ -108,15 +107,13 @@ public class CheckboxesPanel<T> extends Panel {
 		ListView checkboxesVertical = new ListView("checkboxesVertical",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
-				String accessKey = (wrapper.getIndex()+1)+"";
-				Boolean hasAccessKey = items.size() < 10;
-				item.add(new Label("checkLabelVertical",
-						(hasAccessKey ? accessKey : "") + wrapper.getName()));				
+
+				item.add(new Label("checkLabelVertical", wrapper.getName()));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkFieldVertical", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
 						boolean otherNowSelected = false;
-						
+
 						otherNowSelected = isOtherSelected();
 						if ( otherNowSelected != otherSelected ) {
 							for ( Component component : componentsToUpdate) {
@@ -133,12 +130,10 @@ public class CheckboxesPanel<T> extends Panel {
 						checkBox.add(new FocusOnLoadBehavior());
 					}
 				}
-				if(hasAccessKey) {
-					checkBox.add(new SimpleAttributeModifier("accessKey",accessKey));
-				}
 				item.add(checkBox);
 			}
 		};
+
 		checkboxesVertical.setReuseItems(true);
 		verticalForm.add(checkboxesVertical);
 		add(verticalForm);
@@ -146,7 +141,7 @@ public class CheckboxesPanel<T> extends Panel {
 		if ( horizontalLayout )
 			horizontalForm.setVisible(true);
 		else
-			verticalForm.setVisible(false);
+			verticalForm.setVisible(false);	
 	}
 	
 	public void setHorizontalLayout ( boolean horizontalLayout ) {
@@ -161,7 +156,7 @@ public class CheckboxesPanel<T> extends Panel {
 	public class CheckableWrapper implements Serializable {
 		private T item;
 		private Boolean selected;
-		
+
 		public CheckableWrapper(T item) {
 			this.item = item;
 			this.selected = false;
@@ -170,9 +165,6 @@ public class CheckboxesPanel<T> extends Panel {
 			this.selected = selected;
 			return this;
 		}
-		public Integer getIndex() {
-			return 0 /*index*/;
-		}	
 		public Boolean getSelected() {
 			return selected;
 		}
@@ -183,12 +175,12 @@ public class CheckboxesPanel<T> extends Panel {
 			return showItem(item);
 		}
 	}
-	
+
 	public void setAutoFocus() {
 		this.autoFocus = true;
-		
+
 	}
-	
+
 	/**
 	 * the 'otherSpecifyStyle' indicates if we want a textfield to 
 	 * appear when 'Other' is selected,  If this is try
@@ -201,7 +193,7 @@ public class CheckboxesPanel<T> extends Panel {
 	public Boolean getOtherSpecifyStyle() {
 		return(otherSpecifyStyle);
 	}
-	
+
 	/**
 	 * adds an ActionListener to the list of objects
 	 * that want to be notified of events.
@@ -217,7 +209,7 @@ public class CheckboxesPanel<T> extends Panel {
 		if ( !actionListeners.contains(aListener))
 			actionListeners.add(aListener);
 	}
-	
+
 	/**
 	 * simply removes an ActionListener from the list of
 	 * ActionListeners
@@ -226,7 +218,7 @@ public class CheckboxesPanel<T> extends Panel {
 	public void removeActionListener(ActionListener aListener) {
 		actionListeners.remove(aListener);
 	}
-	
+
 	/**
 	 * similar to the list of actionlisteners, 
 	 * keep a list of components to update.
@@ -238,7 +230,7 @@ public class CheckboxesPanel<T> extends Panel {
 		if ( !componentsToUpdate.contains(component))
 			componentsToUpdate.add(component);
 	}
-	
+
 	/**
 	 * simply removes an component from the list of
 	 * componentsToUpdate
@@ -254,7 +246,7 @@ public class CheckboxesPanel<T> extends Panel {
 	 */
 	public void fireActionEvent(boolean selected, String strMessage) {
 		ActionEvent ae ;
-		
+
 		for ( ActionListener aListener:actionListeners ) {
 			ae = new ActionEvent(this, (selected?1:0), strMessage);
 			aListener.actionPerformed(ae);
@@ -266,9 +258,9 @@ public class CheckboxesPanel<T> extends Panel {
 	 * returns false if a checkbox names 'Other' is not located
 	 * @return selection status of 'Other' checkbox
 	 */
-	
+
 	private boolean isOtherSelected() {
-		
+
 		if ( !otherSpecifyStyle )
 			return(false);
 		for ( CheckableWrapper checkWrapper:items ) {
@@ -278,10 +270,24 @@ public class CheckboxesPanel<T> extends Panel {
 		}
 		return(false);
 	}
-	
+
 	public boolean getOtherSelected(boolean forceRecalcuation) {
 		if ( forceRecalcuation )
 			otherSelected = isOtherSelected();
 		return(otherSelected);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
