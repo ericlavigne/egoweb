@@ -3,6 +3,7 @@ package net.sf.egonet.persistence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,9 +134,8 @@ public class Interviewing {
 					int iEvaluate;
 					ArrayList<Alter> emptyAlterList = new ArrayList<Alter>();
 					
-					strUseIf = question.getUseIfExpression();
+					strUseIf = question.getUseIfExpression().trim();
 					if ( strUseIf!=null && strUseIf.length()>0 ) {
-						// System.out.println ( strUseIf);
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, emptyAlterList);
 						strUseIf = question.calculationInsertion(strUseIf, interviewId, emptyAlterList);
@@ -146,7 +146,7 @@ public class Interviewing {
 						if ( SimpleLogicMgr.hasError()) {
 							System.out.println ("USE IF error in " + question.getTitle());
 							System.out.println ("USE IF =" + question.getUseIfExpression());
-						}
+						}	
 						if (iEvaluate==0)
 							shouldAnswer = false;
 					}
@@ -462,6 +462,18 @@ public class Interviewing {
 	private static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
 			Session session, Long interviewId) 
 	{
+		long onFunctionEntry = System.currentTimeMillis();
+		long onFunctionExit;
+		long onEnvironmentSetup;
+		long onSkipLogicEntry;
+		long onUseIfEntry;
+		long timeInSetup = 0;
+		long timeInFunction = 0;
+		long timeInSkipLogic = 0;
+		long timeInUseIf = 0;
+		int  skipLogicCount = 0;
+		int  useIfCount = 0;
+		
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
@@ -472,6 +484,7 @@ public class Interviewing {
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
 		EvaluationContext context = Expressions.getContext(session, interview);
 		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		timeInSetup = System.currentTimeMillis() - onFunctionEntry;
 		for(Question question : questions) {
 			Set<Long> answeredAlterIds = Sets.newHashSet();
 			for(Answer answer : questionIdToAnswers.get(question.getId())) {
@@ -480,20 +493,32 @@ public class Interviewing {
 			ArrayList<Alter> resultAlters = Lists.newArrayList();
 			for(Alter alter : alters) {
 				Long reasonId = question.getAnswerReasonExpressionId();
-				Boolean shouldAnswer =
-					reasonId == null ||
-						Expressions.evaluateAsBool(
-								context.eidToExpression.get(reasonId), 
-								Lists.newArrayList(alter), 
-								context);
-				
+				// Boolean shouldAnswer =
+				// 	reasonId == null ||
+				// 		Expressions.evaluateAsBool(
+				// 				context.eidToExpression.get(reasonId), 
+				// 				Lists.newArrayList(alter), 
+				// 				context);
+				Boolean shouldAnswer;
+				if ( reasonId==null ) {
+					shouldAnswer = true;
+				} else {
+					++skipLogicCount;
+					onSkipLogicEntry = System.currentTimeMillis();
+					shouldAnswer = Expressions.evaluateAsBool(
+							 				context.eidToExpression.get(reasonId), 
+							 				Lists.newArrayList(alter), 
+							 				context);
+					timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
+				}
 				if ( reasonId==null ) {
 					String strUseIf;
 					int iEvaluate;
 					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
-					
-					strUseIf = question.getUseIfExpression();
+					strUseIf = question.getUseIfExpression().trim();
 					if ( strUseIf!=null && strUseIf.length()>0 ) {
+						++useIfCount;
+						onUseIfEntry = System.currentTimeMillis();
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
 						strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);
@@ -507,6 +532,7 @@ public class Interviewing {
 						}
 						if (iEvaluate==0)
 							shouldAnswer = false;
+						timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
 					}
 				}
 				
@@ -518,6 +544,12 @@ public class Interviewing {
 				results.add(new Pair<Question,ArrayList<Alter>>(question,resultAlters));
 			}
 		}
+		onFunctionExit = System.currentTimeMillis();
+		timeInFunction = onFunctionExit - onFunctionEntry;
+		System.out.println ( "Time in alterQuestionsForInterview=" + timeInFunction);
+		System.out.println ( "Time in setup =" + timeInSetup);
+		System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
+		System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
 		return results;
 	}
 	
@@ -547,9 +579,9 @@ public class Interviewing {
 							int iEvaluate;
 							ArrayList<Alter> twoAlterList = Lists.newArrayList(alter1,alter2);
 							
-							strUseIf = question.getUseIfExpression();
+							strUseIf = question.getUseIfExpression().trim();
 							if ( strUseIf!=null && strUseIf.length()>0 ) {
-								System.out.println ( strUseIf);
+						
 								strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 								strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, twoAlterList);
 								strUseIf = question.calculationInsertion(strUseIf, interviewId, twoAlterList);
@@ -561,6 +593,7 @@ public class Interviewing {
 									System.out.println ("USE IF error in " + question.getTitle());
 									System.out.println ("USE IF =" + question.getUseIfExpression());
 								}
+									
 								if (iEvaluate==0)
 									shouldAnswer = false;
 							}
