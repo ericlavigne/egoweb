@@ -5,23 +5,26 @@
 
 // jQuery version 1.4.2 should be loaded before this script.
 
-$(document).ready(function(){
+jQuery.noConflict();
+
+jQuery(document).ready(function(){
 	// Only do hotkeys if we have enough keys for all.
-	if($('span.hotkey').length < 10) {
+	if(jQuery('span.hotkey').length < 10) {
 		// Handle keydown event for keys 1-9.
-		$(document).keydown(function(event) {
+		jQuery(document).keydown(function(event) {
 			if(event.keyCode > 48 && event.keyCode < 58 
-				&& $('.textfocus').length === 0) 
+				&& jQuery('.textfocus').length === 0) 
 			{
-				$("input.hotkey").each(function(i) {
+				jQuery("input.hotkey").each(function(i) {
 					if(i == event.keyCode - 49) {
-						$(this).click();
+						jQuery(this).click();
+						jQuery(this).triggerHandler('click');
 					}
 				});
 			}
 		});
 		// Add labels so we know which numbers select which radio buttons or checkboxes.
-		$('span.hotkey').text(function(i,t) {
+		jQuery('span.hotkey').text(function(i,t) {
 			if(i < 9) {
 				return t + ' (' + (i+1) + ')';
 			} else {
@@ -29,12 +32,12 @@ $(document).ready(function(){
 			}
 		});
 		// Mark text input fields with the textfocus class when they are in focus.
-		$('input[type=text],textarea')
+		jQuery('input[type=text],textarea')
 		.blur(function() {
-			$(this).removeClass("textfocus");
+			jQuery(this).removeClass("textfocus");
 		})
 		.focus(function() {
-			$(this).addClass("textfocus");
+			jQuery(this).addClass("textfocus");
 		});
 	}
 });
