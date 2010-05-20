@@ -55,9 +55,11 @@ public class InterviewingPanel extends Panel {
 		strPrompt = question.individualizePrompt(altersInPrompt);
 		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
 		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, altersInPrompt);
+		strPrompt = question.dateDataInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
 		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);
+		
 		if ( SimpleLogicMgr.hasError()) {
 			System.out.println ("USE IF error in " + question.getTitle());
 		}
@@ -80,7 +82,8 @@ public class InterviewingPanel extends Panel {
 		
 		ArrayList<String> allOptions = Lists.newArrayList();
 		ArrayList<String> selectedOptions = Lists.newArrayList(); // TODO: populate this
-		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) {
+		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION) &&
+		   question.getNoneButton()) {
 			allOptions.add(none);
 		}
 		if(answerFields.size() > 1) {

@@ -137,10 +137,10 @@ public class Expressions {
 		Long studyId = interview.getStudyId();
 		Long interviewId = interview.getId();
 
-		
-		for(Question question : Questions.getQuestionsForStudy(session, studyId, null)) {
-			context.qidToQuestion.put(question.getId(), question);
+		for (Question question : Questions.getQuestionsForStudy(session, studyId, null)) {
+		 	context.qidToQuestion.put(question.getId(), question);
 		}
+		
 		for(Expression expression : Expressions.forStudy(session, studyId)) {
 			context.eidToExpression.put(expression.getId(), expression);
 		}
@@ -174,7 +174,6 @@ public class Expressions {
 							answer.getAlterId1()), 
 					answer);
 		}
-
 		return context;
 	}
 	

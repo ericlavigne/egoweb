@@ -33,8 +33,8 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	private Label otherSpecifyLabel;
 	private TextField otherSpecifyTextField;
 	private String otherText;
-	private boolean otherSpecifyStyle;
-	private boolean horizontalLayout = false;
+	private Boolean otherSpecifyStyle;
+	private Boolean horizontalLayout = false;
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, Question question, 
 			ArrayList<Alter> alters, Long interviewId) {
@@ -71,7 +71,10 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		this.setOutputMarkupId(true);
 		checkBoxPrompt = new Label ("checkBoxPrompt",getCheckRangePrompt());
 		add(checkBoxPrompt);
-
+		
+		if ( question.getAskingStyleList())
+			checkBoxPrompt.setVisible(false);
+		
 		List<Object> allItems = Lists.newArrayList();
 		allItems.addAll(getOptions());
 		if(! question.getType().equals(Question.QuestionType.EGO_ID)) { // Can't refuse EgoID question
@@ -259,12 +262,12 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		return (( otherText==null) ? "" : otherText ) ;
 	}
 	
-	public void setHorizontalLayout ( boolean horizontalLayout ) {
+	public void setHorizontalLayout ( Boolean horizontalLayout ) {
 		this.horizontalLayout = horizontalLayout;
 		if ( answerField!=null )
 		    answerField.setHorizontalLayout(horizontalLayout);
 	}
-	public boolean getHorizontalLayout() {
+	public Boolean getHorizontalLayout() {
 		return(horizontalLayout);
-	}
+	}	
 }

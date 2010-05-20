@@ -390,6 +390,7 @@ public class Archiving {
 		addAttribute(questionNode,"answerReasonExpressionId", question.getAnswerReasonExpressionId());
 		addAttribute(questionNode,"useIf", question.getUseIfExpression());
 		addAttribute(questionNode,"otherSpecify", question.getOtherSpecify());
+		addAttribute(questionNode,"noneButton", question.getNoneButton());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
 			addAttribute(questionNode,"minLiteral", question.getMinLiteral());
@@ -435,7 +436,8 @@ public class Archiving {
 		question.setPrompt(attrText(node,"prompt"));
 		question.setCitation(attrText(node,"citation"));
 		question.setUseIfExpression(attrString(node,"useIf"));
-		
+		question.setOtherSpecify(attrBool(node,"otherSpecify"));
+		question.setNoneButton(attrBool(node,"noneButton"));
 		aType = question.getAnswerType();
 		if ( aType==Answer.AnswerType.NUMERICAL ) {
 			try {

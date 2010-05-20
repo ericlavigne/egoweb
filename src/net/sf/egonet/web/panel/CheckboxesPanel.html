@@ -12,26 +12,28 @@
 
 <wicket:panel>
 	<form wicket:id="horizontalForm" >
-	<span wicket:id="checkboxes" style="margin-right:3em;">
+<!--		<span wicket:id="checkboxes" style="margin-right:1em;"> -->
+	<span wicket:id="checkboxes" >
 		<span style="white-space:nowrap;">
-			<input wicket:id="checkField" class="hotkey" type="checkbox" />
-		    <span  wicket:id="checkLabel" class="hotkey">Label</span>			
+			<input wicket:id="checkField" type="checkbox" />
+		    <span  wicket:id="checkLabel" >Label</span>			
 		</span>
 		<span style="whitespace:pre-wrap; color:#ffffff"> . . </span>
 	</span>
 	</form>
 
-	<form wicket:id="verticalForm" >
-	<span wicket:id="checkboxesVertical" style="margin-right:3em;">
-		<span style="white-space:nowrap;">
-		    <br />
-			<input wicket:id="checkFieldVertical" class="hotkey" type="checkbox" />
-			<span  wicket:id="checkLabelVertical" class="hotkey">Label</span>		
-		</span>
-		<span style="whitespace:pre-wrap; color:#ffffff"> . . </span>
-	</span>
-	</form>
-	
-	<div style="clear:both"></div>
+	<form wicket:id="verticalForm" > 
+	<span wicket:id="checkboxesVertical" style="margin-right:3em;"> 
+		<span style="white-space:nowrap;"> 
+		    <br />  
+			<input wicket:id="checkFieldVertical" class="hotkey" type="checkbox" /> 
+			<span  wicket:id="checkLabelVertical" class="hotkey">Label</span>	 	
+		</span> 
+		<span style="whitespace:pre-wrap; color:#ffffff"> . . </span> 
+	</span> 
 	<br />
+	</form> 
+	
+<!--	<div style="clear:both"></div> -->
+<!--	<br /> -->
 </wicket:panel>

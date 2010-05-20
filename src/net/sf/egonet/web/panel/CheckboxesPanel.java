@@ -23,7 +23,8 @@ import com.google.common.collect.Lists;
 public class CheckboxesPanel<T> extends Panel {
 
 	protected String showItem(T item) {
-		return item.toString();
+		String strItem = item.toString();
+		return( strItem);
 	}
 
 	private List<CheckableWrapper> items;
@@ -34,6 +35,7 @@ public class CheckboxesPanel<T> extends Panel {
 	private Form horizontalForm;
 	private Form verticalForm;
 	private boolean horizontalLayout = false;
+	private int maxStringLength = 100;
 	
 	public List<T> getSelected() {
 		List<T> result = Lists.newArrayList();
@@ -52,6 +54,23 @@ public class CheckboxesPanel<T> extends Panel {
 		componentsToUpdate = new ArrayList<Component>();
 		otherSpecifyStyle = false;
 		otherSelected = false;
+		if ( items.size()>20 ) {
+			setMaxStringLength(12);
+		} else {
+			switch ( items.size()) {
+			case 19: setMaxStringLength(13); break;
+			case 18: setMaxStringLength(13); break;
+			case 17: setMaxStringLength(14); break;
+			case 16: setMaxStringLength(15); break;
+			case 15: setMaxStringLength(16); break;
+			case 14: setMaxStringLength(17); break;
+			case 13: setMaxStringLength(18); break;
+			case 12: setMaxStringLength(20); break;
+			case 11: setMaxStringLength(22); break;
+			default: setMaxStringLength(100); break;
+			}
+		}
+			
 		this.items = Lists.newArrayList();
 		for(T item : items) {
 			this.items.add(
@@ -63,6 +82,19 @@ public class CheckboxesPanel<T> extends Panel {
 
 	private Boolean autoFocus = false;
 
+	/**
+	 * this will be used in horizontal layouts in the list-of-alters
+	 * page to get more items on each line
+	 * @param str the original checkbox label text
+	 * @return a (possibly shortened) label
+	 */
+	
+	private String truncate(String str) {
+		if ( str.length() > maxStringLength )
+			str = str.substring(0,maxStringLength);
+		return(str);
+	}
+	
 	private void build() {
 		horizontalForm = new Form ("horizontalForm");
 		add(horizontalForm);
@@ -71,7 +103,7 @@ public class CheckboxesPanel<T> extends Panel {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
 
-				item.add(new Label("checkLabel", wrapper.getName()));				
+				item.add(new Label("checkLabel", truncate(wrapper.getName())));				
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkField", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
@@ -100,7 +132,7 @@ public class CheckboxesPanel<T> extends Panel {
 		checkboxes.setReuseItems(true);
 		horizontalForm.add(checkboxes);
 		add(horizontalForm);
-		
+	
 		verticalForm = new Form ("verticalForm");
 		add(verticalForm);
 		
@@ -142,6 +174,7 @@ public class CheckboxesPanel<T> extends Panel {
 			horizontalForm.setVisible(true);
 		else
 			verticalForm.setVisible(false);	
+		
 	}
 	
 	public void setHorizontalLayout ( boolean horizontalLayout ) {
@@ -276,6 +309,12 @@ public class CheckboxesPanel<T> extends Panel {
 			otherSelected = isOtherSelected();
 		return(otherSelected);
 	}
+
+	public void setMaxStringLength(int maxStringLength) {
+		this.maxStringLength = maxStringLength;
+	}
+	public int getMaxStringLength() { return(maxStringLength);}
+
 }
 
 

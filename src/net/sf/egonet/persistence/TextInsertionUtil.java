@@ -24,6 +24,11 @@ import net.sf.egonet.persistence.ExpressionNode.MathOp;
  */
 public class TextInsertionUtil {
 	
+	private static final String strMonths[] = 
+	{"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+	
+	private enum DATE_FIELD { NONE, MONTH, DAY, YEAR};
+	
 	/**
 	 * answerToQuestion
 	 * a convenience function for answerInsertion below.
@@ -60,6 +65,10 @@ public class TextInsertionUtil {
 		
 		if ( interviewId==null )
 			return (strQuestionTitle);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strQuestionTitle);
+		
 		// if listOfAlters is null
 		// that indicates this is being used in a preface.
 		// In the case of a preface look ONLY in EGO and EGO_ID 
@@ -74,7 +83,6 @@ public class TextInsertionUtil {
 			iType = QuestionType.EGO;
 		}
 		
-		currentInterview = Interviews.getInterview(interviewId);
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 		if ( question==null  && (iType==QuestionType.ALTER ||  iType==QuestionType.ALTER_PAIR)) {
 			iType = QuestionType.EGO;
@@ -167,6 +175,7 @@ public class TextInsertionUtil {
 
 	public static String variableInsertion (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+		Interview currentInterview;
 		String strResult = "";
 		String pattern = "<VAR.*?/>";
 		String strVariableName;
@@ -179,6 +188,10 @@ public class TextInsertionUtil {
 		// return original prompt unaltered
 		if ( interviewId==null )
 			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strInput);
+		
 		theList = parseExpressionList ( strInput, pattern);
 		if (theList==null)
 			return(strInput);
@@ -203,7 +216,126 @@ public class TextInsertionUtil {
 		return(strResult);
 	}	
 	
+	/**
+	 * dateDataInsertion is very similar to variableInsertion but has more options and
+	 * code specific to dates
+	 * <DATE question /> will default to <VAR question /> behaviour
+	 * <DATE question DATE_FIELD /> will print only the specific date field, such as the year
+	 * <DATE question DATE_FIELD offset /> will print the specified date field offset from
+	 * the one in the question by offset amount
+	 * @param strInput - the original string to (possibly) alter
+	 * @param interviewId - needed to look up variable values ( answers to previous questions )
+	 * @param iType - needed to look up variable values ( answers to previous questions )
+	 * @param studyId - needed to look up variable values ( answers to previous questions )
+	 * @param listOfAlters - needed to look up variable values ( answers to previous questions )
+	 * @return
+	 */
+	public static String dateDataInsertion (String strInput, 
+			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+		Interview currentInterview;		
+		String strResult = "";
+		String pattern = "<DATE.*?/>";
+		String strParameters; // question title, optional field specifier, optional offset
+		String[] paramInfo; // strParameters split into 3 parts
+		String strDate; // date as retrieved from answer Data
+		int[] dateInfo; // date split into year, month, day
+		int offset = 0;
+		String str;
+		DATE_FIELD dateField = DATE_FIELD.NONE;
+		ArrayList<String> theList;
+		int ix;
+		
+		// if no interviewId we are previewing the question
+		// return original prompt unaltered
+		if ( interviewId==null )
+			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strInput);
+		
+		theList = parseExpressionList ( strInput, pattern);
+		if (theList==null)
+			return(strInput);
 
+		// At this point we have an array list with literal strings
+		// alternating with variable markers .
+		// now construct the output string by replacing the
+		// parameters between the <DATE /> markers with formatted DATE data
+		for ( ix=0 ; ix<theList.size(); ++ix ) {
+			str = theList.get(ix);
+			strParameters = trimPrefixAndSuffix ( str, "<DATE", "/>"); 
+			if ( strParameters==null ) {
+				strResult += str;
+			} else {
+			if ( strParameters.length()==0) {
+				strResult += "[empty <DATE /> tag]";
+			} else {
+				paramInfo = strParameters.split(" ");
+				if ( paramInfo.length>1 ) {
+					try {  dateField = DATE_FIELD.valueOf(paramInfo[1]);
+					} catch ( java.lang.RuntimeException rte ) {
+						strResult += "[" + paramInfo[1] + " should be YEAR, MONTH, or DAY]";
+					}
+				}	
+				if ( paramInfo.length>2 ) {
+					if ( paramInfo[2].startsWith("+")  &&  paramInfo[2].length()>1 )
+						paramInfo[2] = paramInfo[2].substring(1).trim();
+					try { offset = Integer.parseInt(paramInfo[2]);
+					} catch ( java.lang.RuntimeException rte ) {
+						offset = 0;
+					}
+				}
+				strDate = answerToQuestion(paramInfo[0], interviewId, iType, studyId, listOfAlters );
+				if ( strDate==null  || strDate.length()==0 ) {
+					strResult += "[date "+strDate+" not found]";
+				} else {
+				    dateInfo = strDateToNumeric(strDate);
+					switch ( paramInfo.length ) {
+					    case 0:
+					    case 1:
+					         strResult += " " + strDate + " ";
+					         break;
+					    case 2: {
+					    	switch ( dateField ) {
+					    	    case NONE: break;
+					    	    case MONTH: strResult += " " + strMonths[dateInfo[0]] + " "; break;
+					    	    case DAY: strResult += " " + dateInfo[1] + " "; break;
+					    	    case YEAR: strResult += " " + dateInfo[2] + " "; break;
+					    	    }
+					    	 }
+					         break;
+					    case 3: {
+					    	 switch ( dateField ) {
+					    	     case NONE: break;
+					    	     case MONTH:
+					    	    	  dateInfo[0] += offset;
+					    	    	  while (dateInfo[0] < 1 )
+					    	    		  dateInfo[0] += 12;
+					    	    	  dateInfo[0] %= 12;
+					    	    	  strResult += " " + strMonths[dateInfo[0]] + " "; 
+					    	    	  break;
+					    	     case DAY:
+					    	    	  dateInfo[1] += offset;
+					    	    	  while ( dateInfo[1] < 1)
+					    	    		  dateInfo[1] += 31;
+					    	    	  dateInfo[1] %= 31;
+					    	    	  strResult += " " + dateInfo[1] + " ";
+					    	    	  break;
+					    	     case YEAR:
+					    	    	  dateInfo[2] += offset;
+					    	    	  strResult += " " + dateInfo[2] + " ";
+					    	    	  break;					    	    	  
+					    	 }
+					    }   	
+					}	
+				}
+			}
+		} 
+		}
+		System.out.println ( strResult );
+		return(strResult);
+	}	
+	
 	/**
 	 * calculationInsertion
 	 * used with the tag <CALC ... />
@@ -227,6 +359,7 @@ public class TextInsertionUtil {
 
 	public static String calculationInsertion (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+		Interview currentInterview;
 		String strResult = "";
 		String pattern = "<CALC.*?/>";
 		String str;
@@ -238,6 +371,9 @@ public class TextInsertionUtil {
 		// if no interviewId we are previewing the question
 		// return original prompt unaltered
 		if ( interviewId==null )
+			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
 			return(strInput);
 		
 		theList = parseExpressionList(strInput, pattern);
@@ -282,7 +418,7 @@ public class TextInsertionUtil {
 	
 	private static String calculateSimpleExpression (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
-	 
+		Interview currentInterview;
 		ArrayList<String> theList = new ArrayList<String>();
 		String strReturn = "";
 		String strNextNumber;
@@ -293,6 +429,9 @@ public class TextInsertionUtil {
 	    
 		// First, check for special cases
 		if ( strInput==null || strInput.length()==0)
+			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
 			return(strInput);
 		
 		theList = parseCalculationList(strInput);
@@ -391,6 +530,7 @@ public class TextInsertionUtil {
 
 	public static String answerCountInsertion (String strInput, 
 			Long interviewId, Long studyId) {
+		Interview currentInterview;
 		String strResult = "";
 		String pattern = "<COUNT.*?/>";
 		String str;
@@ -406,6 +546,10 @@ public class TextInsertionUtil {
 		// return original prompt unaltered
 		if ( interviewId==null )
 			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strInput);
+		
 		theList = parseExpressionList( strInput, pattern);
 		if ( theList==null )
 			return(strInput);
@@ -456,6 +600,7 @@ public class TextInsertionUtil {
 	 */
 	public static String questionContainsAnswerInsertion (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters) {
+		Interview currentInterview;
 		String strResult = "";
 		String pattern = "<CONTAINS.*?/>";
 		String str;
@@ -471,6 +616,10 @@ public class TextInsertionUtil {
 		// return original prompt unaltered
 		if ( interviewId==null )
 			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strInput);
+		
 		theList = parseExpressionList( strInput, pattern);
 		if ( theList==null )
 			return(strInput);
@@ -533,9 +682,14 @@ public class TextInsertionUtil {
 		Answer theAnswer = null;
 		String strAnswer = strQuestionTitle;
 		Long   iOptionId;
-
 		int iCount = 0;
 
+		if ( interviewId==null )
+			return(strQuestionTitle);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strQuestionTitle);
+		
 		strSurveyAnswer = strSurveyAnswer.trim();
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, QuestionType.ALTER, studyId);
 	
@@ -612,6 +766,12 @@ public class TextInsertionUtil {
 		Long   iOptionId;
 		int iCount = 0;
 
+		if ( interviewId==null )
+			return(strQuestionTitle);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strQuestionTitle);
+		
 		answersToLookFor = strSurveyAnswer.trim().split(":");
 		question = Questions.getQuestionUsingTitleAndTypeAndStudy (strQuestionTitle, iType, studyId);
 	
@@ -688,6 +848,7 @@ public class TextInsertionUtil {
 
 	public static String conditionalTextInsertion (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+		Interview currentInterview;
 		String strResult = "";
 		String pattern = "<IF.*?/>";
 		String strContents;
@@ -704,6 +865,10 @@ public class TextInsertionUtil {
 		// return original prompt unaltered
 		if ( interviewId==null )
 			return(strInput);
+		currentInterview = Interviews.getInterview(interviewId);
+		if ( currentInterview==null || currentInterview.getStudyId()==null )
+			return(strInput);
+		
 		theList = parseExpressionList ( strInput, pattern);
 		if (theList==null)
 			return(strInput);
@@ -850,5 +1015,78 @@ public class TextInsertionUtil {
 	return(theList);
 	}
 
+	/**
+	 * simple little function to get the index of the month.
+	 * compare just the first three letters to avoid confusion with
+	 * misspellings and whether or not abreviations have a period.
+	 * also allow for 1 based indexs
+	 * @param str a string which (should be) a month
+	 * @return one based index
+	 */
+	private static int getMonthIndex ( String str ) {
+		int ix;
+		int iValue;
+		
+		if (str==null || str.length()==0)
+			return(-1);
+		str = str.trim();
+		if ( str.length()>3 )
+			str = str.substring(0,4);
+		for ( ix=0 ; ix<strMonths.length ; ++ix ) {
+			if ( str.equalsIgnoreCase(strMonths[ix]))
+				return(ix);
+		}
+		
+		// if the month value does not match one of the three letter
+		// abreviations it may be the 1 based index of the month
+		
+		try {
+			iValue = Integer.parseInt(str);
+		} catch ( NumberFormatException nfe ) {
+			return(-1);
+		}
+		
+		while ( iValue < 1 )
+			iValue += 12;
+		while ( iValue>12 )
+			iValue -= 12;
+		return(iValue-1);
+	}
+
+	/** 
+	 * a simple convenience function to convert a date in string format
+	 * to three integers.  assumes the date is of the format
+	 * MMM DD YYYY
+	 * where YYY and DD are already integers and the month MM
+	 * is either an integer or a string
+	 * @param strDate date in format "Mar 27 1958"
+	 * @return array int[3] = {3, 27, 1958};
+	 */
+	private static int[] strDateToNumeric ( String strDate) {
+		String[] dateInfo;
+		int[] returnInfo = new int[3];
+		
+		returnInfo[0] = returnInfo[1] = returnInfo[2] = 0;
+		dateInfo = strDate.split(" ");
+		switch ( dateInfo.length ) {
+		    case 3: 
+		    	 try {
+		    	    returnInfo[2] = Integer.parseInt(dateInfo[2].trim());
+		    	   } catch ( NumberFormatException nfe3 ) {
+		    		   returnInfo[2] = 0;
+		    	   }
+		    	   // fall thru
+		    case 2:
+		    	 try {
+		    		 returnInfo[1] = Integer.parseInt(dateInfo[1].trim());
+		    	 } catch ( NumberFormatException nfe1 ) {
+		    		 returnInfo[1] = 0;
+		    	 }
+		    	 // fall thru
+		    case 1:
+		    	 returnInfo[0] = getMonthIndex(dateInfo[0].trim());
+		}
+		return(returnInfo);
+	}
 }
 

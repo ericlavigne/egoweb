@@ -28,6 +28,7 @@ public class Question extends OrderedEntity
 	// variables that deal with Selection / Multiple Selection questions
 	// using the 'other-specify' option
 	private Boolean otherSpecify;  // if true, selection of 'Other' brings up text box
+	private Boolean noneButton;
 	// variables that will be specific to numeric answers, 
 	// and (optionally) limiting them to a range
 	private NumericLimitType minLimitType;
@@ -46,6 +47,7 @@ public class Question extends OrderedEntity
 		type = QuestionType.EGO;
 		askingStyleList = false;
 		otherSpecify = false;
+		noneButton = false;
 		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
 		minLiteral = 0;
@@ -86,6 +88,7 @@ public class Question extends OrderedEntity
 		c.setTitle(getTitle().replaceAll("\\s+c\\d+", "")+" c"+(Math.abs(c.getRandomKey())%1000));
 		c.setTypeDB(getTypeDB());
 		c.setUseIfExpression(getUseIfExpression());
+		c.setNoneButton(getNoneButton());
 		return c;
 	}
 	
@@ -251,6 +254,15 @@ public class Question extends OrderedEntity
 		return(otherSpecify);
 	}
 	
+	public void setNoneButton ( Boolean noneButton) {
+		this.noneButton = (noneButton==null) ? false : noneButton;
+	}
+	public Boolean getNoneButton() {
+		if ( noneButton==null)
+			noneButton = false;
+		return(noneButton);
+	}
+	
 	public void setUseIfExpression ( String useIfExpression ) {
 		this.useIfExpression = (useIfExpression==null) ? "" : useIfExpression;
 	}
@@ -400,6 +412,18 @@ public class Question extends OrderedEntity
 	 */
 	public String variableInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
 		return ( TextInsertionUtil.variableInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
+	}
+	
+	/**
+	 * dateDataInsertion is very similar to variable insertion but dates need a little bit of
+	 * extra work
+	 * @param strPrompt text of question
+	 * @param alterId1 id of one person addressed.  may be null
+	 * @param alterId2 id of second person addressed.  may be null
+	 * @return a string with previous answers inserted into place
+	 */
+	public String dateDataInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
+		return ( TextInsertionUtil.dateDataInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
 	}
 	
 	/**

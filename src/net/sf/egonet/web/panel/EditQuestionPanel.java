@@ -42,9 +42,12 @@ public class EditQuestionPanel extends Panel {
 	private Model questionAnswerReasonModel;
 	private Model askingStyleModel;
 	private Model otherSpecifyModel;
+	private Model noneButtonModel;
 	private TextField questionUseIfField;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
+	private Label noneButtonLabel;
+	private CheckBox noneButtonCheckBox;
 	private DropDownChoice dropDownQuestionTypes;
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
@@ -159,6 +162,18 @@ public class EditQuestionPanel extends Panel {
 		form.add(otherSpecifyCheckBox);
 		otherSpecifyLabel.setOutputMarkupId(true);
 		otherSpecifyCheckBox.setOutputMarkupId(true);
+		
+		noneButtonLabel = new Label("noneButtonLabel", "NONE Button?: ");
+		noneButtonModel = new Model();
+		noneButtonModel.setObject(Boolean.FALSE);
+		noneButtonCheckBox = new CheckBox("noneButtonField", noneButtonModel);
+		form.add(noneButtonLabel);
+		form.add(noneButtonCheckBox);
+		noneButtonLabel.setOutputMarkupId(true);
+		noneButtonCheckBox.setOutputMarkupId(true);
+		noneButtonLabel.setVisible(false); 
+		noneButtonCheckBox.setVisible(false);
+		
 		questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		form.add(questionUseIfField);
 		
@@ -209,10 +224,13 @@ public class EditQuestionPanel extends Panel {
 		//throw new RuntimeException(msg);
 		questionUseIfField.setModelObject(question.getUseIfExpression());
 		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
+		noneButtonCheckBox.setModelObject(question.getNoneButton());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( aType==Answer.AnswerType.MULTIPLE_SELECTION) {
 			multipleSelectionLimitsPanel.setVisible(true);
+			noneButtonLabel.setVisible(true); 
+			noneButtonCheckBox.setVisible(true);
 		}
 		if ( aType==Answer.AnswerType.SELECTION  ||  aType==Answer.AnswerType.MULTIPLE_SELECTION) {
 			otherSpecifyLabel.setVisible(true); 
@@ -250,6 +268,7 @@ public class EditQuestionPanel extends Panel {
 		// throw new RuntimeException(msg);
 		question.setUseIfExpression((String) questionUseIfField.getModelObject());
 		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
+		question.setNoneButton((Boolean)noneButtonCheckBox.getModelObject());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());
@@ -276,15 +295,17 @@ public class EditQuestionPanel extends Panel {
 		boolean numericLimitsVisible = false;
 		boolean multipleSelectionLimitsVisible = false;
 		
-		if ( iValue==1) {
+		if ( iValue==1) { // NUMERIC
 			numericLimitsVisible = true;
-		} else if ( iValue==3) {
+		} else if ( iValue==3) { // MULTIPLE_SELECTION
 			multipleSelectionLimitsVisible = true;
 		}
 		numericLimitsPanel.setVisible(numericLimitsVisible);
 		multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
+		noneButtonLabel.setVisible(multipleSelectionLimitsVisible); 
+		noneButtonCheckBox.setVisible(multipleSelectionLimitsVisible);
 		
-		if ( iValue==2  ||  iValue==3) {
+		if ( iValue==2  ||  iValue==3) { // DROP_DOWN or MULTIPLE_SELECTION
 			otherSpecifyLabel.setVisible(true); 
 			otherSpecifyCheckBox.setVisible(true);
 		} else {

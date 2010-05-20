@@ -135,9 +135,11 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		strPrompt = question.individualizePrompt(alters);
 		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
 		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, alters);
+		strPrompt = question.dateDataInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.calculationInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.variableInsertion(strPrompt, interviewId, alters);
 		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, alters);
+		
 		if ( SimpleLogicMgr.hasError()) {
 			System.out.println ("Var Insertion error in " + question.getTitle());
 		}

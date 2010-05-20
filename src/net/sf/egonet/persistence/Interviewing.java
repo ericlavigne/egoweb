@@ -548,8 +548,10 @@ public class Interviewing {
 		timeInFunction = onFunctionExit - onFunctionEntry;
 		System.out.println ( "Time in alterQuestionsForInterview=" + timeInFunction);
 		System.out.println ( "Time in setup =" + timeInSetup);
-		System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
-		System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
+		if ( skipLogicCount>0 )
+		    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
+		if ( useIfCount>0 )
+			System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
 		return results;
 	}
 	

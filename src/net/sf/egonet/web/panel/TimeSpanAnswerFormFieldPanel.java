@@ -169,6 +169,8 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
+		if (years==0 && months==0 && weeks==0 && days==0)
+			strNotification = "Cannot leave all fields zero.";
 		return(strNotification);
 	}
 	
@@ -182,6 +184,8 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return (true);
+		if (years==0 && months==0 && weeks==0 && days==0)
+			return(false);
 		return(true);
 	}
 

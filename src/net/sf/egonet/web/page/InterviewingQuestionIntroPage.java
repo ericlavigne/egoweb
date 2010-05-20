@@ -6,6 +6,7 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.SimpleLogicMgr;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
@@ -20,7 +21,8 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
 			Long interviewId, String text, EgonetPage previous, EgonetPage next, Question question) 
 	{
 		super(interviewId);
-
+		Link forwardLink;
+		
         this.previousPage = previous;
         this.nextPage = next;
        
@@ -29,7 +31,7 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
         // we only want answers from ego and ego_id sections,
         if ( question!=null ) {
         	// text = question.answerCountInsertion(text, interviewId);
-        	
+        	text = question.dateDataInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.calculationInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.variableInsertion(text, interviewId, (ArrayList<Alter>)null);
         	text = question.conditionalTextInsertion(text, interviewId, (ArrayList<Alter>)null);
@@ -50,13 +52,16 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
 			}
 		});
 		
-		add(new Link("forwardLink") {
+		forwardLink = new Link("forwardLink") {
 			public void onClick() {
 				if(nextPage != null) {
 					setResponsePage(nextPage);
 				}
 			}
-		});
+		};
+		forwardLink.add(new FocusOnLoadBehavior());
+		add(forwardLink);
+		
 	}
 
 	public String toString() {
