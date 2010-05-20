@@ -7,6 +7,37 @@
 
 jQuery.noConflict();
 
+function applyPageChangesForHotkeys() {
+	// Add labels so we know which numbers select which radio buttons or checkboxes.
+	jQuery('span.hotkey').text(function(i,t) {
+		// if doesn't have hotkeymodified class
+		// add hotkeymodified class and do the following
+		if(! jQuery(this).hasClass('hotkeymodified')) {
+			jQuery(this).addClass('hotkeymodified');
+			if(i < 9) {
+				return t + ' (' + (i+1) + ')';
+			} else {
+				return t;
+			}
+		}
+	});
+	// Mark text input fields with the textfocus class when they are in focus.
+	jQuery('input[type=text],textarea').each(function() {
+		// if doesn't have hotkeymodified class
+		// add hotkeymodified class, and do the following
+		if(! jQuery(this).hasClass('hotkeymodified')) {
+			jQuery(this)
+			.addClass('hotkeymodified')
+			.blur(function() {
+				jQuery(this).removeClass("textfocus");
+			})
+			.focus(function() {
+				jQuery(this).addClass("textfocus");
+			});
+		}
+	});
+}
+
 jQuery(document).ready(function(){
 	// Only do hotkeys if we have enough keys for all.
 	if(jQuery('span.hotkey').length < 10) {
@@ -23,22 +54,8 @@ jQuery(document).ready(function(){
 				});
 			}
 		});
-		// Add labels so we know which numbers select which radio buttons or checkboxes.
-		jQuery('span.hotkey').text(function(i,t) {
-			if(i < 9) {
-				return t + ' (' + (i+1) + ')';
-			} else {
-				return t;
-			}
-		});
-		// Mark text input fields with the textfocus class when they are in focus.
-		jQuery('input[type=text],textarea')
-		.blur(function() {
-			jQuery(this).removeClass("textfocus");
-		})
-		.focus(function() {
-			jQuery(this).addClass("textfocus");
-		});
+		applyPageChangesForHotkeys();
+		window.setInterval('applyPageChangesForHotkeys()', 1000);
 	}
 });
 
