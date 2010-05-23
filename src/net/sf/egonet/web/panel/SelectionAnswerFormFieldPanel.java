@@ -3,7 +3,7 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.RadioChoice;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.basic.Label;
 
@@ -28,9 +28,9 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 * when its type is not Numeric
 	 */
 	
-	private class DropDownChoicePlus extends DropDownChoice {
+	private class RadioChoicePlus extends RadioChoice {
 		
-		public DropDownChoicePlus (String id, Model model, List<Object> theList ) {
+		public RadioChoicePlus (String id, Model model, List<Object> theList ) {
 			super(id, model, theList);
 		}
 		
@@ -63,7 +63,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 */
 	
 	private Model answer;
-	private DropDownChoicePlus dropDownChoice;
+	private RadioChoicePlus dropDownChoice;
 	private Label otherSpecifyLabel;
 	private TextField otherSpecifyTextField;
 	private String otherSpecifyText;
@@ -107,7 +107,10 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		if(! question.getType().equals(Question.QuestionType.EGO_ID)) {
 			choices.addAll(Lists.newArrayList(dontKnow,refuse));
 		}
-		dropDownChoice = new DropDownChoicePlus("answer",answer,choices);
+		dropDownChoice = new RadioChoicePlus("answer",answer,choices);
+		dropDownChoice.setPrefix("<span style=\"white-space:nowrap;\">");
+		dropDownChoice.setSuffix(
+				"</span><span style=\"whitespace:pre-wrap; color:#ffffff\"> . . </span>");
 		add(dropDownChoice);
 		// features that will be visible only for
 		// 'other/specify' questions
