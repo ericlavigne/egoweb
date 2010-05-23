@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
-
+import org.apache.wicket.markup.html.form.Button;
 import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Answer;
@@ -32,41 +32,22 @@ public class InterviewingEgoPage extends InterviewingPage {
 	}
 
 	private void build() {
+		Button forwardButton;
 		
-		Form form = new Form("form") {
+		Form form = new Form("form");
+		
+		form.add (new Button("nextUnanswered") {
 			public void onSubmit() {
-				List<String> pageFlags = interviewingPanel.pageFlags();
-				List<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
-				boolean okayToContinue = 
-					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
-				boolean consistent = 
-					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
-				boolean multipleSelectionsOkay = 
-					AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
-				for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
-					if ( !multipleSelectionsOkay ) {
-						field.setNotification(field.getRangeCheckNotification());
-					} else if(okayToContinue) {
-							Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
-									field.getAnswer(),field.getOtherText(),
-									field.getSkipReason(pageFlags));
-					} else if(consistent) {
-						field.setNotification(
-								field.answeredOrRefused(pageFlags) ?
-										"" : "Unanswered");
-					} else {
-						field.setNotification(
-								field.consistent(pageFlags) ?
-										"" : field.inconsistencyReason(pageFlags));
-					}
-				}
-				if(okayToContinue) {
-					setResponsePage(
-							askNextUnanswered(interviewId,question,
-									new InterviewingEgoPage(interviewId,question)));
-				}
+				onSave(true);
+			}
+		});
+		
+		forwardButton = new Button("nextQuestion") {
+			public void onSubmit() {
+				onSave(false);
 			}
 		};
+		form.add(forwardButton);
 		
 		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question,interviewId);
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
@@ -107,8 +88,57 @@ public class InterviewingEgoPage extends InterviewingPage {
 				interviewingPanel.pageFlags())) 
 		{
 			forwardLink.setVisible(false);
+			forwardButton.setVisible(false);
 		}
 	}
+
+	/**
+	 * both the "Next Question" and "Next UnAnswered Question" buttons call this
+	 * to save the current data and advance
+	 * @param gotoNextUnAnswered if true proceed to next UNANSWERED question
+	 * if false proceed to next questions
+	 */
+public void onSave(boolean gotoNextUnAnswered) {
+		List<String> pageFlags = interviewingPanel.pageFlags();
+		List<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
+		boolean okayToContinue = 
+			AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
+		boolean consistent = 
+			AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
+		boolean multipleSelectionsOkay = 
+			AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
+		for(AnswerFormFieldPanel field : interviewingPanel.getAnswerFields()) {
+			if ( !multipleSelectionsOkay ) {
+				field.setNotification(field.getRangeCheckNotification());
+			} else if(okayToContinue) {
+					Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+							field.getAnswer(),field.getOtherText(),
+							field.getSkipReason(pageFlags));
+			} else if(consistent) {
+				field.setNotification(
+						field.answeredOrRefused(pageFlags) ?
+								"" : "Unanswered");
+			} else {
+				field.setNotification(
+						field.consistent(pageFlags) ?
+								"" : field.inconsistencyReason(pageFlags));
+			}
+		}
+		if(okayToContinue) {
+			if ( gotoNextUnAnswered ) {
+			setResponsePage(
+					askNextUnanswered(interviewId,question,
+							new InterviewingEgoPage(interviewId,question)));
+			} else {
+				EgonetPage page = 
+					askNext(interviewId,question,new InterviewingEgoPage(interviewId,question));
+				if(page != null) {
+					setResponsePage(page);
+				}
+			}
+		}
+	}
+
 
 	//                    forward, unansweredOnly
 	// askNextUnanswered: true,    true
@@ -147,7 +177,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 		// to advance through the ego questions to the first alter question
 		// was causing the program to crash, this should fix that problem:
 		// return InterviewingAlterPage.askNext(interviewId,null,null,comeFrom);
-		return InterviewingAlterPage.askNext(interviewId,null,false,comeFrom);
+		return InterviewingAlterPage.askNextNEW(interviewId,null,false,comeFrom);
 	}
 	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion, EgonetPage comeFrom) {
 		Question previousEgoQuestion = 

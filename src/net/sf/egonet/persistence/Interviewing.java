@@ -3,7 +3,6 @@ package net.sf.egonet.persistence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -464,7 +463,6 @@ public class Interviewing {
 	{
 		long onFunctionEntry = System.currentTimeMillis();
 		long onFunctionExit;
-		long onEnvironmentSetup;
 		long onSkipLogicEntry;
 		long onUseIfEntry;
 		long timeInSetup = 0;
@@ -648,4 +646,315 @@ public class Interviewing {
 		}
 		return links;
 	}
+	
+	/**
+	 * simple convenience function for alterQuestionsForInterview
+	 * reverses a list of questions
+	 * @param questionList list to be reverse
+	 * @return the input lists data but in reverse order
+	 */
+	private static List<Question> reverse ( List<Question> questionList) {
+		int ix;
+		ArrayList<Question> returnList = new ArrayList<Question>(questionList.size());
+		
+		for ( ix=questionList.size()-1 ; ix>=0 ; --ix ) 
+			returnList.add(questionList.get(ix));
+		return(returnList);
+	}
+	
+	/**
+	 * simple convenience function for alterQuestionsForInterview
+	 * starting from the start on the left, remove all questions up to 
+	 * and including prevQuestion (if present)
+	 * @param questionList list to remove items from
+	 * @param prevQuestion question we will trim up to 
+	 * @return the input list possibly shortened
+	 */
+	private static List<Question> trimLeading ( List<Question> questionList, Question prevQuestion ) {
+		int ix;
+		int questionIndex = -1;
+		Question removed;
+		
+		if ( prevQuestion==null )
+			return(questionList);
+		questionIndex = questionList.indexOf(prevQuestion);
+		if ( questionIndex<0 )
+			return(questionList);
+		
+		for ( ix=questionIndex ; ix>=0 ; --ix ) {
+			removed = questionList.remove(ix);
+			System.out.println ("Skipping " + removed);
+		}
+		return(questionList);
+	}
+	
+	/**
+	 * this version of alterQuestionsForInterview will return just ONE question,
+	 * the next questions to ask
+	 * @param session database object
+	 * @param interviewId IDs this interview
+	 * @param eContext EvaluationContext that will check for answered questions
+	 * @param prevQuestion the question just asked
+	 * @param forward if true, advancing 
+	 * @param unansweredOnly if true, only want unanswered questions
+	 * @return a ArrayList with just one question
+	 */
+	private static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
+			Session session, Long interviewId, EvaluationContext eContext,
+			Question prevQuestion, Boolean forward, Boolean unansweredOnly) 
+	{
+		long onFunctionEntry = System.currentTimeMillis();
+		long onFunctionExit;
+		long onSkipLogicEntry;
+		long onUseIfEntry;
+		long timeInSetup = 0;
+		long timeInFunction = 0;
+		long timeInSkipLogic = 0;
+		long timeInUseIf = 0;
+		int  skipLogicCount = 0;
+		int  useIfCount = 0;
+		
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		List<Alter> alters = Alters.getForInterview(session, interviewId);
+		EvaluationContext context = Expressions.getContext(session, interview);
+		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
+		
+		System.out.println ( "========================");
+		System.out.println ("Moving " + (forward ? "forward" : "backward") + "  looking for " + 
+				(unansweredOnly ? "UNanswered only" : "answered OR unanswered"));
+		
+		// to make things simpler, reverse the order of the list if we
+		// are going backward
+		if ( !forward ) {
+			questions = reverse(questions);
+		}
+		// also to help keep things simple, get rid of questions we
+		// know we have absolutely no use for.
+		// that is, all questions up to and including the previous one.
+		// ( if we are going backwards we don't want questions IN FRONT
+		// of the previous one, but the reverse took care of that
+		if ( prevQuestion!=null) {
+			System.out.println ("prevquestion=" + prevQuestion.getTitle());
+			questions = trimLeading(questions, prevQuestion);
+		} else {
+			System.out.println ("prevquestion=null");
+		}
+		
+		timeInSetup = System.currentTimeMillis() - onFunctionEntry;
+		for(Question question : questions) {
+			System.out.println ( "examining " + question.getTitle());
+			ArrayList<Alter> resultAlters = Lists.newArrayList();
+			Boolean answered = false;
+			
+			// if we are looking for unanswered only and any one
+			// alter has answered the question we are not interested
+			// in the question
+			if ( unansweredOnly ) {
+				for ( Alter alter : alters ) {
+					if ( context.qidAidToAlterAnswer.containsKey(
+							new PairUni<Long>(question.getId(),alter.getId())))
+						answered = true;
+				}
+				if ( answered )
+					System.out.println ( "Skipping, looked of unanswered and this has an answer");
+			}
+			
+			if ( !unansweredOnly || !answered ) {
+			    for(Alter alter : alters) {
+				    Long reasonId = question.getAnswerReasonExpressionId();
+				    Boolean shouldAnswer = true;
+
+			    	if ( reasonId!=null ) {
+			    		++skipLogicCount;
+			    		onSkipLogicEntry = System.currentTimeMillis();
+			    		shouldAnswer = Expressions.evaluateAsBool(
+							 				context.eidToExpression.get(reasonId), 
+							 				Lists.newArrayList(alter), 
+							 				context);
+			    		System.out.println ( "skip logic says to " + (shouldAnswer ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
+			    		timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
+			    	} // end if skip logic reasonID != null
+			    	
+			    	if ( reasonId==null ) {
+			    		String strUseIf;
+			    		int iEvaluate;
+			    		ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
+			    		strUseIf = question.getUseIfExpression();
+			    		if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
+			    			++useIfCount;
+			    			onUseIfEntry = System.currentTimeMillis();
+			    			strUseIf = question.answerCountInsertion(strUseIf, interviewId);
+			    			strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
+			    			strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);
+			    			strUseIf = question.variableInsertion(strUseIf, interviewId, singleAlterList);
+			    			iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
+			    					strUseIf, interviewId, 
+			    					question.getType(), question.getStudyId(), singleAlterList);
+			    			if ( SimpleLogicMgr.hasError()) {
+			    				System.out.println ("USE IF error in " + question.getTitle());
+			    				System.out.println ("USE IF =" + question.getUseIfExpression());
+			    			}
+			    			if (iEvaluate==0)
+			    				shouldAnswer = false;
+			    			System.out.println ( "use-if says to " + (shouldAnswer ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
+			    			timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
+			    		}  // end if strUseIf != null
+			    	} // end if skip-logic reasonID==null
+			
+			    if(shouldAnswer) {
+			    	resultAlters.add(alter);
+			    } // end of for ( Alter alters 
+			    if(! resultAlters.isEmpty()) {
+			    	results.add(new Pair<Question,ArrayList<Alter>>(question,resultAlters));	
+			    } // end of !resultAlters.isEmpty()
+			} // end off for ( Alter alters... loop
+		} // end  if ( !unansweredOnly || !answered )
+			
+		if ( !results.isEmpty()) {
+			onFunctionExit = System.currentTimeMillis();
+			timeInFunction = onFunctionExit - onFunctionEntry;
+			System.out.println ( "Time in NEW alterQuestionsForInterview=" + timeInFunction);
+			System.out.println ( "Time in setup =" + timeInSetup);
+			if ( skipLogicCount>0 )
+			    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
+			if ( useIfCount>0 )
+				System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
+			return results;  
+			}
+		}
+		// if we get to this point results is empty, no questions were found
+		onFunctionExit = System.currentTimeMillis();
+		timeInFunction = onFunctionExit - onFunctionEntry;
+		System.out.println ( "Exit from bottom Time in NEW alterQuestionsForInterview=" + timeInFunction);
+		System.out.println ( "Time in setup =" + timeInSetup);
+		if ( skipLogicCount>0 )
+		    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
+		if ( useIfCount>0 )
+			System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
+		return results;
+	}
+	
+	/**
+	 * duplicate of the existing alterPagesForInterview above but
+	 * has the four additional parameters to pass to the new version
+	 * of alterQuestionsForInterview
+	 * @param session
+	 * @param interviewId
+	 * @param eContext
+	 * @param prevQuestion
+	 * @param forward
+	 * @param unansweredOnly
+	 * @return
+	 */
+	private static TreeSet<InterviewingAlterPage.Subject> 
+	alterPagesForInterview(Session session, Long interviewId,
+			EvaluationContext eContext,
+			Question prevQuestion, Boolean forward, Boolean unansweredOnly) 
+	{
+		ArrayList<Pair<Question,ArrayList<Alter>>> questionAlterListPairs =
+			alterQuestionsForInterview(session,interviewId,
+			eContext, prevQuestion, forward, unansweredOnly );
+		Interview interview = Interviews.getInterview(interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
+		Map<Long,TreeSet<Question>> qIdToSection = 
+			createQuestionIdToSectionMap(new TreeSet<Question>(questions));
+		TreeSet<InterviewingAlterPage.Subject> results = Sets.newTreeSet();
+		for(Pair<Question,ArrayList<Alter>> questionAndAlters : questionAlterListPairs) {
+			Question question = questionAndAlters.getFirst();
+			ArrayList<Alter> alters = questionAndAlters.getSecond();
+			if(question.getAskingStyleList()) {
+				InterviewingAlterPage.Subject subject = new InterviewingAlterPage.Subject();
+				subject.alters = alters;
+				subject.interviewId = interviewId;
+				subject.question = question;
+				subject.sectionQuestions = qIdToSection.get(question.getId());
+				results.add(subject);
+			} else {
+				for(Alter alter : alters) {
+					InterviewingAlterPage.Subject subject = new InterviewingAlterPage.Subject();
+					subject.alters = Lists.newArrayList(alter);
+					subject.interviewId = interviewId;
+					subject.question = question;
+					subject.sectionQuestions = qIdToSection.get(question.getId());
+					results.add(subject);
+				}
+			}
+		}
+		return results;
+	}
+	
+	/**
+	 * new version of nextAlterPageForInterview
+	 * @param interviewId this interview
+	 * @param currentPage 'subject' if this is null we are 'entering' the alter section,
+	 *                     and will want the first or the last question
+	 * @param forward  if false user pressed the << button, searching backwards
+	 * @param unansweredOnly  if true looking for unanswered questions only
+	 * @return
+	 */
+	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(final Long interviewId, 
+			final InterviewingAlterPage.Subject currentPage, final Boolean forward, final Boolean unansweredOnly)
+	{
+		return new DB.Action<InterviewingAlterPage.Subject>() {
+			public InterviewingAlterPage.Subject get() {
+				return nextAlterPageForInterviewNEW(
+						session, interviewId, currentPage, 
+						forward, unansweredOnly);
+			}
+		}.execute();
+	}
+	
+	/**
+	 * new version of nextAlterPageForInterview
+	 * @param session  the database 
+	 * @param interviewId this interview
+	 * @param currentPage 'subject' if this is null we are 'entering' the alter section,
+	 *                     and will want the first or the last question
+	 * @param forward if true searching forward to next question
+	 * @param unansweredOnly if true only want unanswered questions
+	 * @return
+	 */                                       
+	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(Session session, Long interviewId, 
+			InterviewingAlterPage.Subject currentPage, Boolean forward, Boolean unansweredOnly)
+	{
+		InterviewingAlterPage.Subject previousPage = currentPage;
+		Question previousQuestion = (currentPage==null) ? null : currentPage.question;
+		EvaluationContext context = 
+			Expressions.getContext(session, Interviews.getInterview(session, interviewId));
+		TreeSet<InterviewingAlterPage.Subject> pages =
+			alterPagesForInterview(session, interviewId, context, previousQuestion, forward, unansweredOnly);
+		
+		while(true) {
+			InterviewingAlterPage.Subject nextPage;
+			if(pages.isEmpty()) {
+				return null;
+			}
+			if(previousPage == null) {
+				nextPage = 
+					forward ? pages.first() : pages.last();
+			} else {
+				nextPage =
+					forward ? pages.higher(previousPage) : pages.lower(previousPage);
+			}
+			if(nextPage == null) {
+				return null;
+			}
+			if(! unansweredOnly) {
+				return nextPage;
+			}
+			for(Alter alter : nextPage.alters) {
+				Boolean answered = 
+					context.qidAidToAlterAnswer.containsKey(
+							new PairUni<Long>(nextPage.question.getId(),alter.getId()));
+				if(! answered) {
+					return nextPage;
+				}
+			}
+			previousPage = nextPage;
+		}
+	}
+		
 }

@@ -25,7 +25,8 @@ import net.sf.egonet.persistence.ExpressionNode.MathOp;
 public class TextInsertionUtil {
 	
 	private static final String strMonths[] = 
-	{"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+	   {"January", "February", "March", "April", "May", "June", 
+		"July", "August", "September", "October", "November", "December" };
 	
 	private enum DATE_FIELD { NONE, MONTH, DAY, YEAR};
 	
@@ -298,7 +299,12 @@ public class TextInsertionUtil {
 					    case 2: {
 					    	switch ( dateField ) {
 					    	    case NONE: break;
-					    	    case MONTH: strResult += " " + strMonths[dateInfo[0]] + " "; break;
+					    	    case MONTH:
+					    	    	 if ( dateInfo[0]<0  || dateInfo[1]>11)
+						    	    	 strResult += " " + dateInfo[0] + " ";
+					    	    	 else
+					    	    	     strResult += " " + strMonths[dateInfo[0]] + " "; 
+					    	    	 break;
 					    	    case DAY: strResult += " " + dateInfo[1] + " "; break;
 					    	    case YEAR: strResult += " " + dateInfo[2] + " "; break;
 					    	    }
@@ -309,7 +315,7 @@ public class TextInsertionUtil {
 					    	     case NONE: break;
 					    	     case MONTH:
 					    	    	  dateInfo[0] += offset;
-					    	    	  while (dateInfo[0] < 1 )
+					    	    	  while (dateInfo[0] < 0 )
 					    	    		  dateInfo[0] += 12;
 					    	    	  dateInfo[0] %= 12;
 					    	    	  strResult += " " + strMonths[dateInfo[0]] + " "; 
@@ -332,7 +338,6 @@ public class TextInsertionUtil {
 			}
 		} 
 		}
-		System.out.println ( strResult );
 		return(strResult);
 	}	
 	
@@ -1031,9 +1036,9 @@ public class TextInsertionUtil {
 			return(-1);
 		str = str.trim();
 		if ( str.length()>3 )
-			str = str.substring(0,4);
+			str = str.substring(0,3);
 		for ( ix=0 ; ix<strMonths.length ; ++ix ) {
-			if ( str.equalsIgnoreCase(strMonths[ix]))
+			if ( str.equalsIgnoreCase(strMonths[ix].substring(0,3)))
 				return(ix);
 		}
 		

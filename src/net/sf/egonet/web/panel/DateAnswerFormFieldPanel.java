@@ -1,7 +1,6 @@
 package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
 import java.util.StringTokenizer;
@@ -20,8 +19,9 @@ import net.sf.egonet.web.component.TextField;
 
 public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
-	private static final List MONTHS = Arrays.asList(new String[] 
-	   {"Jan", "Feb", "Mar", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec" });
+	private static final List<String> MONTHS = Arrays.asList(new String[] 
+	   {"January", "February", "March", "April", "May", "June", 
+		"July", "August", "September", "October", "November", "December" });
 	private Integer   theYear;
 	private String    theMonth;
 	private Integer   theDay;
@@ -55,7 +55,6 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 */
 	private boolean stringToCalendar ( String strDate ) {
 		int iTokens;
-		String[] dateStrings;
 		StringTokenizer strk;
 		
 		theYear = new Integer(0);
@@ -136,9 +135,9 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
-		if ( theYear < 0 )
+		if ( theYear < 1000 )
 			strNotification += "Year too low ";
-		if ( theYear > 3000 ) 
+		if ( theYear > 9999 ) 
 			strNotification += "Year too high ";
 		if ( theDay<1 )
 			strNotification += "Day too low ";
@@ -155,7 +154,7 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return (true);
-		if ( theYear < 0 || theYear > 3000 ) 
+		if ( theYear < 1000 || theYear > 9999 ) 
 			return(false);
 		if ( theDay<1 || theDay>31 )
 			return(false);

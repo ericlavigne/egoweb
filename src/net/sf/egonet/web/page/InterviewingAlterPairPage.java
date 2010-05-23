@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 
@@ -86,42 +87,22 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 	}
 	
 	private void build() {
+		Button forwardButton;
 		
+		Form form = new Form("form");
 		
-		Form form = new Form("form") {
+		form.add (new Button("nextUnanswered") {
 			public void onSubmit() {
-				List<String> pageFlags = interviewingPanel.pageFlags();
-				ArrayList<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
-				boolean okayToContinue = 
-					AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
-				boolean consistent = 
-					AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
-				boolean multipleSelectionsOkay = 
-					AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
-				for(AnswerFormFieldPanel answerField : answerFields) {
-					if ( !multipleSelectionsOkay ) {
-						answerField.setNotification(answerField.getRangeCheckNotification());
-					} else if(okayToContinue) {
-						Answers.setAnswerForInterviewQuestionAlters(
-								subject.interviewId, subject.question, answerField.getAlters(), 
-								answerField.getAnswer(), answerField.getOtherText(),
-								answerField.getSkipReason(pageFlags));
-					} else if(consistent) {
-						answerField.setNotification(
-								answerField.answeredOrRefused(pageFlags) ?
-										"" : "Unanswered");
-					} else {
-						answerField.setNotification(
-								answerField.consistent(pageFlags) ?
-										"" : answerField.inconsistencyReason(pageFlags));
-					}
-				}
-				if(okayToContinue) {
-					setResponsePage(
-							askNext(subject.interviewId,subject,true,new InterviewingAlterPairPage(subject)));
-				}
+				onSave(true);
+			}
+		});
+		
+		forwardButton = new Button("nextQuestion") {
+			public void onSubmit() {
+				onSave(false);
 			}
 		};
+		form.add(forwardButton);	
 		
 		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
 		for(Alter secondAlter : subject.secondAlters) {
@@ -172,6 +153,54 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		add(forwardLink);
 		if(! AnswerFormFieldPanel.okayToContinue(answerFields,interviewingPanel.pageFlags())) {
 			forwardLink.setVisible(false);
+			forwardButton.setVisible(false);
+		}
+	}
+
+	/**
+	 * both the "Next Question" and "Next UnAnswered Question" buttons call this
+	 * to save the current data and advance
+	 * @param gotoNextUnAnswered if true proceed to next UNANSWERED question
+	 * if false proceed to next questions
+	 */
+	public void onSave(boolean gotoNextUnAnswered) {
+		List<String> pageFlags = interviewingPanel.pageFlags();
+		ArrayList<AnswerFormFieldPanel> answerFields = interviewingPanel.getAnswerFields();
+		boolean okayToContinue = 
+			AnswerFormFieldPanel.okayToContinue(answerFields, pageFlags);
+		boolean consistent = 
+			AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
+		boolean multipleSelectionsOkay = 
+			AnswerFormFieldPanel.allRangeChecksOkay(answerFields);				
+		for(AnswerFormFieldPanel answerField : answerFields) {
+			if ( !multipleSelectionsOkay ) {
+				answerField.setNotification(answerField.getRangeCheckNotification());
+			} else if(okayToContinue) {
+				Answers.setAnswerForInterviewQuestionAlters(
+						subject.interviewId, subject.question, answerField.getAlters(), 
+						answerField.getAnswer(), answerField.getOtherText(),
+						answerField.getSkipReason(pageFlags));
+			} else if(consistent) {
+				answerField.setNotification(
+						answerField.answeredOrRefused(pageFlags) ?
+								"" : "Unanswered");
+			} else {
+				answerField.setNotification(
+					answerField.consistent(pageFlags) ?
+							"" : answerField.inconsistencyReason(pageFlags));
+			}
+		}
+		if(okayToContinue) {
+			if (gotoNextUnAnswered) {
+				setResponsePage(
+						askNext(subject.interviewId,subject,true,new InterviewingAlterPairPage(subject)));
+			} else {
+				EgonetPage page = 
+					askNext(subject.interviewId,subject,false,new InterviewingAlterPairPage(subject));
+				if(page != null) {
+					setResponsePage(page);	
+				}
+			}
 		}
 	}
 
