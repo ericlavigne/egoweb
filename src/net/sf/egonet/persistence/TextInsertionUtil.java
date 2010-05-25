@@ -291,6 +291,8 @@ public class TextInsertionUtil {
 					strResult += "[date "+strDate+" not found]";
 				} else {
 				    dateInfo = strDateToNumeric(strDate);
+				    // System.out.println ("strDate=" + strDate);
+				    // System.out.println ("dateInfo="+dateInfo[0]+","+dateInfo[1]+","+dateInfo[2]);
 					switch ( paramInfo.length ) {
 					    case 0:
 					    case 1:
@@ -314,10 +316,12 @@ public class TextInsertionUtil {
 					    	 switch ( dateField ) {
 					    	     case NONE: break;
 					    	     case MONTH:
+					    	    	  System.out.println ( "OLD date month =" + dateInfo[0] + " offset=" + offset);
 					    	    	  dateInfo[0] += offset;
 					    	    	  while (dateInfo[0] < 0 )
 					    	    		  dateInfo[0] += 12;
 					    	    	  dateInfo[0] %= 12;
+					    	    	  System.out.println("New date month=" + dateInfo[0]);
 					    	    	  strResult += " " + strMonths[dateInfo[0]] + " "; 
 					    	    	  break;
 					    	     case DAY:
@@ -1038,7 +1042,7 @@ public class TextInsertionUtil {
 		if ( str.length()>3 )
 			str = str.substring(0,3);
 		for ( ix=0 ; ix<strMonths.length ; ++ix ) {
-			System.out.println ( "comparing " + str + " and " + strMonths[ix].substring(0,3));
+			// System.out.println ( "comparing " + str + " and " + strMonths[ix].substring(0,3));
 			if ( str.equalsIgnoreCase(strMonths[ix].substring(0,3)))
 				return(ix);
 		}
