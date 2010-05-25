@@ -1038,6 +1038,7 @@ public class TextInsertionUtil {
 		if ( str.length()>3 )
 			str = str.substring(0,3);
 		for ( ix=0 ; ix<strMonths.length ; ++ix ) {
+			System.out.println ( "comparing " + str + " and " + strMonths[ix].substring(0,3));
 			if ( str.equalsIgnoreCase(strMonths[ix].substring(0,3)))
 				return(ix);
 		}
@@ -1073,7 +1074,9 @@ public class TextInsertionUtil {
 		
 		returnInfo[0] = returnInfo[1] = returnInfo[2] = 0;
 		dateInfo = strDate.split(" ");
+
 		switch ( dateInfo.length ) {
+		   default:
 		    case 3: 
 		    	 try {
 		    	    returnInfo[2] = Integer.parseInt(dateInfo[2].trim());

@@ -40,6 +40,10 @@ public class Question extends OrderedEntity
 	// similar variables to be used with MULTIPLE_SELECTION questions
 	private Integer minCheckableBoxes;
 	private Integer maxCheckableBoxes;
+	// Date & Time_Span questions will let authors select which
+	// time units are available for answering.
+	// they will be stored as boolean bit values
+	private Integer timeUnits;
 	
 	public Question() {
 		prompt = "";
@@ -58,6 +62,7 @@ public class Question extends OrderedEntity
 		
 		minCheckableBoxes = 0;
 		maxCheckableBoxes = 100;
+		timeUnits = 0xff;
 	}
 
 	public String toString() {
@@ -358,6 +363,13 @@ public class Question extends OrderedEntity
 	}
 	public Integer getMaxCheckableBoxes() { 
 		return( maxCheckableBoxes );
+	}
+	
+	public void setTimeUnits (Integer timeUnits) {
+		this.timeUnits = (timeUnits==null)?new Integer(0xff):timeUnits;
+	}
+	public Integer getTimeUnits() { 
+		return( timeUnits );
 	}
 	
 	/* ****************************************************************** */

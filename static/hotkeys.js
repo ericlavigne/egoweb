@@ -15,7 +15,16 @@ function applyPageChangesForHotkeys() {
 		if(! jQuery(this).hasClass('hotkeymodified')) {
 			jQuery(this).addClass('hotkeymodified');
 			if(i < 9) {
-				return t + ' (' + (i+1) + ')';
+				// alert (t);
+				// alert ('t.toString()==' + t.toString());
+				// if ( t.toString()=="Don't know" ) {
+				// 	return "(D) Don't know";
+                        // } else if ( t.toString()=="Refuse" ) {
+                        //       return "(R) Refuse";
+                        // } else if ( t.toString()=="None" ) {
+                        //        return "(N) None";
+                        // }
+				return '(' + (i+1) + ') ' + t;
 			} else {
 				return t;
 			}

@@ -49,8 +49,11 @@ public class EditQuestionPanel extends Panel {
 	private Label noneButtonLabel;
 	private CheckBox noneButtonCheckBox;
 	private DropDownChoice dropDownQuestionTypes;
+	
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
+	private TimeUnitsPanel timeUnitsPanel;
+	
 	private static final String answerAlways = "Always";
 	
 	private Component parentThatNeedsUpdating;
@@ -103,6 +106,11 @@ public class EditQuestionPanel extends Panel {
 		form.add(multipleSelectionLimitsPanel);
 		multipleSelectionLimitsPanel.setVisible(false);
 		multipleSelectionLimitsPanel.setOutputMarkupId(true);
+	
+		timeUnitsPanel = new TimeUnitsPanel ("timeUnitsPanel", question);
+		form.add(timeUnitsPanel);
+		timeUnitsPanel.setVisible(false);
+		timeUnitsPanel.setOutputMarkupId(true);
 		
 		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
@@ -239,6 +247,11 @@ public class EditQuestionPanel extends Panel {
 			otherSpecifyLabel.setVisible(false); 
 			otherSpecifyCheckBox.setVisible(false);	
 		}
+		if ( aType==Answer.AnswerType.DATE  || aType==Answer.AnswerType.TIME_SPAN ) {
+			timeUnitsPanel.setVisible(true);
+		} else {
+			timeUnitsPanel.setVisible(false);
+		}
 		numericLimitsPanel.setMinLimitType( question.getMinLimitType());
 		numericLimitsPanel.setMinLiteral  ( question.getMinLiteral());
 		numericLimitsPanel.setMinPrevQues ( question.getMinPrevQues());
@@ -248,6 +261,7 @@ public class EditQuestionPanel extends Panel {
 		
 		multipleSelectionLimitsPanel.setMinCheckableBoxes ( question.getMinCheckableBoxes());
 		multipleSelectionLimitsPanel.setMaxCheckableBoxes ( question.getMaxCheckableBoxes());
+		
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
@@ -269,6 +283,7 @@ public class EditQuestionPanel extends Panel {
 		question.setUseIfExpression((String) questionUseIfField.getModelObject());
 		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
 		question.setNoneButton((Boolean)noneButtonCheckBox.getModelObject());
+		question.setTimeUnits((Integer) timeUnitsPanel.getTimeUnits());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());
@@ -294,24 +309,36 @@ public class EditQuestionPanel extends Panel {
 	protected void onSelectionChanged(int iValue) {
 		boolean numericLimitsVisible = false;
 		boolean multipleSelectionLimitsVisible = false;
+		boolean timeSpanUnitsVisible = false;
+		boolean otherSpecifyVisible = false;
 		
-		if ( iValue==1) { // NUMERIC
-			numericLimitsVisible = true;
-		} else if ( iValue==3) { // MULTIPLE_SELECTION
-			multipleSelectionLimitsVisible = true;
-		}
+		switch ( iValue ) {
+			case 0: // TEXT
+			     break;
+			case 1:  // NUMERIC
+			     numericLimitsVisible = true;
+			     break;
+			case 2: // DROP_DOWN
+				 otherSpecifyVisible = true;
+				 break;
+			case 3: // MULTIPLE_SELECTION
+			     multipleSelectionLimitsVisible = true;
+			     otherSpecifyVisible = true;
+			     break;
+			case 4: // DATE
+			case 5: // TIME_SPAN
+				 timeSpanUnitsVisible = true;
+				 break;
+			}
+				
 		numericLimitsPanel.setVisible(numericLimitsVisible);
 		multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
 		noneButtonLabel.setVisible(multipleSelectionLimitsVisible); 
 		noneButtonCheckBox.setVisible(multipleSelectionLimitsVisible);
-		
-		if ( iValue==2  ||  iValue==3) { // DROP_DOWN or MULTIPLE_SELECTION
-			otherSpecifyLabel.setVisible(true); 
-			otherSpecifyCheckBox.setVisible(true);
-		} else {
-			otherSpecifyLabel.setVisible(false); 
-			otherSpecifyCheckBox.setVisible(false);	
-		}
+		otherSpecifyLabel.setVisible(otherSpecifyVisible); 
+		otherSpecifyCheckBox.setVisible(otherSpecifyVisible);
+		timeUnitsPanel.setVisible(timeSpanUnitsVisible);
+		timeUnitsPanel.setWeeksVisible((iValue==5) ? true : false );
 	}
 	
 }

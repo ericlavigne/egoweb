@@ -35,6 +35,7 @@
  		<property name="maxPrevQues" 	column="maxPrevQues" type="text" length="255" /> 	
 		<property name="minCheckableBoxes" column="minCheckableBoxes" />
 		<property name="maxCheckableBoxes" column="maxCheckableBoxes" />
+		<property name="timeUnits"         column="timeUnits" />
 	
 		<property name="studyId" column="study_id" />
 		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />

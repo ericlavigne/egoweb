@@ -378,6 +378,8 @@ public class Archiving {
 	private static Element addQuestionNode(Element questionsNode, 
 			Question question, List<QuestionOption> options, Integer ordering) 
 	{
+		Answer.AnswerType aType;
+		
 		Element questionNode = questionsNode.addElement("question");
 		addAttribute(questionNode,"id", question.getId());
 		addAttribute(questionNode,"title", question.getTitle());
@@ -391,16 +393,19 @@ public class Archiving {
 		addAttribute(questionNode,"useIf", question.getUseIfExpression());
 		addAttribute(questionNode,"otherSpecify", question.getOtherSpecify());
 		addAttribute(questionNode,"noneButton", question.getNoneButton());
-		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL ) {
+		aType = question.getAnswerType();
+		if (aType==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
 			addAttribute(questionNode,"minLiteral", question.getMinLiteral());
 			addAttribute(questionNode,"minPrevQues", question.getMinPrevQues());
 			addAttribute(questionNode,"maxLimitType", question.getMaxLimitTypeDB());
 			addAttribute(questionNode,"maxLiteral", question.getMaxLiteral());
 			addAttribute(questionNode,"maxPrevQues", question.getMaxPrevQues());	
-		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION ) {
+		} else if (aType==Answer.AnswerType.MULTIPLE_SELECTION ) {
 			addAttribute(questionNode,"minCheckableBoxes", question.getMinCheckableBoxes());
 			addAttribute(questionNode,"maxCheckableBoxes", question.getMaxCheckableBoxes());
+		} else if ( aType==Answer.AnswerType.DATE || aType==Answer.AnswerType.TIME_SPAN ) {
+			addAttribute(questionNode,"timeUnits", question.getTimeUnits());
 		}
 		addText(questionNode,"preface",question.getPreface()); 
 		addText(questionNode,"prompt",question.getPrompt());
@@ -477,6 +482,13 @@ public class Archiving {
 			}
 		}
 		
+		if ( aType==Answer.AnswerType.DATE || aType==Answer.AnswerType.TIME_SPAN ) {
+			try {
+				question.setTimeUnits(attrInt(node,"timeUnits"));
+			} catch ( java.lang.RuntimeException rte4 ) {
+				question.setTimeUnits(0xff);
+			}
+		}
 		Long remoteReasonId = attrLong(node,"answerReasonExpressionId");
 		question.setAnswerReasonExpressionId(
 				remoteReasonId == null ? null : 

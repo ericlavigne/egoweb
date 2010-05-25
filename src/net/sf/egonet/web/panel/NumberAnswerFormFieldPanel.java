@@ -39,7 +39,7 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	private void build(String previousAnswer) {
-		textField = new TextField("answer", new Model(previousAnswer), Integer.class);
+		textField = new TextField("answer", new Model(previousAnswer), String.class);
 		add(textField);
 		
 		lblNumberPrompt = new Label ("numberPrompt", getNumericRangePrompt(alters));
@@ -199,13 +199,14 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	private int numericAnswerStatus() {
 		String strAnswer;
-		int    iAnswer;
+		int iAnswer;
 		
 		strAnswer = getAnswer().trim();
 		try {
 			iAnswer = Integer.parseInt(strAnswer);
 		} catch ( NumberFormatException e ) {
 			iAnswer = 0;
+			return(Integer.MAX_VALUE);
 		}
 		
 		// System.out.println ( "numericAnswerStatus lowBound=" + lowBound + " highBound=" + highBound + " answer=" + iAnswer);
@@ -231,11 +232,19 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	public String getRangeCheckNotification() {
 		int iAnswerStatus;
+		String strAnswer;
 		String strNotification = "";
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
 		
+		strAnswer = getAnswer().trim();
+		try {
+			int iAnswer = Integer.parseInt(strAnswer);
+		} catch ( NumberFormatException e ) {
+			strNotification = "Non-digits in answer field.";
+			return (strNotification);
+		}
 		iAnswerStatus = numericAnswerStatus();
 		if ( iAnswerStatus<0 ) {
 			strNotification  = "Answer is above upper limit of " + highBound + "."; 
