@@ -96,11 +96,21 @@ public class EditStudyQuestionsPanel extends Panel {
 			protected void populateItem(final ListItem item) {
 				final Question question = (Question) item.getModelObject();
 
+				final PanelContainer editor = new PanelContainer("editor");
+				editor.setOutputMarkupId(true);
+				item.add(editor);
+				
 				Link questionLink = new AjaxFallbackLink("questionLink")
                 {
 					public void onClick(AjaxRequestTarget target) {
-						editQuestion(question);
-						target.addComponent(editQuestionPanelContainer);
+						if(editor.isEmpty()) {
+							editor.changePanel(
+									new EditQuestionPanel("panel", 
+											questionsContainer, question, questionType, studyId));
+						} else {
+							editor.removePanel();
+						}
+						target.addComponent(editor);
 					}
 				};
 				
@@ -111,8 +121,10 @@ public class EditStudyQuestionsPanel extends Panel {
 				Link questionOptionsLink = new AjaxFallbackLink("questionOptionsLink") {
 					public void onClick(AjaxRequestTarget target) {
 						if(selectionQuestion) {
-							editQuestionOptions(question);
-							target.addComponent(editQuestionPanelContainer);
+							editor.changePanel(
+									new EditQuestionOptionsPanel("panel",
+											questionsContainer,question));
+							target.addComponent(editor);
 						}
 					}
 				};
@@ -133,8 +145,8 @@ public class EditStudyQuestionsPanel extends Panel {
 				item.add(new Label("questionResponseType", question.getAnswerType().toString()));
 				AjaxFallbackLink questionPreview = new AjaxFallbackLink("questionPreview") {
 					public void onClick(AjaxRequestTarget target) {
-						previewQuestion(question);
-						target.addComponent(editQuestionPanelContainer);
+						editor.changePanel(InterviewingPanel.createExample("panel", question));
+						target.addComponent(editor);
 					}
 				};
 				item.add(questionPreview);
@@ -220,16 +232,6 @@ public class EditStudyQuestionsPanel extends Panel {
 	}
 	private void editQuestion(Question question) {
 		Panel newPanel = new EditQuestionPanel("editQuestionPanel", questionsContainer, question, questionType, studyId);
-		editQuestionPanel.replaceWith(newPanel);
-		editQuestionPanel = newPanel;
-	}
-	private void editQuestionOptions(Question question) {
-		Panel newPanel = new EditQuestionOptionsPanel("editQuestionPanel",questionsContainer,question);
-		editQuestionPanel.replaceWith(newPanel);
-		editQuestionPanel = newPanel;
-	}
-	private void previewQuestion(Question question) {
-		Panel newPanel = InterviewingPanel.createExample("editQuestionPanel", question);
 		editQuestionPanel.replaceWith(newPanel);
 		editQuestionPanel = newPanel;
 	}
