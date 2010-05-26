@@ -184,13 +184,13 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	    inputMinute = new TextField("Minute", new PropertyModel(this,"theMinute"), Integer.class);
 	    radioAmPm = new RadioChoice ("ampm", new PropertyModel(this, "amHour"), AM_PM);
 	    
-	    add(inputYear);
-		add(inputMonth);
-		add(inputDay);
+		add(inputMinute);
 		add(inputHour);
 		add(radioAmPm);
-		add(inputMinute);
-		
+		add(inputDay);
+		add(inputMonth);
+	    add(inputYear);
+	    
 		lblYear   = new Label("lblYear", "Year");
 		lblMonth  = new Label("lblMonth", "Month");
 		lblDay    = new Label("lblDay", "Day");
@@ -322,7 +322,26 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	
 	public void setAutoFocus() {
-		inputYear.add(new FocusOnLoadBehavior());
+		if (inputMinute.isVisible()) {
+			inputMinute.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputHour.isVisible()) {
+			inputHour.add(new FocusOnLoadBehavior());
+			return;
+		}		
+		if (inputDay.isVisible()) {
+			inputDay.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputMonth.isVisible()) {
+			inputMonth.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputYear.isVisible()) {
+			inputYear.add(new FocusOnLoadBehavior());
+			return;
+		}		
 	}
 
 	public boolean dontKnow() {

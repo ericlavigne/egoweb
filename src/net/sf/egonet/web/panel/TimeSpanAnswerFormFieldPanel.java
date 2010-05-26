@@ -157,13 +157,14 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		inputDays    = new TextField("Days",    new PropertyModel(this,"days"), Integer.class);
 	    inputHours   = new TextField("Hours",   new PropertyModel(this,"hours"), Integer.class);
 	    inputMinutes = new TextField("Minutes", new PropertyModel(this,"minutes"), Integer.class);
-		add(inputYears);
-		add(inputMonths);
-		add(inputWeeks);
-		add(inputDays);
-		add(inputHours);
+
 		add(inputMinutes);
-		
+		add(inputHours);	
+		add(inputDays);		
+		add(inputWeeks);		
+		add(inputMonths);	
+	    add(inputYears);
+	    
 		lblYears   = new Label("lblYears", "Years");
 		lblMonths  = new Label("lblMonths", "Months");
 		lblWeeks   = new Label("lblWeeks", "Weeks");
@@ -301,7 +302,30 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	public Integer getMinutes() { return(minutes); 
 	}	
 	public void setAutoFocus() {
-		inputYears.add(new FocusOnLoadBehavior());
+		if (inputMinutes.isVisible()) {
+			inputMinutes.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputHours.isVisible()) {
+			inputHours.add(new FocusOnLoadBehavior());
+			return;
+		}		
+		if (inputDays.isVisible()) {
+			inputDays.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputWeeks.isVisible()) {
+			inputWeeks.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputMonths.isVisible()) {
+			inputMonths.add(new FocusOnLoadBehavior());
+			return;
+		}
+		if (inputYears.isVisible()) {
+			inputYears.add(new FocusOnLoadBehavior());
+			return;
+		}
 	}
 
 	public boolean dontKnow() {
