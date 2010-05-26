@@ -3,9 +3,9 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.markup.html.basic.Label;
 
 import com.google.common.collect.Lists;
-
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
@@ -15,27 +15,42 @@ import net.sf.egonet.web.component.TextField;
 
 public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
+	public static final int BIT_YEAR 	= 0x01;
+	public static final int BIT_MONTH 	= 0x02;
+	public static final int BIT_WEEK 	= 0x04;
+	public static final int BIT_DAY 	= 0x08;
+	public static final int BIT_HOUR 	= 0x10;
+	public static final int BIT_MINUTE  = 0x20;
+	
 	private boolean useYears;
 	private boolean useMonths;
 	private boolean useWeeks;
 	private boolean useDays;
+	private boolean useHours;
+	private boolean useMinutes;
 	private Integer years;
 	private Integer months;
 	private Integer weeks;
 	private Integer days;
+	private Integer hours;
+	private Integer minutes;
 	private TextField inputYears;
 	private TextField inputMonths;
 	private TextField inputWeeks;
 	private TextField inputDays;
+	private TextField inputHours;
+	private TextField inputMinutes;
+	private Label lblYears;
+	private Label lblMonths;
+	private Label lblWeeks;
+	private Label lblDays;
+	private Label lblHours;
+	private Label lblMinutes;
 	private CheckboxesPanel<String> refDKCheck;
 	
 	public TimeSpanAnswerFormFieldPanel(String id, Question question, ArrayList<Alter> alters, Long interviewId) {
 		super(id,question,Answer.SkipReason.NONE,alters, interviewId);
 		stringToTimeSpan("");
-		useYears = true;
-		useMonths = true;
-		useWeeks = true;
-		useDays = true;
 		build("");
 	}
 	
@@ -44,16 +59,12 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	{
 		super(id,question,skipReason,alters,interviewId);
 		stringToTimeSpan(answer);
-		useYears = true;
-		useMonths = true;
-		useWeeks = true;
-		useDays = true;
 		build(answer);
 	}
 
 	/**
 	 * Time Spans will be kept in a string of the format
-	 * "(YY) years (MM) months (WW) weeks (dd) days"
+	 * "(YY) years (MM) months (WW) weeks (dd) days (hh) hours (mm) minutes
 	 * where the (YY)... are integer values
 	 * @param strTimeSpan - a string that contains the time span
 	 * @return false if any errors are encountered, true otherwise
@@ -62,11 +73,13 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		boolean okay = true;
 		String[] strWords;
 		int iValue = 0;
-		
+
 		years = new Integer(0);
 		months = new Integer(0);
 		weeks = new Integer(0);
 		days = new Integer(0);
+		hours = new Integer(0);
+		minutes = new Integer(0);
 		
 		strTimeSpan = strTimeSpan.trim();
 		if ( strTimeSpan==null || strTimeSpan.length()==0 )
@@ -85,6 +98,12 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 				iValue = 0;
 			} else if ( str.equalsIgnoreCase("days")) {
 				days = new Integer(iValue);
+				iValue = 0;
+			} else if ( str.equalsIgnoreCase("hours")) {
+				hours = new Integer(iValue);
+				iValue = 0;
+			} else if ( str.equalsIgnoreCase("minutes")) {
+				minutes = new Integer(iValue);
 				iValue = 0;
 			} else {
 				try {
@@ -106,38 +125,74 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private String timeSpanToString() {
 		String strResult = "";
 		
-		if ( years!=null && years.intValue()>0 )
+		if ( useYears && years!=null && years.intValue()>0 )
 			strResult += " " + years + " years";
-		if ( months!=null && months.intValue()>0 )
+		if ( useMonths && months!=null && months.intValue()>0 )
 			strResult += " " + months + " months";
-		if ( weeks!=null && weeks.intValue()>0 )
+		if ( useWeeks && weeks!=null && weeks.intValue()>0 )
 			strResult += " " + weeks + " weeks";
-		if ( days!=null && days.intValue()>0 )
-			strResult += " " + days + " days";		
+		if ( useDays && days!=null && days.intValue()>0 )
+			strResult += " " + days + " days";	
+		if ( useHours && hours!=null && hours.intValue()>0 )
+			strResult += " " + hours + " hours";
+		if ( useMinutes && minutes!=null && minutes.intValue()>0 )
+			strResult += " " + minutes + " minutes";
 		strResult += " ";
 		return(strResult);
 	}
 	
 	private void build(String answer) {
+		int iTimeUnits = question.getTimeUnits();
 		
-		inputYears = new TextField ("Years", new PropertyModel(this, "years"), Integer.class);
-		inputMonths = new TextField ("Months", new PropertyModel(this,"months"), Integer.class);	
-		inputWeeks = new TextField("Weeks", new PropertyModel(this,"weeks"), Integer.class);		
-		inputDays = new TextField("Days", new PropertyModel(this,"days"), Integer.class);
-	
+		useYears   = ((iTimeUnits & BIT_YEAR)>0 )   ? true : false;
+		useMonths  = ((iTimeUnits & BIT_MONTH)>0 )  ? true : false;
+		useWeeks   = ((iTimeUnits & BIT_WEEK)>0 )   ? true : false;
+		useDays    = ((iTimeUnits & BIT_DAY)>0 )    ? true : false;
+		useHours   = ((iTimeUnits & BIT_HOUR)>0 )   ? true : false;
+		useMinutes = ((iTimeUnits & BIT_MINUTE)>0 ) ? true : false;
+		
+		inputYears   = new TextField("Years",   new PropertyModel(this,"years"), Integer.class);
+		inputMonths  = new TextField("Months",  new PropertyModel(this,"months"), Integer.class);	
+		inputWeeks   = new TextField("Weeks",   new PropertyModel(this,"weeks"), Integer.class);		
+		inputDays    = new TextField("Days",    new PropertyModel(this,"days"), Integer.class);
+	    inputHours   = new TextField("Hours",   new PropertyModel(this,"hours"), Integer.class);
+	    inputMinutes = new TextField("Minutes", new PropertyModel(this,"minutes"), Integer.class);
 		add(inputYears);
 		add(inputMonths);
 		add(inputWeeks);
 		add(inputDays);
+		add(inputHours);
+		add(inputMinutes);
+		
+		lblYears   = new Label("lblYears", "Years");
+		lblMonths  = new Label("lblMonths", "Months");
+		lblWeeks   = new Label("lblWeeks", "Weeks");
+		lblDays    = new Label("lblDays", "Days");
+		lblHours   = new Label("lblHours", "Hours");
+		lblMinutes = new Label("lblMinutes", "Minutes");
+		add(lblYears);
+		add(lblMonths);
+		add(lblWeeks);
+		add(lblDays);
+		add(lblHours);
+		add(lblMinutes);		
 		
 		// check against everything being disallowed
-		if ( !useYears && !useMonths && !useDays )
+		if ( !useYears && !useMonths && !useDays && !useHours && !useMinutes )
 			useWeeks = true;
 		
 		inputYears.setVisible(useYears);
+		lblYears.setVisible(useYears);
 		inputMonths.setVisible(useMonths);
+		lblMonths.setVisible(useMonths);
 		inputWeeks.setVisible(useWeeks);
+		lblWeeks.setVisible(useWeeks);		
 		inputDays.setVisible(useDays);
+		lblDays.setVisible(useDays);		
+		inputHours.setVisible(useHours);
+		lblHours.setVisible(useHours);		
+		inputMinutes.setVisible(useMinutes);
+		lblMinutes.setVisible(useMinutes);
 		
 		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
 		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
@@ -166,10 +221,23 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	public String getRangeCheckNotification() {
 		String strNotification = "";
+		int nonZeroCount = 0;
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
-		if (years==0 && months==0 && weeks==0 && days==0)
+		if ( useYears && years>0)
+			++nonZeroCount;
+		if ( useMonths && months>0)
+			++nonZeroCount;
+		if ( useWeeks && weeks>0)
+			++nonZeroCount;
+		if ( useDays && days>0)
+			++nonZeroCount;
+		if ( useHours && hours>0)
+			++nonZeroCount;
+		if ( useMinutes && minutes>0)
+			++nonZeroCount;
+		if (nonZeroCount==0)
 			strNotification = "Cannot leave all fields zero.";
 		return(strNotification);
 	}
@@ -181,10 +249,23 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 * but may be used in the future to make certain they are reasonable
 	 */
 	public boolean rangeCheckOkay() {
+		int nonZeroCount = 0;
 		
 		if ( dontKnow() || refused())
 			return (true);
-		if (years==0 && months==0 && weeks==0 && days==0)
+		if ( useYears && years>0)
+			++nonZeroCount;
+		if ( useMonths && months>0)
+			++nonZeroCount;
+		if ( useWeeks && weeks>0)
+			++nonZeroCount;
+		if ( useDays && days>0)
+			++nonZeroCount;
+		if ( useHours && hours>0)
+			++nonZeroCount;
+		if ( useMinutes && minutes>0)
+			++nonZeroCount;
+		if (nonZeroCount==0)
 			return(false);
 		return(true);
 	}
@@ -209,6 +290,16 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	public Integer getDays() { return(days); }
 
+	public void setHours ( Integer hours ) {
+		this.hours = (hours==null) ? new Integer(0) : hours;
+	}
+	public Integer getHours() { return(hours); }
+	
+	public void setMinutes ( Integer minutes ) {
+		this.minutes = (minutes==null) ? new Integer(0) : minutes;
+	}
+	public Integer getMinutes() { return(minutes); 
+	}	
 	public void setAutoFocus() {
 		inputYears.add(new FocusOnLoadBehavior());
 	}

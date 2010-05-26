@@ -1,0 +1,28 @@
+<!-- TimeUnitsPanel -->
+<!-- Date and Time_Span questions will allow the survey author -->
+<!-- to specify which time units are available -->
+<!-- KCN May 24 2010 -->
+
+<wicket:panel wicekt:id="timeUnitsPanel" >
+    <form wicket:id = "timeUnitsForm" >
+    <table border="0">
+        <tr><td>Units:</td>
+        <td style="padding-left:0; padding-right:0;"><input type="checkbox" wicket:id="yrs"  /></td>
+        <td style="padding-left:0; padding-right:0;" align="left">yrs</td>
+		<td style="padding-left:4px; padding-right:0;" ><input type="checkbox" wicket:id="mons" /></td>
+        <td style="padding-left:0; padding-right:0;" align="left">mons</td>		
+		<td style="padding-left:4px; padding-right:0;" ><input type="checkbox" wicket:id="wks"  /></td>
+        <td style="padding-left:0; padding-right:0;" align="left">
+        <label for="wks" wicket:id="wksLabel" /> 
+        </td>		
+		<td style="padding-left:4px; padding-right:0;" ><input type="checkbox" wicket:id="days" /></td>
+        <td style="padding-left:0; padding-right:0;" align="left">days</td>		
+		<td style="padding-left:4px; padding-right:0;"><input type="checkbox" wicket:id="hrs"  /></td>
+		<td style="padding-left:0; padding-right:0;" align="left">hrs</td>
+		<td style="padding-left:4px; padding-right:0;"><input type="checkbox" wicket:id="mins" /></td>
+		<td style="padding-left:0; padding-right:0;"align="left">mins</td>
+		</tr>
+    </table>
+    </form>
+</wicket:panel>
+  

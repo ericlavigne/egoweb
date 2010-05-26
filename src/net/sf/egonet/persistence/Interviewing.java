@@ -746,8 +746,10 @@ public class Interviewing {
 		for(Question question : questions) {
 			System.out.println ( "examining " + question.getTitle());
 			ArrayList<Alter> resultAlters = Lists.newArrayList();
+			Long reasonId = question.getAnswerReasonExpressionId();
 			Boolean answered = false;
-			
+			Boolean shouldAnswerSkipLogic = true;
+			Boolean shouldAnswerUseIf = true;
 			// if we are looking for unanswered only and any one
 			// alter has answered the question we are not interested
 			// in the question
@@ -758,52 +760,50 @@ public class Interviewing {
 						answered = true;
 				}
 				if ( answered )
-					System.out.println ( "Skipping, looked of unanswered and this has an answer");
+					System.out.println ( "Skipping, looking for unanswered and this has an answer");
 			}
 			
 			if ( !unansweredOnly || !answered ) {
 			    for(Alter alter : alters) {
-				    Long reasonId = question.getAnswerReasonExpressionId();
-				    Boolean shouldAnswer = true;
-
+			    	int iEvaluate;
+			    	shouldAnswerSkipLogic = shouldAnswerUseIf = true;
+			    	ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
+			    	
 			    	if ( reasonId!=null ) {
 			    		++skipLogicCount;
 			    		onSkipLogicEntry = System.currentTimeMillis();
-			    		shouldAnswer = Expressions.evaluateAsBool(
+			    		shouldAnswerSkipLogic = Expressions.evaluateAsBool(
 							 				context.eidToExpression.get(reasonId), 
-							 				Lists.newArrayList(alter), 
+							 				singleAlterList, 
 							 				context);
-			    		System.out.println ( "skip logic says to " + (shouldAnswer ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
+			    		System.out.println ( "skip logic says to " + (shouldAnswerSkipLogic ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
 			    		timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
 			    	} // end if skip logic reasonID != null
-			    	
-			    	if ( reasonId==null ) {
-			    		String strUseIf;
-			    		int iEvaluate;
-			    		ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
-			    		strUseIf = question.getUseIfExpression();
+			    
+			    	if ( shouldAnswerSkipLogic ) {
+			    		String strUseIf = question.getUseIfExpression();
 			    		if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
 			    			++useIfCount;
 			    			onUseIfEntry = System.currentTimeMillis();
+			    			strUseIf = strUseIf.trim();
 			    			strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 			    			strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
 			    			strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);
 			    			strUseIf = question.variableInsertion(strUseIf, interviewId, singleAlterList);
 			    			iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
-			    					strUseIf, interviewId, 
-			    					question.getType(), question.getStudyId(), singleAlterList);
+			    				strUseIf, interviewId, 
+			    				question.getType(), question.getStudyId(), singleAlterList);
 			    			if ( SimpleLogicMgr.hasError()) {
 			    				System.out.println ("USE IF error in " + question.getTitle());
 			    				System.out.println ("USE IF =" + question.getUseIfExpression());
 			    			}
 			    			if (iEvaluate==0)
-			    				shouldAnswer = false;
-			    			System.out.println ( "use-if says to " + (shouldAnswer ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
+			    				shouldAnswerUseIf = false;
+			    			System.out.println ( "use-if says to " + (shouldAnswerUseIf ? "ask  " : "SKIP " ) + question.getTitle() + " with " + alter.getName());
 			    			timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
 			    		}  // end if strUseIf != null
-			    	} // end if skip-logic reasonID==null
-			
-			    if(shouldAnswer) {
+			    	} // end if shouldAnswerSkipLogic
+			    if(shouldAnswerSkipLogic && shouldAnswerUseIf) {
 			    	resultAlters.add(alter);
 			    } // end of for ( Alter alters 
 			    if(! resultAlters.isEmpty()) {
