@@ -57,9 +57,13 @@ public class EditQuestionOptionsPanel extends Panel {
 		AnswerListMgr.loadAnswerListsForStudy(question.getStudyId());
 		build();
 	}
-	
+
 	private void updateOptionsAndParent(AjaxRequestTarget target) {
 		target.addComponent(parentThatNeedsUpdating);
+		target.addComponent(optionsForm);
+		target.addComponent(editOptionContainer);
+	}
+	private void updateOptions(AjaxRequestTarget target) {
 		target.addComponent(optionsForm);
 		target.addComponent(editOptionContainer);
 	}
@@ -340,6 +344,6 @@ public class EditQuestionOptionsPanel extends Panel {
 		this.editOptionFormLegend.setModelObject(
 				"Editing option: "+option.getName()+" ("+option.getValue()+")");
 		this.editOptionForm.setVisible(true);
-		updateOptionsAndParent(target);
+		updateOptions(target);
 	}
 }

@@ -95,7 +95,8 @@ public class EditStudyQuestionsPanel extends Panel {
         {
 			protected void populateItem(final ListItem item) {
 				final Question question = (Question) item.getModelObject();
-
+				item.setOutputMarkupId(true);
+				
 				final PanelContainer editor = new PanelContainer("editor");
 				editor.setOutputMarkupId(true);
 				item.add(editor);
@@ -123,7 +124,7 @@ public class EditStudyQuestionsPanel extends Panel {
 						if(selectionQuestion) {
 							editor.changePanel(
 									new EditQuestionOptionsPanel("panel",
-											questionsContainer,question));
+											item,question));
 							target.addComponent(editor);
 						}
 					}
