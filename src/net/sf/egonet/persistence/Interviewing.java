@@ -498,6 +498,8 @@ public class Interviewing {
 				// 				Lists.newArrayList(alter), 
 				// 				context);
 				Boolean shouldAnswer;
+				Boolean shouldAnswerUseIf = true;
+				
 				if ( reasonId==null ) {
 					shouldAnswer = true;
 				} else {
@@ -509,12 +511,12 @@ public class Interviewing {
 							 				context);
 					timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
 				}
-				if ( reasonId==null ) {
+				if ( true /* reasonId==null */ ) {
 					String strUseIf;
 					int iEvaluate;
 					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
-					strUseIf = question.getUseIfExpression().trim();
-					if ( strUseIf!=null && strUseIf.length()>0 ) {
+					strUseIf = question.getUseIfExpression();
+					if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
 						++useIfCount;
 						onUseIfEntry = System.currentTimeMillis();
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
@@ -529,12 +531,12 @@ public class Interviewing {
 							System.out.println ("USE IF =" + question.getUseIfExpression());
 						}
 						if (iEvaluate==0)
-							shouldAnswer = false;
+							shouldAnswerUseIf = false;
 						timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
 					}
 				}
 				
-				if(shouldAnswer) {
+				if(shouldAnswer && shouldAnswerUseIf) {
 					resultAlters.add(alter);
 				}
 			}
