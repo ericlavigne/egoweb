@@ -498,6 +498,8 @@ public class Interviewing {
 				// 				Lists.newArrayList(alter), 
 				// 				context);
 				Boolean shouldAnswer;
+				Boolean shouldAnswerUseIf = true;
+				
 				if ( reasonId==null ) {
 					shouldAnswer = true;
 				} else {
@@ -509,12 +511,12 @@ public class Interviewing {
 							 				context);
 					timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
 				}
-				if ( reasonId==null ) {
+				if ( true /* reasonId==null */ ) {
 					String strUseIf;
 					int iEvaluate;
 					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
-					strUseIf = question.getUseIfExpression().trim();
-					if ( strUseIf!=null && strUseIf.length()>0 ) {
+					strUseIf = question.getUseIfExpression();
+					if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
 						++useIfCount;
 						onUseIfEntry = System.currentTimeMillis();
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
@@ -529,12 +531,12 @@ public class Interviewing {
 							System.out.println ("USE IF =" + question.getUseIfExpression());
 						}
 						if (iEvaluate==0)
-							shouldAnswer = false;
+							shouldAnswerUseIf = false;
 						timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
 					}
 				}
 				
-				if(shouldAnswer) {
+				if(shouldAnswer && shouldAnswerUseIf) {
 					resultAlters.add(alter);
 				}
 			}
@@ -678,10 +680,10 @@ public class Interviewing {
 		if ( prevQuestion==null )
 			return(questionList);
 		questionIndex = questionList.indexOf(prevQuestion);
-		if ( questionIndex<0 )
+		if ( questionIndex<1 )
 			return(questionList);
 		
-		for ( ix=questionIndex ; ix>=0 ; --ix ) {
+		for ( ix=questionIndex-1 ; ix>=0 ; --ix ) {
 			removed = questionList.remove(ix);
 			System.out.println ("Skipping " + removed);
 		}
@@ -747,23 +749,23 @@ public class Interviewing {
 			System.out.println ( "examining " + question.getTitle());
 			ArrayList<Alter> resultAlters = Lists.newArrayList();
 			Long reasonId = question.getAnswerReasonExpressionId();
-			Boolean answered = false;
+			Boolean answered = true;
 			Boolean shouldAnswerSkipLogic = true;
 			Boolean shouldAnswerUseIf = true;
 			// if we are looking for unanswered only and any one
 			// alter has answered the question we are not interested
 			// in the question
-			if ( unansweredOnly ) {
-				for ( Alter alter : alters ) {
-					if ( context.qidAidToAlterAnswer.containsKey(
-							new PairUni<Long>(question.getId(),alter.getId())))
-						answered = true;
-				}
-				if ( answered )
-					System.out.println ( "Skipping, looking for unanswered and this has an answer");
-			}
+	//		if ( unansweredOnly ) {
+	//			for ( Alter alter : alters ) {
+	//				if ( !context.qidAidToAlterAnswer.containsKey(
+	//						new PairUni<Long>(question.getId(),alter.getId())))
+	//					answered = false;
+	//			}
+	//			if ( answered )
+	//				System.out.println ( "Skipping, looking for unanswered and this has an answer");
+	//		}
 			
-			if ( !unansweredOnly || !answered ) {
+			if ( true /* !unansweredOnly || !answered */ ) {
 			    for(Alter alter : alters) {
 			    	int iEvaluate;
 			    	shouldAnswerSkipLogic = shouldAnswerUseIf = true;
@@ -804,15 +806,16 @@ public class Interviewing {
 			    		}  // end if strUseIf != null
 			    	} // end if shouldAnswerSkipLogic
 			    if(shouldAnswerSkipLogic && shouldAnswerUseIf) {
+			    	System.out.println ( " adding " + alter.getName() + " to list ");
 			    	resultAlters.add(alter);
 			    } // end of for ( Alter alters 
-			    if(! resultAlters.isEmpty()) {
+			    if( !resultAlters.isEmpty()) {
 			    	results.add(new Pair<Question,ArrayList<Alter>>(question,resultAlters));	
 			    } // end of !resultAlters.isEmpty()
 			} // end off for ( Alter alters... loop
 		} // end  if ( !unansweredOnly || !answered )
 			
-		if ( !results.isEmpty()) {
+		if ( false /* !results.isEmpty() */ ) {
 			onFunctionExit = System.currentTimeMillis();
 			timeInFunction = onFunctionExit - onFunctionEntry;
 			System.out.println ( "Time in NEW alterQuestionsForInterview=" + timeInFunction);
@@ -821,6 +824,7 @@ public class Interviewing {
 			    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
 			if ( useIfCount>0 )
 				System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
+			System.out.println ("returning " + results.size());
 			return results;  
 			}
 		}
@@ -833,6 +837,7 @@ public class Interviewing {
 		    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
 		if ( useIfCount>0 )
 			System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
+		System.out.println ("returning " + results.size());
 		return results;
 	}
 	

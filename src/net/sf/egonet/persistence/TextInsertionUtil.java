@@ -316,13 +316,23 @@ public class TextInsertionUtil {
 					    	 switch ( dateField ) {
 					    	     case NONE: break;
 					    	     case MONTH:
-					    	    	  System.out.println ( "OLD date month =" + dateInfo[0] + " offset=" + offset);
+					    	    	  // System.out.println ( "OLD date month =" + dateInfo[0] + " offset=" + offset);
+					    	    	  boolean yearChange = false;
 					    	    	  dateInfo[0] += offset;
-					    	    	  while (dateInfo[0] < 0 )
+					    	    	  while (dateInfo[0] < 0 ) {
 					    	    		  dateInfo[0] += 12;
-					    	    	  dateInfo[0] %= 12;
-					    	    	  System.out.println("New date month=" + dateInfo[0]);
+					    	    		  --dateInfo[2];
+					    	    		  yearChange = true;
+					    	    	  }
+					    	    	  while ( dateInfo[0]>=12 ){
+					    	    		  dateInfo[0] -= 12;
+					    	    		  ++dateInfo[2];
+					    	    		  yearChange = true;
+					    	    	  }
+					    	    	  // System.out.println("New date month=" + dateInfo[0]);
 					    	    	  strResult += " " + strMonths[dateInfo[0]] + " "; 
+					    	    	  if ( yearChange )
+					    	    		  strResult += dateInfo[2] + " ";
 					    	    	  break;
 					    	     case DAY:
 					    	    	  dateInfo[1] += offset;

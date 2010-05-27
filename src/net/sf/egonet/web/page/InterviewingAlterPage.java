@@ -181,7 +181,7 @@ public void onSave(boolean gotoNextUnAnswered) {
 	}
 	if(okayToContinue) {
 		EgonetPage page = 
-			askNextNEW(subject.interviewId, subject, gotoNextUnAnswered, new InterviewingAlterPage(subject));
+			askNext(subject.interviewId, subject, gotoNextUnAnswered, new InterviewingAlterPage(subject));
 		if(page != null) {
 			setResponsePage(page);
 		}
