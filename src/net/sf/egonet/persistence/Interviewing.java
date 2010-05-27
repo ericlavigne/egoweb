@@ -121,6 +121,7 @@ public class Interviewing {
 				// Looking for unanswered. This one is answered. Not the question we're looking for.
 			} else if(passedCurrent) { 
 				Long reasonId = question.getAnswerReasonExpressionId();
+				Boolean shouldAnswerUseIf = true;
 				Boolean shouldAnswer = 
 					reasonId == null || 
 					Expressions.evaluateAsBool(
@@ -128,13 +129,13 @@ public class Interviewing {
 							new ArrayList<Alter>(), 
 							context);
 
-				if ( reasonId==null ) {
+				if ( shouldAnswer /* reasonId==null */ ) {
 					String strUseIf;
 					int iEvaluate;
 					ArrayList<Alter> emptyAlterList = new ArrayList<Alter>();
 					
-					strUseIf = question.getUseIfExpression().trim();
-					if ( strUseIf!=null && strUseIf.length()>0 ) {
+					strUseIf = question.getUseIfExpression();
+					if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
 						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
 						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, emptyAlterList);
 						strUseIf = question.calculationInsertion(strUseIf, interviewId, emptyAlterList);
@@ -147,11 +148,11 @@ public class Interviewing {
 							System.out.println ("USE IF =" + question.getUseIfExpression());
 						}	
 						if (iEvaluate==0)
-							shouldAnswer = false;
+							shouldAnswerUseIf = false;
 					}
 				}
 				
-				if(shouldAnswer) {
+				if(shouldAnswer && shouldAnswerUseIf) {
 					return question;
 				}
 			}
@@ -511,7 +512,7 @@ public class Interviewing {
 							 				context);
 					timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
 				}
-				if ( true /* reasonId==null */ ) {
+				if ( shouldAnswer /* reasonId==null */ ) {
 					String strUseIf;
 					int iEvaluate;
 					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
@@ -569,6 +570,7 @@ public class Interviewing {
 				for(Alter alter2 : alters) {
 					if(alter1.getId() < alter2.getId()) {
 						Long reasonId = question.getAnswerReasonExpressionId();
+						Boolean shouldAnswerUseIf = true;
 						Boolean shouldAnswer =
 							reasonId == null ||
 							Expressions.evaluateAsBool(
@@ -576,7 +578,7 @@ public class Interviewing {
 									Lists.newArrayList(alter1,alter2), 
 									context);
 						
-						if ( reasonId==null ) {
+						if ( shouldAnswer ) {
 							String strUseIf;
 							int iEvaluate;
 							ArrayList<Alter> twoAlterList = Lists.newArrayList(alter1,alter2);
@@ -597,12 +599,12 @@ public class Interviewing {
 								}
 									
 								if (iEvaluate==0)
-									shouldAnswer = false;
+									shouldAnswerUseIf = false;
 							}
 						}
 						
 						
-						if(shouldAnswer) {
+						if(shouldAnswer  &&  shouldAnswerUseIf) {
 							secondAlters.add(alter2);
 						}
 					}

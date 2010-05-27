@@ -122,7 +122,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 		add(new Link("backwardLink") {
 			public void onClick() {
 				EgonetPage page = 
-					askPreviousNEW(subject.interviewId,subject, new InterviewingAlterPage(subject));
+					askPrevious(subject.interviewId,subject, new InterviewingAlterPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -131,7 +131,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 		Link forwardLink = new Link("forwardLink") {
 			public void onClick() {
 				EgonetPage page = 
-					askNextNEW(subject.interviewId, subject, false, new InterviewingAlterPage(subject));
+					askNext(subject.interviewId, subject, false, new InterviewingAlterPage(subject));
 				if(page != null) {
 					setResponsePage(page);
 				}

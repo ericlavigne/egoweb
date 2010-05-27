@@ -147,8 +147,8 @@ public class InterviewingAlterPromptPage extends InterviewingPage {
 		if(alters < 1 && (study.getMaxAlters() == null || study.getMaxAlters() > 0)) {
 			return new InterviewingAlterPromptPage(interviewId);
 		}
-		// return InterviewingAlterPage.askNext(interviewId,null,true,comeFrom);
-		return InterviewingAlterPage.askNextNEW(interviewId,null,true,comeFrom);
+		return InterviewingAlterPage.askNext(interviewId,null,true,comeFrom);
+		// return InterviewingAlterPage.askNextNEW(interviewId,null,true,comeFrom);
 	}
 	
 	private class AlterUniquenessValidator extends AbstractValidator {
