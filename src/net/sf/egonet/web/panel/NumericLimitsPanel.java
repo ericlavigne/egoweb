@@ -28,46 +28,6 @@ import com.google.common.collect.Lists;
 
 public class NumericLimitsPanel extends Panel {
 	
-	/**
-	 * private inner class extending RadioGroup
-	 * This is so it can implement IOnChangeListener and, 
-	 * in effect, list to itself and set class variables.
-	 * A RadioGroup takes the model of the selected Radio item
-	 * within it.  Unfortunately, if you have two RadioGroups on a page
-	 * they can interfere with each other if two individual radiobuttons
-	 * have the same model.  Hence the one-model-per-radiobutton approach
-	 */
-	
-	private class RadioGroupPlus extends RadioGroup {
-		
-		public RadioGroupPlus (String id, Model model ) {
-			super(id, model );
-		}
-		
-		protected void onSelectionChanged(Object newSelection) {
-			 
-			if ( newSelection.equals("minLiteral") ) {
-				minLimitType = NumericLimitType.NLT_LITERAL;
-			} else if ( newSelection.equals("minPrev") ) {
-				minLimitType = NumericLimitType.NLT_PREVQUES;
-			} else if ( newSelection.equals("minNone") ) {
-				minLimitType = NumericLimitType.NLT_NONE;
-			} else if ( newSelection.equals("maxLiteral") ) {
-				maxLimitType = NumericLimitType.NLT_LITERAL;
-			} else if ( newSelection.equals("maxPrev") ) {
-				maxLimitType = NumericLimitType.NLT_PREVQUES;
-			} else if ( newSelection.equals("maxNone") ) {
-				maxLimitType = NumericLimitType.NLT_NONE;
-			}
-		}
-		
-		protected boolean wantOnSelectionChangedNotifications() { return (true);}
-	}
-	
-	/**
-	 * end of private inner class RadioGroupPlus
-	 */
-	
 	public static enum NumericLimitType { NLT_LITERAL, NLT_PREVQUES, NLT_NONE };
 	
 	private Question question;
@@ -78,12 +38,6 @@ public class NumericLimitsPanel extends Panel {
 	private TextField textMaxLiteral;
 	private DropDownChoice choiceMinPrevQ;
 	private DropDownChoice choiceMaxPrevQ;
-	private Radio radioMinLiteral;
-	private Radio radioMinPrevQues;
-	private Radio radioMinNone;
-	private Radio radioMaxLiteral;
-	private Radio radioMaxPrevQues;
-	private Radio radioMaxNone;	
 	private NumericLimitType minLimitType;
 	private NumericLimitType maxLimitType;
 	private Integer minLiteral;
@@ -118,23 +72,17 @@ public class NumericLimitsPanel extends Panel {
 	private void build() {		
 		setOutputMarkupId(true);
 		numericLimitsForm = new Form("numericLimitsForm");
-		radioMinimum = new RadioGroupPlus("radioMin", new Model());
-		radioMaximum = new RadioGroupPlus("radioMax", new Model());
-		radioMinLiteral =  new Radio("minLiteral", new Model("minLiteral"));
-		radioMinPrevQues=  new Radio("minPrev", new Model("minPrev"));
-		radioMinNone	=  new Radio("minNone", new Model("minNone"));
-		radioMaxLiteral	=  new Radio("maxLiteral", new Model("maxLiteral"));
-		radioMaxPrevQues=  new Radio("maxPrev", new Model("maxPrev"));
-		radioMaxNone	=  new Radio("maxNone", new Model("maxNone"));
+		radioMinimum = new RadioGroup("radioMin", new PropertyModel(this,"minLimitType"));
+		radioMaximum = new RadioGroup("radioMax", new PropertyModel(this,"maxLimitType"));
 		
-		radioMinimum.add( radioMinLiteral);
-		radioMinimum.add( radioMinPrevQues);
-		radioMinimum.add( radioMinNone);
+		radioMinimum.add(new Radio("minLiteral", new Model(NumericLimitType.NLT_LITERAL)));
+		radioMinimum.add(new Radio("minPrev", new Model(NumericLimitType.NLT_PREVQUES)));
+		radioMinimum.add(new Radio("minNone", new Model(NumericLimitType.NLT_NONE)));
 		numericLimitsForm.add(radioMinimum);
 		
-		radioMaximum.add( radioMaxLiteral);
-		radioMaximum.add( radioMaxPrevQues);
-		radioMaximum.add( radioMaxNone); 
+		radioMaximum.add(new Radio("maxLiteral", new Model(NumericLimitType.NLT_LITERAL)));
+		radioMaximum.add(new Radio("maxPrev", new Model(NumericLimitType.NLT_PREVQUES)));
+		radioMaximum.add(new Radio("maxNone", new Model(NumericLimitType.NLT_NONE))); 
 		numericLimitsForm.add(radioMaximum);
 		
 		textMinLiteral = new TextField("minLiteralEntry", new PropertyModel(this, "minLiteral"), Integer.class);
@@ -144,8 +92,6 @@ public class NumericLimitsPanel extends Panel {
 		radioMaximum.add(textMaxLiteral);
 		
 		add(numericLimitsForm);
-		setMinLimitType( NumericLimitType.NLT_NONE);
-		setMaxLimitType( NumericLimitType.NLT_NONE);
 		
 		// now populate the drop-down lists of previous NUMERICAL questions
 		numericQuestions = getPrecedingNumericQuestions();
@@ -183,20 +129,8 @@ public class NumericLimitsPanel extends Panel {
 	 * getters and setters
 	 */
 	
-	/**
-	 * these seem like a lot of work to determine if a radiobutton
-	 * is toggled or not...
-	 */
-	
 	public void setMinLimitType (NumericLimitType minLimitType ) {
 		this.minLimitType = minLimitType;
-
-		// System.out.println ( "NumericLimitsPanel, setting minLimitType to" + minLimitType);
-		switch ( this.minLimitType ) {
-			case NLT_LITERAL:  radioMinimum.setModel(new Model("minLiteral")); break;
-			case NLT_PREVQUES: radioMinimum.setModel(new Model("minPrev")); break;
-			case NLT_NONE: 	   radioMinimum.setModel(new Model("minNone")); break;
-		}
 	}
 	public NumericLimitType getMinLimitType() { 
 		return(minLimitType);
@@ -204,12 +138,6 @@ public class NumericLimitsPanel extends Panel {
 
 	public void setMaxLimitType (NumericLimitType maxLimitType ) {
 		this.maxLimitType = maxLimitType;
-		
-		switch ( this.maxLimitType ) {
-			case NLT_LITERAL:  radioMaximum.setModel(new Model("maxLiteral")); break;
-			case NLT_PREVQUES: radioMaximum.setModel(new Model("maxPrev")); break;
-			case NLT_NONE: 	   radioMaximum.setModel(new Model("maxNone")); break;
-		}		
 	}
 	public NumericLimitType getMaxLimitType() { 
 		return(maxLimitType);
@@ -242,5 +170,4 @@ public class NumericLimitsPanel extends Panel {
 	public String getMaxPrevQues() { 
 		return(strMaxPrevQues);
 	}
-	
 }
