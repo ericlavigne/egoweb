@@ -407,6 +407,12 @@ public class Archiving {
 		} else if ( aType==Answer.AnswerType.DATE || aType==Answer.AnswerType.TIME_SPAN ) {
 			addAttribute(questionNode,"timeUnits", question.getTimeUnits());
 		}
+		if ( aType==Answer.AnswerType.MULTIPLE_SELECTION || aType==Answer.AnswerType.SELECTION) {
+		    addAttribute(questionNode,"withListRange", question.getWithListRange());
+		    addAttribute(questionNode,"listRangeString", question.getListRangeString());
+		    addAttribute(questionNode,"minListRange", question.getMinListRange());
+		    addAttribute(questionNode,"maxListRange", question.getMaxListRange());
+		}
 		addText(questionNode,"preface",question.getPreface()); 
 		addText(questionNode,"prompt",question.getPrompt());
 		addText(questionNode,"citation",question.getCitation());
@@ -477,8 +483,16 @@ public class Archiving {
 		if ( aType==Answer.AnswerType.MULTIPLE_SELECTION || aType==Answer.AnswerType.SELECTION) {
 			try {
 				question.setOtherSpecify(attrBool(node,"otherSpecify"));
+				question.setWithListRange(attrBool(node,"withListRange"));
+				question.setListRangeString(attrString(node,"listRangeString"));
+				question.setMinListRange(attrInt(node,"minListRange"));
+				question.setMaxListRange(attrInt(node,"maxListRange"));
 			} catch ( java.lang.RuntimeException rte3 ) {
 				question.setOtherSpecify(false);
+				question.setWithListRange(false);
+				question.setListRangeString("");
+				question.setMinListRange(0);
+				question.setMaxListRange(100);
 			}
 		}
 		

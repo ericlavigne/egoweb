@@ -17,7 +17,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -53,6 +53,7 @@ public class EditQuestionPanel extends Panel {
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
 	private TimeUnitsPanel timeUnitsPanel;
+	private ListLimitsPanel listLimitsPanel;
 	
 	private static final String answerAlways = "Always";
 	
@@ -112,6 +113,10 @@ public class EditQuestionPanel extends Panel {
 		timeUnitsPanel.setVisible(false);
 		timeUnitsPanel.setOutputMarkupId(true);
 		
+		listLimitsPanel = new ListLimitsPanel ("listLimitsPanel", question );
+		form.add(listLimitsPanel);
+		listLimitsPanel.setVisible(question.getAskingStyleList());
+		
 		questionPromptField = new TextArea("questionPromptField", new Model(""));
 		questionPromptField.setRequired(true);
 		form.add(questionPromptField);
@@ -152,7 +157,18 @@ public class EditQuestionPanel extends Panel {
 		Label askingStyleListLabel = new Label("askingStyleListLabel","Ask with list of alters:");
 		askingStyleModel = new Model();
 		askingStyleModel.setObject(Boolean.FALSE);
-		CheckBox askingStyleListField = new CheckBox("askingStyleListField",askingStyleModel);
+		AjaxCheckBox askingStyleListField = new AjaxCheckBox("askingStyleListField",askingStyleModel) {
+			protected void onUpdate (AjaxRequestTarget target ) {
+				Boolean listLimitsVisible = false;
+				
+				if ( questionResponseTypeModel.getObject().equals(Answer.AnswerType.MULTIPLE_SELECTION) ||
+					 questionResponseTypeModel.getObject().equals(Answer.AnswerType.SELECTION ))
+					listLimitsVisible = (Boolean) askingStyleModel.getObject();
+					
+			    listLimitsPanel.setVisible(listLimitsVisible);	
+				target.addComponent(form); 
+			}
+		};
 		form.add(askingStyleListLabel);
 		form.add(askingStyleListField);
 		if(question.getType().equals(Question.QuestionType.EGO) ||
@@ -182,8 +198,8 @@ public class EditQuestionPanel extends Panel {
 		noneButtonLabel.setVisible(false); 
 		noneButtonCheckBox.setVisible(false);
 		
-		questionUseIfField = new TextField("questionUseIfField", new Model(""));
-		form.add(questionUseIfField);
+		// questionUseIfField = new TextField("questionUseIfField", new Model(""));
+		// form.add(questionUseIfField);
 		
 		form.add(
 			new AjaxFallbackButton("submitQuestion",form)
@@ -230,7 +246,7 @@ public class EditQuestionPanel extends Panel {
 		askingStyleModel.setObject(question.getAskingStyleList());
 		msg += " -> "+askingStyleModel.getObject()+" (question had "+question.getAskingStyleList()+")";
 		//throw new RuntimeException(msg);
-		questionUseIfField.setModelObject(question.getUseIfExpression());
+		// questionUseIfField.setModelObject(question.getUseIfExpression());
 		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
 		noneButtonCheckBox.setModelObject(question.getNoneButton());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
@@ -262,6 +278,7 @@ public class EditQuestionPanel extends Panel {
 		multipleSelectionLimitsPanel.setMinCheckableBoxes ( question.getMinCheckableBoxes());
 		multipleSelectionLimitsPanel.setMaxCheckableBoxes ( question.getMaxCheckableBoxes());
 		
+		listLimitsPanel.setQuestion(question);
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
@@ -280,7 +297,7 @@ public class EditQuestionPanel extends Panel {
 		question.setAskingStyleList(askingStyle); // TODO: need to trace what happens in this method
 		msg += " -> "+question.getAskingStyleList();
 		// throw new RuntimeException(msg);
-		question.setUseIfExpression((String) questionUseIfField.getModelObject());
+		/// question.setUseIfExpression((String) questionUseIfField.getModelObject());
 		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
 		question.setNoneButton((Boolean)noneButtonCheckBox.getModelObject());
 		question.setTimeUnits((Integer) timeUnitsPanel.getTimeUnits());
@@ -294,6 +311,12 @@ public class EditQuestionPanel extends Panel {
 		} else if ( question.getAnswerType()==Answer.AnswerType.MULTIPLE_SELECTION) {
 			question.setMinCheckableBoxes(multipleSelectionLimitsPanel.getMinCheckableBoxes());
 			question.setMaxCheckableBoxes(multipleSelectionLimitsPanel.getMaxCheckableBoxes());
+		}
+		if ( askingStyle ) {
+	        question.setWithListRange(listLimitsPanel.getWithListRange());
+	        question.setListRangeString(listLimitsPanel.getListRangeString());
+	        question.setMinListRange(listLimitsPanel.getMinListRange());
+	        question.setMaxListRange(listLimitsPanel.getMaxListRange());
 		}
 	}
 	
@@ -311,6 +334,8 @@ public class EditQuestionPanel extends Panel {
 		boolean multipleSelectionLimitsVisible = false;
 		boolean timeSpanUnitsVisible = false;
 		boolean otherSpecifyVisible = false;
+		boolean listLimitsVisible = false;
+		boolean isListStyle = (Boolean) askingStyleModel.getObject();
 		
 		switch ( iValue ) {
 			case 0: // TEXT
@@ -318,12 +343,14 @@ public class EditQuestionPanel extends Panel {
 			case 1:  // NUMERIC
 			     numericLimitsVisible = true;
 			     break;
-			case 2: // DROP_DOWN
+			case 2: // DROP_DOWN - single SELECTION
 				 otherSpecifyVisible = true;
+				 listLimitsVisible = isListStyle;
 				 break;
 			case 3: // MULTIPLE_SELECTION
 			     multipleSelectionLimitsVisible = true;
 			     otherSpecifyVisible = true;
+			     listLimitsVisible = isListStyle;
 			     break;
 			case 4: // DATE
 			case 5: // TIME_SPAN
@@ -339,6 +366,7 @@ public class EditQuestionPanel extends Panel {
 		otherSpecifyCheckBox.setVisible(otherSpecifyVisible);
 		timeUnitsPanel.setVisible(timeSpanUnitsVisible);
 		timeUnitsPanel.setWeeksVisible((iValue==5) ? true : false );
+		listLimitsPanel.setVisible(listLimitsVisible);
 	}
 	
 }

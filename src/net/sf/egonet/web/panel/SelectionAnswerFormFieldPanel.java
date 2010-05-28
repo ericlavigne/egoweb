@@ -22,10 +22,10 @@ import net.sf.egonet.web.component.FocusOnLoadBehavior;
 public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 
 	/**
-	 * private inner class extending DropDownChoice
+	 * private inner class extending RadioChoice
 	 * This is so it can implement IOnChangeListener and, 
-	 * in effect, list to itself and hide the numericLimits Panel
-	 * when its type is not Numeric
+	 * in effect, list to itself and show the 'other specify'
+	 * text input box
 	 */
 	
 	private class RadioChoicePlus extends RadioChoice {
@@ -59,7 +59,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	}
 	
 	/**
-	 * end of private inner class DropDownChoicePlus
+	 * end of private inner class RadioChoicePlus
 	 */
 	
 	private Model answer;
@@ -216,4 +216,25 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		return (( otherSpecifyText==null) ? "" : otherSpecifyText ) ;
 	}
 
+	/**
+	 * returns true if strAnswerToCount the answer 
+	 * that has been checked.  This will be used an a 
+	 * list-of-alters format question to count how many times
+	 * a specific answer has been selected
+	 * @param strAnswerToCount the answer we'll count up the number
+	 * of times its been used
+	 * @return true if the answer if selected in this panel
+	 */
+	public boolean isSelected ( String strAnswerToCount ) {
+		String selectedAnswer;
+		
+		strAnswerToCount = strAnswerToCount.trim();
+		selectedAnswer = getAnswerOptionName();
+		if (selectedAnswer != null) {
+			selectedAnswer = selectedAnswer.trim();
+			if ( selectedAnswer.equalsIgnoreCase(strAnswerToCount))
+				return (true);
+		}
+		return (false);
+	}	
 }

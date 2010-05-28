@@ -21,14 +21,19 @@
                         <label for="questionAnswerReasonField">When to answer question:</label>
                         </td><td>
     	 				<select wicket:id="questionAnswerReasonField" id="questionAnswerReasonField" />
-                        </td></tr><tr><td align="right" >
-                        <label for="questionUseIfField">Use If expression:</label>
-                        </td><td>
-                        <input wicket:id="questionUseIfField" id="questionUseIfField" type="text"  size="35"/>
-                        </td></tr><tr><td align="right">
+                        </td></tr>
+               <!--          <tr><td align="right" >                                    -->
+               <!--          <label for="questionUseIfField">Use If expression:</label> -->
+               <!--          </td><td>                                                  -->
+               <!--          <input wicket:id="questionUseIfField" id="questionUseIfField" type="text"  size="35"/> -->
+               <!--          </td></tr>                                                  -->
+                        <tr><td align="right">
     	 				<label for="askingStyleListField" wicket:id="askingStyleListLabel">Ask with list of alters:</label>
     	 				</td><td>
     	 				<input wicket:id="askingStyleListField" id= "askingStyleListField" type="checkbox" />
+                        </td></tr>
+                        <tr><td colspan="2">
+                            <div wicket:id="listLimitsPanel"></div>
                         </td></tr>
                         <tr><td align="right"> 
                         <label for="otherSpecifyField" wicket:id="otherSpecifyLabel">Other/Specify Type Question?: </label> 

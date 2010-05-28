@@ -277,4 +277,131 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		}
 		return (true);
 	}
+	
+	/**
+	 * this is specific to list-of-alters pages using Multiple Selection
+	 * or Single Selection answer panels.  In some cases a question is apt
+	 * to be 'indicate your most recent four sex partners' and we'll check
+	 * that 4 and only 4 'yes' answers are selected.
+	 * @param panels collection of AnswerFormFieldPanels in the 'main' panel
+	 * @param strAnswer - answer to count
+	 * @return count of how many times strAnswer is selected
+	 */
+	private static int
+	countSelectionItem(Collection<AnswerFormFieldPanel> panels, String strAnswer ) {
+		int iCount = 0;
+		
+		for ( AnswerFormFieldPanel panel : panels ) {
+			if ( panel instanceof MultipleSelectionAnswerFormFieldPanel ) {
+				if ( ((MultipleSelectionAnswerFormFieldPanel)panel).isSelected(strAnswer))
+					++iCount;
+			}
+			if ( panel instanceof SelectionAnswerFormFieldPanel ) {
+				if ( ((SelectionAnswerFormFieldPanel)panel).isSelected(strAnswer))
+					++iCount;
+			}		
+		}
+		return(iCount);
+	}
+	
+	/**
+	 * IF this is an alter question, it is in list-of-alters format, AND the 
+	 * 'useListRange' option is on, this will count how many times the specified
+	 * answer is use and return TRUE if that count is within the set range
+	 * @param question - question being asked
+	 * @param panels - collection of answer panels
+	 * @return true if everything is within bounds
+	 */
+	public static boolean checkCountOfListItem(Question question, Collection<AnswerFormFieldPanel> panels) {
+		String strAnswer;
+		int iMin;
+		int iMax;
+		int iTemp;
+		int iAnswerCount;
+		
+		// this check only needs to take place if this is a
+		// list-of-alters question.
+		if ( !question.isAboutAlter()     || !question.getAskingStyleList() || 
+			 !question.getWithListRange() || panels.isEmpty() )
+			return(true);
+		
+		strAnswer = question.getListRangeString();
+		if ( strAnswer==null || strAnswer.length()==0)
+			return(true);
+		
+		iMin = question.getMinListRange();
+		iMax = question.getMaxListRange();
+		// in case the survey author got confused,
+		// force min<max
+		if ( iMin>iMax ) {
+			iTemp = iMin;
+			iMin = iMax;
+			iMax = iTemp;
+		}
+		// check for the case of the survey author asking for a minimum
+		// of more options than are actually available
+		if ( iMin >= panels.size())
+			iMin = panels.size();
+		
+		iAnswerCount = countSelectionItem(panels, strAnswer);
+		if ( iAnswerCount<iMin ) 
+			return(false);
+		
+		if ( iAnswerCount>iMax ) {
+			return(false);
+		}
+		return(true);
+	}
+	
+	/**
+	 * IF the question is a list-of-alters style AND we want a specific response
+	 * limited to a range AND that specific response was answered outside that range
+	 * this provides feedback for the user
+	 * @param question - the question asked
+	 * @param panels - the panels that make up the list of answers
+	 * @return a string to display on the screen
+	 */
+	public static String getStatusCountOfListItem(Question question, Collection<AnswerFormFieldPanel> panels) {
+		int iMin;
+		int iMax;
+		int iTemp;
+		String strAnswer;
+		String strStatus = "";
+		int iAnswerCount;
+		
+		// this check only needs to take place if this is a
+		// list-of-alters question.
+		if ( !question.isAboutAlter()     || !question.getAskingStyleList() || 
+			 !question.getWithListRange() || panels.isEmpty() )
+			return(strStatus);
+
+		strAnswer = question.getListRangeString();
+		if ( strAnswer==null || strAnswer.length()==0)
+			return(strStatus);
+		iMin = question.getMinListRange();
+		iMax = question.getMaxListRange();
+		// in case the survey author got confused,
+		// force min<max
+		if ( iMin>iMax ) {
+			iTemp = iMin;
+			iMin = iMax;
+			iMax = iTemp;
+		}
+		// check for the case of the survey author asking for a minimum
+		// of more options than are actually available
+		if ( iMin >= panels.size())
+			iMin = panels.size();
+		iAnswerCount = countSelectionItem(panels, strAnswer);
+		if ( iAnswerCount<iMin ) {
+			strStatus = strAnswer + " not selected enough, need " + 
+					(iMin-iAnswerCount) + " more.";
+		}
+		if ( iAnswerCount>iMax ) {
+			iTemp = iAnswerCount-iMax;
+			strStatus = strAnswer + " selected too many times, remove " +
+					iTemp + " selection" + ((iTemp==1) ? "." : "s.");
+		}
+		return(strStatus);	
+	}
+	
 }

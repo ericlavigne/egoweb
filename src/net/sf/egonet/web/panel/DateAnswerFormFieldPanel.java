@@ -50,7 +50,6 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	private Label lblYear;
 	private Label lblMonth;
-	private Label lblWeek;
 	private Label lblDay;
 	private Label lblHour;
 	private Label lblMinute;

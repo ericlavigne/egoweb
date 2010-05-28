@@ -121,7 +121,6 @@ public class Interviewing {
 				// Looking for unanswered. This one is answered. Not the question we're looking for.
 			} else if(passedCurrent) { 
 				Long reasonId = question.getAnswerReasonExpressionId();
-				Boolean shouldAnswerUseIf = true;
 				Boolean shouldAnswer = 
 					reasonId == null || 
 					Expressions.evaluateAsBool(
@@ -129,30 +128,7 @@ public class Interviewing {
 							new ArrayList<Alter>(), 
 							context);
 
-				if ( shouldAnswer /* reasonId==null */ ) {
-					String strUseIf;
-					int iEvaluate;
-					ArrayList<Alter> emptyAlterList = new ArrayList<Alter>();
-					
-					strUseIf = question.getUseIfExpression();
-					if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
-						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
-						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, emptyAlterList);
-						strUseIf = question.calculationInsertion(strUseIf, interviewId, emptyAlterList);
-						strUseIf = question.variableInsertion(strUseIf, interviewId, emptyAlterList);
-						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
-								strUseIf, interviewId, 
-								question.getType(), question.getStudyId(), emptyAlterList);
-						if ( SimpleLogicMgr.hasError()) {
-							System.out.println ("USE IF error in " + question.getTitle());
-							System.out.println ("USE IF =" + question.getUseIfExpression());
-						}	
-						if (iEvaluate==0)
-							shouldAnswerUseIf = false;
-					}
-				}
-				
-				if(shouldAnswer && shouldAnswerUseIf) {
+				if(shouldAnswer) {
 					return question;
 				}
 			}
@@ -458,21 +434,33 @@ public class Interviewing {
 		}
 		return results;
 	}
+	 
+	/**
+	 * alterQuestionsForInterview is response for getting the set of
+	 * questions to ask in the alter section.  Here is an example that
+	 * explains how the questions are grouped:
+	 *   Q1 non list question with preface text
+	 *   Q2 non list question (no preface text)
+	 *   Q3 non list question with preface text
+	 *   Q4 non list question (no preface text)
+	 *   Q5 list question
+	 *   Q6 non list question
+	 *   Q7 non list question
+	 *   Q8 list question
+	 *  
+	 *   It should ask:
+	 *  
+	 *   1. Q1 for alter 1, Q2 for alter 1, Q1 for alter 2, Q2 for alter 2 and so on for each alter
+	 *   2. Q3 for alter 1, Q4 for alter 1, Q3 for alter 2, Q4 for alter 2 and so on for each alter
+	 *   3. Q5 in list format
+	 *   4. Q6 for alter 1, Q7 for alter 1, Q6 for alter 2, Q7 for alter 2 and so on for each alter
+	 *   5. Q8 in list format
+	 */
 	
 	private static ArrayList<Pair<Question,ArrayList<Alter>>> alterQuestionsForInterview(
 			Session session, Long interviewId) 
 	{
-		long onFunctionEntry = System.currentTimeMillis();
-		long onFunctionExit;
-		long onSkipLogicEntry;
-		long onUseIfEntry;
-		long timeInSetup = 0;
-		long timeInFunction = 0;
-		long timeInSkipLogic = 0;
-		long timeInUseIf = 0;
-		int  skipLogicCount = 0;
-		int  useIfCount = 0;
-		
+	
 		Interview interview = Interviews.getInterview(session, interviewId);
 		List<Question> questions = 
 			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.ALTER);
@@ -483,7 +471,6 @@ public class Interviewing {
 		List<Alter> alters = Alters.getForInterview(session, interviewId);
 		EvaluationContext context = Expressions.getContext(session, interview);
 		ArrayList<Pair<Question,ArrayList<Alter>>> results = Lists.newArrayList();
-		timeInSetup = System.currentTimeMillis() - onFunctionEntry;
 		for(Question question : questions) {
 			Set<Long> answeredAlterIds = Sets.newHashSet();
 			for(Answer answer : questionIdToAnswers.get(question.getId())) {
@@ -499,45 +486,18 @@ public class Interviewing {
 				// 				Lists.newArrayList(alter), 
 				// 				context);
 				Boolean shouldAnswer;
-				Boolean shouldAnswerUseIf = true;
 				
 				if ( reasonId==null ) {
 					shouldAnswer = true;
 				} else {
-					++skipLogicCount;
-					onSkipLogicEntry = System.currentTimeMillis();
 					shouldAnswer = Expressions.evaluateAsBool(
 							 				context.eidToExpression.get(reasonId), 
 							 				Lists.newArrayList(alter), 
 							 				context);
-					timeInSkipLogic += System.currentTimeMillis() - onSkipLogicEntry;
 				}
-				if ( shouldAnswer /* reasonId==null */ ) {
-					String strUseIf;
-					int iEvaluate;
-					ArrayList<Alter> singleAlterList = Lists.newArrayList(alter);
-					strUseIf = question.getUseIfExpression();
-					if ( strUseIf!=null && strUseIf.trim().length()>0 ) {
-						++useIfCount;
-						onUseIfEntry = System.currentTimeMillis();
-						strUseIf = question.answerCountInsertion(strUseIf, interviewId);
-						strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, singleAlterList);		
-						strUseIf = question.calculationInsertion(strUseIf, interviewId, singleAlterList);
-						strUseIf = question.variableInsertion(strUseIf, interviewId, singleAlterList);
-						iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
-								strUseIf, interviewId, 
-								question.getType(), question.getStudyId(), singleAlterList);
-						if ( SimpleLogicMgr.hasError()) {
-							System.out.println ("USE IF error in " + question.getTitle());
-							System.out.println ("USE IF =" + question.getUseIfExpression());
-						}
-						if (iEvaluate==0)
-							shouldAnswerUseIf = false;
-						timeInUseIf += System.currentTimeMillis() - onUseIfEntry;
-					}
-				}
+
 				
-				if(shouldAnswer && shouldAnswerUseIf) {
+				if(shouldAnswer) {
 					resultAlters.add(alter);
 				}
 			}
@@ -545,14 +505,6 @@ public class Interviewing {
 				results.add(new Pair<Question,ArrayList<Alter>>(question,resultAlters));
 			}
 		}
-		onFunctionExit = System.currentTimeMillis();
-		timeInFunction = onFunctionExit - onFunctionEntry;
-		System.out.println ( "Time in alterQuestionsForInterview=" + timeInFunction);
-		System.out.println ( "Time in setup =" + timeInSetup);
-		if ( skipLogicCount>0 )
-		    System.out.println ( "Time in skip-logic=" + timeInSkipLogic + " (" + skipLogicCount + ") @ " + timeInSkipLogic/skipLogicCount);
-		if ( useIfCount>0 )
-			System.out.println ( "Time in use-if=" + timeInUseIf + " (" + useIfCount + ") @ " + timeInUseIf/useIfCount);
 		return results;
 	}
 	

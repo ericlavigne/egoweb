@@ -40,6 +40,13 @@ public class Question extends OrderedEntity
 	// similar variables to be used with MULTIPLE_SELECTION questions
 	private Integer minCheckableBoxes;
 	private Integer maxCheckableBoxes;
+	// these variables are (optionally) used with
+	// list-of-alters format, when we want a limited number
+	// of one item selected
+	private Boolean withListRange; 
+	private String  listRangeString;
+	private Integer minListRange;
+	private Integer maxListRange;
 	// Date & Time_Span questions will let authors select which
 	// time units are available for answering.
 	// they will be stored as boolean bit values
@@ -62,6 +69,10 @@ public class Question extends OrderedEntity
 		
 		minCheckableBoxes = 0;
 		maxCheckableBoxes = 100;
+		withListRange = new Boolean(false); 
+		listRangeString = new String("");
+		minListRange = new Integer(0);
+		maxListRange = new Integer(100);
 		timeUnits = 0xff;
 	}
 
@@ -94,6 +105,10 @@ public class Question extends OrderedEntity
 		c.setTypeDB(getTypeDB());
 		c.setUseIfExpression(getUseIfExpression());
 		c.setNoneButton(getNoneButton());
+		c.setWithListRange(getWithListRange());
+		c.setListRangeString(getListRangeString());
+		c.setMinListRange(getMinListRange());
+		c.setMaxListRange(getMaxListRange());
 		return c;
 	}
 	
@@ -372,6 +387,58 @@ public class Question extends OrderedEntity
 		return( timeUnits );
 	}
 	
+	/* ****************************************************************** */
+	/* these variables deal with ad-hoc situations in the list-of-alters  */
+	/* question format.  Sometimes we want the survey taker to limit the  */
+	/* number of times a specific answer is selected - like indicating    */
+	/* the four most recent sex partners out of a list of 20              */
+	public void setWithListRange( Boolean withListRange) {
+		this.withListRange = (withListRange==null) ? new Boolean(false) : withListRange;
+	}
+	public Boolean getWithListRange() {
+		return(withListRange);
+	}
+	
+    public void setListRangeString( String listRangeString) {
+    	this.listRangeString = (listRangeString==null) ? new String("") : listRangeString;
+    }
+    public String getListRangeString() {
+    	return (listRangeString);
+    }
+    
+    public void setMinListRange( Integer minListRange) {
+    	this.minListRange = (minListRange==null) ? new Integer(0) : minListRange;
+    }
+    public Integer getMinListRange() {
+    	return (minListRange);
+    }
+    
+    public void setMaxListRange( Integer maxListRange) {
+    	this.maxListRange = (maxListRange==null) ? new Integer(0) : maxListRange;
+    }
+    public Integer getMaxListRange() {
+    	return (maxListRange);
+    }
+    
+    /**
+     * @return prompt that tells the survey taker how many of a crucial
+     * answer to select in a list-of-alters question.
+     */
+    public String getListRangePrompt() {
+    	String strPrompt = "";
+    	
+    	if ( type!=QuestionType.ALTER && type!=QuestionType.ALTER_PAIR )
+    	    return(strPrompt);
+    	if ( !askingStyleList || !withListRange )
+    		return(strPrompt);
+    	strPrompt = "Select " + listRangeString.toUpperCase() + " " + minListRange;
+        if ( minListRange.equals(maxListRange) )
+        	strPrompt += " time" + ((minListRange==1) ? "." : "s.");
+        else
+        	strPrompt += " to " + maxListRange + " times.";
+        return(strPrompt);
+    }
+    
 	/* ****************************************************************** */
 	/* functions from this point down deal with substituting the answer   */
 	/* from a previous question into a new questions prompt               */

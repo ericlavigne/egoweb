@@ -270,4 +270,27 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	public Boolean getHorizontalLayout() {
 		return(horizontalLayout);
 	}	
+	
+	/**
+	 * returns true if strAnswerToCount is among the answers 
+	 * that have been checked.  This will be used an a 
+	 * list-of-alters format question to count how many times
+	 * a specific answer has been selected
+	 * @param strAnswerToCount the answer we'll count up the number
+	 * of times its been used
+	 * @return true if the answer if selected in this panel
+	 */
+	public boolean isSelected ( String strAnswerToCount ) {
+		String selectedAnswer;
+		
+		strAnswerToCount = strAnswerToCount.trim();
+		for(Object option : answerField.getSelected()) {
+			if(option instanceof QuestionOption) {
+				selectedAnswer = ((QuestionOption) option).getName().trim();
+				if ( selectedAnswer.equalsIgnoreCase(strAnswerToCount))
+					return (true);
+			}
+		}
+		return (false);
+	}
 }

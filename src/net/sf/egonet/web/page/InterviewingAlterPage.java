@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 
 import com.google.common.collect.Lists;
@@ -71,7 +72,8 @@ public class InterviewingAlterPage extends InterviewingPage {
 
 	private Subject subject;
 	private InterviewingPanel interviewingPanel;
-
+    private Label pageLevelPrompt;
+    
 	public InterviewingAlterPage(Subject subject) {
 		super(subject.interviewId);
 		this.subject = subject;
@@ -96,6 +98,10 @@ public class InterviewingAlterPage extends InterviewingPage {
 		};
 		form.add(forwardButton);
 
+		pageLevelPrompt = new Label("pageLevelPrompt","");
+		form.add(pageLevelPrompt);
+		setPageLevelPrompt ( subject.question.getListRangePrompt());
+		
 		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
 		for(Alter alter : subject.alters) {
 			ArrayList<Alter> alters = Lists.newArrayList(alter);
@@ -161,6 +167,14 @@ public void onSave(boolean gotoNextUnAnswered) {
 		AnswerFormFieldPanel.allConsistent(answerFields, pageFlags);
 	boolean multipleSelectionsOkay = 
 		AnswerFormFieldPanel.allRangeChecksOkay(answerFields);
+	boolean countOfListItemOkay =
+		AnswerFormFieldPanel.checkCountOfListItem(subject.question, answerFields);
+	if ( countOfListItemOkay ) {
+		setPageLevelPrompt(" ");
+	} else {
+		okayToContinue = false;
+		setPageLevelPrompt(AnswerFormFieldPanel.getStatusCountOfListItem(subject.question, answerFields));
+	}
 	for(AnswerFormFieldPanel answerField : answerFields) {
 		if ( !multipleSelectionsOkay ) {
 			answerField.setNotification(answerField.getRangeCheckNotification());
@@ -290,5 +304,15 @@ public void onSave(boolean gotoNextUnAnswered) {
 				previousSubject == null ? null : previousSubject.question, 
 				currentSubject == null ? null : currentSubject.question,
 				previousPage,comeFrom);
+	}
+	
+	/**
+	 * this is used in list-of-alters pages, where one prompt
+	 * will apply to the screen as a whole, not individual answers.
+	 * Examples are "Select Yes once" or "Yes selected too many times"
+	 * @param text - string to display
+	 */
+	public void setPageLevelPrompt(String text) {
+		pageLevelPrompt.setModelObject(text);
 	}
 }
