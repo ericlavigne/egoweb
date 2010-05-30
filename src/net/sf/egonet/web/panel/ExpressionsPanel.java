@@ -185,6 +185,9 @@ public class ExpressionsPanel extends Panel {
 	}
 	
 	private void editExpression(Expression expression) {
+		if(expression.getOrdering() == null) {
+			expression.setOrdering(getExpressions().size());
+		}
 		replaceExpressionEditorWith(getExpressionEditor(expression));
 	}
 }

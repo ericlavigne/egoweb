@@ -1,10 +1,15 @@
 package net.sf.egonet.persistence;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.TreeMap;
 
 import net.sf.egonet.model.Entity;
+import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.QuestionOption;
+import net.sf.egonet.model.Study;
 import net.sf.egonet.web.Main;
 
 import org.hibernate.Session;
@@ -104,6 +109,22 @@ public class DB {
 					if(option.getQuestionId() != null && option.getStudyId() == null) {
 						option.setStudyId(qIdToStudyId.get(option.getQuestionId()));
 						DB.save(session, option);
+					}
+				}
+				for(Study study : Studies.getStudies(session)) {
+					List<Expression> expressions = Expressions.forStudy(session, study.getId());
+					if((! expressions.isEmpty()) && expressions.get(0).getOrdering() == null) {
+						Collections.sort(expressions, 
+								new Comparator<Expression>() {
+									public int compare(Expression expr1, Expression expr2) {
+										return expr1.getId().compareTo(expr2.getId());
+									}
+						});
+						Integer ordering = 0;
+						for(Expression expression : expressions) {
+							expression.setOrdering(ordering++);
+							save(session, expression);
+						}
 					}
 				}
 				return null;

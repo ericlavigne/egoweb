@@ -225,10 +225,12 @@ public class Archiving {
 			
 			if(updateStudy) {
 				Map<Long,Expression> localIdToExpression = indexById(expressions);
+				Integer ordering = 0;
 				for(Element expressionElement : expressionElements) {
 					Long localExpressionId = remoteToLocalExpressionId.get(attrId(expressionElement));
 					if(localExpressionId != null) {
 						Expression expression = localIdToExpression.get(localExpressionId);
+						expression.setOrdering(ordering++);
 						updateExpressionFromNode(session,expression,expressionElement,
 								study.getId(),remoteToLocalQuestionId,remoteToLocalOptionId,
 								remoteToLocalExpressionId);

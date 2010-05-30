@@ -11,7 +11,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class Expression extends Entity {
+public class Expression extends OrderedEntity {
 	
 	public static enum Operator 
 		{All,Some,None,Equals,Contains,Greater,GreaterOrEqual,LessOrEqual,Less,Count,Sum}

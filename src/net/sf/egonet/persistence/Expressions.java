@@ -36,7 +36,8 @@ public class Expressions {
 	}
 
 	public static List<Expression> forStudy(Session session, Long studyId) {
-		return session.createQuery("from Expression e where e.studyId = :studyId and e.active = 1")
+		return session.createQuery("from Expression e where e.studyId = :studyId and e.active = 1" +
+				" order by ordering")
 				.setLong("studyId", studyId).list();
 	}
 	
