@@ -23,31 +23,31 @@ public class InterviewingEgoPage extends InterviewingPage {
 	private Long interviewId;
 	private Question question;
 	private InterviewingPanel interviewingPanel;
-	
+    private boolean gotoNextUnAnswered;
+    
 	public InterviewingEgoPage(Long interviewId, Question question) {
 		super(interviewId);
 		this.interviewId = interviewId;
 		this.question = question;
+		gotoNextUnAnswered = false;
 		build();
 	}
 
 	private void build() {
-		Button forwardButton;
+		Button nextUnanswered;
 		
-		Form form = new Form("form");
-		
-		form.add (new Button("nextUnanswered") {
+		Form form = new Form("form") {
 			public void onSubmit() {
-				onSave(true);
-			}
-		});
-		
-		forwardButton = new Button("nextQuestion") {
-			public void onSubmit() {
-				onSave(false);
+				onSave(gotoNextUnAnswered);
 			}
 		};
-		form.add(forwardButton);
+		
+		nextUnanswered = new Button("nextUnanswered") {
+			public void onSubmit() {
+				gotoNextUnAnswered = true;
+			}
+		};
+		form.add(nextUnanswered);
 		
 		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question,interviewId);
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
@@ -88,7 +88,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 				interviewingPanel.pageFlags())) 
 		{
 			forwardLink.setVisible(false);
-			forwardButton.setVisible(false);
+			nextUnanswered.setVisible(false);
 		}
 	}
 
@@ -176,7 +176,7 @@ public void onSave(boolean gotoNextUnAnswered) {
 		// KCN May 7 - using the >> button at the bottom of the screen
 		// to advance through the ego questions to the first alter question
 		// was causing the program to crash, this should fix that problem:
-		return InterviewingAlterPage.askNext(interviewId,null,null,comeFrom);
+		return InterviewingAlterPage.askNext(interviewId,null,false,comeFrom);
 		// return InterviewingAlterPage.askNextNEW(interviewId,null,false,comeFrom);
 	}
 	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion, EgonetPage comeFrom) {

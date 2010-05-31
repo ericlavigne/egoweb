@@ -101,17 +101,14 @@ public class EditQuestionPanel extends Panel {
 		numericLimitsPanel = new NumericLimitsPanel("numericLimitsPanel", question);
 		form.add(numericLimitsPanel);
 		numericLimitsPanel.setVisible(false);
-		numericLimitsPanel.setOutputMarkupId(true);
 		
 		multipleSelectionLimitsPanel = new MultipleSelectionLimitsPanel ("multipleSelectionLimitsPanel");
 		form.add(multipleSelectionLimitsPanel);
 		multipleSelectionLimitsPanel.setVisible(false);
-		multipleSelectionLimitsPanel.setOutputMarkupId(true);
 	
 		timeUnitsPanel = new TimeUnitsPanel ("timeUnitsPanel", question);
 		form.add(timeUnitsPanel);
 		timeUnitsPanel.setVisible(false);
-		timeUnitsPanel.setOutputMarkupId(true);
 		
 		listLimitsPanel = new ListLimitsPanel ("listLimitsPanel", question );
 		form.add(listLimitsPanel);
@@ -137,7 +134,15 @@ public class EditQuestionPanel extends Panel {
 		    protected void onUpdate(AjaxRequestTarget target)
 		    	{
 		        onSelectionChanged( Integer.parseInt(dropDownQuestionTypes.getModelValue()));
-		        target.addComponent(form);
+		        // target.addComponent(form);
+		        target.addComponent(numericLimitsPanel);
+		        target.addComponent(multipleSelectionLimitsPanel);
+		        target.addComponent(noneButtonLabel); 
+		        target.addComponent(noneButtonCheckBox);
+		        target.addComponent(otherSpecifyLabel); 
+		        target.addComponent(otherSpecifyCheckBox);
+		        target.addComponent(timeUnitsPanel);
+		        target.addComponent(listLimitsPanel);
 		        }
 		   	});
 		
@@ -169,6 +174,10 @@ public class EditQuestionPanel extends Panel {
 				target.addComponent(form); 
 			}
 		};
+		askingStyleListLabel.setOutputMarkupId(true);
+		askingStyleListLabel.setOutputMarkupPlaceholderTag(true);
+		askingStyleListField.setOutputMarkupId(true);
+		askingStyleListField.setOutputMarkupPlaceholderTag(true);
 		form.add(askingStyleListLabel);
 		form.add(askingStyleListField);
 		if(question.getType().equals(Question.QuestionType.EGO) ||
@@ -186,7 +195,8 @@ public class EditQuestionPanel extends Panel {
 		form.add(otherSpecifyCheckBox);
 		otherSpecifyLabel.setOutputMarkupId(true);
 		otherSpecifyCheckBox.setOutputMarkupId(true);
-		
+		otherSpecifyLabel.setOutputMarkupPlaceholderTag(true);
+		otherSpecifyCheckBox.setOutputMarkupPlaceholderTag(true);
 		noneButtonLabel = new Label("noneButtonLabel", "NONE Button?: ");
 		noneButtonModel = new Model();
 		noneButtonModel.setObject(Boolean.FALSE);
@@ -195,6 +205,8 @@ public class EditQuestionPanel extends Panel {
 		form.add(noneButtonCheckBox);
 		noneButtonLabel.setOutputMarkupId(true);
 		noneButtonCheckBox.setOutputMarkupId(true);
+		noneButtonLabel.setOutputMarkupPlaceholderTag(true);
+		noneButtonCheckBox.setOutputMarkupPlaceholderTag(true);
 		noneButtonLabel.setVisible(false); 
 		noneButtonCheckBox.setVisible(false);
 		

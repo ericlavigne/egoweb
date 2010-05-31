@@ -293,4 +293,8 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		}
 		return (false);
 	}
+	
+	public boolean forceSelectionIfNone(String selection) {
+		return (answerField.forceSelectionIfNone(selection));
+	}
 }

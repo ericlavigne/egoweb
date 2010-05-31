@@ -404,4 +404,25 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		return(strStatus);	
 	}
 	
+	/**
+	 * used in list-of-alters pages by the 'global' Don't know and Refuse
+	 * buttons.  If one of these is clicked, all UNANSWERED panels will
+	 * change to that answer
+	 * @param panels list of answer panels
+	 * @param strAnswer - string to change to, 'Don't know' or 'Refuse'
+	 * @return a count of the altered panels
+	 */
+	protected static int
+	forceSelectionIfNone(Collection<AnswerFormFieldPanel> panels, String strAnswer ) {
+		int iCount = 0;
+		
+		for ( AnswerFormFieldPanel panel : panels ) {
+			if ( panel instanceof MultipleSelectionAnswerFormFieldPanel ) {
+				if ( ((MultipleSelectionAnswerFormFieldPanel)panel).forceSelectionIfNone(strAnswer))
+					++iCount;
+			}		
+		}
+		return(iCount);
+	}
+
 }

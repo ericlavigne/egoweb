@@ -8,6 +8,7 @@ import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.SimpleLogicMgr;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
 
@@ -41,7 +42,7 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
         }
         
         this.text = text;
-        
+		add (new Label("questionTitle", question.getTitle()));
         add(new MultiLineLabel("text", this.text).setEscapeModelStrings(false));
 
 		add(new Link("backwardLink") {

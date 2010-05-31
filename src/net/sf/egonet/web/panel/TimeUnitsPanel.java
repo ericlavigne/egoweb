@@ -50,8 +50,9 @@ public class TimeUnitsPanel extends Panel {
 	 * creates the form an all input widgets
 	 */ 
 	private void build() {	
-		timeUnitsForm = new Form("timeUnitsForm");
 		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
+		timeUnitsForm = new Form("timeUnitsForm");
 		timeUnitsForm.setOutputMarkupId(true);
 		cbYears 	= new CheckBox ("yrs",  new PropertyModel(this,"useYears"));
 		cbMonths 	= new CheckBox ("mons", new PropertyModel(this,"useMonths"));

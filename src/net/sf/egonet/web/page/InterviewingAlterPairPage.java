@@ -76,33 +76,32 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 	}
 
 	private Subject subject;
-
 	private InterviewingPanel interviewingPanel;
-	
+    private boolean gotoNextUnAnswered;
+    
 	public InterviewingAlterPairPage(Subject subject) 
 	{
 		super(subject.interviewId);
 		this.subject = subject;
+		gotoNextUnAnswered = false;
 		build();
 	}
 	
 	private void build() {
-		Button forwardButton;
+		Button nextUnanswered;
 		
-		Form form = new Form("form");
-		
-		form.add (new Button("nextUnanswered") {
+		Form form = new Form("form") {
 			public void onSubmit() {
-				onSave(true);
-			}
-		});
-		
-		forwardButton = new Button("nextQuestion") {
-			public void onSubmit() {
-				onSave(false);
+				onSave(gotoNextUnAnswered);
 			}
 		};
-		form.add(forwardButton);	
+		
+		nextUnanswered = new Button("nextUnanswered") {
+			public void onSubmit() {
+				gotoNextUnAnswered = true;
+			}
+		};
+		form.add(nextUnanswered);	
 		
 		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
 		for(Alter secondAlter : subject.secondAlters) {
@@ -153,7 +152,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		add(forwardLink);
 		if(! AnswerFormFieldPanel.okayToContinue(answerFields,interviewingPanel.pageFlags())) {
 			forwardLink.setVisible(false);
-			forwardButton.setVisible(false);
+			nextUnanswered.setVisible(false);
 		}
 	}
 

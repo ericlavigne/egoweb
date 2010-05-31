@@ -315,7 +315,36 @@ public class CheckboxesPanel<T> extends Panel {
 	}
 	public int getMaxStringLength() { return(maxStringLength);}
 
+	/**
+	 * used in those cases of a list-of-alters screen and the
+	 * user clicks one of the 'global' Don't know or Refuse buttons
+	 * if nothing is selected in this group of checkboxes, search
+	 * for one that matches the string and select it
+	 * @param selection - string to look for.  generally 'Don't know' or 'Refuse'
+	 * @return true if a new checkbox is selected
+	 */
+	public boolean forceSelectionIfNone(String selection) {
+		// if anything is checked at all, 
+		// we won't bother with this
+		for ( CheckableWrapper checkWrapper : items ) {
+			if ( checkWrapper.getSelected()) {
+				System.out.println ("forceSelectionIfNone, item selected");
+				return(false);
+			}
+		}
+		// if everything is unchecked, search for an item
+		// that matches the string and select it
+		for ( CheckableWrapper checkWrapper : items ) {
+			// System.out.println ("examining " + checkWrapper.getName());
+			if ( checkWrapper.getName().equalsIgnoreCase(selection)) {
+				checkWrapper.setSelected(true);
+				return(true);
+			}
+		}
+		return(false);
+	}
 }
+
 
 
 

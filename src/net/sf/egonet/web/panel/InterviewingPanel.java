@@ -1,6 +1,7 @@
 package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.sf.egonet.model.Alter;
@@ -9,8 +10,12 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.SimpleLogicMgr;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -89,9 +94,36 @@ public class InterviewingPanel extends Panel {
 		}
 		if(answerFields.size() > 1) {
 			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
-		}
+		 }
 		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
 		add(refDKCheck);
+	
+// ==========================================================================
+// we may want buttons instead of checkboxs for Don't know and Refuse
+//	    Button btnDontKnow = new Button("btnDontKnow") {
+//			public void onSubmit() {
+//				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, "Don't know" );
+//			}
+//		};
+//		btnDontKnow.setDefaultFormProcessing(false);
+//		add(btnDontKnow);
+//
+//		Button btnRefuse = new Button("btnRefuse") {
+//			public void onSubmit() {
+//				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, "Refuse" );
+//			}
+//		};
+//		btnRefuse.setDefaultFormProcessing(false);
+//		add(btnRefuse);
+//		
+//		// the Don't know & refuse buttons are ONLY for list-of-alters
+//		if ( question.getType() != Question.QuestionType.ALTER  ||  
+//			    question.getAnswerType() != Answer.AnswerType.MULTIPLE_SELECTION ||
+//				answerFields.size()<=1 ) {
+//			btnDontKnow.setVisible(false);
+//			btnRefuse.setVisible(false);
+//		}
+// ===========================================================================		
 	}
 	
 	public List<String> pageFlags() {

@@ -75,8 +75,9 @@ public class ListLimitsPanel extends Panel {
 	}
 	
 	private void build() {
+		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
         listLimitsForm = new Form("listLimitsForm");
-        setOutputMarkupId(true);
         listLimitsForm.setOutputMarkupId(true);
         
 	    cbWithListRange = new CheckBox("withListRange", new PropertyModel(this,"withListRange"));

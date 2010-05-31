@@ -71,6 +71,7 @@ public class NumericLimitsPanel extends Panel {
 	 
 	private void build() {		
 		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
 		numericLimitsForm = new Form("numericLimitsForm");
 		radioMinimum = new RadioGroup("radioMin", new PropertyModel(this,"minLimitType"));
 		radioMaximum = new RadioGroup("radioMax", new PropertyModel(this,"maxLimitType"));

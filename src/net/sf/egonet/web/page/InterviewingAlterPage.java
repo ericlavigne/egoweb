@@ -73,31 +73,31 @@ public class InterviewingAlterPage extends InterviewingPage {
 	private Subject subject;
 	private InterviewingPanel interviewingPanel;
     private Label pageLevelPrompt;
+    private boolean gotoNextUnAnswered;
     
 	public InterviewingAlterPage(Subject subject) {
 		super(subject.interviewId);
 		this.subject = subject;
+		gotoNextUnAnswered = false;
 		build();
 	}
 	
 	private void build() {
-		Button forwardButton;
+		Button nextUnanswered;
 		
-		Form form = new Form("form");
-		
-		form.add (new Button("nextUnanswered") {
+		Form form = new Form("form") {
 			public void onSubmit() {
-				onSave(true);
-			}
-		});
-		
-		forwardButton = new Button("nextQuestion") {
-			public void onSubmit() {
-				onSave(false);
+				onSave(gotoNextUnAnswered);
 			}
 		};
-		form.add(forwardButton);
-
+		
+		nextUnanswered = new Button("nextUnanswered") {
+			public void onSubmit() {
+				gotoNextUnAnswered = true;
+			}
+		};
+		form.add(nextUnanswered);
+		
 		pageLevelPrompt = new Label("pageLevelPrompt","");
 		form.add(pageLevelPrompt);
 		setPageLevelPrompt ( subject.question.getListRangePrompt());
@@ -148,7 +148,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 				interviewingPanel.getAnswerFields(),interviewingPanel.pageFlags())) 
 		{
 			forwardLink.setVisible(false);
-			forwardButton.setVisible(false);
+			nextUnanswered.setVisible(false);
 		}
 	}
 	
