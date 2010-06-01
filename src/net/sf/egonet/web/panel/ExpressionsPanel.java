@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.persistence.DB;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
@@ -80,7 +81,13 @@ public class ExpressionsPanel extends Panel {
 				item.add(editExpressionLink);
 				
 				item.add(new Label("expressionDescription", expression.getValue()+""));
-				
+
+				item.add(new Link("moveUpExpressionLink") {
+					public void onClick() {
+						moveUp(expression);
+						replaceExpressionEditorWith(new EmptyPanel(panelId));
+					}
+				});
 				item.add(new Link("deleteExpressionLink") {
 					public void onClick() {
 						Expressions.delete(expression);
@@ -159,6 +166,32 @@ public class ExpressionsPanel extends Panel {
 		add(editExpressionPanel);
 	}
 
+	private void moveUp(Expression expression) {
+		List<Expression> expressions = getExpressions();
+		
+		// Find the expression to move up.
+		Integer expressionIndex = null;
+		for(Integer i = 0; i < expressions.size(); i++) {
+			if(expressions.get(i).equals(expression)) {
+				expressionIndex = i;
+			}
+		}
+		
+		// Move it up, and save the results.
+		if(expressionIndex != null && expressionIndex > 0) {
+			Expression expr1 = expressions.get(expressionIndex-1);
+			Expression expr2 = expressions.get(expressionIndex);
+			expr1.setOrdering(expressionIndex);
+			expr2.setOrdering(expressionIndex-1);
+			DB.save(expr1);
+			DB.save(expr2);
+		}
+		
+		// Clear the cache, since I just made a significant change to the expressions.
+		this.expressions = null;
+		this.expressionsLastRefreshed = null;
+	}
+	
 	private void replaceExpressionEditorWith(Panel panel) {
 		editExpressionPanel.replaceWith(panel);
 		editExpressionPanel = panel;

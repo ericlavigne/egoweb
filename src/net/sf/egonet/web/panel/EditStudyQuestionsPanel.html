@@ -1,21 +1,14 @@
 <wicket:panel>
-	
 	<form wicket:id="questionsContainer">
-<!--
-	<table border="1">
--->
-    	<span wicket:id="caption">Questions</span>
-<!--
-    	<tr><th>Title</th><th>Prompt</th><th>Response Type</th><th>Options</th></tr>
--->
+    	<h2><span wicket:id="caption">Questions</span></h2>
     	<div wicket:id="questions" style="border:1px solid black; margin: 1em; ">
-    	<div style="float:left">
-    		<a href="#" wicket:id="questionLink">
-    			<span wicket:id="questionTitle">First Name</span>
-    		</a>
-    		<br />
-    		<span wicket:id="questionResponseType">TEXT</span>
-    	</div>
+    		<div style="float:left">
+    			<a href="#" wicket:id="questionLink">
+    				<span wicket:id="questionTitle">First Name</span>
+    			</a>
+    			<br />
+    			<span wicket:id="questionResponseType">TEXT</span>
+    		</div>
     		<table style="float:right">
     			<tr>
     				<td>
@@ -36,7 +29,6 @@
     				</td>
     				<td style="color:white">___</td>
     				<td style="color:white">___</td>
-    			
     			</tr>
     			<tr>
     				<td><a href="#" wicket:id="questionDuplicate">Duplicate</a></td>
@@ -45,22 +37,16 @@
     				<td style="color:white">___</td>
     			</tr>
     		</table>
-		<div style="margin-left:5em; padding-left:5em; margin-right:5em; padding-right:5em">
-			<span wicket:id="questionPrompt">What is your first name?</span>
-		</div>
-		
+			<div style="margin-left:5em; padding-left:5em; margin-right:5em; padding-right:5em">
+				<span wicket:id="questionPrompt">What is your first name?</span>
+			</div>
 			<div style="clear:both" wicket:id="editor">Editor</div>
     	</div>
     	<div>
     		<span><a href="#" wicket:id="newQuestion">New question</a></span>
     	</div>
-<!--
-    </table>
--->
     </form>
-    
     <form wicket:id="editQuestionPanelContainer">
     	<div wicket:id="editQuestionPanel">Edit Question Panel</div>
     </form>
-
 </wicket:panel>
