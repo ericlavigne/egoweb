@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import net.sf.egonet.model.Answer;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -29,6 +28,7 @@ public class CheckboxesPanel<T> extends Panel {
 		return( strItem);
 	}
 
+	private static final String otherSpecify = "OTHER SPECIFY";
 	private List<CheckableWrapper> items;
 	private Boolean otherSpecifyStyle;
 	private Boolean otherSelected;
@@ -120,7 +120,7 @@ public class CheckboxesPanel<T> extends Panel {
 							for ( Component component : componentsToUpdate) {
 							 	target.addComponent(component);
 							}			
-							fireActionEvent (otherNowSelected, "OTHER SPECIFY" );
+							fireActionEvent (otherNowSelected, otherSpecify );
 							otherSelected = otherNowSelected;
 						}
 				 }};
@@ -161,7 +161,7 @@ public class CheckboxesPanel<T> extends Panel {
 							for ( Component component : componentsToUpdate) {
 							 	target.addComponent(component);
 							}			
-							fireActionEvent (otherNowSelected, "OTHER SPECIFY" );
+							fireActionEvent (otherNowSelected, otherSpecify );
 							otherSelected = otherNowSelected;
 						}
 				 }};
@@ -321,7 +321,7 @@ public class CheckboxesPanel<T> extends Panel {
 		if ( !otherSpecifyStyle )
 			return(false);
 		for ( CheckableWrapper checkWrapper:items ) {
-			if ( checkWrapper.getName().trim().startsWith("OTHER SPECIFY")) {
+			if ( checkWrapper.getName().trim().startsWith(otherSpecify)) {
 				return(checkWrapper.getSelected());
 			}
 		}

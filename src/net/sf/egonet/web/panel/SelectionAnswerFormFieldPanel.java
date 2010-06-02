@@ -45,7 +45,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 				strNewSelection = newSelection.toString();
 			}
 			
-			if (strNewSelection.trim().startsWith("OTHER SPECIFY")) {
+			if (strNewSelection.trim().startsWith(otherSpecify)) {
 				otherSpecifyLabel.setVisible(true);
 				otherSpecifyTextField.setVisible(true);	
 			} else {
@@ -61,7 +61,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	/**
 	 * end of private inner class RadioChoicePlus
 	 */
-	
+	private static final String otherSpecify = "OTHER SPECIFY";
 	private Model answer;
 	private RadioChoicePlus dropDownChoice;
 	private Label otherSpecifyLabel;
@@ -204,7 +204,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		String strAnswerName = getAnswerOptionName();
 		boolean retVal = false;
 		
-		if ( strAnswerName!=null && strAnswerName.trim().startsWith("OTHER SPECIFY")) 
+		if ( strAnswerName!=null && strAnswerName.trim().startsWith(otherSpecify)) 
 			retVal = true;
 		return(retVal);
 	 }

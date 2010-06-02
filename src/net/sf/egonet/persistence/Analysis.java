@@ -416,8 +416,10 @@ public class Analysis {
 			return null;
 		}
 		if(question.getAnswerType().equals(Answer.AnswerType.NUMERICAL) ||
-				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL))
-		{
+				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL) ||
+				question.getAnswerType().equals(Answer.AnswerType.DATE) ||
+				question.getAnswerType().equals(Answer.AnswerType.TIME_SPAN))
+				{
 			return answer.getValue();
 		}
 		if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||

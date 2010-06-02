@@ -206,7 +206,6 @@ function doOnKeyUpHorz(event) {
      var nextCol = iloaCurrentCol;
      var nextDiv = loaCurrentRow;
      var unicode=event.keyCode? event.keyCode : event.charCode;
- 
 
      if ( unicode==38 ) {
          nextDiv = loaNextInRowList ( loaCurrentRow, false );
@@ -253,7 +252,6 @@ function doOnKeyUpHorz(event) {
 function doOnKeyUpVert(event) {
      var nextCol = iloaCurrentCol;
      var unicode=event.keyCode? event.keyCode : event.charCode;
-
 
      if ( unicode==38 || unicode==37 ) {
          nextCol = iloaCurrentCol-1;

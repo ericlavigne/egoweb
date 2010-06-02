@@ -88,7 +88,6 @@ public class InterviewingPanel extends Panel {
 		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION) &&
 		   question.getNoneButton()) {
 			allOptions.add(none);
-			
 		}
 		
 		if(answerFields.size() > 1) {
