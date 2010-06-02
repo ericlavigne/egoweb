@@ -21,7 +21,8 @@ import org.apache.wicket.util.resource.StringResourceStream;
 public class EgonetPage extends WebPage
 {
 	private String title;
-
+	private Label labelQuestionId;
+	
 	public EgonetPage() {
 		this("Egoweb");
 	}
@@ -32,7 +33,9 @@ public class EgonetPage extends WebPage
 
 		add(new Label("headTitle",getTitle()));
 		add(new Label("inlineTitle",getTitle()));
-
+		labelQuestionId = new Label("questionTitle", "");
+		add(labelQuestionId);
+		
         Application application = getApplication();
         if (application instanceof Main)
         {
@@ -45,6 +48,10 @@ public class EgonetPage extends WebPage
 	}
 	
 
+	public void setQuestionId(String text) {
+		labelQuestionId.setModelObject(text);
+	}
+	
 	protected void downloadImage(String name, BufferedImage image) {
 		ResourceStreamRequestTarget target =
 			new ResourceStreamRequestTarget(

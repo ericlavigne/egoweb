@@ -42,7 +42,7 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
         }
         
         this.text = text;
-		add (new Label("questionTitle", question.getTitle()));
+		setQuestionId("Question: " + question.getTitle());
         add(new MultiLineLabel("text", this.text).setEscapeModelStrings(false));
 
 		add(new Link("backwardLink") {
@@ -78,6 +78,7 @@ public class InterviewingQuestionIntroPage extends InterviewingPage {
 			Interviewing.getPrefaceBetweenQuestions(earlyQuestion, lateQuestion);
 		return preface == null ? proposedNextPage : 
 			new InterviewingQuestionIntroPage(interviewId,preface,earlyPage,latePage,
-					((earlyQuestion!=null)?earlyQuestion:lateQuestion));
+					((lateQuestion==null)?earlyQuestion:lateQuestion));
+				//	((earlyQuestion!=null)?earlyQuestion:lateQuestion));
 	}
 }

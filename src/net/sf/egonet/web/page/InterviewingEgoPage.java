@@ -31,6 +31,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 		this.question = question;
 		gotoNextUnAnswered = false;
 		build();
+		setQuestionId("Question: " + question.getTitle());
 	}
 
 	private void build() {

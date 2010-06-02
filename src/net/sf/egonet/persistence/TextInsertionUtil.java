@@ -28,7 +28,10 @@ public class TextInsertionUtil {
 	   {"January", "February", "March", "April", "May", "June", 
 		"July", "August", "September", "October", "November", "December" };
 	
-	private enum DATE_FIELD { NONE, MONTH, DAY, YEAR};
+	private static final int monthCaps[] = 
+	{31,28,31,30,31,30,31,31,30,31,30,31};
+	
+	private enum DATE_FIELD { MONTH, DAY, YEAR, HOUR, MINUTE, NONE};
 	
 	/**
 	 * answerToQuestion
@@ -233,6 +236,9 @@ public class TextInsertionUtil {
 	 */
 	public static String dateDataInsertion (String strInput, 
 			Long interviewId, Question.QuestionType iType, Long studyId, ArrayList<Alter> listOfAlters ) {
+		int Month = DATE_FIELD.MONTH.ordinal();
+		int Day   = DATE_FIELD.DAY.ordinal();
+		int Year  = DATE_FIELD.YEAR.ordinal();
 		Interview currentInterview;		
 		String strResult = "";
 		String pattern = "<DATE.*?/>";
@@ -291,8 +297,6 @@ public class TextInsertionUtil {
 					strResult += "[date "+strDate+" not found]";
 				} else {
 				    dateInfo = strDateToNumeric(strDate);
-				    // System.out.println ("strDate=" + strDate);
-				    // System.out.println ("dateInfo="+dateInfo[0]+","+dateInfo[1]+","+dateInfo[2]);
 					switch ( paramInfo.length ) {
 					    case 0:
 					    case 1:
@@ -302,48 +306,40 @@ public class TextInsertionUtil {
 					    	switch ( dateField ) {
 					    	    case NONE: break;
 					    	    case MONTH:
-					    	    	 if ( dateInfo[0]<0  || dateInfo[1]>11)
-						    	    	 strResult += " " + dateInfo[0] + " ";
+					    	    	 if ( dateInfo[Month]<0  || dateInfo[Month]>11)
+						    	    	 strResult += " " + dateInfo[Month] + " ";
 					    	    	 else
-					    	    	     strResult += " " + strMonths[dateInfo[0]] + " "; 
+					    	    	     strResult += " " + strMonths[dateInfo[Month]] + " "; 
 					    	    	 break;
-					    	    case DAY: strResult += " " + dateInfo[1] + " "; break;
-					    	    case YEAR: strResult += " " + dateInfo[2] + " "; break;
+					    	    case DAY: strResult += " " + dateInfo[Day] + " "; break;
+					    	    case YEAR: strResult += " " + dateInfo[Year] + " "; break;
 					    	    }
 					    	 }
 					         break;
 					    case 3: {
+					    	 int[] newDate;
+					    	 
+					    	 newDate = applyOffsetToDate ( dateInfo, dateField, offset );
 					    	 switch ( dateField ) {
 					    	     case NONE: break;
-					    	     case MONTH:
-					    	    	  // System.out.println ( "OLD date month =" + dateInfo[0] + " offset=" + offset);
-					    	    	  boolean yearChange = false;
-					    	    	  dateInfo[0] += offset;
-					    	    	  while (dateInfo[0] < 0 ) {
-					    	    		  dateInfo[0] += 12;
-					    	    		  --dateInfo[2];
-					    	    		  yearChange = true;
-					    	    	  }
-					    	    	  while ( dateInfo[0]>=12 ){
-					    	    		  dateInfo[0] -= 12;
-					    	    		  ++dateInfo[2];
-					    	    		  yearChange = true;
-					    	    	  }
-					    	    	  // System.out.println("New date month=" + dateInfo[0]);
-					    	    	  strResult += " " + strMonths[dateInfo[0]] + " "; 
-					    	    	  if ( yearChange )
-					    	    		  strResult += dateInfo[2] + " ";
+					    	     case MONTH: 
+					    	    	  if ( dateInfo[Month]<0  || dateInfo[Month]>11)
+						    	    	  strResult += " " + dateInfo[Month] + " ";
+					    	    	  else
+					    	    	      strResult += " " + strMonths[newDate[Month]] + " "; 
+					    	    	  if ( newDate[Year] != dateInfo[Year] )
+					    	    		  strResult += newDate[Year] + " ";
 					    	    	  break;
 					    	     case DAY:
-					    	    	  dateInfo[1] += offset;
-					    	    	  while ( dateInfo[1] < 1)
-					    	    		  dateInfo[1] += 31;
-					    	    	  dateInfo[1] %= 31;
-					    	    	  strResult += " " + dateInfo[1] + " ";
+					    	    	  if ( newDate[Month] < 0 || newDate[Month]>11 )
+						    	    	  strResult += " " + newDate[Month] + " " + newDate[Day] + " ";
+					    	    	  else
+					    	    	      strResult += " " + strMonths[newDate[Month]] + " " + newDate[Day] + " ";
+					    	    	  if ( newDate[Year] != dateInfo[Year] )
+					    	    		  strResult += newDate[Year] + " ";					    	    	  
 					    	    	  break;
 					    	     case YEAR:
-					    	    	  dateInfo[2] += offset;
-					    	    	  strResult += " " + dateInfo[2] + " ";
+					    	    	  strResult += " " + newDate[Year] + " ";
 					    	    	  break;					    	    	  
 					    	 }
 					    }   	
@@ -1052,7 +1048,6 @@ public class TextInsertionUtil {
 		if ( str.length()>3 )
 			str = str.substring(0,3);
 		for ( ix=0 ; ix<strMonths.length ; ++ix ) {
-			// System.out.println ( "comparing " + str + " and " + strMonths[ix].substring(0,3));
 			if ( str.equalsIgnoreCase(strMonths[ix].substring(0,3)))
 				return(ix);
 		}
@@ -1107,8 +1102,146 @@ public class TextInsertionUtil {
 		    	 // fall thru
 		    case 1:
 		    	 returnInfo[0] = getMonthIndex(dateInfo[0].trim());
+		    	 // if the month is out of bounds most likely 
+		    	 // there was an error in constructing the <DATE tag
+		    	 if ( returnInfo[0]<0 ) {
+		    		 System.out.println ( "strDate=" + strDate);
+		    		 System.out.println ( "returnInfo[0]=" + returnInfo[0]);
+		    		 returnInfo[0] = 0;
+		    	 }
+		    	 if ( returnInfo[0]>11 ) {
+		    		 System.out.println ( "strDate=" + strDate);
+		    		 System.out.println ( "returnInfo[0]=" + returnInfo[0]);
+		    		 returnInfo[0] = 11;
+		    	 } 
 		}
 		return(returnInfo);
+	}
+	
+	/**
+	 * applys an offset to the appropriate field of a date represented by an
+	 * array of 3 ints.
+	 * @param date 'starting point' date
+	 * @param dateField the field in increment/decrement
+	 * @param offset amount to add/subtract from the specified field
+	 * @return a new array of three ints representing a date
+	 */
+	private static int[] applyOffsetToDate ( int[] date, DATE_FIELD dateField, int offset ) {
+		int returnArray[] = new int[3];
+		int Month = DATE_FIELD.MONTH.ordinal();
+		int Day   = DATE_FIELD.DAY.ordinal();
+		int Year  = DATE_FIELD.YEAR.ordinal();
+		
+		returnArray[Month] = date[Month];
+		returnArray[Day] = date[Day];
+		returnArray[Year] = date[Year];
+		
+		switch ( dateField ) {
+			case NONE:
+				 break;
+			case DAY:
+				 returnArray[Day] += offset;
+				 while ( returnArray[Day]<1 ) {
+					 returnArray[Day] += 31;
+					 --returnArray[Month];
+					 if ( returnArray[Month] < 0 ) {
+						 returnArray[Month] = 11;
+						 --returnArray[Year];
+					 }
+				 }
+				 
+				 while ( returnArray[Day]>31 ) {
+					 returnArray[Day] -= 31;
+					 ++returnArray[Month];
+					 if ( returnArray[Month] > 11 ) {
+						 returnArray[Month] = 0;
+						 ++returnArray[Year];
+					 }
+				 }
+				 break;
+			case MONTH: 
+				 returnArray[Month] += offset;
+				 while ( returnArray[Month] < 0 ) {
+					 returnArray[Month] += 12;
+					 --returnArray[Year];
+				 }
+				 while ( returnArray[Month] > 11 ) {
+					 returnArray[Month] -= 12;
+					 ++returnArray[Year];
+				 }
+				 break;
+			case YEAR:
+				 returnArray[Year] += offset;
+				 break;
+		}
+		if ( returnArray[Day] > monthCaps[returnArray[Month]])
+			returnArray[Day] = monthCaps[returnArray[Month]];
+		return(returnArray);
+	}
+	
+	/**
+	 * there will be cases where we want to display the variable insertion
+	 * tags 'as-is', but they will be in a container that supports HTML markup
+	 * so we need to convert < to &lt; and > to &gt;
+	 * to further confuse matters some tags support comparison operators.
+	 * Eventually we will want to check the syntax of these expression.
+	 * @param strInput
+	 * @return
+	 */
+	private static String replaceLTandGT ( String strInput ) {
+		
+		if ( strInput==null || strInput.length()==0)
+			return(strInput);
+		strInput = strInput.trim();
+		// this is redundant, but soon we will want to 
+		// handle the leading & ending <> differently than
+		// those that are inside the tag
+		if ( strInput.startsWith("<")) {
+			strInput = strInput.substring(1);
+			strInput = "&lt;" + strInput;
+		}
+		if ( strInput.endsWith(">")) {
+			strInput = strInput.substring(0,strInput.length()-1);
+			strInput += "&gt;";
+		}
+		strInput = strInput.replaceAll("<", "&lt;");
+		strInput = strInput.replaceAll(">", "&gt;");
+		strInput = strInput.replaceAll("&", "&amp;");
+		strInput = strInput.replaceAll("\"", "&quot");
+		return(strInput);
+		}
+	
+	/**
+	 * this will be for 'preview' panels, where we need to display the
+	 * text of a question and its variable insertion tags as-is but
+	 * escaped so they are not interpreted by the HTML functions
+	 * @param strInput string to escape
+	 * @return same string, but escaped
+	 */
+	public static String escapeTextInsertionTags ( String strInput ) {
+		String[] pattern = { 
+		"<VAR.*?/>", "<DATE.*?/>", "<CALC.*?/>", "<COUNT.*?/>", "<CONTAINS.*?/>", "<IF.*?/>"};
+		String[] patternStart = { 
+		"<VAR", "<DATE", "<CALC", "<COUNT", "<CONTAINS", "<IF"};
+		String newString;
+		ArrayList<String> theList;
+		int ix;
+		
+		for ( ix=0 ; ix<pattern.length ; ++ix ) {
+			theList = parseExpressionList ( strInput, pattern[ix]);
+			if ( theList != null ) {
+				newString = "";
+				for ( String string : theList ) {
+					if ( string.startsWith(patternStart[ix])) {
+						newString += " " + replaceLTandGT(string) + " ";
+					} else {
+						newString += string;
+					}
+				}
+				strInput = newString;
+			} // end of if (theList != null )
+		} // end of for ( ix=0 ...
+		return(strInput);
 	}
 }
 

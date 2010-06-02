@@ -8,6 +8,7 @@
 		
 		<script type="text/javascript" src="static/jquery-1.4.2.js"></script>
 		<script type="text/javascript" src="static/hotkeys.js"></script>
+		<script type="text/javascript" src="static/listOfAlters.js"></script>
 		
 		<link rel="stylesheet" href="/static/style.css" 
 			type="text/css" media="screen, projection">
@@ -24,14 +25,24 @@
 			.questionText {
 			     background-color: #eeeeff;
 			} 
+			.loaNormalRow{ 
+				background-color: #ffffff;
+			}
+   			.loaHiliteRow {
+       			background-color: #eeeeee;
+       		}
+   			.loaHiliteItem {
+        		background-color: #bbbbff;
+        	}
 		</style>
 	</head>
 	<body>
 		<div class="container">
-		
-			<h3 wicket:id="inlineTitle">Egonet</h3>
-			
-			<hr>
+		<table border="0" width="90%"><tr>
+		    <td align="left"><span wicket:id="questionTitle">Question Title</span></td>
+			<td align="right"><h3 wicket:id="inlineTitle">Egonet</h3></td>
+			</tr></table>
+<!--			<hr> -->
 			
 			<wicket:child />
 			

@@ -47,8 +47,6 @@ public class InterviewingPanel extends Panel {
 	private void build() {
 		String strPrompt;
 		
-		add (new Label("questionTitle", question.getTitle()));
-		
 		ArrayList<Alter> altersInPrompt = Lists.newArrayList();
 		if(answerFields.size() < 2 && ! answerFields.isEmpty()) {
 			altersInPrompt = answerFields.get(0).getAlters();
@@ -92,9 +90,11 @@ public class InterviewingPanel extends Panel {
 			allOptions.add(none);
 			
 		}
+		
 		if(answerFields.size() > 1) {
 			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
 		 }
+		
 		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
 		add(refDKCheck);
 	

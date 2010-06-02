@@ -85,6 +85,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		this.subject = subject;
 		gotoNextUnAnswered = false;
 		build();
+		setQuestionId("Question: " + subject.question.getTitle());
 	}
 	
 	private void build() {

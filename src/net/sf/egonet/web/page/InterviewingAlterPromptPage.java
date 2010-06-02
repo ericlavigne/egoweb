@@ -35,6 +35,7 @@ public class InterviewingAlterPromptPage extends InterviewingPage {
 		super(interviewId);
 		this.interview = Interviews.getInterview(interviewId);
 		build();
+		setQuestionId("");
 	}
 	
 	public String toString() {

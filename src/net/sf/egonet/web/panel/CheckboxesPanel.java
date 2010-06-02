@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import net.sf.egonet.model.Answer;
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -17,6 +18,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 
 import com.google.common.collect.Lists;
 
@@ -95,6 +97,10 @@ public class CheckboxesPanel<T> extends Panel {
 		return(str);
 	}
 	
+	/**
+	 * the horizontal form of the checkboxes will depend on javascript
+	 * functions being available in the file listofalters.js
+	 */
 	private void build() {
 		horizontalForm = new Form ("horizontalForm");
 		add(horizontalForm);
@@ -118,6 +124,10 @@ public class CheckboxesPanel<T> extends Panel {
 							otherSelected = otherNowSelected;
 						}
 				 }};
+				checkBox.add( new SimpleAttributeModifier("onfocus","doOnFocusHorz(this);"));
+				checkBox.add( new SimpleAttributeModifier("onblur", "doOnBlur(this);"));
+				checkBox.add( new SimpleAttributeModifier("onkeyup","doOnKeyUpHorz(event);")); 
+					
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&
 							wrapper.getName().equals(items.get(0).getName()))
@@ -155,6 +165,20 @@ public class CheckboxesPanel<T> extends Panel {
 							otherSelected = otherNowSelected;
 						}
 				 }};
+				 
+				// vertical lists of less than 10 items will have numeric hotkeys 
+				if ( items.size() >= 10 ) { 
+				    checkBox.add( new SimpleAttributeModifier("onfocus","doOnFocusVert(this);"));
+				    checkBox.add( new SimpleAttributeModifier("onblur", "doOnBlur(this);"));
+				    checkBox.add( new SimpleAttributeModifier("onkeyup","doOnKeyUpVert(event);")); 
+				}
+				// this was an attempt to remove the 'hotkey' class from
+				// Don't know and Refuse checkboxes.
+				// it didn't work
+				// if ( wrapper.getName().equals(Answer.SkipReason.DONT_KNOW) ||
+				//      wrapper.getName().equals(Answer.SkipReason.REFUSE)) {
+				// 	checkBox.add( new SimpleAttributeModifier("class",""));
+				// }
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&
 							wrapper.getName().equals(items.get(0).getName()))
@@ -216,7 +240,7 @@ public class CheckboxesPanel<T> extends Panel {
 
 	/**
 	 * the 'otherSpecifyStyle' indicates if we want a textfield to 
-	 * appear when 'Other' is selected,  If this is try
+	 * appear when 'Other' is selected,  If this is trur
 	 * we will want to send actionEvents to the listeners
 	 * @param otherSpecifyStyle
 	 */
@@ -335,8 +359,9 @@ public class CheckboxesPanel<T> extends Panel {
 		// if everything is unchecked, search for an item
 		// that matches the string and select it
 		for ( CheckableWrapper checkWrapper : items ) {
-			// System.out.println ("examining " + checkWrapper.getName());
+			System.out.println ("examining " + checkWrapper.getName());
 			if ( checkWrapper.getName().equalsIgnoreCase(selection)) {
+				System.out.println ("SETTING " + checkWrapper.getName());
 				checkWrapper.setSelected(true);
 				return(true);
 			}

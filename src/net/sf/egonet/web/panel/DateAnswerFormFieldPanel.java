@@ -34,12 +34,18 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private boolean useHours;
 	private boolean useMinutes;
 	
-	private Integer   theYear;
-	private String    theMonth;
-	private Integer   theDay;
-	private Integer   theHour;
-	private Integer   theMinute;
-	private String    amHour;
+	
+	private String   theYear;
+	private String   theMonth;
+	private String   theDay;
+	private String   theHour;
+	private String   theMinute;
+	private String   amHour;
+	
+	private int yearValue; // int values of corresponding strings
+	private int dayValue;
+	private int hourValue;
+	private int minuteValue;
 	
 	private TextField inputYear;
 	private DropDownChoice inputMonth;
@@ -84,11 +90,11 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		StringTokenizer strk;
 		String strAmPm;
 		
-		theYear = new Integer(0);
+		theYear = "";
 		theMonth = "Jan";
-		theDay = new Integer(0);
-		theHour = new Integer(0);
-		theMinute = new Integer(0);
+		theDay = "";
+		theHour = "";
+		theMinute = "";
 		amHour = "AM";
 		
 		if ( strDate!=null && strDate.length()>0 ) {
@@ -96,34 +102,14 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 			iTokens =  strk.countTokens();
 			if ( iTokens>0 )  // Month
 				theMonth = strk.nextToken();
-			if ( iTokens>1 ) { // day in the month
-				try {
-					theDay = new Integer(strk.nextToken());
-				} catch ( NumberFormatException nfe1 ) {
-					theDay = new Integer(0);
-				}
-			}
-			if ( iTokens>2 ) { //year
-				try { 
-					theYear = new Integer(strk.nextToken());
-				} catch ( NumberFormatException nfe2 ) {
-					theYear = new Integer(0);
-				}
-			}
-			if ( iTokens>3 ) { // hour
-				try {
-					theHour = new Integer(strk.nextToken());
-				} catch ( NumberFormatException nfe3 ) {
-					theHour = new Integer(0);
-				}
-			}
-			if ( iTokens>4 ) { // minute
-				try {
-					theMinute = new Integer(strk.nextToken());
-				} catch ( NumberFormatException nfe4 ) {
-					theMinute = new Integer(0);
-				}
-			}
+			if ( iTokens>1 )  // day in the month
+				theDay = strk.nextToken();
+			if ( iTokens>2 )  //year
+				theYear = strk.nextToken();
+			if ( iTokens>3 )  // hour
+				theHour = strk.nextToken();
+			if ( iTokens>4 )  // minute
+				theMinute = strk.nextToken();
 			if ( iTokens>5 ) { // AM / PM
 				strAmPm = strk.nextToken();
 				if ( strAmPm.trim().equalsIgnoreCase("PM") ||
@@ -146,21 +132,7 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private String calendarToString() {
 		String strDate = new String();
 		
-//		if ( useHours ) 
-//			strDate += theHour;
-//		if ( useHours && useMinutes )
-//			strDate += ":";
-//		if ( useMinutes )
-//			strDate += theMinute;
-//		if  (useHours)
-//			strDate += " " + amHour;
-//		if ( useMonths )
-//			strDate += " " + theMonth;
-//		if ( useDays )
-//			strDate += " " + theDay;
-//		if ( useYears )
-//			strDate += " " + theYear;
-		strDate = String.format ("%s %d %d %d:%d %s", theMonth, theDay, theYear,
+		strDate = String.format ("%s %s %s %s:%s %s", theMonth, theDay, theYear,
 				theHour, theMinute, amHour);
 		return(strDate);
 	}
@@ -175,12 +147,12 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		useHours   = ((iTimeUnits & TimeSpanAnswerFormFieldPanel.BIT_HOUR)>0 )   ? true : false;
 		useMinutes = ((iTimeUnits & TimeSpanAnswerFormFieldPanel.BIT_MINUTE)>0 ) ? true : false;
 		
-		inputYear  = new TextField ("Year", new PropertyModel(this, "theYear"), Integer.class);
+		inputYear  = new TextField ("Year", new PropertyModel(this, "theYear"), String.class);
 		inputMonth = new DropDownChoice("Month", new PropertyModel(this,"theMonth"), MONTHS);
 		add(inputMonth);
-		inputDay    = new TextField("Day", new PropertyModel(this,"theDay"), Integer.class);
-	    inputHour   = new TextField("Hour", new PropertyModel(this,"theHour"), Integer.class);
-	    inputMinute = new TextField("Minute", new PropertyModel(this,"theMinute"), Integer.class);
+		inputDay    = new TextField("Day", new PropertyModel(this,"theDay"), String.class);
+	    inputHour   = new TextField("Hour", new PropertyModel(this,"theHour"), String.class);
+	    inputMinute = new TextField("Minute", new PropertyModel(this,"theMinute"), String.class);
 	    radioAmPm = new RadioChoice ("ampm", new PropertyModel(this, "amHour"), AM_PM);
 	    
 		add(inputMinute);
@@ -240,48 +212,104 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		if ( dontKnow() || refused())
 			return(strNotification);
 		if ( useYears ) {
-			if ( theYear < 1000 )
+			theYear = theYear.trim();
+			try { yearValue = Integer.parseInt(theYear);
+			} catch ( NumberFormatException nfeYear) {
+				yearValue = 1000;
+				strNotification += " Non-digits in year field";
+			}
+			if ( yearValue < 1000 )
 				strNotification += "Year too low ";
-			if ( theYear > 9999 ) 
+			if ( yearValue > 9999 ) 
 				strNotification += "Year too high ";
 		}
 		if ( useDays ) {
-			if ( theDay<1 )
+			theDay = theDay.trim();
+			try { dayValue = Integer.parseInt(theDay);
+			} catch ( NumberFormatException nfeDay) {
+				dayValue = 1;
+				strNotification += " Non-digits in day field";
+			}
+			if ( dayValue<1 )
 				strNotification += "Day too low ";
-			if (theDay>31 )
+			if (dayValue>31 )
 				strNotification += "Day too high ";
 		}
 		if ( useHours ) {
-			if ( theHour>12 )
-				strNotification += "Hour too high ";
-			if ( theHour<1 )
+			theHour = theHour.trim();
+			try { hourValue = Integer.parseInt(theHour);
+			} catch ( NumberFormatException nfeHour) {
+				hourValue = 1;
+				strNotification += " Non-digits in hour field";
+			}
+			if ( hourValue<1 )
 				strNotification += "Hour too low ";
+			if ( hourValue>12 )
+				strNotification += "Hour too high ";
 		}
 		if ( useMinutes ) {
-			if ( theMinute>59 )
-				strNotification += "Minute too high ";
-			if ( theMinute<0 )
+			theMinute = theMinute.trim();
+			try { minuteValue = Integer.parseInt(theMinute);
+			} catch ( NumberFormatException nfeMinute ) {
+				minuteValue = 1;
+				strNotification += " Non-digits in minute field";
+			}
+			if ( minuteValue<0 )
 				strNotification += "Minute too low ";
+			if ( minuteValue>59 )
+				strNotification += "Minute too high ";
 		}
 		return(strNotification);
 	}
 	
 	/** 
 	 * if the user selected dontKnow or refused to answer a question
-	 * don't bother counting the responses.
+	 * don't bother checking the responses.
 	 */
 	public boolean rangeCheckOkay() {
 		
 		if ( dontKnow() || refused())
 			return (true);
-		if ( useYears && ( theYear < 1000 || theYear > 9999 )) 
-			return(false);
-		if ( useDays && (theDay<1 || theDay>31 ))
-			return(false);
-		if ( useHours && (theHour<1 || theHour>12 ))
-			return(false);
-		if ( useMinutes && (theMinute<0 || theMinute>59 ))
-			return(false);
+		if ( useYears ) {
+			theYear = theYear.trim();
+			try { yearValue = Integer.parseInt(theYear);
+			} catch ( NumberFormatException nfeYear) {
+				yearValue = 1000;
+				return(false);
+			}
+			if ( yearValue < 1000 || yearValue > 9999 ) 
+				return(false);
+		}
+		if ( useDays ) {
+			theDay = theDay.trim();
+			try { dayValue = Integer.parseInt(theDay);
+			} catch ( NumberFormatException nfeDay) {
+				dayValue = 1;
+				return(false);
+			}
+			if ( dayValue<1 || dayValue>31 )
+				return(false);
+		}
+		if ( useHours ) {
+			theHour = theHour.trim();
+			try { hourValue = Integer.parseInt(theHour);
+			} catch ( NumberFormatException nfeHour) {
+				hourValue = 1;
+				return(false);
+			}
+			if ( hourValue<1 || hourValue>12 )
+				return(false);
+		}
+		if ( useMinutes ) {
+			theMinute = theMinute.trim();
+			try { minuteValue = Integer.parseInt(theMinute);
+			} catch ( NumberFormatException nfeMinute ) {
+				minuteValue = 1;
+				return(false);
+			}
+			if ( minuteValue<0 || minuteValue>59 )
+				return(false);
+		}
 		return(true);
 	}
 	
@@ -289,30 +317,30 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		return (calendarToString());
 	}
 	
-	public void setTheYear ( Integer theYear ) {
-		this.theYear = (theYear==null)?new Integer(0) : theYear;
+	public void setTheYear ( String theYear ) {
+		this.theYear = (theYear==null) ? "" : theYear;
 	}
-	public Integer getTheYear() { return (theYear);}
+	public String getTheYear() { return (theYear);}
 	
 	public void setTheMonth ( String theMonth ) {
 		this.theMonth = (theMonth==null) ? "Jan" : theMonth;
 	}
 	public String getTheMonth() { return (theMonth);}
 	
-	public void setTheDay ( Integer theDay ) {
-		this.theDay = (theDay==null)?new Integer(0) : theDay;
+	public void setTheDay ( String theDay ) {
+		this.theDay = (theDay==null) ? "" : theDay;
 	}
-	public Integer getTheDay() { return (theDay);}
+	public String getTheDay() { return (theDay);}
 	
-	public void setTheHour ( Integer theHour ) {
-		this.theHour = (theHour==null)?new Integer(0) : theHour;
+	public void setTheHour ( String theHour ) {
+		this.theHour = (theHour==null) ? "" : theHour;
 	}
-	public Integer getTheHour() { return (theHour);}
+	public String getTheHour() { return (theHour);}
 	
-	public void setTheMinute ( Integer theMinute ) {
-		this.theMinute = (theMinute==null)?new Integer(0) : theMinute;
+	public void setTheMinute ( String theMinute ) {
+		this.theMinute = (theMinute==null)? "" : theMinute;
 	}
-	public Integer getTheMinute() { return (theMinute);}
+	public String getTheMinute() { return (theMinute);}
 	
 	public void setAmHour ( String amHour ) {
 		this.amHour = (amHour==null) ? "AM" : amHour;

@@ -28,12 +28,18 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private boolean useDays;
 	private boolean useHours;
 	private boolean useMinutes;
-	private Integer years;
-	private Integer months;
-	private Integer weeks;
-	private Integer days;
-	private Integer hours;
-	private Integer minutes;
+	private String years;
+	private String months;
+	private String weeks;
+	private String days;
+	private String hours;
+	private String minutes;
+	private int yearsValue;
+	private int monthsValue;
+	private int weeksValue;
+	private int daysValue;
+	private int hoursValue;
+	private int minutesValue;
 	private TextField inputYears;
 	private TextField inputMonths;
 	private TextField inputWeeks;
@@ -72,14 +78,14 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private boolean stringToTimeSpan( String strTimeSpan ) {
 		boolean okay = true;
 		String[] strWords;
-		int iValue = 0;
+		String strValue = "";
 
-		years = new Integer(0);
-		months = new Integer(0);
-		weeks = new Integer(0);
-		days = new Integer(0);
-		hours = new Integer(0);
-		minutes = new Integer(0);
+		years = "";
+		months = "";
+		weeks = "";
+		days = "";
+		hours = "";
+		minutes = "";
 		
 		strTimeSpan = strTimeSpan.trim();
 		if ( strTimeSpan==null || strTimeSpan.length()==0 )
@@ -88,30 +94,25 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		strWords = strTimeSpan.split(" ");
 		for ( String str : strWords ) {
 			if ( str.equalsIgnoreCase("years")) {
-				years = new Integer(iValue);
-				iValue = 0;
+				years = strValue;
+				strValue = "";
 			} else if ( str.equalsIgnoreCase("months")) {
-				months = new Integer(iValue);
-				iValue = 0;
+				months = strValue;
+				strValue = "";
 			} else if ( str.equalsIgnoreCase("weeks")) {
-				weeks = new Integer(iValue);
-				iValue = 0;
+				weeks = strValue;
+				strValue = "";
 			} else if ( str.equalsIgnoreCase("days")) {
-				days = new Integer(iValue);
-				iValue = 0;
+				days = strValue;
+				strValue = "";
 			} else if ( str.equalsIgnoreCase("hours")) {
-				hours = new Integer(iValue);
-				iValue = 0;
+				hours = strValue;
+				strValue = "";
 			} else if ( str.equalsIgnoreCase("minutes")) {
-				minutes = new Integer(iValue);
-				iValue = 0;
+				minutes = strValue;
+				strValue = "";
 			} else {
-				try {
-					iValue = Integer.parseInt(str);
-				} catch ( NumberFormatException nfe ) {
-					okay = false;
-					iValue = 0;
-				}
+				strValue = str;
 			}
 		}
 	return(okay);
@@ -125,17 +126,17 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private String timeSpanToString() {
 		String strResult = "";
 		
-		if ( useYears && years!=null && years.intValue()>0 )
+		if ( useYears && years!=null )
 			strResult += " " + years + " years";
-		if ( useMonths && months!=null && months.intValue()>0 )
+		if ( useMonths && months!=null )
 			strResult += " " + months + " months";
-		if ( useWeeks && weeks!=null && weeks.intValue()>0 )
+		if ( useWeeks && weeks!=null )
 			strResult += " " + weeks + " weeks";
-		if ( useDays && days!=null && days.intValue()>0 )
+		if ( useDays && days!=null )
 			strResult += " " + days + " days";	
-		if ( useHours && hours!=null && hours.intValue()>0 )
+		if ( useHours && hours!=null )
 			strResult += " " + hours + " hours";
-		if ( useMinutes && minutes!=null && minutes.intValue()>0 )
+		if ( useMinutes && minutes!=null )
 			strResult += " " + minutes + " minutes";
 		strResult += " ";
 		return(strResult);
@@ -151,12 +152,12 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		useHours   = ((iTimeUnits & BIT_HOUR)>0 )   ? true : false;
 		useMinutes = ((iTimeUnits & BIT_MINUTE)>0 ) ? true : false;
 		
-		inputYears   = new TextField("Years",   new PropertyModel(this,"years"), Integer.class);
-		inputMonths  = new TextField("Months",  new PropertyModel(this,"months"), Integer.class);	
-		inputWeeks   = new TextField("Weeks",   new PropertyModel(this,"weeks"), Integer.class);		
-		inputDays    = new TextField("Days",    new PropertyModel(this,"days"), Integer.class);
-	    inputHours   = new TextField("Hours",   new PropertyModel(this,"hours"), Integer.class);
-	    inputMinutes = new TextField("Minutes", new PropertyModel(this,"minutes"), Integer.class);
+		inputYears   = new TextField("Years",   new PropertyModel(this,"years"), String.class);
+		inputMonths  = new TextField("Months",  new PropertyModel(this,"months"), String.class);	
+		inputWeeks   = new TextField("Weeks",   new PropertyModel(this,"weeks"), String.class);		
+		inputDays    = new TextField("Days",    new PropertyModel(this,"days"), String.class);
+	    inputHours   = new TextField("Hours",   new PropertyModel(this,"hours"), String.class);
+	    inputMinutes = new TextField("Minutes", new PropertyModel(this,"minutes"), String.class);
 
 		add(inputMinutes);
 		add(inputHours);	
@@ -226,20 +227,94 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return(strNotification);
-		if ( useYears && years>0)
-			++nonZeroCount;
-		if ( useMonths && months>0)
-			++nonZeroCount;
-		if ( useWeeks && weeks>0)
-			++nonZeroCount;
-		if ( useDays && days>0)
-			++nonZeroCount;
-		if ( useHours && hours>0)
-			++nonZeroCount;
-		if ( useMinutes && minutes>0)
-			++nonZeroCount;
+		
+		yearsValue = 0;
+		monthsValue = 0;
+		weeksValue = 0;
+		daysValue = 0;
+		hoursValue = 0;
+		minutesValue = 0;
+		
+		if ( useYears ) {
+			years = years.trim();
+		    if ( years.length()>0 ) {
+			    try { yearsValue = Integer.parseInt(years);
+		        } catch ( NumberFormatException nfeYears ) { 
+			        yearsValue = 0;
+			        strNotification += " non-digits in years";
+		        }
+		    if( yearsValue>0 )
+			    ++nonZeroCount;
+		    }
+		}
+		
+		if ( useMonths ) {
+			months = months.trim();
+		    if ( months.length()>0 ) {
+		    	try { monthsValue = Integer.parseInt(months);
+		    	} catch ( NumberFormatException nfeMonths ) {
+			        yearsValue = 0;
+			        strNotification += " non-digits in months";
+		    	}
+		    if ( monthsValue>0 )
+		    	++nonZeroCount;
+		    }
+		}
+	
+		if ( useWeeks ) {
+			weeks = weeks.trim();
+			if ( weeks.length()>0 ) {
+				try { weeksValue = Integer.parseInt(weeks);
+				} catch ( NumberFormatException nfeWeeks ) {
+			        yearsValue = 0;
+			        strNotification += " non-digits in weeks";
+				}
+			if ( weeksValue>0 )
+				++nonZeroCount;
+			}
+		}
+			
+		if ( useDays ) {
+			days = days.trim();
+			if ( days.length()>0 ) {
+				try { daysValue = Integer.parseInt(days);
+				} catch ( NumberFormatException nfeDays ) {
+			        yearsValue = 0;
+			        strNotification += " non-digits in days";
+				}
+			if ( daysValue>0 )
+				++nonZeroCount;
+			}
+		}
+
+		if ( useHours ) {
+			hours = hours.trim();
+			if ( hours.length()>0 ) {
+				try { hoursValue = Integer.parseInt(hours);
+				} catch ( NumberFormatException nfeHours ) {
+			        yearsValue = 0;
+			        strNotification += " non-digits in hours";
+				}
+			if ( hoursValue>0 )
+				++nonZeroCount;
+			}
+		}
+		
+		if ( useMinutes ) {
+			minutes = minutes.trim();
+			if ( minutes.length()>0 ) {
+				try { minutesValue = Integer.parseInt(minutes);
+				} catch ( NumberFormatException nfeMinutes ) {
+			        yearsValue = 0;
+			        strNotification += " non-digits in minutes";
+				}
+			if ( minutesValue>0 )
+				++nonZeroCount;
+			}
+		}
+
 		if (nonZeroCount==0)
-			strNotification = "Cannot leave all fields zero.";
+			strNotification += " Cannot leave all fields zero.";
 		return(strNotification);
 	}
 	
@@ -254,52 +329,120 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		
 		if ( dontKnow() || refused())
 			return (true);
-		if ( useYears && years>0)
-			++nonZeroCount;
-		if ( useMonths && months>0)
-			++nonZeroCount;
-		if ( useWeeks && weeks>0)
-			++nonZeroCount;
-		if ( useDays && days>0)
-			++nonZeroCount;
-		if ( useHours && hours>0)
-			++nonZeroCount;
-		if ( useMinutes && minutes>0)
-			++nonZeroCount;
+		
+		yearsValue = 0;
+		monthsValue = 0;
+		weeksValue = 0;
+		daysValue = 0;
+		hoursValue = 0;
+		minutesValue = 0;
+		
+		if ( useYears ) {
+			years = years.trim();
+		    if ( years.length()>0 ) {
+			    try { yearsValue = Integer.parseInt(years);
+		        } catch ( NumberFormatException nfeYears ) { 
+			        return(false);
+		        }
+		    if( yearsValue>0 )
+			    ++nonZeroCount;
+		    }
+		}
+		
+		if ( useMonths ) {
+			months = months.trim();
+		    if ( months.length()>0 ) {
+		    	try { monthsValue = Integer.parseInt(months);
+		    	} catch ( NumberFormatException nfeMonths ) {
+		    		return(false);
+		    	}
+		    if ( monthsValue>0 )
+		    	++nonZeroCount;
+		    }
+		}
+	
+		if ( useWeeks ) {
+			weeks = weeks.trim();
+			if ( weeks.length()>0 ) {
+				try { weeksValue = Integer.parseInt(weeks);
+				} catch ( NumberFormatException nfeWeeks ) {
+					return(false);
+				}
+			if ( weeksValue>0 )
+				++nonZeroCount;
+			}
+		}
+			
+		if ( useDays ) {
+			days = days.trim();
+			if ( days.length()>0 ) {
+				try { daysValue = Integer.parseInt(days);
+				} catch ( NumberFormatException nfeDays ) {
+					return(false);
+				}
+			if ( daysValue>0 )
+				++nonZeroCount;
+			}
+		}
+
+		if ( useHours ) {
+			hours = hours.trim();
+			if ( hours.length()>0 ) {
+				try { hoursValue = Integer.parseInt(hours);
+				} catch ( NumberFormatException nfeHours ) {
+					return(false);
+				}
+			if ( hoursValue>0 )
+				++nonZeroCount;
+			}
+		}
+		
+		if ( useMinutes ) {
+			minutes = minutes.trim();
+			if ( minutes.length()>0 ) {
+				try { minutesValue = Integer.parseInt(minutes);
+				} catch ( NumberFormatException nfeMinutes ) {
+					return(false);
+				}
+			if ( minutesValue>0 )
+				++nonZeroCount;
+			}
+		}
+
 		if (nonZeroCount==0)
 			return(false);
 		return(true);
 	}
 
-	public void setYears ( Integer years ) {
-		this.years = (years==null) ? new Integer(0) : years;
+	public void setYears ( String years ) {
+		this.years = (years==null) ? "" : years;
 	}
-	public Integer getYears() { return(years);}
+	public String getYears() { return(years);}
 	
-	public void setMonths ( Integer months ) {
-		this.months = (months==null) ? new Integer(0) : months;
+	public void setMonths ( String months ) {
+		this.months = (months==null) ? "" : months;
 	}
-	public Integer getMonths() { return(months);}
+	public String getMonths() { return(months);}
 	
-	public void setWeeks ( Integer weeks ) {
-		this.weeks = (weeks==null) ? new Integer(0) : weeks;
+	public void setWeeks ( String weeks ) {
+		this.weeks = (weeks==null) ? "" : weeks;
 	}
-	public Integer getWeeks() { return(weeks);}
+	public String getWeeks() { return(weeks);}
 	
-	public void setDays ( Integer days ) {
-		this.days = (days==null) ? new Integer(0) : days;
+	public void setDays ( String days ) {
+		this.days = (days==null) ? "" : days;
 	}
-	public Integer getDays() { return(days); }
+	public String getDays() { return(days); }
 
-	public void setHours ( Integer hours ) {
-		this.hours = (hours==null) ? new Integer(0) : hours;
+	public void setHours ( String hours ) {
+		this.hours = (hours==null) ? "" : hours;
 	}
-	public Integer getHours() { return(hours); }
+	public String getHours() { return(hours); }
 	
-	public void setMinutes ( Integer minutes ) {
-		this.minutes = (minutes==null) ? new Integer(0) : minutes;
+	public void setMinutes ( String minutes ) {
+		this.minutes = (minutes==null) ? "" : minutes;
 	}
-	public Integer getMinutes() { return(minutes); 
+	public String getMinutes() { return(minutes); 
 	}	
 	public void setAutoFocus() {
 		if (inputMinutes.isVisible()) {
