@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import net.sf.egonet.web.component.FocusOnLoadBehavior;
-
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -167,17 +166,18 @@ public class CheckboxesPanel<T> extends Panel {
 				 }};
 				 
 				// vertical lists of less than 10 items will have numeric hotkeys 
-				if ( items.size() >= 10 ) { 
+				if (items.size() >= 10  ) { 
 				    checkBox.add( new SimpleAttributeModifier("onfocus","doOnFocusVert(this);"));
 				    checkBox.add( new SimpleAttributeModifier("onblur", "doOnBlur(this);"));
 				    checkBox.add( new SimpleAttributeModifier("onkeyup","doOnKeyUpVert(event);")); 
 				}
 				// this was an attempt to remove the 'hotkey' class from
 				// Don't know and Refuse checkboxes.
-				// it didn't work
-				// if ( wrapper.getName().equals(Answer.SkipReason.DONT_KNOW) ||
-				//      wrapper.getName().equals(Answer.SkipReason.REFUSE)) {
-				// 	checkBox.add( new SimpleAttributeModifier("class",""));
+				// it didn't work - the hotkey action was removed, but
+				// the number in parenthesis remained in the label
+				// if ( wrapper.getName().equals(AnswerFormFieldPanel.dontKnow) ||
+				//       wrapper.getName().equals(AnswerFormFieldPanel.refuse)) {
+				//  	checkBox.add( new SimpleAttributeModifier("class",""));
 				// }
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&

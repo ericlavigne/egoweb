@@ -46,6 +46,7 @@ public class InterviewingPanel extends Panel {
 
 	private void build() {
 		String strPrompt;
+		String strSkipReason;
 		
 		ArrayList<Alter> altersInPrompt = Lists.newArrayList();
 		if(answerFields.size() < 2 && ! answerFields.isEmpty()) {
@@ -85,6 +86,14 @@ public class InterviewingPanel extends Panel {
 		
 		ArrayList<String> allOptions = Lists.newArrayList();
 		ArrayList<String> selectedOptions = Lists.newArrayList(); // TODO: populate this
+		strSkipReason = AnswerFormFieldPanel.getSkipReasonForListOfAlters(answerFields);
+		if ( strSkipReason.equals(dontKnow))  {
+			selectedOptions.add(dontKnow);
+		} else if ( strSkipReason.equals(refuse)) {
+			selectedOptions.add(refuse);
+		} else if ( strSkipReason.equals(none)) {
+			selectedOptions.add(none);
+		}
 		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION) &&
 		   question.getNoneButton()) {
 			allOptions.add(none);
@@ -97,6 +106,7 @@ public class InterviewingPanel extends Panel {
 		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
 		add(refDKCheck);
 	
+		
 // ==========================================================================
 // we may want buttons instead of checkboxs for Don't know and Refuse
 //	    Button btnDontKnow = new Button("btnDontKnow") {

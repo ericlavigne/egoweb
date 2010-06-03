@@ -43,6 +43,7 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		setOtherText("");
 		setHorizontalLayout ( question.getAskingStyleList());
 		build();
+		setFirstTimeOnQuestion(true);
 	}
 	
 	public MultipleSelectionAnswerFormFieldPanel(String id, 

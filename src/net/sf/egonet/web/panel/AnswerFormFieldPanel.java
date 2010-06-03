@@ -21,7 +21,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	protected final Answer.SkipReason originalSkipReason;
 	
 	private Label notification;
-	
+    private boolean firstTimeOnQuestion; // ad-hoc to list-of-alters 'none' option
+    
 	public final static String dontKnow = "Don't know";
 	public final static String refuse = "Refuse";
 	public final static String none = "None";
@@ -41,6 +42,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		this.interviewId = interviewId;
 		notification = new Label("notification","");
 		add(notification);
+		firstTimeOnQuestion = false;
 	}
 	
 	public void setNotification(String text) {
@@ -425,4 +427,61 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		return(iCount);
 	}
 
+	/**
+	 * this will be used in the list-of-alters page to (optionally) select
+	 * one of the 'global' checkboxes at the bottom of the panel
+	 * @param panels - collection of answer panels, one for each alter of interest
+	 * @return if ALL of the answers have a certain skip-reason, a string indicating
+	 * which skip-reason is unanymouse among the answers
+	 */
+	public static String getSkipReasonForListOfAlters( Collection<AnswerFormFieldPanel> panels) {
+		int[] histoGram = new int[5];
+		int ix;
+	    boolean firstTime = true;
+	    
+		for ( ix=0 ; ix<histoGram.length ; ++ix ) {
+			histoGram[0] =0;
+		}
+		
+		for ( AnswerFormFieldPanel panel : panels ) {
+			if ( !panel.firstTimeOnQuestion)
+				firstTime = false;
+			if ( panel.originalSkipReason == null ) {
+				++histoGram[0];
+			} else {
+				switch ( panel.originalSkipReason ) {
+				    case NONE:      ++histoGram[1]; break;
+				    case REFUSE:    ++histoGram[2]; break;
+				    case DONT_KNOW: ++histoGram[3]; break;
+				    default:        ++histoGram[4]; break;
+				}
+			}
+		}
+		// System.out.println ("     NULL skips = " + histoGram[0]);
+		// System.out.println ("     NONE skips = " + histoGram[1]);
+		// System.out.println ("   REFUSE skips = " + histoGram[2]);
+		// System.out.println ("DONT_KNOW skips = " + histoGram[3]);
+		// System.out.println ("          Other = " + histoGram[4]);
+		if ( histoGram[1] == panels.size()  &&  !firstTime )
+		    return(none);
+		if ( histoGram[2] == panels.size())
+			return(refuse);
+		if ( histoGram[3] == panels.size())
+			return(dontKnow);
+		return("");
+	}
+	
+	/**
+	 * the firstTimeOnQuestion variable is a flag that helps with the 
+	 * page level None checkbox.  If all the questions have a skip reason of
+	 * None we want the none checkbox checked, but *NOT* on the first time through.
+	 * The first time the question is asked we want surveyers to explicitly choose it
+	 * if its appropriate.  After that it can be checked by default if thats appropriate.
+	 * firstTimeOnQuestion is false by default, it is explicitly set to true by constructors
+	 * that have no prior answer data.
+	 * @param firstTimeOnQuestion
+	 */
+	protected void setFirstTimeOnQuestion ( boolean firstTimeOnQuestion ) {
+		this.firstTimeOnQuestion = firstTimeOnQuestion;
+	}
 }

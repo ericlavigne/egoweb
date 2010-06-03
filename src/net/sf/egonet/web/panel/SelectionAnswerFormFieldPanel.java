@@ -74,6 +74,7 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		this.answer = new Model();
 		otherSpecifyText = "";
 		build();
+		setFirstTimeOnQuestion(true);
 	}
 	
 	public SelectionAnswerFormFieldPanel(String id, 
