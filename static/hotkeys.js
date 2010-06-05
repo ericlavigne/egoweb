@@ -38,6 +38,7 @@ function applyPageChangesForHotkeys() {
 	});
 }
 
+
 jQuery(document).ready(function(){
 	// Only do hotkeys if we have enough keys for all.
 	if(jQuery('span.hotkey').length < 10) {
@@ -48,6 +49,8 @@ jQuery(document).ready(function(){
 			{
 				jQuery("input.hotkey").each(function(i) {
 					if(i == event.keyCode - 49) {
+						//jQuery(this).addClass("loaHiliteItem");
+						jQuery(this).focus();
 						jQuery(this).click();
 						jQuery(this).triggerHandler('click');
 					}
@@ -59,3 +62,10 @@ jQuery(document).ready(function(){
 	}
 });
 
+function addHilite(cbox) {
+   jQuery(cbox).addClass("loaHiliteItem");
+}
+
+function remHilite(cbox) {
+    jQuery(cbox).removeClass("loaHiliteItem");
+}

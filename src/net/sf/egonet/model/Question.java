@@ -563,4 +563,9 @@ public class Question extends OrderedEntity
 	public String conditionalTextInsertion ( String strPrompt, Long interviewId, ArrayList<Alter> listOfAlters ) {
 		return ( TextInsertionUtil.conditionalTextInsertion(strPrompt, interviewId, type, studyId, listOfAlters ));
 	}
+	
+	public String escapeTextInsertionTags ( String strInput ) { 
+	    return ( TextInsertionUtil.escapeTextInsertionTags ( strInput ));
+	}
+	
 }

@@ -170,6 +170,9 @@ public class CheckboxesPanel<T> extends Panel {
 				    checkBox.add( new SimpleAttributeModifier("onfocus","doOnFocusVert(this);"));
 				    checkBox.add( new SimpleAttributeModifier("onblur", "doOnBlur(this);"));
 				    checkBox.add( new SimpleAttributeModifier("onkeyup","doOnKeyUpVert(event);")); 
+				} else {
+					checkBox.add( new SimpleAttributeModifier("onfocus","addHilite(this);"));
+					checkBox.add( new SimpleAttributeModifier("onblur", "remHilite(this);"));
 				}
 				// this was an attempt to remove the 'hotkey' class from
 				// Don't know and Refuse checkboxes.

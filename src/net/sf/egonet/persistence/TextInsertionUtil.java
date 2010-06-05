@@ -1198,11 +1198,11 @@ public class TextInsertionUtil {
 		// those that are inside the tag
 		if ( strInput.startsWith("<")) {
 			strInput = strInput.substring(1);
-			strInput = "&lt;" + strInput;
+			strInput = "[" + strInput;
 		}
 		if ( strInput.endsWith(">")) {
 			strInput = strInput.substring(0,strInput.length()-1);
-			strInput += "&gt;";
+			strInput += "]";
 		}
 		strInput = strInput.replaceAll("<", "&lt;");
 		strInput = strInput.replaceAll(">", "&gt;");

@@ -58,7 +58,6 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private Label lblMonth;
 	private Label lblDay;
 	private Label lblHour;
-	private Label lblMinute;
 	
 	private CheckboxesPanel<String> refDKCheck;
 	
@@ -154,7 +153,10 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	    inputHour   = new TextField("Hour", new PropertyModel(this,"theHour"), String.class);
 	    inputMinute = new TextField("Minute", new PropertyModel(this,"theMinute"), String.class);
 	    radioAmPm = new RadioChoice ("ampm", new PropertyModel(this, "amHour"), AM_PM);
-	    
+	    radioAmPm.setPrefix("<span style=\"white-space:nowrap;\">");
+	    radioAmPm.setSuffix(
+				"</span><span style=\"whitespace:pre-wrap; color:#ffffff\"> . . </span>");
+		
 		add(inputMinute);
 		add(inputHour);
 		add(radioAmPm);
@@ -162,16 +164,14 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		add(inputMonth);
 	    add(inputYear);
 	    
-		lblYear   = new Label("lblYear", "Year");
+		lblYear   = new Label("lblYear", "Year (YYYY)");
 		lblMonth  = new Label("lblMonth", "Month");
-		lblDay    = new Label("lblDay", "Day");
-		lblHour   = new Label("lblHour", "Hour");
-		lblMinute = new Label("lblMinute", "Minute");
+		lblDay    = new Label("lblDay", "Day (1-31)");
+		lblHour   = new Label("lblHour", "Time (HH:MM)");
 		add(lblYear);
 		add(lblMonth);
 		add(lblDay);
 		add(lblHour);
-		add(lblMinute);
 		
 		inputYear.setVisible(useYears);
 		lblYear.setVisible(useYears);
@@ -183,7 +183,6 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		lblHour.setVisible(useHours);	
 		radioAmPm.setVisible(useHours);
 		inputMinute.setVisible(useMinutes);
-		lblMinute.setVisible(useMinutes);
 		
 		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
 		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
@@ -349,14 +348,14 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	
 	public void setAutoFocus() {
+		if (inputHour.isVisible()) {
+			inputHour.add(new FocusOnLoadBehavior());
+			return;
+		}	
 		if (inputMinute.isVisible()) {
 			inputMinute.add(new FocusOnLoadBehavior());
 			return;
 		}
-		if (inputHour.isVisible()) {
-			inputHour.add(new FocusOnLoadBehavior());
-			return;
-		}		
 		if (inputDay.isVisible()) {
 			inputDay.add(new FocusOnLoadBehavior());
 			return;

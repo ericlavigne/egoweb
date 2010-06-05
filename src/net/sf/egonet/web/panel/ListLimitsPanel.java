@@ -79,6 +79,7 @@ public class ListLimitsPanel extends Panel {
 		setOutputMarkupPlaceholderTag(true);
         listLimitsForm = new Form("listLimitsForm");
         listLimitsForm.setOutputMarkupId(true);
+        listLimitsForm.setOutputMarkupPlaceholderTag(true);
         
 	    cbWithListRange = new CheckBox("withListRange", new PropertyModel(this,"withListRange"));
 	    dropListRangeString = new DropDownChoice("listRangeString", 
@@ -86,13 +87,23 @@ public class ListLimitsPanel extends Panel {
 	    txtMinListRange = new TextField("min", new PropertyModel(this,"minListRange"), Integer.class);
 	    txtMaxListRange = new TextField("max", new PropertyModel(this,"maxListRange"), Integer.class);
 
+	    cbWithListRange.setOutputMarkupId(true);
+	    dropListRangeString.setOutputMarkupId(true);
+	    txtMinListRange.setOutputMarkupId(true);
+        txtMaxListRange.setOutputMarkupId(true);
+        
+	    cbWithListRange.setOutputMarkupPlaceholderTag(true);
+	    dropListRangeString.setOutputMarkupPlaceholderTag(true);
+	    txtMinListRange.setOutputMarkupPlaceholderTag(true);
+        txtMaxListRange.setOutputMarkupPlaceholderTag(true);
+        
 	    listLimitsForm.add(cbWithListRange);
 	    listLimitsForm.add(dropListRangeString);
 	    listLimitsForm.add(txtMinListRange);
         listLimitsForm.add(txtMaxListRange);
 	    add(listLimitsForm);
 	}
-	
+		
 	/**
 	 * setters / getters
 	 */

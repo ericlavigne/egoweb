@@ -5,27 +5,24 @@
 <wicket:extend >
     <table>
         <tr>
-        <td><input wicket:id="Minute" type="text" /></td>
-        <td align="left"><label wicket:id="lblMinute">Minute (0-59)</label></td>
-        </tr><tr>
+        <td align="left"><label wicket:id="lblHour">Time (HH:MM)</label></td>
         <td><input wicket:id="Hour" type="text" /></td>
-        <td align="left"><label wicket:id="lblHour">Hour (1-12)</label></td>
-        </tr><tr>
-        <td colspan="2"><span wicket:id="ampm" >
+        <td><input wicket:id="Minute" type="text" /></td>
+        <td><span wicket:id="ampm">
         <input type="radio"> AM </input>
- <!--       <input type="radio"> PM </input> -->
+        <input type="radio"> PM </input>
         </span></td>
         </tr><tr>
+        <td align="right"><label wicket:id="lblDay">Day (1-31)</label></td> 
         <td><input wicket:id="Day" type="text" /></td>
-        <td align="left"><label wicket:id="lblDay">Day (1-31)</label></td> 
         </tr><tr>
+        <td align="right"><label wicket:id="lblMonth">Month</label></td>
         <td><select wicket:id="Month" /></td>
-        <td align="left"><label wicket:id="lblMonth">Month</label></td>
         </tr><tr>
+        <td align="right"><label wicket:id="lblYear">Year (yyyy)</label></td>
         <td><input wicket:id="Year" type="text" /></td>
-        <td align="left"><label wicket:id="lblYear">Year (yyyy)</label></td>
         </tr>
      </table>
-    
+    <br />
 	<span wicket:id="refDKCheck">Refuse and dont know checkboxes</span>
 </wicket:extend>

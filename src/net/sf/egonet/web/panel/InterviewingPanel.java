@@ -57,12 +57,16 @@ public class InterviewingPanel extends Panel {
 		}
 		
 		strPrompt = question.individualizePrompt(altersInPrompt);
-		strPrompt = question.answerCountInsertion(strPrompt, interviewId);
-		strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, altersInPrompt);
-		strPrompt = question.dateDataInsertion(strPrompt, interviewId, altersInPrompt);
-		strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
-		strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
-		strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);
+		if ( interviewId==null ) {
+			strPrompt = question.escapeTextInsertionTags(strPrompt);
+		} else {
+		    strPrompt = question.answerCountInsertion(strPrompt, interviewId);
+		    strPrompt = question.questionContainsAnswerInsertion(strPrompt, interviewId, altersInPrompt);
+		    strPrompt = question.dateDataInsertion(strPrompt, interviewId, altersInPrompt);
+		    strPrompt = question.calculationInsertion(strPrompt, interviewId, altersInPrompt);
+		    strPrompt = question.variableInsertion(strPrompt,interviewId, altersInPrompt);
+		    strPrompt = question.conditionalTextInsertion(strPrompt, interviewId, altersInPrompt);
+		}
 		
 		if ( SimpleLogicMgr.hasError()) {
 			System.out.println ("USE IF error in " + question.getTitle());
