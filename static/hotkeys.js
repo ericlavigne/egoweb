@@ -49,9 +49,12 @@ jQuery(document).ready(function(){
 			{
 				jQuery("input.hotkey").each(function(i) {
 					if(i == event.keyCode - 49) {
-						//jQuery(this).addClass("loaHiliteItem");
 						jQuery(this).focus();
-						jQuery(this).click();
+						if(jQuery(this).attr("type") === "checkbox") {
+							jQuery(this).click();
+						} else {
+							jQuery(this).attr("checked","checked");
+						}
 						jQuery(this).triggerHandler('click');
 					}
 				});

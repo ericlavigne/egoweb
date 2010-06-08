@@ -3,8 +3,11 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.markup.html.form.RadioChoice;
+import org.apache.wicket.markup.html.form.Radio;
+import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.basic.Label;
 
 import org.apache.wicket.model.Model;
@@ -28,30 +31,31 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 * text input box
 	 */
 	
-	private class RadioChoicePlus extends RadioChoice {
+	private class RadioChoicePlus extends RadioGroup {
 		
-		public RadioChoicePlus (String id, Model model, List<Object> theList ) {
-			super(id, model, theList);
+		public RadioChoicePlus (String id, Model model) {
+			super(id, model);
 		}
 		
 		protected void onSelectionChanged(Object newSelection) {
-			String strNewSelection;
+			if(newSelection != null) {
+				String strNewSelection;
+				if ( newSelection instanceof String ) {
+					strNewSelection = (String)newSelection;
+				} else if ( newSelection instanceof QuestionOption ) {
+					strNewSelection = ((QuestionOption)newSelection).getName();
+				} else {
+					strNewSelection = newSelection.toString();
+				}
 			
-			if ( newSelection instanceof String ) {
-				strNewSelection = (String)newSelection;
-			} else if ( newSelection instanceof QuestionOption ) {
-				strNewSelection = ((QuestionOption)newSelection).getName();
-			} else {
-				strNewSelection = newSelection.toString();
-			}
-			
-			if (strNewSelection.trim().startsWith(otherSpecify)) {
-				otherSpecifyLabel.setVisible(true);
-				otherSpecifyTextField.setVisible(true);	
-			} else {
-				setNotification("");
-				otherSpecifyLabel.setVisible(false);
-				otherSpecifyTextField.setVisible(false);
+				if (strNewSelection.trim().startsWith(otherSpecify)) {
+					otherSpecifyLabel.setVisible(true);
+					otherSpecifyTextField.setVisible(true);	
+				} else {
+					setNotification("");
+					otherSpecifyLabel.setVisible(false);
+					otherSpecifyTextField.setVisible(false);
+				}
 			}
 		}
 		
@@ -108,11 +112,22 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		if(! question.getType().equals(Question.QuestionType.EGO_ID)) {
 			choices.addAll(Lists.newArrayList(dontKnow,refuse));
 		}
-		dropDownChoice = new RadioChoicePlus("answer",answer,choices);
-		dropDownChoice.setPrefix("<span style=\"white-space:nowrap;\">");
-		dropDownChoice.setSuffix(
-				"</span><span style=\"whitespace:pre-wrap; color:#ffffff\"> . . </span>");
+		dropDownChoice = new RadioChoicePlus("answer",answer); 
+		ListView options = new ListView("options",choices) {
+			protected void populateItem(ListItem item) {
+				item.add(new Radio("optionInput",item.getModel()));
+				item.add(new Label("optionLabel", 
+						item.getModelObject() instanceof QuestionOption ? 
+								((QuestionOption) item.getModelObject()).getName()
+								: item.getModelObject().toString()));
+			}
+		};
+		options.setReuseItems(true);
+		dropDownChoice.add(options);
 		add(dropDownChoice);
+		
+		
+		
 		// features that will be visible only for
 		// 'other/specify' questions
 		otherSpecifyStyle = question.getOtherSpecify();
