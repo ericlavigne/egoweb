@@ -435,7 +435,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	 * which skip-reason is unanymouse among the answers
 	 */
 	public static String getSkipReasonForListOfAlters( Collection<AnswerFormFieldPanel> panels) {
-		int[] histoGram = new int[5];
+		int[] histoGram = new int[6];
 		int ix;
 	    boolean firstTime = true;
 	    
@@ -450,10 +450,15 @@ public abstract class AnswerFormFieldPanel extends Panel {
 				++histoGram[0];
 			} else {
 				switch ( panel.originalSkipReason ) {
-				    case NONE:      ++histoGram[1]; break;
+				    case NONE:
+				    	 if ( panel.getAnswer()==null || panel.getAnswer().trim().length()==0)
+				    	     ++histoGram[1];
+				    	 else
+				    		 ++histoGram[4];
+				    	 break;
 				    case REFUSE:    ++histoGram[2]; break;
 				    case DONT_KNOW: ++histoGram[3]; break;
-				    default:        ++histoGram[4]; break;
+				    default:        ++histoGram[5]; break;
 				}
 			}
 		}
@@ -461,7 +466,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		// System.out.println ("     NONE skips = " + histoGram[1]);
 		// System.out.println ("   REFUSE skips = " + histoGram[2]);
 		// System.out.println ("DONT_KNOW skips = " + histoGram[3]);
-		// System.out.println ("          Other = " + histoGram[4]);
+		// System.out.println ("       Answered = " + histoGram[4]);
+		// System.out.println ("          Other = " + histoGram[5]);
 		if ( histoGram[1] == panels.size()  &&  !firstTime )
 		    return(none);
 		if ( histoGram[2] == panels.size())

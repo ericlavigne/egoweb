@@ -1198,16 +1198,16 @@ public class TextInsertionUtil {
 		// those that are inside the tag
 		if ( strInput.startsWith("<")) {
 			strInput = strInput.substring(1);
-			strInput = "[" + strInput;
+			strInput = "&lt;" + strInput;
 		}
 		if ( strInput.endsWith(">")) {
 			strInput = strInput.substring(0,strInput.length()-1);
-			strInput += "]";
+			strInput += "&gt;";
 		}
 		strInput = strInput.replaceAll("<", "&lt;");
 		strInput = strInput.replaceAll(">", "&gt;");
-		strInput = strInput.replaceAll("&", "&amp;");
-		strInput = strInput.replaceAll("\"", "&quot");
+		//strInput = strInput.replaceAll("&", "&amp;");
+		//strInput = strInput.replaceAll("\"", "&quot");
 		return(strInput);
 		}
 	
@@ -1218,30 +1218,125 @@ public class TextInsertionUtil {
 	 * @param strInput string to escape
 	 * @return same string, but escaped
 	 */
+//	public static String escapeTextInsertionTags ( String strInput ) {
+//		String[] pattern = { 
+//		"<VAR.*?/>", "<DATE.*?/>", "<CALC.*?/>", "<COUNT.*?/>", "<CONTAINS.*?/>", "<IF.*?/>"};
+//		String[] patternStart = { 
+//		"<VAR", "<DATE", "<CALC", "<COUNT", "<CONTAINS", "<IF"};
+//		String newString;
+//		ArrayList<String> theList;
+//		int ix;
+//		
+//		for ( ix=0 ; ix<pattern.length ; ++ix ) {
+//			theList = parseExpressionList ( strInput, pattern[ix]);
+//			if ( theList != null ) {
+//				newString = "";
+//				for ( String string : theList ) {
+//					if ( string.startsWith(patternStart[ix])) {
+//						newString += " " + replaceLTandGT(string) + " ";
+//					} else {
+//						newString += string;
+//					}
+//				}
+//				strInput = newString;
+//			} // end of if (theList != null )
+//		} // end of for ( ix=0 ...
+//		return(strInput);
+//	}
+	
+	/**
+	 * this will be for 'preview' panels, where we need to display the
+	 * text of a question and its variable insertion tags as-is but
+	 * escaped so they are not interpreted by the HTML functions.
+	 * Also, this will do *some* syntax checking
+	 * @param strInput string to escape
+	 * @return same string, but escaped
+	 */
+	
 	public static String escapeTextInsertionTags ( String strInput ) {
 		String[] pattern = { 
-		"<VAR.*?/>", "<DATE.*?/>", "<CALC.*?/>", "<COUNT.*?/>", "<CONTAINS.*?/>", "<IF.*?/>"};
-		String[] patternStart = { 
-		"<VAR", "<DATE", "<CALC", "<COUNT", "<CONTAINS", "<IF"};
-		String newString;
+				"<VAR.*?/>", "<DATE.*?/>", "<CALC.*?/>", "<COUNT.*?/>", "<CONTAINS.*?/>", "<IF.*?/>"};
+		String[] strStartTag = { 
+				"<VAR", "<DATE", "<CALC", "<COUNT", "<CONTAINS", "<IF"};
+		String[] strStartTagReplacement = {
+				"&lt;VAR ", "&lt;DATE ", "&lt;CALC ", "&lt;COUNT ", "&lt;CONTAINS ", "&lt;IF "};				
+		String strEndTag = "/>";
+		String strEndTagReplacement = " /&gt;";
+		String innerString;
+		String newString = "";
 		ArrayList<String> theList;
 		int ix;
+		
+		if ( strInput==null || strInput.length()==0)
+			return(strInput);
 		
 		for ( ix=0 ; ix<pattern.length ; ++ix ) {
 			theList = parseExpressionList ( strInput, pattern[ix]);
 			if ( theList != null ) {
 				newString = "";
-				for ( String string : theList ) {
-					if ( string.startsWith(patternStart[ix])) {
-						newString += " " + replaceLTandGT(string) + " ";
-					} else {
-						newString += string;
-					}
-				}
-				strInput = newString;
-			} // end of if (theList != null )
-		} // end of for ( ix=0 ...
-		return(strInput);
+		        for ( String string : theList ) {
+			        if ( string.startsWith(strStartTag[ix])) {
+				        innerString = trimPrefixAndSuffix ( string, strStartTag[ix], strEndTag);
+				        innerString = tagSpecificVerification (innerString, ix);
+				        newString += strStartTagReplacement[ix] + innerString + strEndTagReplacement;
+			        } else {
+				        newString += string;
+			        }
+		        }
+		        strInput = newString;
+			}
+		}
+	return(strInput);
+	}
+		
+	/**
+	 * will do (simple) verification of the syntax of specific tags
+	 * @param str string within the start and stop tags ( <VAR ... />
+	 * @param iTagIndex an integer indicating which tag we are verifying.
+	 * look to the inner variables of escapeTextInsertionTags and the
+	 * switch cases statements for explanation
+	 * @return the original string with (optional) warning messages appended.
+	 */
+	private static String tagSpecificVerification (String str, int iTagIndex) {
+		String strReturn = str;
+		String[] innerList;
+		int innerWordCount;
+		
+		innerList = str.trim().split(" ");
+		innerWordCount = innerList.length;
+		
+   	 	if (innerWordCount<1 ) {
+   	 		strReturn += " NO PARAMETER ";
+   	 	} else if (innerWordCount==1 && innerList[0].trim().length()==0 ) {
+   	 		strReturn += " EMPTY ";
+   	 	} else {
+   	 		switch ( iTagIndex ) {
+   	 			case 0: // VAR
+   	 				 if ( innerWordCount>1 ) {
+   	 					strReturn += " TOO MANY PARAMETERS ";
+   	 				 }
+   	 				 break;
+   	 			case 1: // DATE
+   	 				 if ( innerWordCount>3 ) {
+   	 					 strReturn += " TOO MANY PARAMETERS ";
+   	 				 }
+   	 				 break;
+   	 			case 2: // CALC
+   	 				 if ( innerWordCount>3 ) {
+   	 					 strReturn += " TOO MANY PARAMTERS ";
+   	 				 }
+   	 				 break;
+   	 			case 3: // COUNT
+   	 				 break;
+   	 			case 4: // CONTAINS
+   	 				 break;
+   	 			case 5: // IF
+   	 				 break;
+   	 			default:
+   	 				break;
+   	 		}
+		}
+		return(strReturn);
 	}
 }
 
