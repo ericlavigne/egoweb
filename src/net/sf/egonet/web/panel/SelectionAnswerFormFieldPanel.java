@@ -3,6 +3,7 @@ package net.sf.egonet.web.panel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.form.Radio;
 import org.apache.wicket.markup.html.form.RadioGroup;
 import org.apache.wicket.markup.html.form.TextField;
@@ -115,11 +116,36 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		dropDownChoice = new RadioChoicePlus("answer",answer); 
 		ListView options = new ListView("options",choices) {
 			protected void populateItem(ListItem item) {
-				item.add(new Radio("optionInput",item.getModel()));
-				item.add(new Label("optionLabel", 
-						item.getModelObject() instanceof QuestionOption ? 
-								((QuestionOption) item.getModelObject()).getName()
-								: item.getModelObject().toString()));
+				Object obj = item.getModelObject();
+				QuestionOption option = obj instanceof QuestionOption ? (QuestionOption) obj : null;
+				String string = obj instanceof String ? (String) obj : null;
+				Radio radio = new Radio("optionInput",item.getModel());
+				Label label = new Label("optionLabel", option != null ? option.getName() : string);
+				String hotkey = null;
+				if(option != null) {
+					try {
+						Integer intVal = Integer.parseInt(option.getValue());
+						if(intVal > -1 && intVal < 10) {
+							hotkey = intVal+"";
+						}
+					} catch(Exception ex) {
+						
+					}
+				}
+				if(string != null) {
+					if(string.equals(dontKnow)) {
+						hotkey = "f8";
+					}
+					if(string.equals(refuse)) {
+						hotkey = "f9";
+					}
+				}
+				if(hotkey != null) {
+					radio.add(new SimpleAttributeModifier("hotkey",hotkey));
+					label.add(new SimpleAttributeModifier("hotkey",hotkey));
+				}
+				item.add(radio);
+				item.add(label);
 			}
 		};
 		options.setReuseItems(true);
