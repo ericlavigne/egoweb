@@ -4,15 +4,24 @@
 <!-- of the list-of-alters page                        -->
 <!-- KCN May 29 2010                                   -->
 
+// jQuery version 1.4.2 should be loaded before this script.
+
+jQuery.noConflict();
+
 var loaRowList = null;
 var loaColList = null;
 var loaCurrentRow = null;
 var iloaCurrentRow = null;
 var iloaCurrentCol = null;
 var loaInitialized = false;
+var loaCheckBoxes = null;
+var loaLabels = null;
 
 //============================================================
-// loaInitializeHorz
+// loaInitialize
+// needs to be called once per page to initialize the arrays
+// used.  horizontal is a boolean indicating the orientation
+// of the multiple selection questions.
 //============================================================
 
 function loaInitialize(horizontal) {
@@ -21,6 +30,8 @@ function loaInitialize(horizontal) {
 
     if ( !loaInitialized ) {
         loaRowList = new Array();
+        loaCheckBoxes = new Array();
+        loaLabels = new Array(); 
         tempList = document.getElementsByTagName("div");
 
         if ( horizontal ) {
@@ -39,6 +50,38 @@ function loaInitialize(horizontal) {
             }
         }
 
+        // ==============================================
+        // now get the array of input and associated spans
+        // the spans are the labels of the checkboxes.
+        // this is needed to set the background of the 
+        // labels associated with checkboxes, as firefox does
+        // not let you do much with the style of a checkbox
+        // now get array of <input>
+        tempList = document.getElementsByTagName("input");
+        // alert (tempList.length);
+        iy = 0;
+        for ( ix=0 ; ix<tempList.length ; ++ix ) {
+            if ( tempList[ix].className != null  && tempList[ix].className.match("hotkey")) {
+                loaCheckBoxes[iy] = tempList[ix];
+                ++iy;
+             }
+        }
+        // alert(loaCheckBoxes.length);
+        // now get an array of <span> and also limit them
+        // to ones with a className of hotkey.
+        tempList = document.getElementsByTagName("span");
+        // alert (tempList.length);
+        iy = 0;
+        for ( ix=0 ; ix<tempList.length ; ++ix ) {
+            if ( tempList[ix].className != null  && tempList[ix].className.match("hotkey")) {
+                loaLabels[iy] = tempList[ix];
+                ++iy;
+             }
+        }
+        // alert(loaLabels.length);
+
+        //=======================================
+        // lastly, set the initial row and column
         iloaCurrentRow = 0;
         iloaCurrentCol = 0;
         loaCurrentRow = loaRowList[iloaCurrentRow];
@@ -50,6 +93,28 @@ function loaInitialize(horizontal) {
         loaColList[iloaCurrentCol].className = "loaHiliteItem";
     }
     loaInitialized = true;
+}
+
+//===========================================================
+//  loaGetLabelForCheckBox
+//  if cbox is in the array of checkboxes ( loaCheckBoxes )
+//  this will return the corresponding element in the loalabels
+//  array, which *should* be the label associated with it
+//===========================================================
+
+function loaGetLabelForCheckBox ( cbox ) {
+
+    var retLabel = null;
+
+    if ( loaCheckBoxes==null  ||  loaLabels==null )
+        return(retLabel);
+    
+    for ( ix=0 ; ix<loaCheckBoxes.length ; ++ix ) {
+        if ( loaCheckBoxes[ix] == cbox )
+            return (loaLabels[ix]);
+    }
+
+    return (retLabel);
 }
 
 //===========================================================
@@ -121,12 +186,14 @@ function loaFindInColList ( object ) {
 
 //========================================================
 // doOnFocusHorz
+// object parameter will be a checkbox
 //========================================================
 
 function doOnFocusHorz(object) {
 
       var ix;
       var init;
+      var cbLabel;
 
       init = loaInitialized;
       if ( !loaInitialized ) 
@@ -150,16 +217,25 @@ function doOnFocusHorz(object) {
     iloaCurrentCol = loaFindInColList(object);
     loaColList[iloaCurrentCol].focus();
     loaColList[iloaCurrentCol].className = "loaHiliteItem";
+
+    cbLabel = loaGetLabelForCheckBox(loaColList[iloaCurrentCol]);
+    if ( cbLabel!=null )
+        cbLabel.className = "loaHiliteItem";
+    // addHilite(cbLabel);
+
 }
 
 //========================================================
 // doOnFocusVert
+// called when a checkbox gains focus and the orientation
+// is vertical
 //========================================================
 
 function doOnFocusVert(object) {
 
       var ix;
       var init;
+      var cbLabel;
 
       init = loaInitialized;
       if ( !loaInitialized )
@@ -183,6 +259,11 @@ function doOnFocusVert(object) {
     iloaCurrentCol = loaFindInColList(object);
     loaColList[iloaCurrentCol].focus();
     loaColList[iloaCurrentCol].className = "loaHiliteItem";
+
+    cbLabel = loaGetLabelForCheckBox(loaColList[iloaCurrentCol]);
+    if ( cbLabel != null )
+        cbLabel.className = "loaHiliteItem";
+   // addHilite(cbLabel);
 }
 
 //===========================================================
@@ -191,7 +272,11 @@ function doOnFocusVert(object) {
 
 function doOnBlur(object) {
 
+    var cbLabel;
+
     object.className = "loaNormalRow";
+    cbLabel = loaGetLabelForCheckBox(object);
+    remHilite(cbLabel);
 }
 
 //===========================================================
@@ -271,4 +356,22 @@ function doOnKeyUpVert(event) {
       } else {
           event.returnValue = true;
       }
+}
+
+//========================================================
+// addHilite
+//========================================================
+
+function addHilite(cbox) {
+   if ( cbox != null )
+       jQuery(cbox).addClass("loaHiliteItem");
+}
+
+//========================================================
+// remHilite
+//========================================================
+
+function remHilite(cbox) {
+    if ( cbox != null )
+        jQuery(cbox).removeClass("loaHiliteItem");
 }

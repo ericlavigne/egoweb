@@ -65,10 +65,10 @@ jQuery(document).ready(function(){
 	}
 });
 
-function addHilite(cbox) {
-   jQuery(cbox).addClass("loaHiliteItem");
-}
+// function addHilite(cbox) {
+//    jQuery(cbox).addClass("loaHiliteItem");
+// }
 
-function remHilite(cbox) {
-    jQuery(cbox).removeClass("loaHiliteItem");
-}
+// function remHilite(cbox) {
+//     jQuery(cbox).removeClass("loaHiliteItem");
+// }

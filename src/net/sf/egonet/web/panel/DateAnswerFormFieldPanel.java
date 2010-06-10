@@ -55,8 +55,6 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private RadioChoice radioAmPm;
 	
 	private Label lblYear;
-	private Label lblMonth;
-	private Label lblDay;
 	private Label lblHour;
 	
 	private CheckboxesPanel<String> refDKCheck;
@@ -164,21 +162,16 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		add(inputMonth);
 	    add(inputYear);
 	    
-		lblYear   = new Label("lblYear", "Year (YYYY)");
-		lblMonth  = new Label("lblMonth", "Month");
-		lblDay    = new Label("lblDay", "Day (1-31)");
+		lblYear   = new Label("lblYear", "Date (Month,Day,Year)");
 		lblHour   = new Label("lblHour", "Time (HH:MM)");
 		add(lblYear);
-		add(lblMonth);
-		add(lblDay);
+
 		add(lblHour);
 		
 		inputYear.setVisible(useYears);
 		lblYear.setVisible(useYears);
-		inputMonth.setVisible(useMonths);
-		lblMonth.setVisible(useMonths);	
-		inputDay.setVisible(useDays);
-		lblDay.setVisible(useDays);		
+		inputMonth.setVisible(useMonths);	
+		inputDay.setVisible(useDays);	
 		inputHour.setVisible(useHours);
 		lblHour.setVisible(useHours);	
 		radioAmPm.setVisible(useHours);

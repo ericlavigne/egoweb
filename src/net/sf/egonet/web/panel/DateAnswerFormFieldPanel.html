@@ -5,22 +5,20 @@
 <wicket:extend >
     <table>
         <tr>
-        <td align="left"><label wicket:id="lblHour">Time (HH:MM)</label></td>
-        <td><input wicket:id="Hour" type="text" /></td>
-        <td><input wicket:id="Minute" type="text" /></td>
-        <td><span wicket:id="ampm">
+        <td align="left" style="padding-left: 1px;padding-right: 1px;">
+        <label wicket:id="lblHour">Time (HH:MM)</label></td>
+        <td style="padding-left: 1px;padding-right: 1px;"><input wicket:id="Hour" type="text" /></td>
+        <td style="padding-left: 1px;padding-right: 1px;"><input wicket:id="Minute" type="text" /></td>
+        <td style="padding-left: 1px;padding-right: 1px;"><span wicket:id="ampm">
         <input type="radio"> AM </input>
         <input type="radio"> PM </input>
         </span></td>
         </tr><tr>
-        <td align="right"><label wicket:id="lblDay">Day (1-31)</label></td> 
-        <td><input wicket:id="Day" type="text" /></td>
-        </tr><tr>
-        <td align="right"><label wicket:id="lblMonth">Month</label></td>
-        <td><select wicket:id="Month" /></td>
-        </tr><tr>
-        <td align="right"><label wicket:id="lblYear">Year (yyyy)</label></td>
-        <td><input wicket:id="Year" type="text" /></td>
+        <td align="right" style="padding-left: 1px;padding-right: 1px;">
+        <label wicket:id="lblYear">Date (Month,Day,Year)</label></td> 
+        <td style="padding-left: 1px;padding-right: 1px;"><select wicket:id="Month" /></td>
+        <td style="padding-left: 1px;padding-right: 1px;"><input wicket:id="Day" type="text" /></td>
+        <td style="padding-left: 1px;padding-right: 1px;"><input wicket:id="Year" type="text" /></td>
         </tr>
      </table>
     <br />
