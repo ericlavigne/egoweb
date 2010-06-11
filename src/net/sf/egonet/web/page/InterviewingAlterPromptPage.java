@@ -63,8 +63,9 @@ public class InterviewingAlterPromptPage extends InterviewingPage {
 		
 		Form form = new Form("form") {
 			public void onSubmit() {
-				if(study.getMaxAlters() == null || getCurrentAlters() < study.getMaxAlters()) {
-					DB.save(new Alter(interview,addAlterField.getText()));
+				Integer currentAlters = getCurrentAlters();
+				if(study.getMaxAlters() == null || currentAlters < study.getMaxAlters()) {
+					DB.save(new Alter(interview,addAlterField.getText(),currentAlters));
 					addAlterField.setModelObject("");
 				}
 			}

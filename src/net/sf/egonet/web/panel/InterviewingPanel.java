@@ -1,7 +1,6 @@
 package net.sf.egonet.web.panel;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import net.sf.egonet.model.Alter;
@@ -10,12 +9,8 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.persistence.SimpleLogicMgr;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -89,7 +84,7 @@ public class InterviewingPanel extends Panel {
 		add(questionsView);
 		
 		ArrayList<String> allOptions = Lists.newArrayList();
-		ArrayList<String> selectedOptions = Lists.newArrayList(); // TODO: populate this
+		ArrayList<String> selectedOptions = Lists.newArrayList();
 		strSkipReason = AnswerFormFieldPanel.getSkipReasonForListOfAlters(answerFields);
 		if ( strSkipReason.equals(dontKnow))  {
 			selectedOptions.add(dontKnow);
@@ -150,12 +145,12 @@ public class InterviewingPanel extends Panel {
 	public static InterviewingPanel createExample(String id, Question question) {
 		ArrayList<AnswerFormFieldPanel> panels = Lists.newArrayList();
 		Interview interview = new Interview();
-		Alter oneAlter = new Alter(interview,"Jacob");
+		Alter oneAlter = new Alter(interview,"Jacob",1);
 		List<String> names = 
 			Lists.newArrayList("Emma","Michael","Ethan","Isabella","Joshua");
 		for(int i = 0; i < (question.getAskingStyleList() ? 5 : 1); i++) {
 			ArrayList<Alter> alters = Lists.newArrayList();
-			Alter otherAlter = new Alter(interview,names.get(i));
+			Alter otherAlter = new Alter(interview,names.get(i),i+2);
 			if(question.getType().equals(Question.QuestionType.ALTER)) {
 				alters.add(otherAlter);
 			}

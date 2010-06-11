@@ -1,5 +1,6 @@
 package net.sf.egonet.persistence;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.sf.egonet.model.Alter;
@@ -11,11 +12,20 @@ import org.hibernate.Session;
 import com.google.common.collect.Lists;
 
 public class Alters {
-	@SuppressWarnings("unchecked")
 	static List<Alter> getForInterview(Session session, Long interviewId) {
-		return session.createQuery("from Alter where interviewId = :interviewId and active = 1")
-		.setParameter("interviewId", interviewId)
-		.list();
+		List<Alter> alters = 
+			session.createQuery("from Alter where interviewId = :interviewId and active = 1")
+			.setParameter("interviewId", interviewId)
+			.list();
+		Collections.sort(alters);
+		for(Integer i = 0; i < alters.size(); i++) {
+			Alter alter = alters.get(i);
+			if(alter.getOrdering() == null || ! alter.getOrdering().equals(i)) {
+				alter.setOrdering(i);
+				DB.save(session, alter);
+			}
+		}
+		return alters;
 	}
 	
 	public static List<Alter> getForInterview(final Long interviewId) {

@@ -260,9 +260,11 @@ public class Archiving {
 							alterElements, true, true,
 							fnCreateAlter(), fnDeleteAlter(session));
 					Map<Long,Alter> localIdToAlter = indexById(alterEntities);
-					for(Element alterElement : alterElements) {
+					for(Integer i = 0; i < alterElements.size(); i++) {
+						Element alterElement = alterElements.get(i);
 						Long localAlterId = remoteToLocalAlterId.get(attrId(alterElement));
 						Alter alter = localIdToAlter.get(localAlterId);
+						alter.setOrdering(i);
 						updateAlterFromNode(session,alter,alterElement,interview.getId());
 					}
 					

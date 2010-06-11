@@ -5,9 +5,10 @@ public class Alter extends OrderedEntity
 	private String name;
 	private Long interviewId;
 
-	public Alter(Interview interview, String name) {
+	public Alter(Interview interview, String name, Integer ordering) {
 		this.name = name;
 		this.interviewId = interview.getId();
+		setOrdering(ordering);
 	}
 
 	public String getName() {
