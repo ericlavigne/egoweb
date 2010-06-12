@@ -40,11 +40,16 @@
                         </td><td> 
                         <input wicket:id="otherSpecifyField" id= "otherSpecifyField" type="checkbox" /> 
                         </td></tr>
-                        <tr><td align="right"> 
-                        <label for="noneButtonField" wicket:id="noneButtonLabel">NONE Button?: </label> 
-                        </td><td> 
-                        <input wicket:id="noneButtonField" id= "noneButtonField" type="checkbox" /> 
-                        </td></tr>         
+                        <tr>
+                        <td align="right">Optional Buttons: </td>
+                        <td>Don't know<input type="checkbox" wicket:id="dontknow" /> &nbsp;&nbsp;&nbsp;	
+    					 Refuse <input type="checkbox" wicket:id="refuse" /></td>
+    					</tr>
+                <!--    <tr><td align="right">                                                          -->
+                <!--    <label for="noneButtonField" wicket:id="noneButtonLabel">NONE Button?: </label> -->
+                <!--    </td><td>                                                                       -->
+                <!--    <input wicket:id="noneButtonField" id= "noneButtonField" type="checkbox" />     -->
+                <!--    </td></tr>                                                                      -->
                         <tr><td colspan="2">
                             <div wicket:id="numericLimitsPanel"></div>
                         </td></tr>

@@ -110,9 +110,13 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private void build() {
 		List<Object> choices = Lists.newArrayList();
 		choices.addAll(getOptions());
-		if(! question.getType().equals(Question.QuestionType.EGO_ID)) {
-			choices.addAll(Lists.newArrayList(dontKnow,refuse));
-		}
+
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		choices.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		choices.add(refuse);
+	    }
 		dropDownChoice = new RadioChoicePlus("answer",answer); 
 		ListView options = new ListView("options",choices) {
 			protected void populateItem(ListItem item) {

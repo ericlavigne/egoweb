@@ -176,6 +176,12 @@ public abstract class AnswerFormFieldPanel extends Panel {
 			return "Can't give two skip reasons";
 		}
 		if((ref || dk || pageNone) && answered()) {
+			if ( ref )
+				return "Can't select page-level Refuse and other answer choices at the same time.  Please correct.";
+			if ( dk )
+				return "Can't select page-level Don't know and other answer choices at the same time.  Please correct.";
+			if ( pageNone )
+				return "Can't select None and other answer choices at the same time.  Please correct.";
 			return "Can't provide a skip reason without skipping";
 		}
 		return null;

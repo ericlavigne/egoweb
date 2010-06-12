@@ -34,10 +34,13 @@ public class TextAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		this.textField = new TextField("answer", new Model(answer));
 		add(textField);
 		
-		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
-		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
-			refAndDK = Lists.newArrayList();
-		}
+	    ArrayList<String> refAndDK = Lists.newArrayList();
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		refAndDK.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		refAndDK.add(refuse);
+	    }
 		ArrayList<String> selectedRefAndDK = Lists.newArrayList();
 		if(originalSkipReason.equals(SkipReason.DONT_KNOW)) {
 			selectedRefAndDK.add(dontKnow);

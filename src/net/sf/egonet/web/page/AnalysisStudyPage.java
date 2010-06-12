@@ -23,6 +23,7 @@ public class AnalysisStudyPage extends EgonetPage {
 	
 	private Long studyId;
 	private Model adjacencyReason;
+	private Label errorMessage;
 	
 	public AnalysisStudyPage(Study study) {
 		super("Analysis for "+study.getName());
@@ -41,22 +42,35 @@ public class AnalysisStudyPage extends EgonetPage {
 		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
 			new Model(Expressions.get(adjacencyExpressionId));
 		analysisForm.add(new DropDownChoice("adjacency",adjacencyReason,Expressions.forStudy(getStudy().getId())));
-		
+		errorMessage = new Label ("errorMessage", "");
+		analysisForm.add(errorMessage);
 		analysisForm.add(new Button("csvAlterExport") {
 			public void onSubmit() {
+				Expression connectionExpression = getConnectionReason();
+				if ( connectionExpression == null ) {
+					errorMessage.setModelObject("Need to select adjacency!");
+					return;
+				}
+				errorMessage.setModelObject("");
 				downloadText(
 						getStudy().getName()+"-alter-data.csv",
 						"text/csv",
-						Analysis.getEgoAndAlterCSVForStudy(getStudy(),getConnectionReason()));
+						Analysis.getEgoAndAlterCSVForStudy(getStudy(),connectionExpression));
 			}
 		});
 		
 		analysisForm.add(new Button("csvAlterPairExport") {
 			public void onSubmit() {
+				Expression connectionExpression = getConnectionReason();
+				if ( connectionExpression == null ) {
+					errorMessage.setModelObject("Need to select adjacency!");
+					return;
+				}
+				errorMessage.setModelObject("");
 				downloadText(
 						getStudy().getName()+"-alter-pair-data.csv",
 						"text/csv",
-						Analysis.getAlterPairCSVForStudy(getStudy(),getConnectionReason()));
+						Analysis.getAlterPairCSVForStudy(getStudy(),connectionExpression));
 			}
 		});
 		

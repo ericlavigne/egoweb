@@ -125,20 +125,21 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	 */
 	private String timeSpanToString() {
 		String strResult = "";
-		
-		if ( useYears && years!=null )
+				
+		if ( useYears && years!=null && !years.isEmpty())
 			strResult += " " + years + " years";
-		if ( useMonths && months!=null )
+		if ( useMonths && months!=null && !months.isEmpty())
 			strResult += " " + months + " months";
-		if ( useWeeks && weeks!=null )
+		if ( useWeeks && weeks!=null && !weeks.isEmpty())
 			strResult += " " + weeks + " weeks";
-		if ( useDays && days!=null )
+		if ( useDays && days!=null && !days.isEmpty())
 			strResult += " " + days + " days";	
-		if ( useHours && hours!=null )
+		if ( useHours && hours!=null && !hours.isEmpty())
 			strResult += " " + hours + " hours";
-		if ( useMinutes && minutes!=null )
+		if ( useMinutes && minutes!=null && !minutes.isEmpty())
 			strResult += " " + minutes + " minutes";
-		strResult += " ";
+		if ( !strResult.isEmpty())
+		    strResult += " ";
 		return(strResult);
 	}
 	
@@ -196,10 +197,14 @@ public class TimeSpanAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		inputMinutes.setVisible(useMinutes);
 		lblMinutes.setVisible(useMinutes);
 		
-		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
-		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
-			refAndDK = Lists.newArrayList();
-		}
+	    ArrayList<String> refAndDK = Lists.newArrayList();
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		refAndDK.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		refAndDK.add(refuse);
+	    }
+	    
 		ArrayList<String> selectedRefAndDK = Lists.newArrayList();
 		if(originalSkipReason.equals(SkipReason.DONT_KNOW)) {
 			selectedRefAndDK.add(dontKnow);

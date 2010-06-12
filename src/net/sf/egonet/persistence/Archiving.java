@@ -397,6 +397,12 @@ public class Archiving {
 		addAttribute(questionNode,"useIf", question.getUseIfExpression());
 		addAttribute(questionNode,"otherSpecify", question.getOtherSpecify());
 		addAttribute(questionNode,"noneButton", question.getNoneButton());
+		addAttribute(questionNode,"allButton", question.getAllButton());
+		addAttribute(questionNode,"pageLevelDontKnowButton", question.getPageLevelDontKnowButton());
+		addAttribute(questionNode,"pageLevelRefuseButton", question.getPageLevelRefuseButton());
+		addAttribute(questionNode,"dontKnowButton", question.getDontKnowButton());
+		addAttribute(questionNode,"refuseButton", question.getRefuseButton());
+		addAttribute(questionNode,"allOptionString", question.getAllOptionString());		
 		aType = question.getAnswerType();
 		if (aType==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
@@ -453,6 +459,12 @@ public class Archiving {
 		question.setUseIfExpression(attrString(node,"useIf"));
 		question.setOtherSpecify(attrBool(node,"otherSpecify"));
 		question.setNoneButton(attrBool(node,"noneButton"));
+		question.setAllButton(attrBool(node,"allButton"));
+		question.setPageLevelDontKnowButton(attrBool(node,"pageLevelDontKnowButton"));
+		question.setPageLevelRefuseButton (attrBool(node,"pageLevelRefuseButton"));
+		question.setDontKnowButton(attrBool(node,"dontKnowButton"));
+		question.setRefuseButton(attrBool(node,"refuseButton"));
+		question.setAllOptionString(attrText(node,"allOptionString"));		
 		aType = question.getAnswerType();
 		if ( aType==Answer.AnswerType.NUMERICAL ) {
 			try {

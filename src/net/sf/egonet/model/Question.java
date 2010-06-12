@@ -28,7 +28,16 @@ public class Question extends OrderedEntity
 	// variables that deal with Selection / Multiple Selection questions
 	// using the 'other-specify' option
 	private Boolean otherSpecify;  // if true, selection of 'Other' brings up text box
-	private Boolean noneButton;
+	// each question has SIX optional buttons associated with it
+	// four of these are only active if the question is asked in a 
+	// list format, two always apply
+	private Boolean noneButton; // list format only
+	private Boolean allButton;  // list format only
+	private Boolean pageLevelDontKnowButton; // list format only
+	private Boolean pageLevelRefuseButton;   // list format only
+	private Boolean dontKnowButton; // single question format only
+	private Boolean refuseButton;   // single question format only
+	private String allOptionString; // if All button is clicked, use this
 	// variables that will be specific to numeric answers, 
 	// and (optionally) limiting them to a range
 	private NumericLimitType minLimitType;
@@ -59,6 +68,12 @@ public class Question extends OrderedEntity
 		askingStyleList = false;
 		otherSpecify = false;
 		noneButton = false;
+		allButton = false;
+		pageLevelDontKnowButton = true;
+		pageLevelRefuseButton = true;
+		dontKnowButton = true;
+		refuseButton = true;
+		allOptionString = "";
 		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
 		minLiteral = 0;
@@ -105,6 +120,12 @@ public class Question extends OrderedEntity
 		c.setTypeDB(getTypeDB());
 		c.setUseIfExpression(getUseIfExpression());
 		c.setNoneButton(getNoneButton());
+		c.setAllButton(getAllButton());
+		c.setPageLevelDontKnowButton(getPageLevelDontKnowButton());
+		c.setPageLevelRefuseButton(getPageLevelRefuseButton());
+		c.setDontKnowButton(getDontKnowButton());
+		c.setRefuseButton(getRefuseButton());
+		c.setAllOptionString(getAllOptionString());		
 		c.setWithListRange(getWithListRange());
 		c.setListRangeString(getListRangeString());
 		c.setMinListRange(getMinListRange());
@@ -281,6 +302,60 @@ public class Question extends OrderedEntity
 		if ( noneButton==null)
 			noneButton = false;
 		return(noneButton);
+	}
+	
+	public void setAllButton ( Boolean allButton) {
+		this.allButton = (allButton==null) ? false : allButton;
+	}
+	public Boolean getAllButton() {
+		if ( allButton==null)
+			allButton = false;
+		return(allButton);
+	}
+	
+	public void setPageLevelDontKnowButton ( Boolean pageLevelDontKnowButton ) {
+		this.pageLevelDontKnowButton  = (pageLevelDontKnowButton==null) ? true : pageLevelDontKnowButton;
+	}
+	public Boolean getPageLevelDontKnowButton() {
+		if ( pageLevelDontKnowButton==null)
+			pageLevelDontKnowButton  = true;
+		return(pageLevelDontKnowButton );
+	}
+	
+	public void setPageLevelRefuseButton( Boolean pageLevelRefuseButton ) {
+		this.pageLevelRefuseButton = (pageLevelRefuseButton==null) ? true : pageLevelRefuseButton; 
+	}
+	public Boolean getPageLevelRefuseButton() {
+		if ( pageLevelRefuseButton==null)
+			pageLevelRefuseButton = true;
+		return(pageLevelRefuseButton);
+	}
+	
+	public void setDontKnowButton ( Boolean dontKnowButton ) {
+		this.dontKnowButton = (dontKnowButton==null) ? true : dontKnowButton;
+	}
+	public Boolean getDontKnowButton() {
+		if ( dontKnowButton==null)
+			dontKnowButton = true;
+		return(dontKnowButton);
+	}
+	
+	public void setRefuseButton ( Boolean refuseButton) {
+		this.refuseButton = (refuseButton==null) ? true : refuseButton;
+	}
+	public Boolean getRefuseButton() {
+		if ( refuseButton==null)
+			refuseButton = true;
+		return(refuseButton);
+	}	
+	
+	public void setAllOptionString ( String allOptionString) {
+		this.allOptionString = (allOptionString==null) ? "" : allOptionString;
+	}
+	public String getAllOptionString() {
+		if ( allOptionString==null)
+			allOptionString = "";
+		return(allOptionString);
 	}
 	
 	public void setUseIfExpression ( String useIfExpression ) {

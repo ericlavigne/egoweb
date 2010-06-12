@@ -129,8 +129,13 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	private String calendarToString() {
 		String strDate = new String();
 		
+		if ( theDay.isEmpty() && theYear.isEmpty() && 
+			 theHour.isEmpty() && theMinute.isEmpty() )
+			return(strDate);
+		
 		strDate = String.format ("%s %s %s %s:%s %s", theMonth, theDay, theYear,
 				theHour, theMinute, amHour);
+	
 		return(strDate);
 	}
 	
@@ -153,7 +158,7 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	    radioAmPm = new RadioChoice ("ampm", new PropertyModel(this, "amHour"), AM_PM);
 	    radioAmPm.setPrefix("<span style=\"white-space:nowrap;\">");
 	    radioAmPm.setSuffix(
-				"</span><span style=\"whitespace:pre-wrap; color:#ffffff\"> . . </span>");
+				"</span><span style=\"white-space:pre-wrap; color:#ffffff\"> . . </span>");
 		
 		add(inputMinute);
 		add(inputHour);
@@ -177,10 +182,13 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		radioAmPm.setVisible(useHours);
 		inputMinute.setVisible(useMinutes);
 		
-		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
-		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
-			refAndDK = Lists.newArrayList();
-		}
+	    ArrayList<String> refAndDK = Lists.newArrayList();
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		refAndDK.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		refAndDK.add(refuse);
+	    }
 		ArrayList<String> selectedRefAndDK = Lists.newArrayList();
 		if(originalSkipReason.equals(SkipReason.DONT_KNOW)) {
 			selectedRefAndDK.add(dontKnow);

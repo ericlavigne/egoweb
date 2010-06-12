@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 public class EditQuestionPanel extends Panel {
 	
@@ -42,13 +43,14 @@ public class EditQuestionPanel extends Panel {
 	private Model questionAnswerReasonModel;
 	private Model askingStyleModel;
 	private Model otherSpecifyModel;
-	private Model noneButtonModel;
+	private Model dontKnowModel;
+	private Model refuseModel;
 	private TextField questionUseIfField;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
-	private Label noneButtonLabel;
-	private CheckBox noneButtonCheckBox;
-	private DropDownChoice dropDownQuestionTypes;
+	private DropDownChoice dropDownQuestionTypes;  
+	private CheckBox cbDontKnow;
+	private CheckBox cbRefuse;
 	
 	private NumericLimitsPanel numericLimitsPanel;
 	private MultipleSelectionLimitsPanel multipleSelectionLimitsPanel;
@@ -137,8 +139,6 @@ public class EditQuestionPanel extends Panel {
 		        // target.addComponent(form);
 		        target.addComponent(numericLimitsPanel);
 		        target.addComponent(multipleSelectionLimitsPanel);
-		        target.addComponent(noneButtonLabel); 
-		        target.addComponent(noneButtonCheckBox);
 		        target.addComponent(otherSpecifyLabel); 
 		        target.addComponent(otherSpecifyCheckBox);
 		        target.addComponent(timeUnitsPanel);
@@ -166,8 +166,8 @@ public class EditQuestionPanel extends Panel {
 			protected void onUpdate (AjaxRequestTarget target ) {
 				Boolean listLimitsVisible = false;
 				
-				if ( questionResponseTypeModel.getObject().equals(Answer.AnswerType.MULTIPLE_SELECTION) ||
-					 questionResponseTypeModel.getObject().equals(Answer.AnswerType.SELECTION ))
+//				if ( questionResponseTypeModel.getObject().equals(Answer.AnswerType.MULTIPLE_SELECTION) ||
+//					 questionResponseTypeModel.getObject().equals(Answer.AnswerType.SELECTION ))
 					listLimitsVisible = (Boolean) askingStyleModel.getObject();
 					
 			    listLimitsPanel.setVisible(listLimitsVisible);	
@@ -187,6 +187,19 @@ public class EditQuestionPanel extends Panel {
 			askingStyleListField.setVisible(false);
 		}
 
+		dontKnowModel = new Model();
+		dontKnowModel.setObject(Boolean.TRUE);
+		refuseModel = new Model();
+		refuseModel.setObject(Boolean.TRUE);
+    	cbDontKnow = new CheckBox("dontknow", dontKnowModel);
+    	cbRefuse   = new CheckBox("refuse", refuseModel);
+    	cbDontKnow.setOutputMarkupId(true);
+    	cbDontKnow.setOutputMarkupPlaceholderTag(true);
+    	cbRefuse.setOutputMarkupId(true);
+    	cbRefuse.setOutputMarkupPlaceholderTag(true);
+    	form.add(cbDontKnow);
+    	form.add(cbRefuse);
+    	
 		otherSpecifyLabel = new Label("otherSpecifyLabel", "Other/Specify Type Question?: ");
 		otherSpecifyModel = new Model();
 		otherSpecifyModel.setObject(Boolean.FALSE);
@@ -197,18 +210,6 @@ public class EditQuestionPanel extends Panel {
 		otherSpecifyCheckBox.setOutputMarkupId(true);
 		otherSpecifyLabel.setOutputMarkupPlaceholderTag(true);
 		otherSpecifyCheckBox.setOutputMarkupPlaceholderTag(true);
-		noneButtonLabel = new Label("noneButtonLabel", "NONE Button?: ");
-		noneButtonModel = new Model();
-		noneButtonModel.setObject(Boolean.FALSE);
-		noneButtonCheckBox = new CheckBox("noneButtonField", noneButtonModel);
-		form.add(noneButtonLabel);
-		form.add(noneButtonCheckBox);
-		noneButtonLabel.setOutputMarkupId(true);
-		noneButtonCheckBox.setOutputMarkupId(true);
-		noneButtonLabel.setOutputMarkupPlaceholderTag(true);
-		noneButtonCheckBox.setOutputMarkupPlaceholderTag(true);
-		noneButtonLabel.setVisible(false); 
-		noneButtonCheckBox.setVisible(false);
 		
 		// questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		// form.add(questionUseIfField);
@@ -260,13 +261,12 @@ public class EditQuestionPanel extends Panel {
 		//throw new RuntimeException(msg);
 		// questionUseIfField.setModelObject(question.getUseIfExpression());
 		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
-		noneButtonCheckBox.setModelObject(question.getNoneButton());
+		cbDontKnow.setModelObject(question.getDontKnowButton());
+		cbRefuse.setModelObject(question.getRefuseButton());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( aType==Answer.AnswerType.MULTIPLE_SELECTION) {
 			multipleSelectionLimitsPanel.setVisible(true);
-			noneButtonLabel.setVisible(true); 
-			noneButtonCheckBox.setVisible(true);
 		}
 		if ( aType==Answer.AnswerType.SELECTION  ||  aType==Answer.AnswerType.MULTIPLE_SELECTION) {
 			otherSpecifyLabel.setVisible(true); 
@@ -311,8 +311,9 @@ public class EditQuestionPanel extends Panel {
 		// throw new RuntimeException(msg);
 		/// question.setUseIfExpression((String) questionUseIfField.getModelObject());
 		question.setOtherSpecify((Boolean)otherSpecifyCheckBox.getModelObject());
-		question.setNoneButton((Boolean)noneButtonCheckBox.getModelObject());
 		question.setTimeUnits((Integer) timeUnitsPanel.getTimeUnits());
+		question.setDontKnowButton((Boolean) cbDontKnow.getModelObject());
+		question.setRefuseButton((Boolean) cbRefuse.getModelObject());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());
@@ -329,6 +330,12 @@ public class EditQuestionPanel extends Panel {
 	        question.setListRangeString(listLimitsPanel.getListRangeString());
 	        question.setMinListRange(listLimitsPanel.getMinListRange());
 	        question.setMaxListRange(listLimitsPanel.getMaxListRange());
+	       
+	        question.setPageLevelRefuseButton(listLimitsPanel.getPageLevelRefuseButton());
+	        question.setPageLevelDontKnowButton(listLimitsPanel.getPageLevelDontKnowButton());
+	        question.setAllButton(listLimitsPanel.getAllButton());
+	        question.setNoneButton(listLimitsPanel.getNoneButton());
+	        question.setAllOptionString(listLimitsPanel.getAllOptionString());
 		}
 	}
 	
@@ -345,40 +352,44 @@ public class EditQuestionPanel extends Panel {
 		boolean numericLimitsVisible = false;
 		boolean multipleSelectionLimitsVisible = false;
 		boolean timeSpanUnitsVisible = false;
+		boolean weeksVisible = false;
 		boolean otherSpecifyVisible = false;
-		boolean listLimitsVisible = false;
 		boolean isListStyle = (Boolean) askingStyleModel.getObject();
 		
 		switch ( iValue ) {
 			case 0: // TEXT
+				 listLimitsPanel.setAnswerType(Answer.AnswerType.TEXTUAL);
 			     break;
 			case 1:  // NUMERIC
 			     numericLimitsVisible = true;
+			     listLimitsPanel.setAnswerType(Answer.AnswerType.NUMERICAL);
 			     break;
 			case 2: // DROP_DOWN - single SELECTION
 				 otherSpecifyVisible = true;
-				 listLimitsVisible = isListStyle;
+				 listLimitsPanel.setAnswerType(Answer.AnswerType.SELECTION);
 				 break;
 			case 3: // MULTIPLE_SELECTION
 			     multipleSelectionLimitsVisible = true;
 			     otherSpecifyVisible = true;
-			     listLimitsVisible = isListStyle;
+			     listLimitsPanel.setAnswerType(Answer.AnswerType.MULTIPLE_SELECTION);
 			     break;
 			case 4: // DATE
-			case 5: // TIME_SPAN
+				 listLimitsPanel.setAnswerType(Answer.AnswerType.DATE);
 				 timeSpanUnitsVisible = true;
+				 weeksVisible = false;
+				 break;
+			case 5: // TIME_SPAN
+				 listLimitsPanel.setAnswerType(Answer.AnswerType.TIME_SPAN);
+				 timeSpanUnitsVisible = true;
+				 weeksVisible = true;
 				 break;
 			}
 				
 		numericLimitsPanel.setVisible(numericLimitsVisible);
 		multipleSelectionLimitsPanel.setVisible(multipleSelectionLimitsVisible);
-		noneButtonLabel.setVisible(multipleSelectionLimitsVisible); 
-		noneButtonCheckBox.setVisible(multipleSelectionLimitsVisible);
 		otherSpecifyLabel.setVisible(otherSpecifyVisible); 
 		otherSpecifyCheckBox.setVisible(otherSpecifyVisible);
 		timeUnitsPanel.setVisible(timeSpanUnitsVisible);
-		timeUnitsPanel.setWeeksVisible((iValue==5) ? true : false );
-		listLimitsPanel.setVisible(listLimitsVisible);
+		timeUnitsPanel.setWeeksVisible(weeksVisible);
 	}
-	
 }

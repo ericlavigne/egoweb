@@ -45,10 +45,13 @@ public class NumberAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		lblNumberPrompt = new Label ("numberPrompt", getNumericRangePrompt(alters));
 		add(lblNumberPrompt);
 		
-		ArrayList<String> refAndDK = Lists.newArrayList(refuse,dontKnow);
-		if(question.getType().equals(Question.QuestionType.EGO_ID)) {
-			refAndDK = Lists.newArrayList();
-		}
+	    ArrayList<String> refAndDK = Lists.newArrayList();
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		refAndDK.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		refAndDK.add(refuse);
+	    }
 		ArrayList<String> selectedRefAndDK = Lists.newArrayList();
 		if(originalSkipReason.equals(SkipReason.DONT_KNOW)) {
 			selectedRefAndDK.add(dontKnow);

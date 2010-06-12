@@ -78,10 +78,13 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		
 		List<Object> allItems = Lists.newArrayList();
 		allItems.addAll(getOptions());
-		if(! question.getType().equals(Question.QuestionType.EGO_ID)) { // Can't refuse EgoID question
-			allItems.add(dontKnow);
-			allItems.add(refuse);
-		}
+
+	    if ( !question.getType().equals(Question.QuestionType.EGO_ID)) {
+	    	if ( question.getDontKnowButton())
+	    		allItems.add(dontKnow);
+	    	if ( question.getRefuseButton())
+	    		allItems.add(refuse);
+	    }
 		List<Object> selectedItems = Lists.newArrayList();
 		if(originalSkipReason.equals(Answer.SkipReason.NONE)) {
 			selectedItems.addAll(originallySelectedOptions);

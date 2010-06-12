@@ -25,7 +25,13 @@
 	
 		<property name="otherSpecify" 	 column="otherSpecify" />
 		<property name="noneButton"      column="noneButton" />
-		
+		<property name="allButton"       column="allButton" />
+		<property name="pageLevelDontKnowButton"    column="pageLevelDontKnowButton" />
+		<property name="pageLevelRefuseButton"      column="pageLevelRefuseButton" />
+		<property name="dontKnowButton"   column="dontKnowButton" />
+		<property name="refuseButton"     column="refuseButton" />
+		<property name="allOptionString"  column="allOptionString" />
+														
 		<property name="useIfExpression" column="useIfExpression" type="text" length="255" /> 
  		<property name="minLimitTypeDB" column="minLimitType" /> 
  		<property name="minLiteral" 	column="minLiteral" /> 
