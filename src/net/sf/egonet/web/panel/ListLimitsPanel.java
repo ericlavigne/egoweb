@@ -104,14 +104,14 @@ public class ListLimitsPanel extends Panel {
 		    if ( listRangeOption==null ) {
 		    	if (qID==null)
 		    		qID = new Long(0);
-		    	listRangeOption =  new QuestionOption(qID, "(no options yet!)");
+		    	listRangeOption =  new QuestionOption(qID, "(none)");
 		    	listOfOptions.add(listRangeOption);
 		    }
 		    
 		    if ( allOption==null ) {
 		    	if ( qID==null)
 		    		qID = new Long(0);
-		    	allOption = new QuestionOption(qID,"(no options yet)");
+		    	allOption = new QuestionOption(qID,"(none)");
 		    	listOfOptions.add(allOption);
 		    }
 		}

@@ -65,14 +65,14 @@ public class Question extends OrderedEntity
 		prompt = "";
 		answerType = AnswerType.TEXTUAL;
 		type = QuestionType.EGO;
-		askingStyleList = false;
-		otherSpecify = false;
-		noneButton = false;
-		allButton = false;
-		pageLevelDontKnowButton = true;
-		pageLevelRefuseButton = true;
-		dontKnowButton = true;
-		refuseButton = true;
+		askingStyleList = new Boolean(false);
+		otherSpecify = new Boolean(false);
+		noneButton = new Boolean(false);
+		allButton = new Boolean(false);
+		pageLevelDontKnowButton = new Boolean(true);
+		pageLevelRefuseButton = new Boolean(true);
+		dontKnowButton = new Boolean(true);
+		refuseButton = new Boolean(true);
 		allOptionString = "";
 		useIfExpression = "";
 		minLimitType = NumericLimitType.NLT_NONE;
@@ -296,56 +296,58 @@ public class Question extends OrderedEntity
 	}
 	
 	public void setNoneButton ( Boolean noneButton) {
-		this.noneButton = (noneButton==null) ? false : noneButton;
+		this.noneButton = (noneButton==null) ? new Boolean(false) : noneButton;
 	}
 	public Boolean getNoneButton() {
 		if ( noneButton==null)
-			noneButton = false;
+			noneButton = new Boolean(false);
 		return(noneButton);
 	}
 	
 	public void setAllButton ( Boolean allButton) {
-		this.allButton = (allButton==null) ? false : allButton;
+		this.allButton = (allButton==null) ? new Boolean(false) : allButton;
 	}
 	public Boolean getAllButton() {
 		if ( allButton==null)
-			allButton = false;
+			allButton =new Boolean(false);
 		return(allButton);
 	}
 	
 	public void setPageLevelDontKnowButton ( Boolean pageLevelDontKnowButton ) {
-		this.pageLevelDontKnowButton  = (pageLevelDontKnowButton==null) ? true : pageLevelDontKnowButton;
+		if ( pageLevelDontKnowButton==null)
+			System.out.println ( "question " + title + "has null pageLevelDontKnowButton");
+		this.pageLevelDontKnowButton  = (pageLevelDontKnowButton==null) ? new Boolean(true) : pageLevelDontKnowButton;
 	}
 	public Boolean getPageLevelDontKnowButton() {
 		if ( pageLevelDontKnowButton==null)
-			pageLevelDontKnowButton  = true;
+			pageLevelDontKnowButton  = new Boolean(true);
 		return(pageLevelDontKnowButton );
 	}
 	
 	public void setPageLevelRefuseButton( Boolean pageLevelRefuseButton ) {
-		this.pageLevelRefuseButton = (pageLevelRefuseButton==null) ? true : pageLevelRefuseButton; 
+		this.pageLevelRefuseButton = (pageLevelRefuseButton==null) ? new Boolean(true) : pageLevelRefuseButton; 
 	}
 	public Boolean getPageLevelRefuseButton() {
 		if ( pageLevelRefuseButton==null)
-			pageLevelRefuseButton = true;
+			pageLevelRefuseButton = new Boolean(true);
 		return(pageLevelRefuseButton);
 	}
 	
 	public void setDontKnowButton ( Boolean dontKnowButton ) {
-		this.dontKnowButton = (dontKnowButton==null) ? true : dontKnowButton;
+		this.dontKnowButton = (dontKnowButton==null) ? new Boolean(true): dontKnowButton;
 	}
 	public Boolean getDontKnowButton() {
 		if ( dontKnowButton==null)
-			dontKnowButton = true;
+			dontKnowButton = new Boolean(true);
 		return(dontKnowButton);
 	}
 	
 	public void setRefuseButton ( Boolean refuseButton) {
-		this.refuseButton = (refuseButton==null) ? true : refuseButton;
+		this.refuseButton = (refuseButton==null) ? new Boolean(true) : refuseButton;
 	}
 	public Boolean getRefuseButton() {
 		if ( refuseButton==null)
-			refuseButton = true;
+			refuseButton = new Boolean(true);
 		return(refuseButton);
 	}	
 	
