@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
 
@@ -29,6 +30,7 @@ public class CheckboxesPanel<T> extends Panel {
 
 	private static final String otherSpecify = "OTHER SPECIFY";
 	private List<CheckableWrapper> items;
+	private List<AjaxCheckBox> checkBoxes;
 	private Boolean otherSpecifyStyle;
 	private Boolean otherSelected;
 	private ArrayList<ActionListener> actionListeners;
@@ -104,6 +106,7 @@ public class CheckboxesPanel<T> extends Panel {
 		horizontalForm = new Form ("horizontalForm");
 		add(horizontalForm);
 		
+		checkBoxes = Lists.newArrayList();
 		ListView checkboxes = new ListView("checkboxes",items) {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
@@ -122,11 +125,12 @@ public class CheckboxesPanel<T> extends Panel {
 							fireActionEvent (otherNowSelected, otherSpecify );
 							otherSelected = otherNowSelected;
 						}
-				 }};
+				 }}; 
+
 				checkBox.add( new SimpleAttributeModifier("onfocus","doOnFocusHorz(this);"));
 				checkBox.add( new SimpleAttributeModifier("onblur", "doOnBlur(this);"));
 				checkBox.add( new SimpleAttributeModifier("onkeyup","doOnKeyUpHorz(event);")); 
-					
+				checkBoxes.add(checkBox);
 				if(autoFocus) {
 					if(wrapper.getName() != null && items.get(0).getName() != null &&
 							wrapper.getName().equals(items.get(0).getName()))
@@ -164,6 +168,7 @@ public class CheckboxesPanel<T> extends Panel {
 							otherSelected = otherNowSelected;
 						}
 				 }};
+
 				 
 				// vertical lists of less than 10 items will have numeric hotkeys 
 				if (items.size() >= 10  ) { 
@@ -174,6 +179,7 @@ public class CheckboxesPanel<T> extends Panel {
 					checkBox.add( new SimpleAttributeModifier("onfocus","addHilite(this);"));
 					checkBox.add( new SimpleAttributeModifier("onblur", "remHilite(this);"));
 				}
+				checkBoxes.add(checkBox);
 				// this was an attempt to remove the 'hotkey' class from
 				// Don't know and Refuse checkboxes.
 				// it didn't work - the hotkey action was removed, but
@@ -355,17 +361,21 @@ public class CheckboxesPanel<T> extends Panel {
 		// we won't bother with this
 		for ( CheckableWrapper checkWrapper : items ) {
 			if ( checkWrapper.getSelected()) {
-				System.out.println ("forceSelectionIfNone, item selected");
 				return(false);
 			}
 		}
 		// if everything is unchecked, search for an item
 		// that matches the string and select it
+		// This goes through a rather round-about way of updating
+		// the modelObject of the checkBox, but I found this was nessecary
+		// to get the screen to update.
 		for ( CheckableWrapper checkWrapper : items ) {
-			System.out.println ("examining " + checkWrapper.getName());
 			if ( checkWrapper.getName().equalsIgnoreCase(selection)) {
-				System.out.println ("SETTING " + checkWrapper.getName());
 				checkWrapper.setSelected(true);
+				for ( AjaxCheckBox cBox : checkBoxes ) {
+				    if ( (Boolean)cBox.getModelObject())
+				    	cBox.setModelObject( new Model(Boolean.TRUE));
+				}
 				return(true);
 			}
 		}

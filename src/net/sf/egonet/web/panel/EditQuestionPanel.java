@@ -80,7 +80,10 @@ public class EditQuestionPanel extends Panel {
 	}
 	
 	private void build() {
-
+		Label lblOptionalButtons;
+		Label lblDontKnowBtn;
+		Label lblRefuseBtn;
+		
 		feedbackPanel = new FeedbackPanel("feedback");
 		add(feedbackPanel);
 		
@@ -191,15 +194,24 @@ public class EditQuestionPanel extends Panel {
 		dontKnowModel.setObject(Boolean.TRUE);
 		refuseModel = new Model();
 		refuseModel.setObject(Boolean.TRUE);
+		lblOptionalButtons = new Label("optionalButtons", "Optional Buttons: ");
+		lblDontKnowBtn = new Label("dontKnowBtn", "Don't know: ");
+		lblRefuseBtn = new Label("refuseBtn", "Refuse: ");
+    	form.add(lblOptionalButtons);
+    	form.add(lblDontKnowBtn);
+    	form.add(lblRefuseBtn);
+    	
     	cbDontKnow = new CheckBox("dontknow", dontKnowModel);
     	cbRefuse   = new CheckBox("refuse", refuseModel);
-    	cbDontKnow.setOutputMarkupId(true);
-    	cbDontKnow.setOutputMarkupPlaceholderTag(true);
-    	cbRefuse.setOutputMarkupId(true);
-    	cbRefuse.setOutputMarkupPlaceholderTag(true);
     	form.add(cbDontKnow);
     	form.add(cbRefuse);
-    	
+		if(question.getType().equals(Question.QuestionType.EGO_ID )) {
+			lblOptionalButtons.setVisible(false);
+			lblDontKnowBtn.setVisible(false);
+			lblRefuseBtn.setVisible(false);
+			cbDontKnow.setVisible(false);
+			cbRefuse.setVisible(false);
+		}
 		otherSpecifyLabel = new Label("otherSpecifyLabel", "Other/Specify Type Question?: ");
 		otherSpecifyModel = new Model();
 		otherSpecifyModel.setObject(Boolean.FALSE);
@@ -354,7 +366,6 @@ public class EditQuestionPanel extends Panel {
 		boolean timeSpanUnitsVisible = false;
 		boolean weeksVisible = false;
 		boolean otherSpecifyVisible = false;
-		boolean isListStyle = (Boolean) askingStyleModel.getObject();
 		
 		switch ( iValue ) {
 			case 0: // TEXT

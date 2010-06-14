@@ -14,6 +14,9 @@ import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.markup.html.form.Form;
 
 import com.google.common.collect.Lists;
 
@@ -39,9 +42,26 @@ public class InterviewingPanel extends Panel {
 		build();
 	}
 
+	/**
+	 * IF this IS an alter question, the type IS MULTIPLE_SELECTION 
+	 * AND there is more than one answer Field 
+	 * THEN we want to use the action buttons to (optionally)
+	 * set Don't Know, Refuse or the 'All' selection
+	 */
 	private void build() {
 		String strPrompt;
 		String strSkipReason;
+		Label lblBtnAll;
+		Form pageButtonsForm = new Form("pageButtonsForm");
+		boolean withDKRefActionButtons = false;
+		
+		if ( question.getType() == Question.QuestionType.ALTER &&
+			 question.getAnswerType() == Answer.AnswerType.MULTIPLE_SELECTION ) {
+			if ( answerFields.size() > 1)
+				withDKRefActionButtons = true;
+		}
+		setOutputMarkupId(true);
+		setOutputMarkupPlaceholderTag(true);
 		
 		ArrayList<Alter> altersInPrompt = Lists.newArrayList();
 		if(answerFields.size() < 2 && ! answerFields.isEmpty()) {
@@ -98,7 +118,7 @@ public class InterviewingPanel extends Panel {
 			allOptions.add(none);
 		}
 		
-		if(answerFields.size() > 1) {
+		if( !withDKRefActionButtons  &&  answerFields.size() > 1 ) {
 			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
 		 }
 		
@@ -108,31 +128,73 @@ public class InterviewingPanel extends Panel {
 		
 // ==========================================================================
 // we may want buttons instead of checkboxs for Don't know and Refuse
-//	    Button btnDontKnow = new Button("btnDontKnow") {
-//			public void onSubmit() {
-//				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, "Don't know" );
-//			}
-//		};
-//		btnDontKnow.setDefaultFormProcessing(false);
-//		add(btnDontKnow);
-//
-//		Button btnRefuse = new Button("btnRefuse") {
-//			public void onSubmit() {
-//				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, "Refuse" );
-//			}
-//		};
-//		btnRefuse.setDefaultFormProcessing(false);
-//		add(btnRefuse);
-//		
-//		// the Don't know & refuse buttons are ONLY for list-of-alters
-//		if ( question.getType() != Question.QuestionType.ALTER  ||  
-//			    question.getAnswerType() != Answer.AnswerType.MULTIPLE_SELECTION ||
-//				answerFields.size()<=1 ) {
-//			btnDontKnow.setVisible(false);
-//			btnRefuse.setVisible(false);
-//		}
-// ===========================================================================		
+		final String strAllOption = question.getAllOptionString();
+		
+		AjaxFallbackButton btnAll = new AjaxFallbackButton("btnAll", pageButtonsForm) {
+			public void onSubmit(AjaxRequestTarget target, Form form) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, strAllOption );
+				target.addComponent(this);
+				for ( AnswerFormFieldPanel panel : answerFields) {
+					target.addComponent(panel);
+				}
+			}
+		};
+		pageButtonsForm.add(btnAll);
+		
+		lblBtnAll = new Label("btnAllLabel", "(Set all to " + strAllOption + ") ");
+		pageButtonsForm.add(lblBtnAll);
+		
+		AjaxFallbackButton btnDontKnow = new AjaxFallbackButton("btnDontKnow", pageButtonsForm) {
+			public void onSubmit(AjaxRequestTarget target, Form form) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, dontKnow );
+				target.addComponent(this);
+				for ( AnswerFormFieldPanel panel : answerFields) {
+					target.addComponent(panel);
+				}
+			}
+		};
+		pageButtonsForm.add(btnDontKnow);
+
+		AjaxFallbackButton btnRefuse = new AjaxFallbackButton("btnRefuse", pageButtonsForm) {
+			public void onSubmit(AjaxRequestTarget target, Form form) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, refuse );
+				target.addComponent(this);
+				for ( AnswerFormFieldPanel panel : answerFields) {
+					target.addComponent(panel);
+				}
+			}
+		};
+		pageButtonsForm.add(btnRefuse);
+		
+		add(pageButtonsForm);
+		// the Don't know & refuse buttons are ONLY for list-of-alters
+		// with Multiple_Selection type questions AND list-of-alters
+		if ( withDKRefActionButtons ) {
+			if ( !question.getAllButton()) {
+				btnAll.setEnabled(false);
+				btnAll.setVisible(false);
+				lblBtnAll.setVisible(false);
+			}
+			if ( !question.getPageLevelDontKnowButton()) {
+				btnDontKnow.setEnabled(false);
+				btnDontKnow.setVisible(false);
+			}
+			if (  !question.getPageLevelRefuseButton()) {
+				btnRefuse.setEnabled(false);
+				btnRefuse.setVisible(false);
+			}
+		} else {
+			btnAll.setEnabled(false);
+			btnDontKnow.setEnabled(false);
+			btnRefuse.setEnabled(false);
+			btnAll.setVisible(false);
+			lblBtnAll.setVisible(false);
+			btnDontKnow.setVisible(false);
+			btnRefuse.setVisible(false);
+		} 
 	}
+	
+
 	
 	public List<String> pageFlags() {
 		return refDKCheck.getSelected();

@@ -300,14 +300,6 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	
 	public boolean forceSelectionIfNone(String selection) {
 		boolean anyChange = answerField.forceSelectionIfNone(selection);
-		
-		if ( anyChange ) {
-			// System.out.println ( "Change!");
-			for ( Object option : answerField.getSelected() ) {
-				System.out.println ( option.toString());
-			}
-
-		}
 		return(anyChange);
 	}
 }
