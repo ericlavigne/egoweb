@@ -138,10 +138,10 @@ public class SelectionAnswerFormFieldPanel extends AnswerFormFieldPanel {
 				}
 				if(string != null) {
 					if(string.equals(dontKnow)) {
-						hotkey = "f8";
+						hotkey = "F8";
 					}
 					if(string.equals(refuse)) {
-						hotkey = "f9";
+						hotkey = "F9";
 					}
 				}
 				if(hotkey != null) {
