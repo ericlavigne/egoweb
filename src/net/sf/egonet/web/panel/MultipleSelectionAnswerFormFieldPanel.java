@@ -139,10 +139,18 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 	}
 	
 	public boolean dontKnow() {
+		// System.out.println("MultipeSelectionAnswer dontKnow");
+		// for ( Object obj : answerField.getSelected()) {
+		// 	System.out.println (obj.toString());
+		// }
 		return answerField.getSelected().contains(dontKnow);
 	}
 	
 	public boolean refused() {
+		// System.out.println("MultipleSelectionAsnwer refused");
+		// for ( Object obj : answerField.getSelected()) {
+		// 	System.out.println (obj.toString());
+		// }
 		return answerField.getSelected().contains(refuse);
 	}
 	
@@ -298,8 +306,8 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 		return (false);
 	}
 	
-	public boolean forceSelectionIfNone(String selection) {
-		boolean anyChange = answerField.forceSelectionIfNone(selection);
+	public boolean forceSelectionIfNone(String selection, int iMaxSelection) {
+		boolean anyChange = answerField.forceSelectionIfNone(selection, iMaxSelection);
 		return(anyChange);
 	}
 }

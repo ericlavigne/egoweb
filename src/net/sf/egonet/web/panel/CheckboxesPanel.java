@@ -22,7 +22,12 @@ import org.apache.wicket.model.Model;
 import com.google.common.collect.Lists;
 
 public class CheckboxesPanel<T> extends Panel {
-
+	
+	private final String 
+		dontKnow = AnswerFormFieldPanel.dontKnow,
+		refuse = AnswerFormFieldPanel.refuse,
+		none = AnswerFormFieldPanel.none;
+	
 	protected String showItem(T item) {
 		String strItem = item.toString();
 		return( strItem);
@@ -354,16 +359,28 @@ public class CheckboxesPanel<T> extends Panel {
 	 * if nothing is selected in this group of checkboxes, search
 	 * for one that matches the string and select it
 	 * @param selection - string to look for.  generally 'Don't know' or 'Refuse'
+	 * @param iMaxSelection - maximum number of selections allowed in this
+	 * set of checkboxes
 	 * @return true if a new checkbox is selected
 	 */
-	public boolean forceSelectionIfNone(String selection) {
-		// if anything is checked at all, 
-		// we won't bother with this
+	public boolean forceSelectionIfNone(String selection, int iMaxSelection) {
+		int iSelectionCount = 0;
+		
 		for ( CheckableWrapper checkWrapper : items ) {
 			if ( checkWrapper.getSelected()) {
-				return(false);
+				++iSelectionCount;
+				if ( checkWrapper.getName().endsWith(dontKnow))
+					return(false);
+				if ( checkWrapper.getName().endsWith(refuse))
+					return(false);
 			}
 		}
+		
+		// if we already have the maximum number of checkboxes checked, 
+		// exit
+		if ( iSelectionCount >= iMaxSelection )
+			return(false);
+		
 		// if everything is unchecked, search for an item
 		// that matches the string and select it
 		// This goes through a rather round-about way of updating

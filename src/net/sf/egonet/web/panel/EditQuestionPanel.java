@@ -45,7 +45,6 @@ public class EditQuestionPanel extends Panel {
 	private Model otherSpecifyModel;
 	private Model dontKnowModel;
 	private Model refuseModel;
-	private TextField questionUseIfField;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
 	private DropDownChoice dropDownQuestionTypes;  
@@ -195,8 +194,8 @@ public class EditQuestionPanel extends Panel {
 		refuseModel = new Model();
 		refuseModel.setObject(Boolean.TRUE);
 		lblOptionalButtons = new Label("optionalButtons", "Optional Buttons: ");
-		lblDontKnowBtn = new Label("dontKnowBtn", "Don't know: ");
-		lblRefuseBtn = new Label("refuseBtn", "Refuse: ");
+		lblDontKnowBtn = new Label("dontKnowBtn", "DON'T KNOW: ");
+		lblRefuseBtn = new Label("refuseBtn", "REFUSE: ");
     	form.add(lblOptionalButtons);
     	form.add(lblDontKnowBtn);
     	form.add(lblRefuseBtn);
