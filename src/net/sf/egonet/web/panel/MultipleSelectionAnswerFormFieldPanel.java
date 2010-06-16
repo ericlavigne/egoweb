@@ -100,6 +100,26 @@ public class MultipleSelectionAnswerFormFieldPanel extends AnswerFormFieldPanel
 						((QuestionOption) option).getName() : 
 							option.toString();
 			}
+			protected String hotkey(Object obj) {
+				if(obj instanceof QuestionOption) {
+					try {
+						QuestionOption option = (QuestionOption) obj;
+						Integer intVal = Integer.parseInt(option.getValue());
+						if(intVal > -1 && intVal < 10) {
+							return intVal+"";
+						}
+					} catch(Exception ex) {
+						
+					}
+				}
+				if(obj.equals(dontKnow)) {
+					return "F8";
+				}
+				if(obj.equals(refuse)) {
+					return "F9";
+				}
+				return null;
+			}
 		};
 		add(answerField); 
 		// features that will be visible only for

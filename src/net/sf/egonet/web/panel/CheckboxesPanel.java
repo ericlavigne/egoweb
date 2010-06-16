@@ -27,6 +27,10 @@ public class CheckboxesPanel<T> extends Panel {
 		String strItem = item.toString();
 		return( strItem);
 	}
+	
+	protected String hotkey(Object obj) {
+		return null;
+	}
 
 	private static final String otherSpecify = "OTHER SPECIFY";
 	private List<CheckableWrapper> items;
@@ -153,7 +157,7 @@ public class CheckboxesPanel<T> extends Panel {
 			protected void populateItem(ListItem item) {
 				CheckableWrapper wrapper = (CheckableWrapper) item.getModelObject();
 
-				item.add(new Label("checkLabelVertical", wrapper.getName()));				
+				Label label = new Label("checkLabelVertical", wrapper.getName());
 				AjaxCheckBox checkBox = new AjaxCheckBox("checkFieldVertical", new PropertyModel(wrapper, "selected"))
 				{
 				 protected void onUpdate(AjaxRequestTarget target) {
@@ -195,6 +199,12 @@ public class CheckboxesPanel<T> extends Panel {
 						checkBox.add(new FocusOnLoadBehavior());
 					}
 				}
+				String hk = hotkey(wrapper.getItem());
+				if(hk != null) {
+					label.add(new SimpleAttributeModifier("hotkey",hk));
+					checkBox.add(new SimpleAttributeModifier("hotkey",hk));
+				}
+				item.add(label);				
 				item.add(checkBox);
 			}
 		};
