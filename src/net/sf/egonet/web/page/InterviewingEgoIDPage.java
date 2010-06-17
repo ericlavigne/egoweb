@@ -3,13 +3,17 @@ package net.sf.egonet.web.page;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -19,10 +23,12 @@ import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Question.QuestionType;
+import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
+import net.sf.functionalj.tuple.Pair;
 
 public class InterviewingEgoIDPage extends EgonetPage {
 	
@@ -118,5 +124,54 @@ public class InterviewingEgoIDPage extends EgonetPage {
 		message = new Model("");
 		
 		add(new Label("message", message));
+		
+		// now create the list of interviews on the right side
+//	    ListView interviewView = new ListView("interviews", new PropertyModel(this, "interviews"))
+//	        {
+//				protected void populateItem(ListItem item)
+//	            {
+//					final Interview interview = (Interview) item.getModelObject();
+//					Link interviewLink;
+//					Long id;
+//					String egoName;
+//					
+//					id = interview.getId();
+//					egoName = Interviews.getEgoNameForInterview(id);
+//					
+//					interviewLink = new Link("interviewLink", new Model(id))
+//	                {
+//						public void onClick()
+//	                   	{
+//							Long id = (Long)getModelObject();
+//							// System.out.println ( "     id=" + id);
+//							EgonetPage comeFrom = InterviewingEgoPage.askNext(id, null, null);
+//							setResponsePage(
+//									InterviewingEgoPage.askNextUnanswered(id,null,comeFrom));
+//	                   	}
+//					};
+//
+//					interviewLink.add(new Label("name", egoName));
+//					item.add(interviewLink);
+//					
+//				}
+//			};
+//			form.add(interviewView);
 	}
+	
+	//======================================================================
+	// functions below are specific to the list of existing interviews
+	// =====================================================================
+	
+//	protected Page onInterviewClick(Interview interview) {
+//		return null;
+//	}
+//	
+//	protected Pair<Class<?>,PageParameters> getInterviewBookmark(Interview interview) {
+//		return null;
+//	}
+//
+//	public List<Interview> getInterviews()
+//   {
+//		return Interviews.getInterviewsForStudy(studyId);
+//	}
 }

@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.form.Form;
 
@@ -118,8 +119,10 @@ public class InterviewingPanel extends Panel {
 			allOptions.add(none);
 		}
 		
-		if( !withDKRefActionButtons  &&  answerFields.size() > 1 ) {
-			allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
+		if( !withDKRefActionButtons  && 
+			 question.getType() != Question.QuestionType.EGO_ID &&  
+			 answerFields.size() > 1 ) {
+			     allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
 		 }
 		
 		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
@@ -130,23 +133,22 @@ public class InterviewingPanel extends Panel {
 // we may want buttons instead of checkboxs for Don't know and Refuse
 		final String strAllOption = question.getAllOptionString();
 		
-		AjaxFallbackButton btnAll = new AjaxFallbackButton("btnAll", pageButtonsForm) {
-			public void onSubmit(AjaxRequestTarget target, Form form) {
-				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, strAllOption );
+		AjaxFallbackLink btnAll = new AjaxFallbackLink("btnAll") {
+			public void onClick(AjaxRequestTarget target) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, strAllOption, 
+						question.getMaxCheckableBoxes() );
 				target.addComponent(this);
 				for ( AnswerFormFieldPanel panel : answerFields) {
 					target.addComponent(panel);
 				}
 			}
 		};
+		btnAll.add(new Label("btnAllLabel", "(Set all to " + strAllOption + ") "));
 		pageButtonsForm.add(btnAll);
 		
-		lblBtnAll = new Label("btnAllLabel", "(Set all to " + strAllOption + ") ");
-		pageButtonsForm.add(lblBtnAll);
-		
-		AjaxFallbackButton btnDontKnow = new AjaxFallbackButton("btnDontKnow", pageButtonsForm) {
-			public void onSubmit(AjaxRequestTarget target, Form form) {
-				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, dontKnow );
+		AjaxFallbackLink btnDontKnow = new AjaxFallbackLink("btnDontKnow") {
+			public void onClick(AjaxRequestTarget target) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, dontKnow, 1);
 				target.addComponent(this);
 				for ( AnswerFormFieldPanel panel : answerFields) {
 					target.addComponent(panel);
@@ -155,9 +157,9 @@ public class InterviewingPanel extends Panel {
 		};
 		pageButtonsForm.add(btnDontKnow);
 
-		AjaxFallbackButton btnRefuse = new AjaxFallbackButton("btnRefuse", pageButtonsForm) {
-			public void onSubmit(AjaxRequestTarget target, Form form) {
-				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, refuse );
+		AjaxFallbackLink btnRefuse = new AjaxFallbackLink("btnRefuse") {
+			public void onClick(AjaxRequestTarget target) {
+				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, refuse,1 );
 				target.addComponent(this);
 				for ( AnswerFormFieldPanel panel : answerFields) {
 					target.addComponent(panel);
@@ -173,7 +175,6 @@ public class InterviewingPanel extends Panel {
 			if ( !question.getAllButton()) {
 				btnAll.setEnabled(false);
 				btnAll.setVisible(false);
-				lblBtnAll.setVisible(false);
 			}
 			if ( !question.getPageLevelDontKnowButton()) {
 				btnDontKnow.setEnabled(false);
@@ -188,7 +189,6 @@ public class InterviewingPanel extends Panel {
 			btnDontKnow.setEnabled(false);
 			btnRefuse.setEnabled(false);
 			btnAll.setVisible(false);
-			lblBtnAll.setVisible(false);
 			btnDontKnow.setVisible(false);
 			btnRefuse.setVisible(false);
 		} 

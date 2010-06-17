@@ -23,8 +23,8 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	private Label notification;
     private boolean firstTimeOnQuestion; // ad-hoc to list-of-alters 'none' option
     
-	public final static String dontKnow = "Don't know";
-	public final static String refuse = "Refuse";
+	public final static String dontKnow = "DON'T KNOW";
+	public final static String refuse = "REFUSE";
 	public final static String none = "None";
 
 	protected AnswerFormFieldPanel(String id, Question question, 
@@ -421,12 +421,12 @@ public abstract class AnswerFormFieldPanel extends Panel {
 	 * @return a count of the altered panels
 	 */
 	protected static int
-	forceSelectionIfNone(Collection<AnswerFormFieldPanel> panels, String strAnswer ) {
+	forceSelectionIfNone(Collection<AnswerFormFieldPanel> panels, String strAnswer, int iMaxSelection ) {
 		int iCount = 0;
 		
 		for ( AnswerFormFieldPanel panel : panels ) {
 			if ( panel instanceof MultipleSelectionAnswerFormFieldPanel ) {
-				if ( ((MultipleSelectionAnswerFormFieldPanel)panel).forceSelectionIfNone(strAnswer))
+				if ( ((MultipleSelectionAnswerFormFieldPanel)panel).forceSelectionIfNone(strAnswer, iMaxSelection))
 					++iCount;
 			}		
 		}

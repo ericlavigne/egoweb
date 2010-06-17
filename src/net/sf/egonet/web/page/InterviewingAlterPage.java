@@ -20,6 +20,7 @@ import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
+import net.sf.egonet.web.component.FocusOnLoadBehavior;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.egonet.web.panel.InterviewingPanel;
 
@@ -83,21 +84,34 @@ public class InterviewingAlterPage extends InterviewingPage {
 		setQuestionId("Question: " + subject.question.getTitle());
 	}
 	
+	/**
+	 * had to add the nextQuestion button explicitly instead of simply creating
+	 * a form and having the submit button created implicitly because we need an
+	 * object to add FocusOnLoadBehavior to 
+	 */
 	private void build() {
+		Button nextQuestion;
 		Button nextUnanswered;
 		
-		Form form = new Form("form") {
+		Form form = new Form("form"); // {
+	//		public void onSubmit() {
+	//			onSave(gotoNextUnAnswered);
+	//		}
+	//	};
+		
+		nextQuestion = new Button("nextQuestion") {
 			public void onSubmit() {
 				onSave(gotoNextUnAnswered);
 			}
 		};
-		
 		nextUnanswered = new Button("nextUnanswered") {
 			public void onSubmit() {
 				gotoNextUnAnswered = true;
 			}
 		};
+		form.add(nextQuestion);
 		form.add(nextUnanswered);
+		nextQuestion.add(new FocusOnLoadBehavior()); // whole reason for nextQuestion button
 		
 		pageLevelPrompt = new Label("pageLevelPrompt","");
 		form.add(pageLevelPrompt);
@@ -125,7 +139,7 @@ public class InterviewingAlterPage extends InterviewingPage {
 		form.add(interviewingPanel);
 		
 		add(form);
-		
+
 		add(new Link("backwardLink") {
 			public void onClick() {
 				EgonetPage page = 
