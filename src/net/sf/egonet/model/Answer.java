@@ -164,6 +164,10 @@ public class Answer extends Entity
 	public SkipReason getSkipReason() {
 		return skipReason == null ? SkipReason.NONE : skipReason;
 	}
+	
+	public boolean isSkipped() {
+		return ! getSkipReason().equals(SkipReason.NONE);
+	}
 
 	// ---------------------------------
 	
