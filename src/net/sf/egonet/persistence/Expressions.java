@@ -306,6 +306,9 @@ public class Expressions {
 							alters.get(0).getId(),
 							alters.get(1).getId()));
 		}
+		if(answer == null || answer.isSkipped()) {
+			return expression.getResultForUnanswered();
+		}
 		Expression.Type eType = expression.getType();
 		if(eType.equals(Expression.Type.Number)) {
 			return evaluateNumericalExpression(expression, answer);
