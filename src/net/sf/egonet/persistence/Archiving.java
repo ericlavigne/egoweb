@@ -513,7 +513,7 @@ public class Archiving {
 			question.setPageLevelRefuseButton (attrBool(node,"pageLevelRefuseButton"));
 			question.setDontKnowButton(attrBool(node,"dontKnowButton"));
 			question.setRefuseButton(attrBool(node,"refuseButton"));
-			question.setAllOptionString(attrText(node,"allOptionString"));
+			question.setAllOptionString(attrString(node,"allOptionString"));
 		} catch ( java.lang.RuntimeException rte4 ) {
 			question.setNoneButton(new Boolean(false));
 			question.setAllButton(new Boolean(false));
