@@ -534,9 +534,11 @@ public class Expressions {
 	}
 	
 	private static Boolean evaluateSelectionExpression(Expression expression, Answer answer) {
+
 		try {
 			List<String> selectedStrings = Lists.newArrayList(answer.getValue().split(","));
 			Operator operator = expression.getOperator();
+
 			for(Long id : (List<Long>) expression.getValue()) {
 				if(selectedStrings.contains(id.toString())) {
 					if(operator.equals(Operator.Some)) {
