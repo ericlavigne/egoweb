@@ -154,6 +154,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 			if(answer == null || answer.getValue() == null || answer.getValue().isEmpty()) {
 				return "";
 			} else if(question.getAnswerType().equals(Answer.AnswerType.TEXTUAL) ||
+					question.getAnswerType().equals(Answer.AnswerType.TEXTUAL_PP) ||
 					question.getAnswerType().equals(Answer.AnswerType.NUMERICAL)) 
 			{
 				return answer.getValue();

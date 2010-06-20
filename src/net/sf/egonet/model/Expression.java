@@ -78,7 +78,8 @@ public class Expression extends OrderedEntity {
 		if(answerType.equals(AnswerType.NUMERICAL)) {
 			return Type.Number;
 		}
-		if(answerType.equals(AnswerType.TEXTUAL)) {
+		if(answerType.equals(AnswerType.TEXTUAL) ||
+			answerType.equals(AnswerType.TEXTUAL_PP)) {
 			return Type.Text;
 		}
 		return Type.Selection;

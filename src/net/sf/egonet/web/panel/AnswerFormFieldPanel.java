@@ -62,6 +62,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		if(type.equals(AnswerType.TEXTUAL)) {
 			return new TextAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
+		if(type.equals(AnswerType.TEXTUAL_PP)) {
+			return new TextAreaAnswerFormFieldPanel(id,question,alters,interviewId);
+		}
 		if(type.equals(AnswerType.NUMERICAL)) {
 			return new NumberAnswerFormFieldPanel(id,question,alters, interviewId);
 		}
@@ -92,6 +95,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		
 		if(type.equals(AnswerType.TEXTUAL)) {
 			return new TextAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
+		}
+		if(type.equals(AnswerType.TEXTUAL_PP)) { 
+			return new TextAreaAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
 		}
 		if(type.equals(AnswerType.NUMERICAL)) {
 			return new NumberAnswerFormFieldPanel(id,question,answer,skipReason,alters,interviewId);
