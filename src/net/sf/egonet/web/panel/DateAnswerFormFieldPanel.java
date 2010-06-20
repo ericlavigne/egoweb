@@ -56,6 +56,8 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 	
 	private Label lblYear;
 	private Label lblHour;
+	private String lblYearPrompt;
+	private String lblHourPrompt;
 	
 	private CheckboxesPanel<String> refDKCheck;
 	
@@ -149,6 +151,24 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		useHours   = ((iTimeUnits & TimeSpanAnswerFormFieldPanel.BIT_HOUR)>0 )   ? true : false;
 		useMinutes = ((iTimeUnits & TimeSpanAnswerFormFieldPanel.BIT_MINUTE)>0 ) ? true : false;
 		
+
+		lblYearPrompt = " Date (";
+		if ( useMonths )
+			lblYearPrompt += "Month,";
+		if ( useDays )
+			lblYearPrompt += "Day,";
+		if ( useYears )
+			lblYearPrompt += "Year";
+		lblYearPrompt += ")";
+		
+		lblHourPrompt = "Time ";
+		if ( useHours && useMinutes )
+			lblHourPrompt += "(HH:MM)";
+		else if ( useHours)
+			lblHourPrompt += "(Hours)";
+		else if ( useMinutes )
+			lblHourPrompt += "(Minutes)";
+		
 		inputYear  = new TextField ("Year", new PropertyModel(this, "theYear"), String.class);
 		inputMonth = new DropDownChoice("Month", new PropertyModel(this,"theMonth"), MONTHS);
 		add(inputMonth);
@@ -167,8 +187,8 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		add(inputMonth);
 	    add(inputYear);
 	    
-		lblYear   = new Label("lblYear", "Date (Month,Day,Year)");
-		lblHour   = new Label("lblHour", "Time (HH:MM)");
+		lblYear   = new Label("lblYear", lblYearPrompt);
+		lblHour   = new Label("lblHour", lblHourPrompt);
 		add(lblYear);
 
 		add(lblHour);
