@@ -9,16 +9,21 @@ package net.sf.egonet.controller;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.event.EventListenerList;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
+import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.Main;
@@ -79,8 +84,33 @@ public class InterviewController implements EgonetMonitor
     private static long                    dbInterviewID;
     private static String                  studyName;
     private static String                  clientCaseID;
-    private static Question                egoIDQuestionType;
+    private static Question                caseIDQuestion;
+    private static Question                completionStatusFlagQuestion;
+    private static Question                everTouchedStatusFlagQuestion;
     private static List<Question>          questionList;
+    private static Map<String,String>      preloadMap;
+
+    private boolean ensureIntrinsicFlagsExist;
+    private boolean completionStatusFlagEnabled;
+    private boolean everTouchedStatusFlagEnabled;
+    private boolean preloadsHaveBeenLoaded;
+
+    private enum AdminQuestions
+    {
+        caseID( 0 ), completed( 1 ), everTouched( 2 );
+
+        private final int position;
+
+        private AdminQuestions( int position )
+        {
+            this.position = position;
+        }
+
+        private int getPosition()
+        {
+            return position;
+        }
+    }
 
     /**
      * This constructor creates the Singleton instance of this class.
@@ -106,6 +136,24 @@ public class InterviewController implements EgonetMonitor
             interviewController = new InterviewController();
         }
         return interviewController;
+    }
+
+    /**
+     * Returns whether or not the use of an instrinsic completion status flag
+     * is enabled.  This behavior is specified on a per-study basis.
+     */
+    public boolean isCompletionStatusFlagEnabled( boolean enable )
+    {
+        return completionStatusFlagEnabled;
+    }
+
+    /**
+     * Returns whether or not the use of an instrinsic everTouched status flag
+     * is enabled.  This behavior is specified on a per-study basis.
+     */
+    public boolean isEverTouchedStatusFlagEnabled( boolean enable )
+    {
+        return everTouchedStatusFlagEnabled;
     }
 
     /**
@@ -217,6 +265,28 @@ public class InterviewController implements EgonetMonitor
      */
     public void beginStudy( String studyName, String dbConfigFilePath ) throws Exception
     {
+        beginStudy( studyName, dbConfigFilePath, false );
+    }
+
+    /**
+     * Begins an Egonet study named 'studyName' if there is no active interview
+     * and no active study and the server is running.  Uses 'dbConfigFilePath'
+     * to retrieve the configuration file for the database associated with the
+     * study.
+     *
+     * Throws an IllegalStateException if an interview or study is active or
+     * if the server is not running.
+     *
+     * Throws an Exception if no Egonet study exists for 'studyName'.
+     *
+     * @param studyName name of an Egonet study
+     * @param dbConfigFilePath configuration file for database associated with study
+     * @param ensureIntrinsicFlagsExist whether or not the intrinsic flags must exist
+     * @throws Exception
+     */
+    public void beginStudy( String studyName, String dbConfigFilePath,
+                            boolean ensureIntrinsicFlagsExist ) throws Exception
+    {
         if (isInterviewActive())
         {
             throw new IllegalStateException( "An interview is active. Call endInterview()." );
@@ -229,6 +299,7 @@ public class InterviewController implements EgonetMonitor
         {
             throw new IllegalStateException( "The Egonet server is not running. Call startServer()." );
         }
+        this.ensureIntrinsicFlagsExist = ensureIntrinsicFlagsExist;
         dbSessionFactoryManager.useSessionFactory( studyName, dbConfigFilePath );
         Study study = null;
         List<Study> studyList = Studies.getStudies();
@@ -246,7 +317,7 @@ public class InterviewController implements EgonetMonitor
         if (study == null)
         {
             stopServer();
-            throw new Exception( "Unable to find study " + studyName );
+            throw new Exception( "Unable to find study '" + studyName + "'." );
         }
         questionList = Questions.getQuestionsForStudy( dbStudyID, null );
         this.studyName = studyName;
@@ -295,12 +366,43 @@ public class InterviewController implements EgonetMonitor
      *
      * Throws an IllegalStateException if an interview is already active, if no
      * study is active, or if the server is not running.
-     * 
+     *
      * @param clientCaseID client case ID (to be) associated with Egonet interview
-     * 
+     *
      * @throws Exception
      */
     public void beginInterview( String clientCaseID ) throws Exception
+    {
+        beginInterview( clientCaseID, null );
+    }
+
+    /**
+     * Begins an Egonet interview that is, or will be, associated with the given
+     * client's case ID.  The client's case ID is stored as the interview's
+     * response for the question denoted as being of type 'EGO_ID'.  An
+     * interview is determined to be already in existance if the study database
+     * contains an interview for which that interview's EGO_ID question
+     * response matches 'clientCaseID'.  Otherwise, a new interview is created
+     * with its EGO_ID question response containing the value of 'clientCaseID'.
+     *
+     * Implementation note: This method sets the state for a subsequent call to
+     * method getInterviewID(), which is called from the StartInterviewPage
+     * class at the point where the interview's HTML entry point is launched in
+     * the user's browser.  Specifically, if this method finds an existing
+     * interview for 'clientCaseID', class variable 'dbInterviewID' will
+     * have a non-zero value, otherwise it will be zero, indicating that a new
+     * interview must be created.  See method getInterviewID() in this class.
+     *
+     * Throws an IllegalStateException if an interview is already active, if no
+     * study is active, or if the server is not running.
+     *
+     * @param clientCaseID client case ID (to be) associated with Egonet interview
+     * @param preloadMap a Map with keys that are Egoweb question names and values
+     *        that are responses for the associated questions
+     *
+     * @throws Exception
+     */
+    public void beginInterview( String clientCaseID, Map<String,String> preloadMap ) throws Exception
     {
         if (isInterviewActive())
         {
@@ -315,9 +417,10 @@ public class InterviewController implements EgonetMonitor
             throw new IllegalStateException( "The Egonet server is not running. Call startServer()." );
         }
         this.clientCaseID = clientCaseID;
-        List<Question> localQuestionList = Questions.getQuestionsForStudy( dbStudyID, Question.QuestionType.EGO_ID );
-        egoIDQuestionType = localQuestionList.get( 0 );
-        long questionID = egoIDQuestionType.getId();
+        this.preloadMap = preloadMap;
+        preloadsHaveBeenLoaded = false;
+        loadAdminQuestions();
+        long questionID = caseIDQuestion.getId();
         List<Answer> answerList = Answers.getAnswersForQuestion( new Long( questionID ) );
         Iterator<Answer> answers = answerList.iterator();
         while ( answers.hasNext() )
@@ -335,6 +438,91 @@ public class InterviewController implements EgonetMonitor
             }
         }
         Desktop.getDesktop().browse( new URI( "http://127.0.0.1:8080" ) );
+    }
+
+    private void loadPreloadQuestions( Map<String,String> preloadMap ) throws Exception
+    {
+        StringBuffer errorBuf = new StringBuffer();
+        Set<Map.Entry<String,String>> entrySet = preloadMap.entrySet();
+        for ( Map.Entry<String,String> entry : entrySet )
+        {
+            String varName = entry.getKey();
+            String value = entry.getValue();
+            Question question = Questions.getQuestionUsingTitleAndTypeAndStudy( varName,
+                                                                                Question.QuestionType.EGO_ID,
+                                                                                dbStudyID );
+            if (question == null)
+            {
+                String s = "Question '" + varName + "' not found in Egoweb database.";
+                errorBuf.append( "\n" );
+                errorBuf.append( s );
+            }
+            else
+            {
+                try
+                {
+                    Answers.setAnswerForInterviewAndQuestion( dbInterviewID, question,
+                                                              value, "", Answer.SkipReason.NONE );
+                }
+                catch ( Exception e )
+                {
+                    String s = "Could not store response for question '" + varName + "' in Egoweb database.";
+                    errorBuf.append( "\n" );
+                    errorBuf.append( s );
+                }
+            }
+        }
+        if (errorBuf.length() != 0)
+        {
+            throw new RuntimeException( errorBuf.toString() );
+        }
+    }
+
+    private void loadAdminQuestions() throws Exception
+    {
+        List<Question> localQuestionList = Questions.getQuestionsForStudy( dbStudyID, Question.QuestionType.EGO_ID );
+        try
+        {
+            caseIDQuestion = localQuestionList.get( AdminQuestions.caseID.getPosition() );
+        }
+        catch( Exception e )
+        {
+            String s = "Egoweb 'case ID' question not found.";
+            throw new RuntimeException( s, e );
+        }
+        StringBuffer errorBuf = new StringBuffer();
+        try
+        {
+            completionStatusFlagQuestion = localQuestionList.get( AdminQuestions.completed.getPosition() );
+            completionStatusFlagEnabled = true;
+        }
+        catch( Exception e )
+        {
+            if (ensureIntrinsicFlagsExist)
+            {
+                String s = "Egoweb 'completion' status flag question not found.";
+                errorBuf.append( "\n" );
+                errorBuf.append( s );
+            }
+        }
+        try
+        {
+            everTouchedStatusFlagQuestion = localQuestionList.get( AdminQuestions.everTouched.getPosition() );
+            everTouchedStatusFlagEnabled = true;
+        }
+        catch( Exception e )
+        {
+            if (ensureIntrinsicFlagsExist)
+            {
+                String s = "Egoweb 'everTouched' status flag question not found.";
+                errorBuf.append( "\n" );
+                errorBuf.append( s );
+            }
+        }
+        if (errorBuf.length() != 0)
+        {
+            throw new RuntimeException( errorBuf.toString() );
+        }
     }
 
     /**
@@ -396,7 +584,7 @@ public class InterviewController implements EgonetMonitor
             ArrayList<Answer> answers = new ArrayList<Answer>();
             interview = Interviewing.findOrCreateMatchingInterviewForStudy( dbStudyID, answers );
             dbInterviewID = interview.getId();
-            Answers.setAnswerForInterviewAndQuestion( dbInterviewID, egoIDQuestionType,
+            Answers.setAnswerForInterviewAndQuestion( dbInterviewID, caseIDQuestion,
                                                       clientCaseID, "", Answer.SkipReason.NONE );
         }
         return dbInterviewID;
@@ -439,9 +627,34 @@ public class InterviewController implements EgonetMonitor
         }
         String response = "";
         Answer answer = Answers.getAnswerForInterviewAndQuestion( dbInterviewID, question );
-        if (answer != null)
+        if (answer != null) // CASE-3225
         {
             response = answer.getValue();
+            if (question.getAnswerType() == Answer.AnswerType.SELECTION
+                || question.getAnswerType() == Answer.AnswerType.MULTIPLE_SELECTION) // CASE-3215
+            {
+                String selectionResponse = null;
+// CASE-3243    long answerID = answer.getId().longValue();
+                List<QuestionOption> optionList = Options.getOptionsForQuestion( question.getId() );
+                for ( QuestionOption option : optionList )
+                {
+                    long optionID = option.getId().longValue();
+                    String optionIDString = new Long( optionID ).toString(); // CASE-3243
+// CASE-3243        if (optionID == answerID)
+                    if (optionIDString.equals( response )) // CASE-3243
+                    {
+                        selectionResponse = option.getValue();
+                        break;
+                    }
+                }
+                if (selectionResponse == null)
+                {
+                    String s = "No selection value found for answer to question '" +
+                               question.getTitle() + "'.";
+                    selectionResponse = ""; // CASE-3238
+                }
+                response = selectionResponse;
+            }
         }
         return response;
     }
@@ -497,6 +710,29 @@ public class InterviewController implements EgonetMonitor
      */
     public void userActivityOccurred()
     {
+        if (everTouchedStatusFlagEnabled)
+        {
+            try
+            {
+                setIntrinsicFlag( everTouchedStatusFlagQuestion ); // CASE-3219
+                if (!preloadsHaveBeenLoaded && preloadMap != null) // CASE-3228
+                {
+                    try
+                    {
+                        loadPreloadQuestions( preloadMap ); // CASE-3220
+                    }
+                    catch( Exception e )
+                    {
+                        throw new RuntimeException( e );
+                    }
+                    preloadsHaveBeenLoaded = true;
+                }
+            }
+            catch( RuntimeException e )
+            {
+                e.toString(); // An exception occurs the very first time an interview is touched
+            }
+        }
         if (isInterviewActive())
         {
             fireInterviewActivityOccurred( studyName, clientCaseID );
@@ -508,22 +744,41 @@ public class InterviewController implements EgonetMonitor
      */
     public void interviewHasEnded()
     {
+        if (completionStatusFlagEnabled)
+        {
+            setIntrinsicFlag( completionStatusFlagQuestion ); // CASE-3219
+        }
         endInterview_work();
+    }
+
+    private void setIntrinsicFlag( Question question ) // CASE-3219
+    {
+        Answers.setAnswerForInterviewAndQuestion( dbInterviewID, question,
+                                                  "1", "", Answer.SkipReason.NONE );
     }
 
 // --------------------------------- main -----------------------------------
 
 	public static void main( String[] args ) throws Exception
     {
-        String testStudyName = "ChrisTest1";
-        String dbConfigFilePath = "C:/csm/Test6/vntest/_vn_/egonet/hibernate.cfg.xml";
+        String testStudyName = "EgoWebSample";
+//      String dbConfigFilePath = "C:/Studies/cases6.0/server1/ChrisTest1/_vn_/Egonet/_client_/hibernate.cfg.xml";
+        String dbConfigFilePath = "C:/Studies/cases6.0/server1/EgoWebSample/_vn_/Egonet/_server_/hibernate.cfg.xml";
 		InterviewController controller = InterviewController.getInstance();
         controller.startServer();
-        controller.beginStudy( testStudyName, dbConfigFilePath );
-        controller.beginInterview( "012" );
+        controller.beginStudy( testStudyName, dbConfigFilePath, false );
+        controller.beginInterview( "007", getTestPreloadsMap() );
 //      String response = controller.getQuestionResponse( "ego_ques_1" );
 //      response.toString();
 //      controller.endInterview();
 //      controller.stopServer();
 	}
+
+    private static Map<String,String> getTestPreloadsMap()
+    {
+        Map<String,String> preloads = new HashMap<String,String>();
+        preloads.put( "site", "1" );
+        preloads.put( "touched", "1" );
+        return preloads;
+    }
 }
