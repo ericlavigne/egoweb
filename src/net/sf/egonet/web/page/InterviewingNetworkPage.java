@@ -363,11 +363,11 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					if (ansValue == null)
 						return vColors[4];
 
-					if (ansValue.contains("1"))
+					if (ansValue.contains("0"))
 						return vColors[1];
-					if (ansValue.contains("2"))
+					if (ansValue.contains("1"))
 						return vColors[2];
-					if (ansValue.contains("3"))
+					if (ansValue.contains("2"))
 						return vColors[3];
 					
 					return vColors[4];
@@ -435,11 +435,11 @@ public class InterviewingNetworkPage extends InterviewingPage {
 							String shapeAnsValue = shapeAns.getValue();
 							if (shapeAnsValue != null)
 							{
-								if (shapeAnsValue.contains("1"))
+								if (shapeAnsValue.contains("0"))
 									vtxShape = vertexSquare;
-								else if (shapeAnsValue.contains("2"))
+								else if (shapeAnsValue.contains("1"))
 									vtxShape = vertexPentagon;
-								else if (shapeAnsValue.contains("3"))
+								else if (shapeAnsValue.contains("2"))
 									vtxShape = vertexHexagon;
 							}
 						}
@@ -457,17 +457,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						if (sizeAnsValue != null)
 						{
 							AffineTransform vtxResize = new AffineTransform();
-							if (sizeAnsValue.contains("1"))
+							if (sizeAnsValue.contains("0"))
 							{
 								vtxResize.scale(1.45, 1.45);
 								return vtxResize.createTransformedShape(vtxShape);
 							}
-							if (sizeAnsValue.contains("2"))
+							if (sizeAnsValue.contains("1"))
 							{
 								vtxResize.scale(1.85, 1.85);
 								return vtxResize.createTransformedShape(vtxShape);
 							}
-							if (sizeAnsValue.contains("3"))
+							if (sizeAnsValue.contains("2"))
 							{
 								vtxResize.scale(2.6, 2.6);
 								return vtxResize.createTransformedShape(vtxShape);
@@ -511,11 +511,11 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					if (ansValue == null)
 						return eColors[0];
 
-					if (ansValue.contains("1"))
+					if (ansValue.contains("0"))
 						return eColors[1];
-					if (ansValue.contains("2"))
+					if (ansValue.contains("1"))
 						return eColors[2];
-					if (ansValue.contains("3"))
+					if (ansValue.contains("2"))
 						return eColors[3];
 					
 					return eColors[0];
@@ -556,11 +556,11 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					if (ansValue == null)
 						return new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 			
-					if (ansValue.contains("1"))
+					if (ansValue.contains("0"))
 						return new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("2"))
+					if (ansValue.contains("1"))
 						return new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("3"))
+					if (ansValue.contains("2"))
 						return new BasicStroke(8.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 					
 						return new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
