@@ -2,17 +2,23 @@
 <project default="run" name="egoweb" basedir=".">
 
 	<property name="src.dir" value="src"/>
+	<property name="test.dir" value="test"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="static.dir" value="static"/>
 	<property name="build.dir" value="build"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="main.class.web" value="net.sf.egonet.web.ServerGui" />
 	<property name="launch4j.dir" location="lib/launch4j" />
-	
+
 	<path id="build.classpath">
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
+	</path>
+	
+	<path id="run.classpath">
+		<path refid="build.classpath"/>
+		<pathelement path="${build.dir}"/>
 	</path>
 
 	<path id="launch4j.classpath">
@@ -39,8 +45,15 @@
 		<javac destdir="${build.dir}" srcdir="${src.dir}" classpathref="build.classpath">
 			<compilerarg value="-Xlint:unchecked" />
 		</javac>
+		<javac destdir="${build.dir}" srcdir="${test.dir}" classpathref="run.classpath">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}">
+				<include name="**/*.*"/>
+				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="${test.dir}">
 				<include name="**/*.*"/>
 				<exclude name="**/*.java"/>
 			</fileset>
@@ -49,12 +62,23 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java classname="${main.class.web}" fork="true">
+		<java classname="${main.class.web}" fork="true" classpathref="run.classpath" />
+	</target>
+	
+	<target name="test" depends="compile">
+		<mkdir dir="junittemp"/>
+		<junit fork="true" forkmode="once" showoutput="true" printsummary="true" 
+			failureProperty="test.failure" tempdir="junittemp">
 			<classpath>
-				<path refid="build.classpath"/>
-				<pathelement path="${build.dir}"/>
+				<path refid="run.classpath"/>
 			</classpath>
-		</java>
+	        <formatter type="brief" usefile="false" /> 
+	        <batchtest> 
+	           <fileset dir="${build.dir}" includes="**/*Test*.class" /> 
+	        </batchtest> 
+		</junit>
+		<delete dir="junittemp" failonerror="false"/>
+		<fail message="Test failed!" if="test.failure" />
 	</target>
 	
 	<target name="jar" depends="compile">
