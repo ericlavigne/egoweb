@@ -399,6 +399,12 @@ public class Archiving {
 		addAttribute(questionNode,"pageLevelDontKnowButton", question.getPageLevelDontKnowButton());
 		addAttribute(questionNode,"pageLevelRefuseButton", question.getPageLevelRefuseButton());
 		addAttribute(questionNode,"dontKnowButton", question.getDontKnowButton());
+		addAttribute(questionNode,"networkRelationshipExprId", question.getNetworkRelationshipExprId());
+		addAttribute(questionNode,"networkNShapeQId", question.getNetworkNShapeQId());
+		addAttribute(questionNode,"networkNColorQId", question.getNetworkNColorQId());
+		addAttribute(questionNode,"networkNSizeQId", question.getNetworkNSizeQId());
+		addAttribute(questionNode,"networkEColorQId", question.getNetworkEColorQId());
+		addAttribute(questionNode,"networkESizeQId", question.getNetworkESizeQId());
 		addAttribute(questionNode,"refuseButton", question.getRefuseButton());
 		addAttribute(questionNode,"allOptionString", question.getAllOptionString());		
 		aType = question.getAnswerType();
@@ -537,6 +543,30 @@ public class Archiving {
 		question.setAnswerReasonExpressionId(
 				remoteReasonId == null ? null : 
 					remoteToLocalExpressionId.get(remoteReasonId));
+
+		try
+		{
+			Long remoteNetworkRelationshipId = attrLong(node,"answerNetworkRelationshipExpressionId");
+			question.setNetworkRelationshipExprId(
+					remoteNetworkRelationshipId == null ? null : 
+						remoteToLocalExpressionId.get(remoteNetworkRelationshipId));
+
+			question.setNetworkNShapeQId(attrLong(node, "networkNShapeQId"));
+			question.setNetworkNColorQId(attrLong(node, "networkNColorQId"));
+			question.setNetworkNSizeQId(attrLong(node, "networkNSizeQId"));
+			question.setNetworkEColorQId(attrLong(node, "networkEColorQId"));
+			question.setNetworkESizeQId(attrLong(node, "networkESizeQId"));
+		}
+		catch (java.lang.RuntimeException rte)
+		{
+			question.setNetworkRelationshipExprId(null);	
+			question.setNetworkNShapeQId(null);
+			question.setNetworkNColorQId(null);
+			question.setNetworkNSizeQId(null);
+			question.setNetworkEColorQId(null);
+			question.setNetworkESizeQId(null);
+		}
+
 		DB.save(session, question);
 	}
 	

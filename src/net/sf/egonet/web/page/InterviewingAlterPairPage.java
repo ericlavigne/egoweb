@@ -221,7 +221,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 					nextSubject.question,
 					comeFrom,nextPage);
 		}
-		return new InterviewingConclusionPage(interviewId);
+		return InterviewingNetworkPage.askNext(interviewId, null, comeFrom);
 	}
 	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject, EgonetPage comeFrom) {
 		Subject previousSubject =

@@ -11,6 +11,7 @@ import net.sf.egonet.web.page.InterviewingAlterPage;
 import net.sf.egonet.web.page.InterviewingAlterPairPage;
 import net.sf.egonet.web.page.InterviewingAlterPromptPage;
 import net.sf.egonet.web.page.InterviewingEgoPage;
+import net.sf.egonet.web.page.InterviewingNetworkPage;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -119,6 +120,31 @@ public class InterviewNavigationPanel extends Panel {
 		}
 	}
 	
+	public static class NetworkLink implements InterviewLink
+	{
+		private Long interviewId;
+		private Question question;
+		private InterviewingNetworkPage page;
+		public	NetworkLink(Long interviewId, Question question)
+		{
+			this.interviewId = interviewId;
+			this.question = question;
+		}
+		public EgonetPage getPage()
+		{
+			if (page == null)
+			{
+				page = new InterviewingNetworkPage(interviewId, question);
+			}
+			return page;
+		}
+		public String toString()
+		{
+			return "Network : " + question.getTitle();
+		}
+	}
+
+
 	public List<InterviewLink> getLinks() {
 		return links;
 	}

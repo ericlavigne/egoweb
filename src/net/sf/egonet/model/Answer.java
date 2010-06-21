@@ -4,7 +4,7 @@ import net.sf.egonet.model.Question.QuestionType;
 
 public class Answer extends Entity
 {
-	public static enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION, DATE, TIME_SPAN };
+	public static enum AnswerType { TEXTUAL, NUMERICAL, SELECTION, MULTIPLE_SELECTION, DATE, TIME_SPAN, TEXTUAL_PP };
 	public static enum SkipReason { NONE, REFUSE, DONT_KNOW };
 
 	private Long questionId;

@@ -30,7 +30,65 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 public class EditQuestionPanel extends Panel {
-	
+
+	/*
+	 * For NETWORK questions, the question-editor panel will have several
+	 * DropDownChoice controls listing ALTER and ALTER_PAIR questions.
+	 * The interview author can select these questions to set parameters
+	 * used in network graph rendering, varying node/edge parameters
+	 * based on an interviewee's response. 
+	 * 
+	 * The NetworkQuestionTId class contains the title and ID# for a question
+	 * listed in one of these DropDownChoice controls, and the ID# will be used
+	 * to configure the NETWORK question.
+	 */
+	private class NetworkQuestionTId
+	{
+		public String title;
+		public Long id;
+
+		public NetworkQuestionTId()
+		{
+		}
+
+		public NetworkQuestionTId(String _title, Long _id)
+		{
+			title = _title;
+			id = _id;
+		}
+
+		@Override
+		public String toString()
+		{
+			return title;
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (this == o)
+				return true;
+			if (o == null)
+				return false;
+			if (getClass() != o.getClass())
+				return false;
+			final NetworkQuestionTId toCompare = (NetworkQuestionTId)o;
+			return (title.equals(toCompare.title) && (id.compareTo(toCompare.id) == 0));
+
+		}
+
+		@Override
+		public int hashCode()
+		{
+			int hash = 1;
+			if (title != null)
+				hash = hash * 31 + title.hashCode();
+			if (id != null)
+				hash = hash * 31 + id.hashCode();
+			return hash;
+		}
+	}
+
 	private Question question;
 
 	private FeedbackPanel feedbackPanel;
@@ -57,6 +115,20 @@ public class EditQuestionPanel extends Panel {
 	private ListLimitsPanel listLimitsPanel;
 	
 	private static final String answerAlways = "Always";
+
+	private Model networkRelationshipExpr;
+	private NetworkQuestionTId nodeShapeId;
+	private NetworkQuestionTId nodeColorId;
+	private NetworkQuestionTId nodeSizeId;
+	private NetworkQuestionTId edgeColorId;
+	private NetworkQuestionTId edgeSizeId;
+
+	private DropDownChoice networkRelationshipExprChoice;
+	private DropDownChoice nodeShapeIdChoice;
+	private DropDownChoice nodeColorIdChoice;
+	private DropDownChoice nodeSizeIdChoice;
+	private DropDownChoice edgeColorIdChoice;
+	private DropDownChoice edgeSizeIdChoice;
 	
 	private Component parentThatNeedsUpdating;
 
@@ -128,7 +200,13 @@ public class EditQuestionPanel extends Panel {
 		questionCitationField = new TextArea("questionCitationField", new Model(""));
 		form.add(questionCitationField);
 
-		questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); // Could also leave this null.
+		// For NETWORK questions, default to a large text box for answer-entry
+		boolean networkQuestion = question.getType().equals(Question.QuestionType.NETWORK);
+		if (networkQuestion)
+			questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL_PP);
+		else
+			questionResponseTypeModel = new Model(Answer.AnswerType.TEXTUAL); 
+
 		dropDownQuestionTypes = new DropDownChoice(
 				"questionResponseTypeField",
 				questionResponseTypeModel,
@@ -183,7 +261,8 @@ public class EditQuestionPanel extends Panel {
 		form.add(askingStyleListLabel);
 		form.add(askingStyleListField);
 		if(question.getType().equals(Question.QuestionType.EGO) ||
-				question.getType().equals(Question.QuestionType.EGO_ID))
+				question.getType().equals(Question.QuestionType.EGO_ID) ||
+				question.getType().equals(Question.QuestionType.NETWORK))
 		{
 			askingStyleListLabel.setVisible(false);
 			askingStyleListField.setVisible(false);
@@ -225,6 +304,115 @@ public class EditQuestionPanel extends Panel {
 		// questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		// form.add(questionUseIfField);
 		
+		
+		// Configuration options for network questions (hidden/not populated for other question types)
+		if (networkQuestion)
+		{
+			List<NetworkQuestionTId> alterQs = new ArrayList<NetworkQuestionTId>();
+			for (Question q : Questions.getQuestionsForStudy(question.getStudyId(), Question.QuestionType.ALTER))
+			{
+				alterQs.add(new NetworkQuestionTId(q.getTitle(), q.getId()));
+			}
+
+			List<NetworkQuestionTId> alterPairQs = new ArrayList<NetworkQuestionTId>();
+			for (Question q : Questions.getQuestionsForStudy(question.getStudyId(), Question.QuestionType.ALTER_PAIR))
+			{
+				alterPairQs.add(new NetworkQuestionTId(q.getTitle(), q.getId()));
+			}
+
+			List<NetworkQuestionTId> alterQsOptional = new ArrayList<NetworkQuestionTId>();
+			alterQsOptional.add(null);
+			alterQsOptional.addAll(alterQs);
+
+			List<NetworkQuestionTId> alterPairQsOptional = new ArrayList<NetworkQuestionTId>();
+			alterPairQsOptional.add(null);
+			alterPairQsOptional.addAll(alterPairQs);
+
+			/*
+			 * The Expression used to determine whether an edge exists between each pair 
+			 * of alters. Without this, the network graph cannot be created.
+			 */
+			if (networkRelationshipExpr == null)
+				networkRelationshipExpr = new Model();
+			networkRelationshipExprChoice = new DropDownChoice(
+					"networkRelationshipField",
+					networkRelationshipExpr,
+					Expressions.forStudy(question.getStudyId()));
+
+			nodeShapeId = new NetworkQuestionTId();
+			nodeShapeIdChoice = new DropDownChoice(
+					"networkNodeShapeField",
+					new PropertyModel(this, "nodeShapeId"),
+					alterQsOptional);
+
+			nodeColorId = new NetworkQuestionTId();
+			nodeColorIdChoice = new DropDownChoice(
+					"networkNodeColorField",
+					new PropertyModel(this, "nodeColorId"),
+					alterQsOptional);
+
+			nodeSizeId = new NetworkQuestionTId();
+			nodeSizeIdChoice = new DropDownChoice(
+					"networkNodeSizeField",
+					new PropertyModel(this, "nodeSizeId"),
+					alterQsOptional);
+
+			edgeColorId = new NetworkQuestionTId();
+			edgeColorIdChoice = new DropDownChoice(
+					"networkEdgeColorField",
+					new PropertyModel(this, "edgeColorId"),
+					alterPairQsOptional);
+
+			edgeSizeId = new NetworkQuestionTId();
+			edgeSizeIdChoice = new DropDownChoice(
+					"networkEdgeSizeField",
+					new PropertyModel(this, "edgeSizeId"),
+					alterPairQsOptional);
+		}
+		else
+		{
+			networkRelationshipExprChoice = new DropDownChoice("networkRelationshipField");
+			nodeShapeIdChoice = new DropDownChoice("networkNodeShapeField");
+			nodeColorIdChoice = new DropDownChoice("networkNodeColorField");
+			nodeSizeIdChoice = new DropDownChoice("networkNodeSizeField");
+			edgeColorIdChoice = new DropDownChoice("networkEdgeColorField");
+			edgeSizeIdChoice = new DropDownChoice("networkEdgeSizeField");
+		}
+		Label networkRelationshipLabel = new Label("networkRelationshipLabel","Alters are adjacent when:");
+		Label networkNodeShapeLabel = new Label("networkNodeShapeLabel", "Alter attribute for network node shape (optional):");
+		Label networkNodeColorLabel = new Label("networkNodeColorLabel", "Alter attribute for network node color (optional):");
+		Label networkNodeSizeLabel = new Label("networkNodeSizeLabel", "Alter attribute for network node size (optional):");
+		Label networkEdgeColorLabel = new Label("networkEdgeColorLabel", "Alter attribute for network edge color (optional):");
+		Label networkEdgeSizeLabel = new Label("networkEdgeSizeLabel", "Alter attribute for network edge size (optional):");
+
+		form.add(networkRelationshipExprChoice);
+		form.add(nodeShapeIdChoice);
+		form.add(nodeColorIdChoice);
+		form.add(nodeSizeIdChoice);
+		form.add(edgeColorIdChoice);
+		form.add(edgeSizeIdChoice);
+
+		form.add(networkRelationshipLabel);
+		form.add(networkNodeShapeLabel);
+		form.add(networkNodeColorLabel);
+		form.add(networkNodeSizeLabel);
+		form.add(networkEdgeColorLabel);
+		form.add(networkEdgeSizeLabel);
+
+		networkRelationshipExprChoice.setVisible(networkQuestion);
+		nodeShapeIdChoice.setVisible(networkQuestion);
+		nodeColorIdChoice.setVisible(networkQuestion);
+		nodeSizeIdChoice.setVisible(networkQuestion);
+		edgeColorIdChoice.setVisible(networkQuestion);
+		edgeSizeIdChoice.setVisible(networkQuestion);
+
+		networkRelationshipLabel.setVisible(networkQuestion);
+		networkNodeShapeLabel.setVisible(networkQuestion);
+		networkNodeColorLabel.setVisible(networkQuestion);
+		networkNodeSizeLabel.setVisible(networkQuestion);
+		networkEdgeColorLabel.setVisible(networkQuestion);
+		networkEdgeSizeLabel.setVisible(networkQuestion);
+
 		form.add(
 			new AjaxFallbackButton("submitQuestion",form)
             {
@@ -302,6 +490,87 @@ public class EditQuestionPanel extends Panel {
 		multipleSelectionLimitsPanel.setMaxCheckableBoxes ( question.getMaxCheckableBoxes());
 		
 		listLimitsPanel.setQuestion(question);
+	
+		if (question.getType() == QuestionType.NETWORK)
+		{
+			nodeShapeId = null;
+			nodeColorId = null;
+			nodeSizeId = null;
+			edgeColorId = null;
+			edgeSizeId = null;
+			
+			Long questionRelationshipExprId = question.getNetworkRelationshipExprId();
+			Long questionNShapeQId = question.getNetworkNShapeQId();
+			Long questionNColorQId = question.getNetworkNColorQId();
+			Long questionNSizeQId = question.getNetworkNSizeQId();
+			Long questionEColorQId = question.getNetworkEColorQId();
+			Long questionESizeQId = question.getNetworkESizeQId();
+
+			List<Question> alterQs = Questions.getQuestionsForStudy(question.getStudyId(), Question.QuestionType.ALTER);
+			List<Question> alterPairQs = Questions.getQuestionsForStudy(question.getStudyId(), Question.QuestionType.ALTER_PAIR);
+			
+			if (questionRelationshipExprId != null)
+			{
+
+				networkRelationshipExpr.setObject(Expressions.get(questionRelationshipExprId));
+			}
+
+			if (questionNShapeQId != null)
+			{
+				for(Question q : alterQs)
+				{
+					if (questionNShapeQId.compareTo(q.getId()) == 0)
+					{
+						nodeShapeId = new NetworkQuestionTId(q.getTitle(), q.getId());
+						break;
+					}
+				}
+			}
+			if (questionNColorQId != null)
+			{
+				for(Question q : alterQs)
+				{
+					if (questionNColorQId.compareTo(q.getId()) == 0)
+					{
+						nodeColorId = new NetworkQuestionTId(q.getTitle(), q.getId());
+						break;
+					}
+				}
+			}
+			if (questionNSizeQId != null)
+			{
+				for(Question q : alterQs)
+				{
+					if (questionNSizeQId.compareTo(q.getId()) == 0)
+					{
+						nodeSizeId = new NetworkQuestionTId(q.getTitle(), q.getId());
+						break;
+					}
+				}
+			}
+			if (questionEColorQId != null)
+			{
+				for(Question q : alterPairQs)
+				{
+					if (questionEColorQId.compareTo(q.getId()) == 0)
+					{
+						edgeColorId = new NetworkQuestionTId(q.getTitle(), q.getId());
+						break;
+					}
+				}
+			}
+			if (questionESizeQId != null)
+			{
+				for(Question q : alterPairQs)
+				{
+					if (questionESizeQId.compareTo(q.getId()) == 0)
+					{
+						edgeSizeId = new NetworkQuestionTId(q.getTitle(), q.getId());
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	private void insertFormFieldsIntoQuestion(Question question) {
@@ -347,6 +616,28 @@ public class EditQuestionPanel extends Panel {
 	        question.setAllButton(listLimitsPanel.getAllButton());
 	        question.setNoneButton(listLimitsPanel.getNoneButton());
 	        question.setAllOptionString(listLimitsPanel.getAllOptionString());
+		}
+		if (question.getType() == QuestionType.NETWORK)
+		{
+			if (networkRelationshipExpr != null)
+			{
+				Expression adjacencyExpr = (Expression) networkRelationshipExpr.getObject();
+				question.setNetworkRelationshipExprId(
+					adjacencyExpr == null? null : adjacencyExpr.getId());
+			}
+			else
+			{
+			}
+			question.setNetworkNShapeQId(
+				nodeShapeId == null ? null : ((NetworkQuestionTId)nodeShapeId).id);
+			question.setNetworkNColorQId(
+				nodeColorId == null ? null : ((NetworkQuestionTId)nodeColorId).id);
+			question.setNetworkNSizeQId(
+				nodeSizeId == null ? null : ((NetworkQuestionTId)nodeSizeId).id);
+			question.setNetworkEColorQId(
+				edgeColorId == null ? null : ((NetworkQuestionTId)edgeColorId).id);
+			question.setNetworkESizeQId(
+				edgeSizeId == null ? null : ((NetworkQuestionTId)edgeSizeId).id);
 		}
 	}
 	
