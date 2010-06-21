@@ -108,7 +108,8 @@ public class Answers {
 	{
 		Integer numAlters = alters.size();
 		if(question.getType().equals(QuestionType.EGO) || 
-				question.getType().equals(QuestionType.EGO_ID)) 
+				question.getType().equals(QuestionType.EGO_ID) ||
+				question.getType().equals(QuestionType.NETWORK)) 
 		{
 			if(numAlters > 0) {
 				throw new IllegalArgumentException(question.getType()+" questions have zero alters, not "+numAlters+".");

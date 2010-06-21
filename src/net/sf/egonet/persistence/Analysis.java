@@ -417,6 +417,7 @@ public class Analysis {
 		}
 		if(question.getAnswerType().equals(Answer.AnswerType.NUMERICAL) ||
 				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL) ||
+				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL_PP) ||
 				question.getAnswerType().equals(Answer.AnswerType.DATE) ||
 				question.getAnswerType().equals(Answer.AnswerType.TIME_SPAN))
 				{

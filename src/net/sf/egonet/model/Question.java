@@ -8,7 +8,7 @@ import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
 public class Question extends OrderedEntity
 {
-	public static enum QuestionType { EGO_ID, EGO, ALTER, ALTER_PAIR };
+	public static enum QuestionType { EGO_ID, EGO, ALTER, ALTER_PAIR, NETWORK };
 
 	private Long studyId;
 	private String title;    // Gender
@@ -22,6 +22,13 @@ public class Question extends OrderedEntity
 	private QuestionType type;
 	private Boolean askingStyleList;
 	private Long answerReasonExpressionId; // Answer the question if this expression is null or true
+	private Long networkRelationshipExprId;
+	private Long networkNShapeQId;
+	private Long networkNColorQId;
+	private Long networkNSizeQId;
+	private Long networkEColorQId;
+	private Long networkESizeQId;
+
 	// an 'additional logic' expression in string form
 	// to be evaluated if answerReasonExpressionId is null
 	private String useIfExpression;
@@ -209,6 +216,10 @@ public class Question extends OrderedEntity
 	  */
 	public boolean isAboutRelationship() { return getType() == QuestionType.ALTER_PAIR; }
 
+	/** Whether the question describes the network of the interviewee's alters
+	  */
+	public boolean isAboutNetwork() { return getType() == QuestionType.NETWORK; }
+
 	public boolean needsTextualResponse()        { return getAnswerType() == AnswerType.TEXTUAL;            }
 	public boolean needsNumericalResponse()      { return getAnswerType() == AnswerType.NUMERICAL;          }
 	public boolean needsSelectionResponse()      { return getAnswerType() == AnswerType.SELECTION;          }
@@ -221,6 +232,68 @@ public class Question extends OrderedEntity
 	public Long getAnswerReasonExpressionId() {
 		return answerReasonExpressionId;
 	}
+
+	public void setNetworkRelationshipExprId(Long expId)
+	{
+		this.networkRelationshipExprId = expId;
+	}
+
+	public Long getNetworkRelationshipExprId()
+	{
+		return networkRelationshipExprId;
+	}
+
+	public void setNetworkNShapeQId(Long qid)
+	{
+		this.networkNShapeQId = qid;
+	}
+
+	public Long getNetworkNShapeQId()
+	{
+		return networkNShapeQId;
+	}
+
+	public void setNetworkNColorQId(Long qid)
+	{
+		this.networkNColorQId = qid;
+	}
+
+	public Long getNetworkNColorQId()
+	{
+		return networkNColorQId;
+	}
+
+	public void setNetworkNSizeQId(Long qid)
+	{
+		this.networkNSizeQId = qid;
+	}
+
+	public Long getNetworkNSizeQId()
+	{
+		return networkNSizeQId;
+	}
+
+	public void setNetworkEColorQId(Long qid)
+	{
+		this.networkEColorQId = qid;
+	}
+
+	public Long getNetworkEColorQId()
+	{
+		return networkEColorQId;
+	}
+
+	public void setNetworkESizeQId(Long qid)
+	{
+		this.networkESizeQId = qid;
+	}
+
+	public Long getNetworkESizeQId()
+	{
+		return networkESizeQId;
+	}
+
+
 	
 	// ---------------------------------
 

@@ -23,6 +23,6 @@
 		<property name="studyId" column="study_id" />
 		<property name="questionId" column="question_id" />
 		
-		<property name="ordering" column="ordering" />
+		<!-- <property name="ordering" column="ordering" /> -->
 	</class>
 </hibernate-mapping>

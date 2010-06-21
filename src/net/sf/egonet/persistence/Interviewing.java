@@ -16,6 +16,7 @@ import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.egonet.web.page.InterviewingAlterPage;
 import net.sf.egonet.web.page.InterviewingAlterPairPage;
+import net.sf.egonet.web.page.InterviewingNetworkPage;
 import net.sf.egonet.web.panel.InterviewNavigationPanel;
 import net.sf.egonet.web.panel.InterviewNavigationPanel.InterviewLink;
 import net.sf.functionalj.tuple.Pair;
@@ -265,6 +266,80 @@ public class Interviewing {
 		}
 	}
 	
+	public static Question nextNetworkQuestionForInterview(
+			final Long interviewId, final Question current, 
+			final Boolean forward, final Boolean unansweredOnly) 
+	{
+		return DB.withTx(new Function<Session,Question>() {
+			public Question apply(Session session) {
+				return nextNetworkQuestionForInterview(session,interviewId,current,forward,unansweredOnly);
+			}
+		});
+	}
+	
+	public static Question nextNetworkQuestionForInterview(
+			Session session, Long interviewId, Question current, Boolean forward, Boolean unansweredOnly)
+	{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.NETWORK);
+		if(! forward) {
+			Collections.reverse(questions);
+		}
+		List<Answer> answers = 
+			Answers.getAnswersForInterview(session, interviewId, QuestionType.NETWORK);
+		Boolean passedCurrent = current == null;
+		EvaluationContext context = Expressions.getContext(session, interview);
+		for(Question question : questions) {
+			Boolean foundAnswer = false;
+			for(Answer answer : answers) {
+				if(answer.getQuestionId().equals(question.getId())) {
+					foundAnswer = true;
+				}
+			}
+			if(unansweredOnly && foundAnswer) {
+				// Looking for unanswered. This one is answered. Not the question we're looking for.
+			} else if(passedCurrent) { 
+				Long reasonId = question.getAnswerReasonExpressionId();
+				Boolean shouldAnswer = 
+					reasonId == null || 
+					Expressions.evaluateAsBool(
+							context.eidToExpression.get(reasonId), 
+							new ArrayList<Alter>(), 
+							context);
+				if(shouldAnswer) {
+					return question;
+				}
+			}
+			if(current != null && question.getId().equals(current.getId())) {
+				passedCurrent = true;
+			}
+		}
+		return null;
+	}
+
+	public static List<Question> answeredNetworkQuestionsForInterview(
+			Session session, EvaluationContext context, Long interviewId) 
+			{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.NETWORK);
+		List<Question> answeredQuestions = Lists.newArrayList();
+		for(Question question : questions) {
+			Long reasonId = question.getAnswerReasonExpressionId();
+			Boolean shouldAnswer = 
+				reasonId == null || 
+				Expressions.evaluateAsBool(
+						context.eidToExpression.get(reasonId), 
+						new ArrayList<Alter>(), 
+						context);
+			if(shouldAnswer && context.qidToEgoAnswer.get(question.getId()) != null) {
+				answeredQuestions.add(question);
+			}
+		}
+		return answeredQuestions;
+	}
+
 	// Note: sections only relevant for alter and alter pair questions... for now...
 	private static Map<Long,TreeSet<Question>> 
 	createQuestionIdToSectionMap(Collection<Question> questions) 
@@ -599,6 +674,9 @@ public class Interviewing {
 			answeredAlterPairPagesForInterview(session,context,interviewId)) 
 		{
 			links.add(new InterviewNavigationPanel.AlterPairLink(alterPairSubject));
+		}
+		for(Question networkQuestion : answeredNetworkQuestionsForInterview(session,context,interviewId)) {
+			links.add(new InterviewNavigationPanel.NetworkLink(interviewId,networkQuestion));
 		}
 		return links;
 	}

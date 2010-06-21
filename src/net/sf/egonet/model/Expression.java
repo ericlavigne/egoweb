@@ -11,7 +11,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class Expression extends OrderedEntity {
+public class Expression extends Entity {
 	
 	public static enum Operator 
 		{All,Some,None,Equals,Contains,Greater,GreaterOrEqual,LessOrEqual,Less,Count,Sum}
@@ -78,7 +78,8 @@ public class Expression extends OrderedEntity {
 		if(answerType.equals(AnswerType.NUMERICAL)) {
 			return Type.Number;
 		}
-		if(answerType.equals(AnswerType.TEXTUAL)) {
+		if(answerType.equals(AnswerType.TEXTUAL) ||
+			answerType.equals(AnswerType.TEXTUAL_PP)) {
 			return Type.Text;
 		}
 		return Type.Selection;

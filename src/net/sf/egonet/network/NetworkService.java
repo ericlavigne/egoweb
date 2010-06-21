@@ -18,6 +18,7 @@ import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import java.awt.Shape;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -32,14 +33,45 @@ public class NetworkService
     		LayoutOption layoutOption, Color backgroundColor, 
     		Transformer<N,String> nodeLabeller)
     {
-        final int width  = 1600;
-        final int height = 800;
+		return createImage(network, layoutOption, backgroundColor, nodeLabeller, null, null, null, null);
+    }
+
+	public static <N> BufferedImage createImage(Network<N> network, 
+		LayoutOption layoutOption, Color backgroundColor, 
+		Transformer<N,String> nodeLabeller,
+		Transformer<N,Paint> nodeColorizer,
+		Transformer<N,Shape> nodeShaper,
+		Transformer<PairUni<N>,Stroke> edgeSizer,
+		Transformer<PairUni<N>,Paint> edgeColorizer)
+	{
+		int width = 1600;
+		int height = 800;
+		return createImage(network, 
+						layoutOption,
+						backgroundColor,
+						width,
+						height,
+						nodeLabeller,
+						nodeColorizer,
+						nodeShaper,
+						edgeSizer,
+						edgeColorizer);
+	}
+
+	public static <N> BufferedImage createImage(Network<N> network, 
+    		LayoutOption layoutOption, Color backgroundColor, 
+			int width,
+			int height,
+    		Transformer<N,String> nodeLabeller,
+			Transformer<N,Paint> nodeColorizer,
+			Transformer<N,Shape> nodeShaper,
+			Transformer<PairUni<N>,Stroke> edgeSizer,
+			Transformer<PairUni<N>,Paint> edgeColorizer)
+	{
         final Color nodeColor = Color.GREEN;
         final boolean labelVertices = true;
         final boolean labelEdges = false;
 		final Point center = new Point(0,0);
-//        float dash[] = {10.0f};
-//        final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
         final Stroke edgeStroke = new BasicStroke();
 
         //--------------------
@@ -64,7 +96,6 @@ public class NetworkService
         VisualizationImageServer<N,PairUni<N>> vv = new VisualizationImageServer<N,PairUni<N>>(layout, d);
         vv.getRenderContext().setVertexFillPaintTransformer(newVertexPainter(network, nodeColor));
         vv.setBackground(backgroundColor == null ? Color.WHITE : backgroundColor);
-        vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(network, edgeStroke));
         vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
         if (labelVertices) {
         	vv.getRenderContext().setVertexLabelTransformer(
@@ -73,6 +104,26 @@ public class NetworkService
         if (labelEdges) {
         	vv.getRenderContext().setEdgeLabelTransformer(  new ToStringLabeller<PairUni<N>>());
         }
+		if (nodeColorizer != null)
+		{
+			vv.getRenderContext().setVertexFillPaintTransformer(nodeColorizer);
+		}
+		if (nodeShaper != null)
+		{
+			vv.getRenderContext().setVertexShapeTransformer(nodeShaper);
+		}
+		if (edgeSizer != null)
+		{
+			vv.getRenderContext().setEdgeStrokeTransformer(edgeSizer);
+		}
+		else
+		{
+			vv.getRenderContext().setEdgeStrokeTransformer(newEdgeStrokeTransformer(network, edgeStroke));		
+		}
+		if (edgeColorizer != null)
+		{
+			vv.getRenderContext().setEdgeDrawPaintTransformer(edgeColorizer);
+		}
 
         return (BufferedImage) vv.getImage(center, d);
     }

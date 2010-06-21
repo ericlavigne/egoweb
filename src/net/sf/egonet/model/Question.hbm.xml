@@ -49,5 +49,12 @@
 	
 		<property name="studyId" column="study_id" />
 		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />
+
+		<property name="networkRelationshipExprId" column="network_relationship_expr_id" />
+		<property name="networkNShapeQId" column="network_node_shape_q_id" />
+		<property name="networkNColorQId" column="network_node_color_q_id" />
+		<property name="networkNSizeQId" column="network_node_size_q_id" />
+		<property name="networkEColorQId" column="network_edge_color_q_id" />
+		<property name="networkESizeQId" column="network_edge_size_q_id" />
 	</class>
 </hibernate-mapping>
