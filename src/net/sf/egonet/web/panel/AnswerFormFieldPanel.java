@@ -179,13 +179,13 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		boolean dk = dontKnow() || pageLevelFlags.contains(dontKnow);
 		boolean pageNone = pageLevelFlags.contains(none);
 		if(ref && dk) {
-			return "Can't give two skip reasons";
+			return "Can't select both Don't know and Refuse at the same time.";
 		}
 		if((ref || dk || pageNone) && answered()) {
 			if ( ref )
-				return "Can't select page-level Refuse and other answer choices at the same time.  Please correct.";
+				return "Can't select Refuse and other answer choices at the same time.  Please correct.";
 			if ( dk )
-				return "Can't select page-level Don't know and other answer choices at the same time.  Please correct.";
+				return "Can't select Don't know and other answer choices at the same time.  Please correct.";
 			if ( pageNone )
 				return "Can't select None and other answer choices at the same time.  Please correct.";
 			return "Can't provide a skip reason without skipping";
@@ -412,8 +412,9 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		}
 		if ( iAnswerCount>iMax ) {
 			iTemp = iAnswerCount-iMax;
-			strStatus = strAnswer + " selected too many times, remove " +
-					iTemp + " selection" + ((iTemp==1) ? "." : "s.");
+			strStatus = strAnswer + " select only " + iMax + " responses";
+			// strStatus = strAnswer + " selected too many times, remove " +
+			// 		iTemp + " selection" + ((iTemp==1) ? "." : "s.");
 		}
 		return(strStatus);	
 	}
