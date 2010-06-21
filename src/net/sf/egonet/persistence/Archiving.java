@@ -546,16 +546,28 @@ public class Archiving {
 				remoteReasonId == null ? null : 
 					remoteToLocalExpressionId.get(remoteReasonId));
 
-		Long remoteNetworkRelationshipId = attrLong(node,"answerNetworkRelationshipExpressionId");
-		question.setNetworkRelationshipExprId(
-				remoteNetworkRelationshipId == null ? null : 
-					remoteToLocalExpressionId.get(remoteNetworkRelationshipId));
+		try
+		{
+			Long remoteNetworkRelationshipId = attrLong(node,"answerNetworkRelationshipExpressionId");
+			question.setNetworkRelationshipExprId(
+					remoteNetworkRelationshipId == null ? null : 
+						remoteToLocalExpressionId.get(remoteNetworkRelationshipId));
 
-		question.setNetworkNShapeQId(attrLong(node, "networkNShapeQId"));
-		question.setNetworkNColorQId(attrLong(node, "networkNColorQId"));
-		question.setNetworkNSizeQId(attrLong(node, "networkNSizeQId"));
-		question.setNetworkEColorQId(attrLong(node, "networkEColorQId"));
-		question.setNetworkESizeQId(attrLong(node, "networkESizeQId"));
+			question.setNetworkNShapeQId(attrLong(node, "networkNShapeQId"));
+			question.setNetworkNColorQId(attrLong(node, "networkNColorQId"));
+			question.setNetworkNSizeQId(attrLong(node, "networkNSizeQId"));
+			question.setNetworkEColorQId(attrLong(node, "networkEColorQId"));
+			question.setNetworkESizeQId(attrLong(node, "networkESizeQId"));
+		}
+		catch (java.lang.RuntimeException rte)
+		{
+			question.setNetworkRelationshipExprId(null);	
+			question.setNetworkNShapeQId(null);
+			question.setNetworkNColorQId(null);
+			question.setNetworkNSizeQId(null);
+			question.setNetworkEColorQId(null);
+			question.setNetworkESizeQId(null);
+		}
 
 		DB.save(session, question);
 	}
