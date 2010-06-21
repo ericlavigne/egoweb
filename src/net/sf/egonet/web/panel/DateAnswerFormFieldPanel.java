@@ -90,7 +90,7 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		String strAmPm;
 		
 		theYear = "";
-		theMonth = "Jan";
+		theMonth = "January";
 		theDay = "";
 		theHour = "";
 		theMinute = "";
@@ -135,8 +135,12 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 			 theHour.isEmpty() && theMinute.isEmpty() )
 			return(strDate);
 		
-		strDate = String.format ("%s %s %s %s:%s %s", theMonth, theDay, theYear,
-				theHour, theMinute, amHour);
+		strDate = String.format ("%s %s %s %s:%s %s", (theMonth.isEmpty() ? "MM" : theMonth),
+													  (theDay.isEmpty()   ? "1"  : theDay), 
+													  (theYear.isEmpty()  ? "0000" : theYear),
+													  (theHour.isEmpty()  ? "12" : theHour), 
+													  (theMinute.isEmpty()? "00" : theMinute), 
+													  amHour);
 	
 		return(strDate);
 	}
@@ -194,11 +198,17 @@ public class DateAnswerFormFieldPanel extends AnswerFormFieldPanel {
 		add(lblHour);
 		
 		inputYear.setVisible(useYears);
-		lblYear.setVisible(useYears);
+		if ( useYears || useMonths || useDays )
+		    lblYear.setVisible(true);
+		else
+			lblYear.setVisible(false);
 		inputMonth.setVisible(useMonths);	
 		inputDay.setVisible(useDays);	
 		inputHour.setVisible(useHours);
-		lblHour.setVisible(useHours);	
+		if ( useHours || useMinutes)
+		    lblHour.setVisible(true);
+		else
+			lblHour.setVisible(false);
 		radioAmPm.setVisible(useHours);
 		inputMinute.setVisible(useMinutes);
 		
