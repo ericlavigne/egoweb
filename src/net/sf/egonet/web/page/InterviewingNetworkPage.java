@@ -28,6 +28,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
+import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Studies;
@@ -274,7 +275,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		 * and the parameter will not be varied during image-creation in NetworkService.java
 		 */
 		networkImage.setNodeColorizer(newAlterVtxPainter(questionNetwork, nColorAnswerMap));
-		networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap));
+
+		/*
+		 * Set the node shape and size. If the size question has an answer in the 
+		 * NUMERICAL format, the transformer needs the question so that it can find
+		 * the min/max value allowed for that answer.
+		 */
+		if (nSizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap, nSizeQuestion));
+		else
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap));
+
 		networkImage.setEdgeColorizer(newAlterEdgePainter(questionNetwork, eColorAnswerMap));
 		networkImage.setEdgeSizer(newAlterEdgeSizer(questionNetwork, eSizeAnswerMap));
 		networkImage.setDimensions(1200,800);
@@ -404,6 +415,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	private static Rectangle2D vertexSquare = new Rectangle2D.Float(-vtxSquareHalfSize, -vtxSquareHalfSize, vtxSquareHalfSize * 2, vtxSquareHalfSize * 2);
 
 	/*
+	 * For questions with NUMERICAL answer type and a defined min/max value, we can scale the vertex size 
+	 * based on where the interviewee's answer falls in the valid range. 
+	 * 
+	 * The scaling factor for the vertex will be:
+	 *		[(answer - minAnswer) / (maxAnswer - minAnswer)] * (maxScale - minScale) + minScale
+	 */
+	private static float minSizeScale = 1.0f;
+	private static float maxSizeScale = 4.0f;
+	private static float vtxSizeScaleRange = maxSizeScale - minSizeScale;
+
+	/*
 	 * Given an alter, set that alter's vertex shape depending on the interviewee's answer
 	 * to the node-color question. This transformer also provides the functionality for 
 	 * varying the vertex size, based on the node-size question. (If only one of the two
@@ -420,6 +442,14 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
 															final Map<Long, Answer> shapeAnswers,
 															final Map<Long, Answer> sizeAnswers)
+	{
+		return newAlterVtxShaper(network, shapeAnswers, sizeAnswers, null);
+	}
+
+	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
+															final Map<Long, Answer> shapeAnswers,
+															final Map<Long, Answer> sizeAnswers,
+															final Question sizeQuestion)
 	{
 		return
 			new Transformer<Alter, Shape>()
@@ -451,6 +481,28 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						return vtxShape;
 
 					Answer sizeAns = sizeAnswers.get(a.getId());
+					if (sizeQuestion != null && sizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
+					{
+						try
+						{
+							Integer minAnswer = sizeQuestion.getMinLiteral();
+							Integer maxAnswer = sizeQuestion.getMaxLiteral();
+
+							float answer = Float.parseFloat(sizeAns.getValue());
+
+							answer = (float)(answer > maxAnswer? maxAnswer : answer);
+							answer = (float)(answer < minAnswer? minAnswer : answer);
+							float scale = (answer - minAnswer) / (float)(maxAnswer - minAnswer) * vtxSizeScaleRange + minSizeScale;
+							AffineTransform vtxResize = new AffineTransform();
+							vtxResize.scale(scale, scale);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						catch (RuntimeException rtx)
+						{
+							return vtxShape;
+						}
+
+					}
 					if (sizeAns != null)
 					{
 						String sizeAnsValue = sizeAns.getValue();
