@@ -11,6 +11,7 @@ import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.Polygon;
 import java.awt.Stroke;
 import java.awt.BasicStroke;
@@ -28,6 +29,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
+import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Studies;
@@ -274,7 +276,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		 * and the parameter will not be varied during image-creation in NetworkService.java
 		 */
 		networkImage.setNodeColorizer(newAlterVtxPainter(questionNetwork, nColorAnswerMap));
-		networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap));
+
+		/*
+		 * Set the node shape and size. If the size question has an answer in the 
+		 * NUMERICAL format, the transformer needs the question so that it can find
+		 * the min/max value allowed for that answer.
+		 */
+		if (nSizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap, nSizeQuestion));
+		else
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap));
+
 		networkImage.setEdgeColorizer(newAlterEdgePainter(questionNetwork, eColorAnswerMap));
 		networkImage.setEdgeSizer(newAlterEdgeSizer(questionNetwork, eSizeAnswerMap));
 		networkImage.setDimensions(1200,800);
@@ -333,12 +345,16 @@ public class InterviewingNetworkPage extends InterviewingPage {
 												   new Color(78, 205, 196),
 												   new Color(199, 244, 100),
 												   new Color(255, 107, 107),
-												   new Color(220, 105, 135) };
+												   new Color(220, 105, 135),
+												   new Color(180, 105, 220)
+												};
 	private static Color[] eColors = new Color[] { new Color(63, 74, 84),
 												   new Color(59, 155, 147),
 												   new Color(125, 152, 61),
 												   new Color(145, 68, 128),
-												   new Color(147, 57, 66) };
+												   new Color(147, 57, 66),
+												   new Color(55, 82, 162),
+												};
 
 	/*
 	 * Given an alter, set that alter's vertex color depending on the interviewee's answer
@@ -363,12 +379,21 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					if (ansValue == null)
 						return vColors[4];
 
+					/*
+					 * Vertex color order was modified here from their array position after testing
+					 * with questions where not all colors were used. Thus, the slightly odd sequence
+					 * of array indices.
+					 */
 					if (ansValue.contains("0"))
 						return vColors[1];
 					if (ansValue.contains("1"))
 						return vColors[2];
 					if (ansValue.contains("2"))
 						return vColors[3];
+					if (ansValue.contains("3"))
+						return vColors[0];
+					if (ansValue.contains("4"))
+						return vColors[5];
 					
 					return vColors[4];
 					
@@ -380,6 +405,8 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	/*
 	 * Predefined shapes that can be used for vertex rendering. We use
 	 * 4-, 5-, and 6-sided regular polygons, as well as (the default) circle.
+	 * Also available are a rounded rectangle and an oval, both wider than they
+	 * are tall.
 	 */
 	private static int vtxPentagonSize = 14	;
 	private static int c1 = (int)(0.3090 * vtxPentagonSize);
@@ -403,6 +430,31 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	private static int vtxSquareHalfSize = 11;
 	private static Rectangle2D vertexSquare = new Rectangle2D.Float(-vtxSquareHalfSize, -vtxSquareHalfSize, vtxSquareHalfSize * 2, vtxSquareHalfSize * 2);
 
+	private static int vtxRoundRectHalfWidth = 14;
+	private static int vtxRoundRectHalfHeight = 8;
+	private static float vtxRoundRectArcWidth = 6;
+	private static RoundRectangle2D vertexRoundRect = new RoundRectangle2D.Float(-vtxRoundRectHalfWidth, 
+																				-vtxRoundRectHalfHeight,
+																				vtxRoundRectHalfWidth * 2,
+																				vtxRoundRectHalfHeight * 2,
+																				vtxRoundRectArcWidth,
+																				vtxRoundRectArcWidth);
+																				
+	private static int vtxOvalHalfWidth = 14;
+	private static int vtxOvalHalfHeight = 8;
+	private static Ellipse2D vertexOval = new Ellipse2D.Float(-vtxOvalHalfWidth, -vtxOvalHalfHeight, vtxOvalHalfWidth * 2, vtxOvalHalfHeight * 2);
+
+	/*
+	 * For questions with NUMERICAL answer type and a defined min/max value, we can scale the vertex size 
+	 * based on where the interviewee's answer falls in the valid range. 
+	 * 
+	 * The scaling factor for the vertex will be:
+	 *		[(answer - minAnswer) / (maxAnswer - minAnswer)] * (maxScale - minScale) + minScale
+	 */
+	private static float minSizeScale = 1.0f;
+	private static float maxSizeScale = 4.0f;
+	private static float vtxSizeScaleRange = maxSizeScale - minSizeScale;
+
 	/*
 	 * Given an alter, set that alter's vertex shape depending on the interviewee's answer
 	 * to the node-color question. This transformer also provides the functionality for 
@@ -420,6 +472,14 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
 															final Map<Long, Answer> shapeAnswers,
 															final Map<Long, Answer> sizeAnswers)
+	{
+		return newAlterVtxShaper(network, shapeAnswers, sizeAnswers, null);
+	}
+
+	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
+															final Map<Long, Answer> shapeAnswers,
+															final Map<Long, Answer> sizeAnswers,
+															final Question sizeQuestion)
 	{
 		return
 			new Transformer<Alter, Shape>()
@@ -441,6 +501,10 @@ public class InterviewingNetworkPage extends InterviewingPage {
 									vtxShape = vertexPentagon;
 								else if (shapeAnsValue.contains("2"))
 									vtxShape = vertexHexagon;
+								else if (shapeAnsValue.contains("3"))
+									vtxShape = vertexRoundRect;
+								else if (shapeAnsValue.contains("4"))
+									vtxShape = vertexOval;
 							}
 						}
 					}
@@ -451,6 +515,28 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						return vtxShape;
 
 					Answer sizeAns = sizeAnswers.get(a.getId());
+					if (sizeQuestion != null && sizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
+					{
+						try
+						{
+							Integer minAnswer = sizeQuestion.getMinLiteral();
+							Integer maxAnswer = sizeQuestion.getMaxLiteral();
+
+							float answer = Float.parseFloat(sizeAns.getValue());
+
+							answer = (float)(answer > maxAnswer? maxAnswer : answer);
+							answer = (float)(answer < minAnswer? minAnswer : answer);
+							float scale = (answer - minAnswer) / (float)(maxAnswer - minAnswer) * vtxSizeScaleRange + minSizeScale;
+							AffineTransform vtxResize = new AffineTransform();
+							vtxResize.scale(scale, scale);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						catch (RuntimeException rtx)
+						{
+							return vtxShape;
+						}
+
+					}
 					if (sizeAns != null)
 					{
 						String sizeAnsValue = sizeAns.getValue();
@@ -470,6 +556,16 @@ public class InterviewingNetworkPage extends InterviewingPage {
 							if (sizeAnsValue.contains("2"))
 							{
 								vtxResize.scale(2.6, 2.6);
+								return vtxResize.createTransformedShape(vtxShape);
+							}
+							if (sizeAnsValue.contains("3"))
+							{
+								vtxResize.scale(3.6, 3.6);
+								return vtxResize.createTransformedShape(vtxShape);
+							}
+							if (sizeAnsValue.contains("4"))
+							{
+								vtxResize.scale(4.7, 4.7);
 								return vtxResize.createTransformedShape(vtxShape);
 							}
 						}
@@ -517,6 +613,10 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						return eColors[2];
 					if (ansValue.contains("2"))
 						return eColors[3];
+					if (ansValue.contains("3"))
+						return eColors[4];
+					if (ansValue.contains("4"))
+						return eColors[5];
 					
 					return eColors[0];
 
@@ -550,20 +650,24 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						ans = answers.get(new PairUni<Long>(idA2, idA1));
 
 					if (ans == null)
-						return new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 					
 					String ansValue = ans.getValue();
 					if (ansValue == null)
-						return new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 			
 					if (ansValue.contains("0"))
-						return new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(2.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 					if (ansValue.contains("1"))
-						return new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(4.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 					if (ansValue.contains("2"))
-						return new BasicStroke(8.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(5.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+					if (ansValue.contains("3"))
+						return new BasicStroke(7.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+					if (ansValue.contains("4"))
+						return new BasicStroke(10.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 					
-						return new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 
 				}
 			};

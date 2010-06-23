@@ -546,7 +546,7 @@ public class Archiving {
 
 		try
 		{
-			Long remoteNetworkRelationshipId = attrLong(node,"answerNetworkRelationshipExpressionId");
+			Long remoteNetworkRelationshipId = attrLong(node,"networkRelationshipExprId");
 			question.setNetworkRelationshipExprId(
 					remoteNetworkRelationshipId == null ? null : 
 						remoteToLocalExpressionId.get(remoteNetworkRelationshipId));
