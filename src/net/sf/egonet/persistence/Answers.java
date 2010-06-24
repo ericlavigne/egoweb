@@ -141,9 +141,17 @@ public class Answers {
 			query.setLong("a1", alters.get(0).getId());
 		}
 		if(numAlters.equals(2)) {
-			Boolean smallestFirst = alters.get(0).getId() < alters.get(1).getId();
-			query.setLong("a1", alters.get(smallestFirst ? 0 : 1).getId());
-			query.setLong("a2", alters.get(smallestFirst ? 1 : 0).getId());
+			Long alter1id = alters.get(0).getId();
+			Long alter2id = alters.get(1).getId();
+			
+			// if the question is symmetic (a->b implies b->a ) store small ID first
+			if ( question.getSymmetric()  &&  alter1id > alter2id ) {
+				Long temp = alter1id;
+				alter1id = alter2id;
+				alter2id = temp;
+			}
+			query.setLong("a1", alter1id);
+			query.setLong("a2", alter2id);
 		}
 		List<Answer> answers = query.list();
 		if(answers.isEmpty()) {
@@ -163,9 +171,17 @@ public class Answers {
 				answer.setAlterId1(alters.get(0).getId());
 			}
 			if(new Integer(2).equals(alters.size())) {
-				Boolean smallestFirst = alters.get(0).getId() < alters.get(1).getId();
-				answer.setAlterId1(alters.get(smallestFirst ? 0 : 1).getId());
-				answer.setAlterId2(alters.get(smallestFirst ? 1 : 0).getId());
+				Long alter1id = alters.get(0).getId();
+				Long alter2id = alters.get(1).getId();
+				
+				// if the question is symmetic (a->b implies b->a ) store small ID first
+				if ( question.getSymmetric()  &&  alter1id > alter2id ) {
+					Long temp = alter1id;
+					alter1id = alter2id;
+					alter2id = temp;
+				}
+				answer.setAlterId1(alter1id);
+				answer.setAlterId2(alter2id);
 			}
 		} else {
 			answer.setValue(answerString);

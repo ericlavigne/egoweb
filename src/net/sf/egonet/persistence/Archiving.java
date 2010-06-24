@@ -406,7 +406,9 @@ public class Archiving {
 		addAttribute(questionNode,"networkEColorQId", question.getNetworkEColorQId());
 		addAttribute(questionNode,"networkESizeQId", question.getNetworkESizeQId());
 		addAttribute(questionNode,"refuseButton", question.getRefuseButton());
-		addAttribute(questionNode,"allOptionString", question.getAllOptionString());		
+		addAttribute(questionNode,"allOptionString", question.getAllOptionString());
+		addAttribute(questionNode,"symmetric", question.getSymmetric());
+		addAttribute(questionNode,"groupID", question.getGroupID());
 		aType = question.getAnswerType();
 		if (aType==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
@@ -465,6 +467,18 @@ public class Archiving {
 		    question.setOtherSpecify(attrBool(node,"otherSpecify"));
 		} catch ( java.lang.RuntimeException rte2 ) {
 			question.setOtherSpecify(false);
+		}
+		
+		try {
+			question.setSymmetric(attrBool(node,"symmetric"));
+		} catch ( java.lang.RuntimeException rte5 ) {
+			question.setSymmetric(false);
+		}
+		
+		try {
+			question.setGroupID(attrString(node,"groupID"));
+		} catch ( java.lang.RuntimeException rte6 ) {
+			question.setGroupID("");
 		}
 		
 		aType = question.getAnswerType();

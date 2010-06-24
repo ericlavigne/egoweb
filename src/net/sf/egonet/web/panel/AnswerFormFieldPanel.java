@@ -481,7 +481,7 @@ public abstract class AnswerFormFieldPanel extends Panel {
 		// System.out.println ("DONT_KNOW skips = " + histoGram[3]);
 		// System.out.println ("       Answered = " + histoGram[4]);
 		// System.out.println ("          Other = " + histoGram[5]);
-		if ( histoGram[1] == panels.size()  &&  !firstTime )
+		if ( histoGram[1] > 0 /* == panels.size() */  &&  !firstTime )
 		    return(none);
 		if ( histoGram[2] == panels.size())
 			return(refuse);

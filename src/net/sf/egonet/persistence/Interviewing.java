@@ -595,43 +595,17 @@ public class Interviewing {
 			for(Alter alter1 : alters) {
 				ArrayList<Alter> secondAlters = Lists.newArrayList();
 				for(Alter alter2 : alters) {
-					if(alter1.getId() < alter2.getId()) {
+					if( ( !question.getSymmetric() && alter1.getId()!=alter2.getId()) ||  
+							alter1.getId() < alter2.getId()) {
 						Long reasonId = question.getAnswerReasonExpressionId();
-						Boolean shouldAnswerUseIf = true;
 						Boolean shouldAnswer =
 							reasonId == null ||
 							Expressions.evaluateAsBool(
 									context.eidToExpression.get(reasonId), 
 									Lists.newArrayList(alter1,alter2), 
 									context);
-						
-						if ( shouldAnswer ) {
-							String strUseIf;
-							int iEvaluate;
-							ArrayList<Alter> twoAlterList = Lists.newArrayList(alter1,alter2);
-							
-							strUseIf = question.getUseIfExpression().trim();
-							if ( strUseIf!=null && strUseIf.length()>0 ) {
-						
-								strUseIf = question.answerCountInsertion(strUseIf, interviewId);
-								strUseIf = question.questionContainsAnswerInsertion(strUseIf, interviewId, twoAlterList);
-								strUseIf = question.calculationInsertion(strUseIf, interviewId, twoAlterList);
-								strUseIf = question.variableInsertion(strUseIf, interviewId, twoAlterList);
-								iEvaluate = SimpleLogicMgr.createSimpleExpressionAndEvaluate (
-										strUseIf, interviewId, 
-										question.getType(), question.getStudyId(), twoAlterList);
-								if ( SimpleLogicMgr.hasError()) {
-									System.out.println ("USE IF error in " + question.getTitle());
-									System.out.println ("USE IF =" + question.getUseIfExpression());
-								}
-									
-								if (iEvaluate==0)
-									shouldAnswerUseIf = false;
-							}
-						}
-						
-						
-						if(shouldAnswer  &&  shouldAnswerUseIf) {
+												
+						if( shouldAnswer ) {
 							secondAlters.add(alter2);
 						}
 					}

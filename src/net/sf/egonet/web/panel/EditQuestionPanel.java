@@ -101,10 +101,13 @@ public class EditQuestionPanel extends Panel {
 	private Model questionAnswerReasonModel;
 	private Model askingStyleModel;
 	private Model otherSpecifyModel;
+	private Model symmetricModel;
 	private Model dontKnowModel;
 	private Model refuseModel;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
+	private Label symmetricLabel;
+	private CheckBox symmetricCheckBox;
 	private DropDownChoice dropDownQuestionTypes;  
 	private CheckBox cbDontKnow;
 	private CheckBox cbRefuse;
@@ -301,6 +304,20 @@ public class EditQuestionPanel extends Panel {
 		otherSpecifyLabel.setOutputMarkupPlaceholderTag(true);
 		otherSpecifyCheckBox.setOutputMarkupPlaceholderTag(true);
 		
+		symmetricLabel = new Label("symmetricLabel", "Symmetric Question?: ");
+		symmetricModel = new Model();
+		symmetricModel.setObject(Boolean.TRUE);
+		symmetricCheckBox = new CheckBox("symmetricField", symmetricModel);
+		form.add(symmetricLabel);
+		form.add(symmetricCheckBox);
+		symmetricLabel.setOutputMarkupId(true);
+		symmetricCheckBox.setOutputMarkupId(true);
+		symmetricLabel.setOutputMarkupPlaceholderTag(true);
+		symmetricCheckBox.setOutputMarkupPlaceholderTag(true);
+		if( !question.getType().equals(Question.QuestionType.ALTER_PAIR )) {
+			symmetricLabel.setVisible(false);
+			symmetricCheckBox.setVisible(false);
+		}
 		// questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		// form.add(questionUseIfField);
 		
@@ -462,6 +479,7 @@ public class EditQuestionPanel extends Panel {
 		otherSpecifyCheckBox.setModelObject(question.getOtherSpecify());
 		cbDontKnow.setModelObject(question.getDontKnowButton());
 		cbRefuse.setModelObject(question.getRefuseButton());
+		symmetricCheckBox.setModelObject(question.getSymmetric());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( aType==Answer.AnswerType.MULTIPLE_SELECTION) {
@@ -594,6 +612,7 @@ public class EditQuestionPanel extends Panel {
 		question.setTimeUnits((Integer) timeUnitsPanel.getTimeUnits());
 		question.setDontKnowButton((Boolean) cbDontKnow.getModelObject());
 		question.setRefuseButton((Boolean) cbRefuse.getModelObject());
+		question.setSymmetric((Boolean) symmetricCheckBox.getModelObject()); 
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());
