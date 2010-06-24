@@ -46,7 +46,9 @@
 		<property name="minListRange"      column="minListRange" />
 		<property name="maxListRange"      column="maxListRange" />
 		<property name="timeUnits"         column="timeUnits" />
-	
+		<property name="symmetric"         column="symmetric" />
+		<property name="groupID"           column="groupID" type="text" length="255" />
+		
 		<property name="studyId" column="study_id" />
 		<property name="answerReasonExpressionId" column="answer_reason_expression_id" />
 

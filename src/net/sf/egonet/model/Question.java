@@ -67,6 +67,10 @@ public class Question extends OrderedEntity
 	// time units are available for answering.
 	// they will be stored as boolean bit values
 	private Integer timeUnits;
+	// symmetric indicates if a question should be asked a->b and b->a or just a->n
+	private Boolean symmetric;
+	// groupID will be used to group questions together on one page
+	private String groupID;
 	
 	public Question() {
 		prompt = "";
@@ -96,6 +100,8 @@ public class Question extends OrderedEntity
 		minListRange = new Integer(0);
 		maxListRange = new Integer(100);
 		timeUnits = 0xff;
+		symmetric = true;
+		groupID = "";
 	}
 
 	public String toString() {
@@ -137,6 +143,9 @@ public class Question extends OrderedEntity
 		c.setListRangeString(getListRangeString());
 		c.setMinListRange(getMinListRange());
 		c.setMaxListRange(getMaxListRange());
+		c.setTimeUnits(getTimeUnits());
+		c.setSymmetric(getSymmetric());
+		c.setGroupID(getGroupID());
 		return c;
 	}
 	
@@ -587,6 +596,24 @@ public class Question extends OrderedEntity
         else
         	strPrompt += " to " + maxListRange + " times.";
         return(strPrompt);
+    }
+    
+    public void setSymmetric( Boolean symmetric ) {
+    	this.symmetric = (symmetric==null) ? new Boolean(false) : symmetric;
+    }
+    public Boolean getSymmetric() {
+    	if ( symmetric==null )
+    		symmetric = new Boolean(false);
+    	return(symmetric);
+    }
+    
+    public void setGroupID( String groupID ) {
+    	this.groupID = (groupID==null) ? "" : groupID;
+    }
+    public String getGroupID() {
+    	if ( groupID==null )
+    		groupID = "";
+    	return(groupID);
     }
     
 	/* ****************************************************************** */
