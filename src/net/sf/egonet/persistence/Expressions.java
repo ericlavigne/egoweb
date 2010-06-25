@@ -122,6 +122,7 @@ public class Expressions {
 		public Map<Long,Answer> qidToEgoAnswer = Maps.newHashMap();
 		public Map<PairUni<Long>,Answer> qidAidToAlterAnswer = Maps.newHashMap();
 		public Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer = Maps.newHashMap();
+		public Map<Long,Answer> qidToNetworkAnswer = Maps.newHashMap();
 	}
 	
 	public static EvaluationContext getContext(final Interview interview) {
@@ -174,6 +175,9 @@ public class Expressions {
 							answer.getAlterId1()), 
 					answer);
 		}
+		for(Answer answer : Answers.getAnswersForInterview(session, interviewId, Question.QuestionType.NETWORK)) {
+			context.qidToNetworkAnswer.put(answer.getQuestionId(), answer);
+		}
 		return context;
 	}
 	
@@ -183,7 +187,7 @@ public class Expressions {
 		return evaluate(expression,alters,
 				context.qidToQuestion,context.eidToExpression,context.idToOption,
 				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
-				context.qidA1idA2idToAlterPairAnswer);
+				context.qidA1idA2idToAlterPairAnswer,context.qidToNetworkAnswer);
 	}
 
 	public static Boolean evaluateAsBool(Expression expression, ArrayList<Alter> alters, 
@@ -192,7 +196,7 @@ public class Expressions {
 		return evaluateAsBool(expression,alters,
 				context.qidToQuestion,context.eidToExpression,context.idToOption,
 				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
-				context.qidA1idA2idToAlterPairAnswer);
+				context.qidA1idA2idToAlterPairAnswer,context.qidToNetworkAnswer);
 	}
 	public static Integer evaluateAsInt(Expression expression, ArrayList<Alter> alters, 
 			EvaluationContext context) 
@@ -200,19 +204,21 @@ public class Expressions {
 		return evaluateAsInt(expression,alters,
 				context.qidToQuestion,context.eidToExpression,context.idToOption,
 				context.qidToEgoAnswer,context.qidAidToAlterAnswer,
-				context.qidA1idA2idToAlterPairAnswer);
+				context.qidA1idA2idToAlterPairAnswer,context.qidToNetworkAnswer);
 	}
 
 	private static Boolean evaluateAsBool(Expression expression, ArrayList<Alter> alters,
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,
+			Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		Object result = evaluate(expression, alters,
 				qidToQuestion, eidToExpression, idToOption,
 				qidToEgoAnswer, qidAidToAlterAnswer,
-				qidA1idA2idToAlterPairAnswer);
+				qidA1idA2idToAlterPairAnswer,
+				qidToNetworkAnswer);
 		if(result instanceof Boolean) {
 			return (Boolean) result;
 		}
@@ -226,12 +232,14 @@ public class Expressions {
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,
+			Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		Object result = evaluate(expression, alters,
 				qidToQuestion, eidToExpression, idToOption,
 				qidToEgoAnswer, qidAidToAlterAnswer,
-				qidA1idA2idToAlterPairAnswer);
+				qidA1idA2idToAlterPairAnswer,
+				qidToNetworkAnswer);
 		if(result instanceof Boolean) {
 			return ((Boolean) result) ? 1 : 0;
 		}
@@ -245,36 +253,37 @@ public class Expressions {
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,
+			Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		if(expression.getType().equals(Expression.Type.Compound)) {
 			return evaluateCompoundExpression(expression, alters,
 					qidToQuestion, eidToExpression, idToOption,
 					qidToEgoAnswer, qidAidToAlterAnswer,
-					qidA1idA2idToAlterPairAnswer);
+					qidA1idA2idToAlterPairAnswer,qidToNetworkAnswer);
 		}
 		if(expression.getType().equals(Expression.Type.Counting)) {
 			return evaluateCountingExpression(expression, alters,
 					qidToQuestion, eidToExpression, idToOption,
 					qidToEgoAnswer, qidAidToAlterAnswer,
-					qidA1idA2idToAlterPairAnswer);
+					qidA1idA2idToAlterPairAnswer,qidToNetworkAnswer);
 		}
 		if(expression.getType().equals(Expression.Type.Comparison)) {
 			return evaluateComparisonExpression(expression, alters,
 					qidToQuestion, eidToExpression, idToOption,
 					qidToEgoAnswer, qidAidToAlterAnswer,
-					qidA1idA2idToAlterPairAnswer);
+					qidA1idA2idToAlterPairAnswer,qidToNetworkAnswer);
 		}
 		return evaluateSimpleExpression(expression, 
 				qidToQuestion.get(expression.getQuestionId()),
 				alters, qidToEgoAnswer, qidAidToAlterAnswer,
-				qidA1idA2idToAlterPairAnswer);
+				qidA1idA2idToAlterPairAnswer, qidToNetworkAnswer);
 	}
 	
 	private static Boolean evaluateSimpleExpression(Expression expression, Question question,
 			ArrayList<Alter> alters,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		QuestionType qType = question.getType();
 		Answer answer = null;
@@ -287,7 +296,7 @@ public class Expressions {
 			} else if(alters.size() > 1) {
 				for(Alter alter : alters) {
 					if( ! evaluateSimpleExpression(expression,question,Lists.newArrayList(alter),
-							null,qidAidToAlterAnswer,null)) 
+							null,qidAidToAlterAnswer,null,null)) 
 					{
 						return false;
 					}
@@ -305,6 +314,9 @@ public class Expressions {
 							question.getId(),
 							alters.get(0).getId(),
 							alters.get(1).getId()));
+		}
+		if(qType.equals(QuestionType.NETWORK)) {
+			answer = qidToNetworkAnswer.get(question.getId());
 		}
 		if(answer == null || answer.isSkipped()) {
 			return expression.getResultForUnanswered();
@@ -327,7 +339,7 @@ public class Expressions {
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		if(! expression.getType().equals(Expression.Type.Comparison)) {
 			throw new RuntimeException("using evaluateComparisonExpression for " +
@@ -342,7 +354,8 @@ public class Expressions {
 		}
 		Integer subResult = evaluateCountingExpression(subExpression,alters,
 				qidToQuestion, eidToExpression, idToOption,
-				qidToEgoAnswer, qidAidToAlterAnswer, qidA1idA2idToAlterPairAnswer);
+				qidToEgoAnswer, qidAidToAlterAnswer, qidA1idA2idToAlterPairAnswer,
+				qidToNetworkAnswer);
 		Integer number = numberExpr.getFirst();
 		Expression.Operator operator = expression.getOperator();
 
@@ -366,7 +379,7 @@ public class Expressions {
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		if(! expression.getType().equals(Expression.Type.Counting)) {
 			throw new RuntimeException("using evaluateCountingExpression for " +
@@ -399,7 +412,8 @@ public class Expressions {
 					if(evaluateAsBool(subExpression,alterGroup,
 							qidToQuestion,eidToExpression,idToOption,
 							qidToEgoAnswer,qidAidToAlterAnswer,
-							qidA1idA2idToAlterPairAnswer))
+							qidA1idA2idToAlterPairAnswer,
+							qidToNetworkAnswer))
 					{
 						total++;
 					}
@@ -407,7 +421,8 @@ public class Expressions {
 					total += evaluateAsInt(subExpression,alterGroup,
 							qidToQuestion,eidToExpression,idToOption,
 							qidToEgoAnswer,qidAidToAlterAnswer,
-							qidA1idA2idToAlterPairAnswer);
+							qidA1idA2idToAlterPairAnswer,
+							qidToNetworkAnswer);
 				} else {
 					throw new RuntimeException(
 							"Unrecognized operator for counting expression: "+operator);
@@ -437,6 +452,8 @@ public class Expressions {
 										alters.get(1).getId())));
 			} else if(question.isAboutEgo()){
 				answers.add(qidToEgoAnswer.get(questionId));
+			} else if(question.isAboutNetwork()){
+				answers.add(qidToNetworkAnswer.get(questionId));
 			}
 			for(Answer answer : answers) {
 				if(answer != null && answer.getSkipReason().equals(SkipReason.NONE)) {
@@ -491,7 +508,7 @@ public class Expressions {
 			Map<Long,Question> qidToQuestion, Map<Long,Expression> eidToExpression,
 			Map<Long,QuestionOption> idToOption,
 			Map<Long,Answer> qidToEgoAnswer, Map<PairUni<Long>,Answer> qidAidToAlterAnswer,
-			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer) 
+			Map<TripleUni<Long>,Answer> qidA1idA2idToAlterPairAnswer,Map<Long,Answer> qidToNetworkAnswer) 
 	{
 		Expression.Operator operator = expression.getOperator();
 		for(Long expressionId : (List<Long>) expression.getValue()) {
@@ -515,7 +532,8 @@ public class Expressions {
 					evaluateAsBool(subExpression,alterGroup,
 							qidToQuestion,eidToExpression,idToOption,
 							qidToEgoAnswer,qidAidToAlterAnswer,
-							qidA1idA2idToAlterPairAnswer);
+							qidA1idA2idToAlterPairAnswer,
+							qidToNetworkAnswer);
 				if(result) {
 					if(operator.equals(Operator.Some)) {
 						return true;
