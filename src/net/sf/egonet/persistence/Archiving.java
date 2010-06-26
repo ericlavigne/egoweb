@@ -201,7 +201,7 @@ public class Archiving {
 					}
 					if(updateStudy) {
 						updateQuestionFromNode(session,question,questionElement,
-								study.getId(),remoteToLocalExpressionId);
+								study.getId(),remoteToLocalExpressionId,remoteToLocalQuestionId);
 					}
 					List<Element> optionElements = questionElement.elements("option");
 					List<QuestionOption> optionEntities = Options.getOptionsForQuestion(session, question.getId());
@@ -438,6 +438,14 @@ public class Archiving {
 		return questionNode;
 	}
 	
+
+	/*
+	 * Ethan - 20100625: modified the parameter list for updateQuestionFromNode to add remoteToLocalQuestionId, so
+	 * that the network questions can load the IDs of the questions being used to customize
+	 * the node/edge rendering of the graph. If there's any trouble retrieving values from
+	 * remoteToLocalQuestionId, the network question parameters are all set to null. 
+	 */
+
 	/**
 	 * when importing older xml files, the data regarding the numeric checking
 	 * and ranges might not be present.  If an exception is thrown we will just
@@ -447,9 +455,11 @@ public class Archiving {
 	 * @param node
 	 * @param studyId
 	 * @param remoteToLocalExpressionId
+	 * @param remoteToLocalQuestionId
 	 */
+
 	private static void updateQuestionFromNode(Session session, Question question, Element node, 
-			Long studyId, Map<Long,Long> remoteToLocalExpressionId) 
+			Long studyId, Map<Long,Long> remoteToLocalExpressionId, Map<Long,Long>remoteToLocalQuestionId) 
 	{	
 		Answer.AnswerType aType;
 		
@@ -553,11 +563,17 @@ public class Archiving {
 					remoteNetworkRelationshipId == null ? null : 
 						remoteToLocalExpressionId.get(remoteNetworkRelationshipId));
 
-			question.setNetworkNShapeQId(attrLong(node, "networkNShapeQId"));
-			question.setNetworkNColorQId(attrLong(node, "networkNColorQId"));
-			question.setNetworkNSizeQId(attrLong(node, "networkNSizeQId"));
-			question.setNetworkEColorQId(attrLong(node, "networkEColorQId"));
-			question.setNetworkESizeQId(attrLong(node, "networkESizeQId"));
+			Long nShapeQId = attrLong(node, "networkNShapeQId");
+			question.setNetworkNShapeQId(nShapeQId == null? null : remoteToLocalQuestionId.get(nShapeQId));
+			Long nSizeQId = attrLong(node, "networkNSizeQId");
+			question.setNetworkNSizeQId(nSizeQId == null? null : remoteToLocalQuestionId.get(nSizeQId));
+			Long nColorQId = attrLong(node, "networkNColorQId");
+			question.setNetworkNColorQId(nColorQId == null? null : remoteToLocalQuestionId.get(nColorQId));
+			Long eColorQId = attrLong(node, "networkEColorQId");
+			question.setNetworkEColorQId(eColorQId == null? null : remoteToLocalQuestionId.get(eColorQId));
+			Long eSizeQId = attrLong(node, "networkESizeQId");
+			question.setNetworkESizeQId(eSizeQId == null? null : remoteToLocalQuestionId.get(eSizeQId));
+
 		}
 		catch (java.lang.RuntimeException rte)
 		{
