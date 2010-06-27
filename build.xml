@@ -119,7 +119,7 @@
 		</jar>
 	</target>
 	
-	<target name="dist" depends="jar">
+	<target name="dist" depends="clean,jar">
 		<launch4j configFile="winwrap.xml" />
 	</target>
 </project>
