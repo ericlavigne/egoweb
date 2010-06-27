@@ -333,7 +333,7 @@ public class Interviewing {
 						context.eidToExpression.get(reasonId), 
 						new ArrayList<Alter>(), 
 						context);
-			if(shouldAnswer && context.qidToEgoAnswer.get(question.getId()) != null) {
+			if(shouldAnswer && context.qidToNetworkAnswer.get(question.getId()) != null) {
 				answeredQuestions.add(question);
 			}
 		}

@@ -23,12 +23,14 @@ import org.apache.commons.collections15.Transformer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.base.Joiner;
 
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Interview;
+import net.sf.egonet.model.QuestionOption;
 import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
@@ -38,6 +40,7 @@ import net.sf.egonet.persistence.Alters;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Analysis;
 import net.sf.egonet.persistence.Questions;
+import net.sf.egonet.persistence.Options;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.egonet.web.panel.InterviewingPanel;
 import net.sf.egonet.web.component.NetworkImage;
@@ -185,41 +188,58 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		Question eSizeQuestion = null;
 		Question eColorQuestion = null;
 
-		Map<Long, Answer> nSizeAnswerMap = null;
-		Map<Long, Answer> nShapeAnswerMap = null;
-		Map<Long, Answer> nColorAnswerMap = null;
-		Map<PairUni<Long>, Answer> eSizeAnswerMap = null;
-		Map<PairUni<Long>, Answer> eColorAnswerMap = null;
+		Map<Long, String> nSizeResponseMap = null;
+		Map<Long, String> nShapeResponseMap = null;
+		Map<Long, String> nColorResponseMap = null;
+		Map<PairUni<Long>, String> eSizeResponseMap = null;
+		Map<PairUni<Long>, String> eColorResponseMap = null;
 
 		/*
 		 * iterate through alters, asking about each for the node size questions, and each pair for the edge questions
 		 */
 		if (relExprId != null)
 		{
+			List<Question> allQuestions = Lists.newArrayList();
 			if (nSizeQId != null)
 			{
 				nSizeQuestion = Questions.getQuestion(nSizeQId);
-				nSizeAnswerMap = Maps.newHashMap();
+				nSizeResponseMap = Maps.newHashMap();
+				allQuestions.add(nSizeQuestion);
 			}
 			if (nShapeQId != null)
 			{
 				nShapeQuestion = Questions.getQuestion(nShapeQId);
-				nShapeAnswerMap = Maps.newHashMap();
+				nShapeResponseMap = Maps.newHashMap();
+				allQuestions.add(nShapeQuestion);
 			}
 			if (nColorQId != null)
 			{
 				nColorQuestion = Questions.getQuestion(nColorQId);
-				nColorAnswerMap = Maps.newHashMap();
+				nColorResponseMap = Maps.newHashMap();
+				allQuestions.add(nColorQuestion);
 			}
 			if (eSizeQId != null)
 			{
 				eSizeQuestion = Questions.getQuestion(eSizeQId);
-				eSizeAnswerMap = Maps.newHashMap();
+				eSizeResponseMap = Maps.newHashMap();
+				allQuestions.add(eSizeQuestion);
 			}
 			if (eColorQId != null)
 			{
 				eColorQuestion = Questions.getQuestion(eColorQId);
-				eColorAnswerMap = Maps.newHashMap();
+				eColorResponseMap = Maps.newHashMap();
+				allQuestions.add(eColorQuestion);
+			}
+
+			Map<Long,String> optionIdToValue = Maps.newTreeMap();
+			for(Question question : allQuestions) {
+				if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) || 
+						question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+				{
+					for(QuestionOption option : Options.getOptionsForQuestion(question.getId())) {
+						optionIdToValue.put(option.getId(), option.getValue());
+					}
+				}
 			}
 
 			for (final Alter a1 : interviewAlters)
@@ -227,15 +247,22 @@ public class InterviewingNetworkPage extends InterviewingPage {
 				ArrayList<Alter> a1List = new ArrayList<Alter>(){{ add(a1); }};
 				if (nSizeQuestion != null)
 				{
-					nSizeAnswerMap.put(a1.getId(), Answers.getAnswerForInterviewQuestionAlters(interview, nSizeQuestion, a1List));
+					nSizeResponseMap.put(a1.getId(), showAnswer(optionIdToValue,
+																nSizeQuestion,
+																Answers.getAnswerForInterviewQuestionAlters(interview, nSizeQuestion, a1List)));
+
 				}
 				if (nShapeQuestion != null)
 				{
-					nShapeAnswerMap.put(a1.getId(), Answers.getAnswerForInterviewQuestionAlters(interview, nShapeQuestion, a1List));
+					nShapeResponseMap.put(a1.getId(), showAnswer(optionIdToValue,
+																nShapeQuestion,
+																Answers.getAnswerForInterviewQuestionAlters(interview, nShapeQuestion, a1List)));
 				}
 				if (nColorQuestion != null)
 				{
-					nColorAnswerMap.put(a1.getId(), Answers.getAnswerForInterviewQuestionAlters(interview, nColorQuestion, a1List));
+					nColorResponseMap.put(a1.getId(), showAnswer(optionIdToValue,
+																nColorQuestion,
+																Answers.getAnswerForInterviewQuestionAlters(interview, nColorQuestion, a1List)));
 				}
 				for (final Alter a2 : interviewAlters)
 				{
@@ -244,13 +271,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						ArrayList<Alter> a1a2List = new ArrayList<Alter>() {{ add(a1); add(a2); }};
 						if (eSizeQuestion != null)
 						{
-							eSizeAnswerMap.put(new PairUni<Long>(a1.getId(), a2.getId()), 
-								Answers.getAnswerForInterviewQuestionAlters(interview, eSizeQuestion, a1a2List));
+							eSizeResponseMap.put(new PairUni<Long>(a1.getId(), a2.getId()),  
+												showAnswer(optionIdToValue,
+															eSizeQuestion,
+															Answers.getAnswerForInterviewQuestionAlters(interview, eSizeQuestion, a1a2List)));
 						}
 						if (eColorQuestion != null)
 						{
-							eColorAnswerMap.put(new PairUni<Long>(a1.getId(), a2.getId()), 
-								Answers.getAnswerForInterviewQuestionAlters(interview, eColorQuestion, a1a2List));
+							eColorResponseMap.put(new PairUni<Long>(a1.getId(), a2.getId()),  
+												showAnswer(optionIdToValue,
+															eColorQuestion,
+															Answers.getAnswerForInterviewQuestionAlters(interview, eColorQuestion, a1a2List)));
 						}
 					}
 				}
@@ -259,7 +290,8 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		else
 		{
 			/*
-			 * This point should not be reached. No expression has been specified for edge-creation.
+			 * ETHAN - This point should not be reached. No expression has been specified for edge-creation.
+			 * TODO: Add exception/error warning code.
 			 */
 		}
 
@@ -267,7 +299,9 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		 * Retrieve a network with the interviewee's alters as the graph nodes, and edges
 		 * as defined by the selected Expression.
 		 */
-		Network<Alter> questionNetwork = Analysis.getNetworkForInterview(interview, Expressions.get(relExprId));
+		Network<Alter> questionNetwork = null;
+		questionNetwork = Analysis.getNetworkForInterview(interview, Expressions.get(relExprId));
+
 		networkImage = new NetworkImage<Alter>("networkImage", questionNetwork);
 
 		/*
@@ -275,22 +309,62 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		 * a parameter when the interview was first created, the transformer will be null here,
 		 * and the parameter will not be varied during image-creation in NetworkService.java
 		 */
-		networkImage.setNodeColorizer(newAlterVtxPainter(questionNetwork, nColorAnswerMap));
-
+		networkImage.setNodeColorizer(newAlterVtxPainter(questionNetwork, nColorResponseMap));
 		/*
 		 * Set the node shape and size. If the size question has an answer in the 
 		 * NUMERICAL format, the transformer needs the question so that it can find
 		 * the min/max value allowed for that answer.
 		 */
-		if (nSizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
-			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap, nSizeQuestion));
+		if (nSizeQuestion != null && nSizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeResponseMap, nSizeResponseMap, nSizeQuestion));
 		else
-			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeAnswerMap, nSizeAnswerMap));
+			networkImage.setNodeShaper(newAlterVtxShaper(questionNetwork, nShapeResponseMap, nSizeResponseMap));
+			 
+		networkImage.setEdgeColorizer(newAlterEdgePainter(questionNetwork, eColorResponseMap));
+		networkImage.setEdgeSizer(newAlterEdgeSizer(questionNetwork, eSizeResponseMap));
 
-		networkImage.setEdgeColorizer(newAlterEdgePainter(questionNetwork, eColorAnswerMap));
-		networkImage.setEdgeSizer(newAlterEdgeSizer(questionNetwork, eSizeAnswerMap));
 		networkImage.setDimensions(1200,800);
+			 
 		add(networkImage);
+	}
+
+	/*
+	 * Essentially the same method as the one by the same name in Analysis.java
+	 * The Analysis.java method is private, and also can return "0" in a case where it fails
+	 * to parse out an answer. "0" is part of a valid answer for most SELECTION or
+	 * MULTIPLE_SELECTION questions, so we instead return null in the case where answer.getValue() == null
+	 */
+	private String showAnswer(Map<Long, String> optionIdToValue, Question question, Answer answer)
+	{
+		if(answer == null) {
+			return null;
+		}
+		if(question.getAnswerType().equals(Answer.AnswerType.NUMERICAL) ||
+				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL) ||
+				question.getAnswerType().equals(Answer.AnswerType.TEXTUAL_PP) ||
+				question.getAnswerType().equals(Answer.AnswerType.DATE) ||
+				question.getAnswerType().equals(Answer.AnswerType.TIME_SPAN))
+				{
+			return answer.getValue();
+		}
+		if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+				question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+		{
+			String value = answer.getValue();
+			if(value == null || value.isEmpty()) {
+				return null;
+			}
+			List<String> selectedOptions = Lists.newArrayList();
+			for(String optionIdString : value.split(",")) {
+				Long optionId = Long.parseLong(optionIdString);
+				String optionValue = optionIdToValue.get(optionId);
+				if(optionValue != null) {
+					selectedOptions.add(optionValue);
+				}
+			}
+			return Joiner.on("; ").join(selectedOptions);
+		}
+		throw new RuntimeException("Unable to answer for answer type: "+question.getAnswerType());
 	}
 
 	//                    forward, unansweredOnly
@@ -346,7 +420,8 @@ public class InterviewingNetworkPage extends InterviewingPage {
 												   new Color(199, 244, 100),
 												   new Color(255, 107, 107),
 												   new Color(220, 105, 135),
-												   new Color(180, 105, 220)
+												   new Color(180, 105, 220),
+												   new Color(210, 230, 255)
 												};
 	private static Color[] eColors = new Color[] { new Color(63, 74, 84),
 												   new Color(59, 155, 147),
@@ -360,42 +435,42 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	 * Given an alter, set that alter's vertex color depending on the interviewee's answer
 	 * to the node-color question.
 	 */
-	private static Transformer<Alter, Paint> newAlterVtxPainter(final Network<Alter> network, final Map<Long, Answer> answers)
+	private static Transformer<Alter, Paint> newAlterVtxPainter(final Network<Alter> network, final Map<Long, String> answers)
 	{
 		return
 			new Transformer<Alter, Paint>()
 			{
 				public Paint transform(Alter a)
 				{
+					Color defaultColor = vColors[6];
 					if (answers == null)
-						return vColors[4];
+						return defaultColor;
 
-					Answer ans = answers.get(a.getId());
+					String ans = answers.get(a.getId());
 					if (ans == null)
 					{
-						return vColors[4];
+						return defaultColor;
 					}
-					String ansValue = ans.getValue();
-					if (ansValue == null)
-						return vColors[4];
+					if (ans == null)
+						return defaultColor;
 
 					/*
 					 * Vertex color order was modified here from their array position after testing
 					 * with questions where not all colors were used. Thus, the slightly odd sequence
 					 * of array indices.
 					 */
-					if (ansValue.contains("0"))
+					if (ans.contains("0"))
 						return vColors[1];
-					if (ansValue.contains("1"))
+					if (ans.contains("1"))
 						return vColors[2];
-					if (ansValue.contains("2"))
+					if (ans.contains("2"))
 						return vColors[3];
-					if (ansValue.contains("3"))
+					if (ans.contains("3"))
 						return vColors[0];
-					if (ansValue.contains("4"))
+					if (ans.contains("4"))
 						return vColors[5];
 					
-					return vColors[4];
+					return defaultColor;
 					
 				}
 			};
@@ -470,15 +545,15 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	 */
 
 	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
-															final Map<Long, Answer> shapeAnswers,
-															final Map<Long, Answer> sizeAnswers)
+															final Map<Long, String> shapeAnswers,
+															final Map<Long, String> sizeAnswers)
 	{
 		return newAlterVtxShaper(network, shapeAnswers, sizeAnswers, null);
 	}
 
 	private static Transformer<Alter, Shape> newAlterVtxShaper(final Network<Alter> network, 
-															final Map<Long, Answer> shapeAnswers,
-															final Map<Long, Answer> sizeAnswers,
+															final Map<Long, String> shapeAnswers,
+															final Map<Long, String> sizeAnswers,
 															final Question sizeQuestion)
 	{
 		return
@@ -489,32 +564,28 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					Shape vtxShape = null;
 					if (shapeAnswers != null)
 					{
-						Answer shapeAns = shapeAnswers.get(a.getId());
+						String shapeAns = shapeAnswers.get(a.getId());
 						if (shapeAns != null)
 						{
-							String shapeAnsValue = shapeAns.getValue();
-							if (shapeAnsValue != null)
-							{
-								if (shapeAnsValue.contains("0"))
-									vtxShape = vertexSquare;
-								else if (shapeAnsValue.contains("1"))
-									vtxShape = vertexPentagon;
-								else if (shapeAnsValue.contains("2"))
-									vtxShape = vertexHexagon;
-								else if (shapeAnsValue.contains("3"))
-									vtxShape = vertexRoundRect;
-								else if (shapeAnsValue.contains("4"))
-									vtxShape = vertexOval;
-							}
+							if (shapeAns.contains("0"))
+								vtxShape = vertexSquare;
+							else if (shapeAns.contains("1"))
+								vtxShape = vertexPentagon;
+							else if (shapeAns.contains("2"))
+								vtxShape = vertexHexagon;
+							else if (shapeAns.contains("3"))
+								vtxShape = vertexRoundRect;
+							else if (shapeAns.contains("4"))
+								vtxShape = vertexOval;
 						}
 					}
 					if (vtxShape == null)
 						vtxShape = vertexCircle;
-
+					
 					if (sizeAnswers == null)
 						return vtxShape;
 
-					Answer sizeAns = sizeAnswers.get(a.getId());
+					String sizeAns = sizeAnswers.get(a.getId());
 					if (sizeQuestion != null && sizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
 					{
 						try
@@ -522,7 +593,7 @@ public class InterviewingNetworkPage extends InterviewingPage {
 							Integer minAnswer = sizeQuestion.getMinLiteral();
 							Integer maxAnswer = sizeQuestion.getMaxLiteral();
 
-							float answer = Float.parseFloat(sizeAns.getValue());
+							float answer = Float.parseFloat(sizeAns);
 
 							answer = (float)(answer > maxAnswer? maxAnswer : answer);
 							answer = (float)(answer < minAnswer? minAnswer : answer);
@@ -539,36 +610,33 @@ public class InterviewingNetworkPage extends InterviewingPage {
 					}
 					if (sizeAns != null)
 					{
-						String sizeAnsValue = sizeAns.getValue();
-						if (sizeAnsValue != null)
+						AffineTransform vtxResize = new AffineTransform();
+						if (sizeAns.contains("0"))
 						{
-							AffineTransform vtxResize = new AffineTransform();
-							if (sizeAnsValue.contains("0"))
-							{
-								vtxResize.scale(1.45, 1.45);
-								return vtxResize.createTransformedShape(vtxShape);
-							}
-							if (sizeAnsValue.contains("1"))
-							{
-								vtxResize.scale(1.85, 1.85);
-								return vtxResize.createTransformedShape(vtxShape);
-							}
-							if (sizeAnsValue.contains("2"))
-							{
-								vtxResize.scale(2.6, 2.6);
-								return vtxResize.createTransformedShape(vtxShape);
-							}
-							if (sizeAnsValue.contains("3"))
-							{
-								vtxResize.scale(3.6, 3.6);
-								return vtxResize.createTransformedShape(vtxShape);
-							}
-							if (sizeAnsValue.contains("4"))
-							{
-								vtxResize.scale(4.7, 4.7);
-								return vtxResize.createTransformedShape(vtxShape);
-							}
+							vtxResize.scale(1.35, 1.35);
+							return vtxResize.createTransformedShape(vtxShape);
 						}
+						if (sizeAns.contains("1"))
+						{
+							vtxResize.scale(1.7, 1.7);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						if (sizeAns.contains("2"))
+						{
+							vtxResize.scale(2.4, 2.4);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						if (sizeAns.contains("3"))
+						{
+							vtxResize.scale(3.3, 3.3);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						if (sizeAns.contains("4"))
+						{
+							vtxResize.scale(4.3, 4.3);
+							return vtxResize.createTransformedShape(vtxShape);
+						}
+						
 					}
 					return vtxShape;
 
@@ -581,7 +649,7 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	 * Given a pair of alters, determine the interviewee's response to the ALTER_PAIR
 	 * edge-color question (if applicable). Set the edge color based on that response.
 	 */
-	private static Transformer<PairUni<Alter>, Paint> newAlterEdgePainter(final Network<Alter> network, final Map<PairUni<Long>, Answer> answers)
+	private static Transformer<PairUni<Alter>, Paint> newAlterEdgePainter(final Network<Alter> network, final Map<PairUni<Long>, String> answers)
 	{
 		return
 			new Transformer<PairUni<Alter>, Paint>()
@@ -590,35 +658,42 @@ public class InterviewingNetworkPage extends InterviewingPage {
 				{
 					Long idA1 = alters.getFirst().getId();
 					Long idA2 = alters.getSecond().getId();
-					Answer ans = null;
-					/*
-					 * getNetworkForInterview creates a network with edges where 
-					 * the first alter id listed is lower than the second
-					 */
-					if (idA1 < idA2)
-						ans = answers.get(new PairUni<Long>(idA1, idA2));
-					else
-						ans = answers.get(new PairUni<Long>(idA2, idA1));
+					String ans = null;
+					Color defaultColor = eColors[3];
+					try
+					{
+						/*
+						 * getNetworkForInterview creates a network with edges where 
+						 * the first alter id listed is lower than the second
+						 */
+						if (idA1 < idA2)
+							ans = answers.get(new PairUni<Long>(idA1, idA2));
+						else
+							ans = answers.get(new PairUni<Long>(idA2, idA1));
 
-					if (ans == null)
-						return eColors[0];
-					
-					String ansValue = ans.getValue();
-					if (ansValue == null)
-						return eColors[0];
+						if (ans == null)
+							return defaultColor;
+						
+						if (ans == null)
+							return defaultColor;
 
-					if (ansValue.contains("0"))
-						return eColors[1];
-					if (ansValue.contains("1"))
-						return eColors[2];
-					if (ansValue.contains("2"))
-						return eColors[3];
-					if (ansValue.contains("3"))
-						return eColors[4];
-					if (ansValue.contains("4"))
-						return eColors[5];
-					
-					return eColors[0];
+						if (ans.contains("0"))
+							return eColors[1];
+						if (ans.contains("1"))
+							return eColors[2];
+						if (ans.contains("2"))
+							return eColors[3];
+						if (ans.contains("3"))
+							return eColors[4];
+						if (ans.contains("4"))
+							return eColors[5];
+						
+						return defaultColor;
+					}
+					catch (RuntimeException rtx)
+					{
+						return defaultColor;
+					}
 
 				}
 			};
@@ -630,7 +705,7 @@ public class InterviewingNetworkPage extends InterviewingPage {
 	 * edge-size question (if applicable). Set the edge width based on that response.
 	 */
 
-	private static Transformer<PairUni<Alter>, Stroke> newAlterEdgeSizer(final Network<Alter> network, final Map<PairUni<Long>, Answer> answers)
+	private static Transformer<PairUni<Alter>, Stroke> newAlterEdgeSizer(final Network<Alter> network, final Map<PairUni<Long>, String> answers)
 	{
 		return
 			new Transformer<PairUni<Alter>, Stroke>()
@@ -639,35 +714,43 @@ public class InterviewingNetworkPage extends InterviewingPage {
 				{
 					Long idA1 = alters.getFirst().getId();
 					Long idA2 = alters.getSecond().getId();
-					Answer ans = null;
-					/*
-					 * getNetworkForInterview creates a network with edges where 
-					 * the first alter id listed is lower than the second
-					 */
-					if (idA1 < idA2)
-						ans = answers.get(new PairUni<Long>(idA1, idA2));
-					else
-						ans = answers.get(new PairUni<Long>(idA2, idA1));
+					String ans = null;
 
-					if (ans == null)
-						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					
-					String ansValue = ans.getValue();
-					if (ansValue == null)
-						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-			
-					if (ansValue.contains("0"))
-						return new BasicStroke(2.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("1"))
-						return new BasicStroke(4.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("2"))
-						return new BasicStroke(5.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("3"))
-						return new BasicStroke(7.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					if (ansValue.contains("4"))
-						return new BasicStroke(10.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
-					
-						return new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+					BasicStroke defaultStroke = new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+					try
+					{
+						/*
+						 * getNetworkForInterview creates a network with edges where 
+						 * the first alter id listed is lower than the second
+						 */
+						if (idA1 < idA2)
+							ans = answers.get(new PairUni<Long>(idA1, idA2));
+						else
+							ans = answers.get(new PairUni<Long>(idA2, idA1));
+
+						if (ans == null)
+							return defaultStroke;
+						
+						if (ans == null)
+							return defaultStroke;
+				
+						if (ans.contains("0"))
+							return new BasicStroke(2.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						if (ans.contains("1"))
+							return new BasicStroke(4.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						if (ans.contains("2"))
+							return new BasicStroke(5.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						if (ans.contains("3"))
+							return new BasicStroke(7.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						if (ans.contains("4"))
+							return new BasicStroke(10.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+						
+						return defaultStroke;
+					}
+					catch (RuntimeException rtx)
+					{
+						return defaultStroke;
+					}
 
 				}
 			};
