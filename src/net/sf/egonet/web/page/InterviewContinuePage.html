@@ -1,0 +1,38 @@
+<!-- InterviewContinuePage.html                               -->
+<!-- When the user selected to continue an existing interview -->
+<!-- this allows them to first select the study and then      -->
+<!-- the interview                                            -->
+<!-- KCN June 28 2010                                         -->
+
+<wicket:extend>
+	<form wicket:id="form">
+	    <table border="0">
+	    <tr><td>
+		<fieldset>
+	        <div><b><center>Study List</center></b></div>	
+	        <div><center>Click any study to get a list of partially completed interviews</center></div>
+	        <table border="0">
+	        <tr wicket:id="studies">
+	            <td><a href="#" wicket:id="studyLink"><span wicket:id="studyName">Study Name</span></a></td>
+	        </tr>
+	        </table>
+	        <div><center>Click any study to get a list of interviews</center></div>
+		</fieldset> 
+		
+		</td><td>                                                        
+		<fieldset>                                                     
+		    <div><b><center>Interviews for <span wicket:id="currentStudyName">Study Name</span></center></b></div>   
+		    <table border="0">                                           
+  	        <tr wicket:id="interviews">                                   
+			    <td><a href="#" wicket:id="interviewLink"><span wicket:id="name">Interview Name</span></a></td> 
+		    </tr>                                                               
+	        </table>                                                            
+		    <div><center>Click any interview to continue with it</center></div> 
+		</fieldset>                                                             
+		</td>                                                                   
+		</tr>                                                                   
+		</table>                                                                
+		
+	</form>
+	<span wicket:id="message">Message</span>
+</wicket:extend>

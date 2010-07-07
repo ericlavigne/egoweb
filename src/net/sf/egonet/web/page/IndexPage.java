@@ -25,6 +25,15 @@ public class IndexPage extends EgonetPage
 	            }
 	        );
 		add(
+	            new Link("interviewContinueLink")
+	            {
+	                public void onClick()
+	                {
+	                    setResponsePage(new InterviewContinuePage());
+	                }
+	            }
+	        );		
+		add(
 	            new Link("analysisLink")
 	            {
 	                public void onClick()

@@ -7,6 +7,8 @@ import net.sf.egonet.model.Alter;
 import net.sf.egonet.model.Answer;
 import net.sf.egonet.model.Interview;
 import net.sf.egonet.model.Question;
+import net.sf.egonet.model.QuestionOption;
+import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.SimpleLogicMgr;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -16,8 +18,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
 
@@ -44,7 +48,7 @@ public class InterviewingPanel extends Panel {
 	}
 
 	/**
-	 * IF this IS an alter question, the type IS MULTIPLE_SELECTION 
+	 * IF this IS an alter pr alter_pair question, the type IS MULTIPLE_SELECTION 
 	 * AND there is more than one answer Field 
 	 * THEN we want to use the action buttons to (optionally)
 	 * set Don't Know, Refuse or the 'All' selection
@@ -55,9 +59,12 @@ public class InterviewingPanel extends Panel {
 		Label lblBtnAll;
 		Form pageButtonsForm = new Form("pageButtonsForm");
 		boolean withDKRefActionButtons = false;
+		List<QuestionOption> listOfOptions;
+		Question.QuestionType qType = question.getType();
+		Answer.AnswerType aType = question.getAnswerType();
 		
-		if ( question.getType() == Question.QuestionType.ALTER &&
-			 question.getAnswerType() == Answer.AnswerType.MULTIPLE_SELECTION ) {
+		if ( (qType == Question.QuestionType.ALTER || qType==Question.QuestionType.ALTER_PAIR )&&
+			  aType == Answer.AnswerType.MULTIPLE_SELECTION ) {
 			if ( answerFields.size() > 1)
 				withDKRefActionButtons = true;
 		}
@@ -114,37 +121,53 @@ public class InterviewingPanel extends Panel {
 		} else if ( strSkipReason.equals(none)) {
 			selectedOptions.add(none);
 		}
-		if(question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION) &&
-		   question.getNoneButton()) {
+		if( aType.equals(Answer.AnswerType.MULTIPLE_SELECTION)  &&  question.getNoneButton()) {
 			allOptions.add(none);
 		}
 		
 		if( !withDKRefActionButtons  && 
-			 question.getType() != Question.QuestionType.EGO_ID &&  
+			 qType != Question.QuestionType.EGO_ID &&  
 			 answerFields.size() > 1 ) {
 			     allOptions.addAll(Lists.newArrayList(dontKnow,refuse));
 		 }
 		
 		refDKCheck = new CheckboxesPanel<String>("refDKCheck",allOptions,selectedOptions);
 		add(refDKCheck);
-	
 		
-// ==========================================================================
-// we may want buttons instead of checkboxs for Don't know and Refuse
-		final String strAllOption = question.getAllOptionString();
 		
+		Long qID = question.getId();
+		if (qID!=null) {
+	  	    listOfOptions = Options.getOptionsForQuestion(qID);
+		} else {
+	    	listOfOptions = new ArrayList<QuestionOption>(1);
+		}
+		
+		lblBtnAll = new Label("lblSetAlls", "Set All Unanswered To...");
+		pageButtonsForm.add(lblBtnAll);
+		
+		RepeatingView rv = new RepeatingView("btnParent");
+		
+		if ( question.getAllButton()) {
+		    for ( QuestionOption option : listOfOptions ) {
+			    WebMarkupContainer parent = new WebMarkupContainer(rv.newChildId());
+			    rv.add(parent);
 		AjaxFallbackLink btnAll = new AjaxFallbackLink("btnAll") {
-			public void onClick(AjaxRequestTarget target) {
-				AnswerFormFieldPanel.forceSelectionIfNone(answerFields, strAllOption, 
+				    public void onClick ( AjaxRequestTarget target) {
+					    AnswerFormFieldPanel.forceSelectionIfNone(answerFields, getModelObjectAsString(), 
 						question.getMaxCheckableBoxes() );
-				target.addComponent(this);
-				for ( AnswerFormFieldPanel panel : answerFields) {
+					    for ( AnswerFormFieldPanel panel : answerFields ) {
 					target.addComponent(panel);
 				}
 			}
 		};
-		btnAll.add(new Label("btnAllLabel", "(Set all to " + strAllOption + ") "));
-		pageButtonsForm.add(btnAll);
+			
+			    btnAll.setModel(new Model(option.getName()));
+			    parent.add(btnAll);
+			    btnAll.add(new Label("btnAllLabel",option.getName()));
+		    }
+		} // end if question.getAllButton()
+		pageButtonsForm.add(rv);
+		
 		
 		AjaxFallbackLink btnDontKnow = new AjaxFallbackLink("btnDontKnow") {
 			public void onClick(AjaxRequestTarget target) {
@@ -172,9 +195,10 @@ public class InterviewingPanel extends Panel {
 		// the Don't know & refuse buttons are ONLY for list-of-alters
 		// with Multiple_Selection type questions AND list-of-alters
 		if ( withDKRefActionButtons ) {
-			if ( !question.getAllButton()) {
-				btnAll.setEnabled(false);
-				btnAll.setVisible(false);
+			if ( !question.getAllButton() && 
+				 !question.getPageLevelDontKnowButton() &&
+				 !question.getPageLevelRefuseButton()) {
+				lblBtnAll.setVisible(false);
 			}
 			if ( !question.getPageLevelDontKnowButton()) {
 				btnDontKnow.setEnabled(false);
@@ -185,10 +209,9 @@ public class InterviewingPanel extends Panel {
 				btnRefuse.setVisible(false);
 			}
 		} else {
-			btnAll.setEnabled(false);
+			lblBtnAll.setVisible(false);
 			btnDontKnow.setEnabled(false);
 			btnRefuse.setEnabled(false);
-			btnAll.setVisible(false);
 			btnDontKnow.setVisible(false);
 			btnRefuse.setVisible(false);
 		} 

@@ -21,6 +21,7 @@ import net.sf.egonet.model.Question.QuestionType;
 import net.sf.egonet.model.AnswerList;
 import net.sf.egonet.model.AnswerListMgr;
 import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
+import net.sf.egonet.web.page.CheckIncludeID;
 
 import net.sf.functionalj.tuple.Pair;
 import net.sf.functionalj.tuple.Triple;
@@ -46,14 +47,14 @@ public class Archiving {
 	public static String getStudyXML(final Study study) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getStudyXML(session, study,false);
+				return getStudyXML(session, study,false, (List<CheckIncludeID>)(null));
 			}
 		}.execute();
 	}
-	public static String getRespondentDataXML(final Study study) {
+	public static String getRespondentDataXML(final Study study, final List<CheckIncludeID> checkIncludeIDList ) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getStudyXML(session, study,true);
+				return getStudyXML(session, study,true,checkIncludeIDList);
 			}
 		}.execute();
 	}
@@ -77,7 +78,8 @@ public class Archiving {
 		return string;
 	}
 	
-	public static String getStudyXML(Session session, Study study, Boolean includeInterviews) {
+	public static String getStudyXML(Session session, Study study, Boolean includeInterviews,
+			List<CheckIncludeID> checkIncludeIDList ) {
 		try {
 			Document document = DocumentHelper.createDocument();
 			Element studyNode = addStudyNode(document, study);
@@ -101,7 +103,27 @@ public class Archiving {
 			
 			if(includeInterviews) {
 				Element interviewsNode = studyNode.addElement("interviews");
-				for(Interview interview : Interviews.getInterviewsForStudy(session, study.getId())) {
+				List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
+				
+				// IF the user selected which interviews in this study to include in the analysis
+				// that data will be in List<CheckIncludeID> checkIncludeIDList.
+				// need to remove unwanted interviews the 'safe' way
+
+				if ( checkIncludeIDList != null  &&  !checkIncludeIDList.isEmpty()) {
+					// First, copy interviews to a temp structure and clear original array
+					List<Interview> oldInterviews = Lists.newArrayList(); // new ArrayList<Interview>();
+					oldInterviews.addAll(interviews);
+					interviews.clear();
+					
+					// now reconstruct the list of interviews to include
+					for ( Interview interview : oldInterviews ) {
+						if ( CheckIncludeID.useThisID(checkIncludeIDList, interview.getId()))
+							interviews.add(interview);
+					}
+				}
+				
+				
+				for(Interview interview : interviews ) {
 					addInterviewNode(interviewsNode,interview,
 							Alters.getForInterview(session, interview.getId()),
 							Answers.getAnswersForInterview(session, interview.getId()));
@@ -408,7 +430,7 @@ public class Archiving {
 		addAttribute(questionNode,"refuseButton", question.getRefuseButton());
 		addAttribute(questionNode,"allOptionString", question.getAllOptionString());
 		addAttribute(questionNode,"symmetric", question.getSymmetric());
-		addAttribute(questionNode,"groupID", question.getGroupID());
+		addAttribute(questionNode,"keepOnSamePage", question.getKeepOnSamePage());
 		aType = question.getAnswerType();
 		if (aType==Answer.AnswerType.NUMERICAL ) {
 			addAttribute(questionNode,"minLimitType", question.getMinLimitTypeDB());
@@ -486,9 +508,9 @@ public class Archiving {
 		}
 		
 		try {
-			question.setGroupID(attrString(node,"groupID"));
+			question.setKeepOnSamePage(attrBool(node,"keepOnSamePage"));
 		} catch ( java.lang.RuntimeException rte6 ) {
-			question.setGroupID("");
+			question.setKeepOnSamePage(false);
 		}
 		
 		aType = question.getAnswerType();
@@ -704,6 +726,7 @@ public class Archiving {
 		Element interviewNode = parent.addElement("interview");
 		addAttribute(interviewNode,"id", interview.getId());
 		addAttribute(interviewNode,"key", interview.getRandomKey());
+		addAttribute(interviewNode,"completed", interview.getCompleted());
 		Element altersNode = interviewNode.addElement("alters");
 		for(Alter alter : alters) {
 			addAlterNode(altersNode,alter);
@@ -718,6 +741,8 @@ public class Archiving {
 	private static void updateInterviewFromNode(Session session, Interview interview, Element node, Long studyId) 
 	{
 		interview.setStudyId(studyId);
+		try { interview.setCompleted(attrBool(node,"completed")); }
+		catch (java.lang.RuntimeException rte) { interview.setCompleted(new Boolean(false));}
 		DB.save(session, interview);
 	}
 	

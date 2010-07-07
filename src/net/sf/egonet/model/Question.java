@@ -67,10 +67,10 @@ public class Question extends OrderedEntity
 	// time units are available for answering.
 	// they will be stored as boolean bit values
 	private Integer timeUnits;
-	// symmetric indicates if a question should be asked a->b and b->a or just a->n
+	// symmetric indicates if a question should be asked a->b and b->a or just a->b
 	private Boolean symmetric;
 	// groupID will be used to group questions together on one page
-	private String groupID;
+	private Boolean keepOnSamePage;
 	
 	public Question() {
 		prompt = "";
@@ -101,7 +101,7 @@ public class Question extends OrderedEntity
 		maxListRange = new Integer(100);
 		timeUnits = 0xff;
 		symmetric = true;
-		groupID = "";
+		keepOnSamePage = false;
 	}
 
 	public String toString() {
@@ -145,7 +145,7 @@ public class Question extends OrderedEntity
 		c.setMaxListRange(getMaxListRange());
 		c.setTimeUnits(getTimeUnits());
 		c.setSymmetric(getSymmetric());
-		c.setGroupID(getGroupID());
+		c.setKeepOnSamePage(getKeepOnSamePage());
 		return c;
 	}
 	
@@ -607,13 +607,13 @@ public class Question extends OrderedEntity
     	return(symmetric);
     }
     
-    public void setGroupID( String groupID ) {
-    	this.groupID = (groupID==null) ? "" : groupID;
+    public void setKeepOnSamePage( Boolean keepOnSamePage ) {
+    	this.keepOnSamePage = (keepOnSamePage==null) ? new Boolean(false) : keepOnSamePage;
     }
-    public String getGroupID() {
-    	if ( groupID==null )
-    		groupID = "";
-    	return(groupID);
+    public Boolean getKeepOnSamePage() {
+    	if ( keepOnSamePage==null )
+    		keepOnSamePage = new Boolean(false);
+    	return(keepOnSamePage);
     }
     
 	/* ****************************************************************** */

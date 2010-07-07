@@ -14,11 +14,17 @@
 	
 	<br />
     <form wicket:id="pageButtonsForm"> 	
-	    <a href="#" wicket:id="btnAll"><span wicket:id="btnAllLabel" > Set All To... </span></a> 
+        <label wicket:id="lblSetAlls">Set All to...</label>
+        &nbsp;
+        <span wicket:id="btnParent">
+            <a href="#" wicket:id="btnAll">
+                <span wicket:id="btnAllLabel" > Set all to...</span>
+            </a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span>                                                                                  
+	    <a href="#" wicket:id="btnDontKnow"> DON'T KNOW </a>             
 	    &nbsp;&nbsp;                                                                   
-	    <a href="#" wicket:id="btnDontKnow"> DON'T KNOW ALL </a>             
-	    &nbsp;&nbsp;                                                                                       
-	    <a href="#" wicket:id="btnRefuse"> REFUSE ALL </a>                                  
+	    <a href="#" wicket:id="btnRefuse"> REFUSE </a>                                  
 	</form>                                                                                
 	<span wicket:id="refDKCheck" style="margin-left:10em">Refuse and dont know checkboxes</span>
 

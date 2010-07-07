@@ -12,5 +12,6 @@
 		<property name="active" column="active" />
 
 		<property name="studyId" column="study_id" />
+		<property name="completed" column="completed" />
 	</class>
 </hibernate-mapping>

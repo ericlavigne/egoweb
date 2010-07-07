@@ -38,6 +38,7 @@ import net.sf.egonet.persistence.Expressions.EvaluationContext;
 import net.sf.egonet.web.component.NetworkImage;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.functionalj.tuple.TripleUni;
+import net.sf.egonet.web.page.CheckIncludeID;
 
 public class Analysis {
 	
@@ -112,7 +113,8 @@ public class Analysis {
 		return new Network<Alter>(alters,edges);
 	}
 	
-	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study, Expression connection) {
+	public static void writeEgoAndAlterDataForStudy(CSVWriter writer, Session session, Study study, 
+			Expression connection, List<CheckIncludeID> checkIncludeIDList) {
 
 		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
 
@@ -135,6 +137,23 @@ public class Analysis {
 				for(QuestionOption option : Options.getOptionsForQuestion(session, question.getId())) {
 					optionIdToValue.put(option.getId(), option.getValue());
 				}
+			}
+		}
+		
+		// IF the user selected which interviews in this study to include in the analysis
+		// that data will be in List<CheckIncludeID> checkIncludeIDList.
+		// need to remove unwanted interviews the 'safe' way
+
+		if ( checkIncludeIDList != null  &&  !checkIncludeIDList.isEmpty()) {
+			// First, copy interviews to a temp structure and clear original array
+			List<Interview> oldInterviews = Lists.newArrayList(); // new ArrayList<Interview>();
+			oldInterviews.addAll(interviews);
+			interviews.clear();
+			
+			// now reconstruct the list of interviews to include
+			for ( Interview interview : oldInterviews ) {
+				if ( CheckIncludeID.useThisID(checkIncludeIDList, interview.getId()))
+					interviews.add(interview);
 			}
 		}
 		
@@ -239,7 +258,8 @@ public class Analysis {
 		return string.isEmpty() ? string : string.substring(0, 1).toUpperCase()+string.substring(1);
 	}
 	
-	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study, Expression connection) 
+	public static void writeAlterPairDataForStudy(CSVWriter writer, Session session, Study study, 
+			Expression connection, List<CheckIncludeID> checkIncludeIDList) 
 	{
 		List<Interview> interviews = Interviews.getInterviewsForStudy(session, study.getId());
 
@@ -261,7 +281,24 @@ public class Analysis {
 				}
 			}
 		}
+		
+		// IF the user selected which interviews in this study to include in the analysis
+		// that data will be in List<CheckIncludeID> checkIncludeIDList.
+		// need to remove unwanted interviews the 'safe' way
 
+		if ( checkIncludeIDList != null  &&  !checkIncludeIDList.isEmpty()) {
+			// First, copy interviews to a temp structure and clear original array
+			List<Interview> oldInterviews = Lists.newArrayList(); // new ArrayList<Interview>();
+			oldInterviews.addAll(interviews);
+			interviews.clear();
+			
+			// now reconstruct the list of interviews to include
+			for ( Interview interview : oldInterviews ) {
+				if ( CheckIncludeID.useThisID(checkIncludeIDList, interview.getId()))
+					interviews.add(interview);
+			}
+		}
+		
 		List<String> header = Lists.newArrayList();
 		header.add("Interview number");
 		for(Question question : egoIdQuestions) {
@@ -324,9 +361,9 @@ public class Analysis {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeEgoAndAlterDataForStudy(writer, session, study, connection);
+			writeEgoAndAlterDataForStudy(writer, session, study, connection, (List<CheckIncludeID>)(null));
 			writer.writeNext(new String[]{}); // blank line between tables
-			writeAlterPairDataForStudy(writer, session, study, connection);
+			writeAlterPairDataForStudy(writer, session, study, connection,  (List<CheckIncludeID>)(null));
 			
 			writer.close();
 			return stringWriter.toString();
@@ -335,20 +372,22 @@ public class Analysis {
 		}
 	}
 	
-	public static String getEgoAndAlterCSVForStudy(final Study study, final Expression connection) {
+	public static String getEgoAndAlterCSVForStudy(final Study study, final Expression connection,
+			final List<CheckIncludeID> checkIncludeIDList) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getEgoAndAlterCSVForStudy(session, study, connection);
+				return getEgoAndAlterCSVForStudy(session, study, connection, checkIncludeIDList);
 			}
 		}.execute();
 	}
 	
-	public static String getEgoAndAlterCSVForStudy(Session session, Study study, Expression connection) {
+	public static String getEgoAndAlterCSVForStudy(Session session, Study study, 
+			Expression connection, List<CheckIncludeID> checkIncludeIDList) {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeEgoAndAlterDataForStudy(writer, session, study, connection);
+			writeEgoAndAlterDataForStudy(writer, session, study, connection, checkIncludeIDList);
 			
 			writer.close();
 			return stringWriter.toString();
@@ -357,20 +396,22 @@ public class Analysis {
 		}
 	}
 
-	public static String getAlterPairCSVForStudy(final Study study, final Expression connection) {
+	public static String getAlterPairCSVForStudy(final Study study, final Expression connection,
+			final List<CheckIncludeID> checkIncludeIDList) {
 		return new DB.Action<String>() {
 			public String get() {
-				return getAlterPairCSVForStudy(session, study, connection);
+				return getAlterPairCSVForStudy(session, study, connection,checkIncludeIDList);
 			}
 		}.execute();
 	}
 	
-	public static String getAlterPairCSVForStudy(Session session, Study study, Expression connection) {
+	public static String getAlterPairCSVForStudy(Session session, Study study, Expression connection,
+			List<CheckIncludeID> checkIncludeIDList) {
 		try {
 			StringWriter stringWriter = new StringWriter();
 			CSVWriter writer = new CSVWriter(stringWriter);
 			
-			writeAlterPairDataForStudy(writer, session, study, connection);
+			writeAlterPairDataForStudy(writer, session, study, connection, checkIncludeIDList);
 			
 			writer.close();
 			return stringWriter.toString();

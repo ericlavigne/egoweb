@@ -1,15 +1,19 @@
 package net.sf.egonet.web.page;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Expression;
 import net.sf.egonet.model.Interview;
@@ -17,13 +21,18 @@ import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Analysis;
 import net.sf.egonet.persistence.Expressions;
 import net.sf.egonet.persistence.Interviews;
+import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Studies;
+
+import net.sf.egonet.web.page.CheckIncludeID;
+import net.sf.egonet.web.panel.InterviewNavigationPanel.InterviewLink;
 
 public class AnalysisStudyPage extends EgonetPage {
 	
 	private Long studyId;
 	private Model adjacencyReason;
 	private Label errorMessage;
+	private List<CheckIncludeID> checkIncludeIDList;
 	
 	public AnalysisStudyPage(Study study) {
 		super("Analysis for "+study.getName());
@@ -38,6 +47,7 @@ public class AnalysisStudyPage extends EgonetPage {
 	private void build() {
 		Form analysisForm = new Form("analysisForm");
 
+		checkIncludeIDList = Lists.newArrayList();
 		Long adjacencyExpressionId = getStudy().getAdjacencyExpressionId();
 		adjacencyReason = adjacencyExpressionId == null ? new Model() : 
 			new Model(Expressions.get(adjacencyExpressionId));
@@ -55,7 +65,7 @@ public class AnalysisStudyPage extends EgonetPage {
 				downloadText(
 						getStudy().getName()+"-alter-data.csv",
 						"text/csv",
-						Analysis.getEgoAndAlterCSVForStudy(getStudy(),connectionExpression));
+						Analysis.getEgoAndAlterCSVForStudy(getStudy(),connectionExpression,checkIncludeIDList));
 			}
 		});
 		
@@ -70,13 +80,15 @@ public class AnalysisStudyPage extends EgonetPage {
 				downloadText(
 						getStudy().getName()+"-alter-pair-data.csv",
 						"text/csv",
-						Analysis.getAlterPairCSVForStudy(getStudy(),connectionExpression));
+						Analysis.getAlterPairCSVForStudy(getStudy(),connectionExpression,checkIncludeIDList));
 			}
 		});
 		
 		analysisForm.add(new ListView("interviews", new PropertyModel(this, "interviews")) {
 			protected void populateItem(ListItem item) {
 				final Interview interview = (Interview) item.getModelObject();
+				ArrayList<InterviewLink> links;
+
 				item.add(new Label("interviewName",
 						Interviews.getEgoNameForInterview(interview.getId())));
 				item.add(new Button("interviewReview") {
@@ -97,6 +109,15 @@ public class AnalysisStudyPage extends EgonetPage {
 										getConnectionReason()));
 					}
 				});
+				item.add(new Label("interviewActive", (interview.getCompleted()?"Complete":"Incomplete")));
+				CheckIncludeID checkIncludeID = new CheckIncludeID(interview.getId(), interview.getCompleted());
+				checkIncludeIDList.add(checkIncludeID);
+				item.add(new CheckBox("interviewInclude", new PropertyModel(checkIncludeID,"selected")));
+				links = Lists.newArrayList(Interviewing.getAnsweredPagesForInterview(interview.getId()));
+				if ( links.isEmpty())
+				    item.add(new Label("lastQuestion", "(none)"));
+				else
+					item.add(new Label("lastQuestion", links.get(links.size()-1).toString()));
 			}});
 		
 		add(analysisForm);
@@ -110,4 +131,6 @@ public class AnalysisStudyPage extends EgonetPage {
 		return Interviews.getInterviewsForStudy(studyId);
 	}
 }
+
+
 

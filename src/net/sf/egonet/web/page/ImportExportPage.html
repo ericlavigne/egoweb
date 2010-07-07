@@ -40,9 +40,6 @@
 		</form>
 	</fieldset>
 	</td>
-	<td></td>
-	</tr>
-	<tr>
 	<td>
 	<fieldset>
 		<legend>Import respondent data</legend>
@@ -60,6 +57,23 @@
 		</form>
 	</fieldset>
 	</td>
+	</tr>
+	<tr>
+	<td>
+	<fieldset>
+		<legend>Export 'Other/Specify' data</legend>
+		<form wicket:id="exportOSForm">
+			<p>
+				<label for="studyToOSExport">Study:</label>
+				<select id="studyToOSExport" wicket:id="studyToOSExport" />
+			</p>
+			<p>
+				<input wicket:id="studyOSExport" type="submit" value="Export Other/Specify Data" />
+			</p>
+
+		</form>
+	</fieldset>
+	</td>
 	<td>
 	<fieldset>
 		<legend>Export</legend>
@@ -74,22 +88,27 @@
 			<p>
 				<input wicket:id="respondentDataExport" type="submit" value="Export respondent data" />
 			</p>
+			<p>
+			    <input wicket:id="selectCases" type="submit" value="Select Cases" />
+			</p>
 		</form>
 	</fieldset>
 	</td>
 	<td>
-	<fieldset>
-		<legend>Export 'Other/Specify' data</legend>
-		<form wicket:id="exportOSForm">
-			<p>
-				<label for="studyToOSExport">Study:</label>
-				<select id="studyToOSExport" wicket:id="studyToOSExport" />
-			</p>
-			<p>
-				<input wicket:id="studyOSExport" type="submit" value="Export Other/Specify Data" />
-			</p>
-		</form>
-	</fieldset>
+	   <form wicket:id="selectCasesForm">
+	   	<fieldset>                
+	   <legend>Select Export Cases</legend> 
+	   		<table>
+			<tr wicket:id="interviews">
+				<td wicket:id="interviewName">Interview name</td>
+				<td><span  wicket:id="interviewActive">...</span></td>
+				<td align="right" style="padding-right: 0px;"><input wicket:id="interviewInclude" type="checkBox" /></td>
+				<td align="left">Include?</td>
+				<td><span wicket:id="lastQuestion">...</span></td>
+			</tr>
+		</table>
+	   </fieldset>
+	   </form>
 	</td>
 	</tr>
 	</table>

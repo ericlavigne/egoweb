@@ -36,14 +36,11 @@ public class ListLimitsPanel extends Panel {
 	private Boolean allButton;  
 	private Boolean pageLevelDontKnowButton;
 	private Boolean pageLevelRefuseButton;  
-	private String  allOptionString;
-	private QuestionOption allOption;
 	
 	private CheckBox cbNone;
 	private CheckBox cbAll;
 	private CheckBox cbDontKnow;
 	private CheckBox cbRefuse;
-    private DropDownChoice dropListAllOption;
     
     /**
      * standard constructor
@@ -82,20 +79,15 @@ public class ListLimitsPanel extends Panel {
 		    setAllButton(question.getAllButton());
 		    setPageLevelDontKnowButton(question.getPageLevelDontKnowButton());
 		    setPageLevelRefuseButton(question.getPageLevelRefuseButton());
-		    setAllOptionString(question.getAllOptionString());
 		    
 		    // find the question option that matches the listRangeString
 		    if ( qID != null ) {
 		    	for ( QuestionOption qo : listOfOptions ) {
 		    		if ( listRangeString.equalsIgnoreCase(qo.getName()))
 		    			listRangeOption = qo;
-		    		if ( allOptionString.equalsIgnoreCase(qo.getName()))
-		    			allOption = qo;
 		    	}
 		    	if ( listRangeOption==null && !listOfOptions.isEmpty())
 		    		listRangeOption = listOfOptions.get(0);
-		    	if ( allOption==null && !listOfOptions.isEmpty())
-		    		allOption = listOfOptions.get(0);
 		    } // end of if qId != null
 		    
 		    // this next part might happen with new questions
@@ -105,13 +97,6 @@ public class ListLimitsPanel extends Panel {
 		    		qID = new Long(0);
 		    	listRangeOption =  new QuestionOption(qID, "(none)");
 		    	listOfOptions.add(listRangeOption);
-		    }
-		    
-		    if ( allOption==null ) {
-		    	if ( qID==null)
-		    		qID = new Long(0);
-		    	allOption = new QuestionOption(qID,"(none)");
-		    	listOfOptions.add(allOption);
 		    }
 		}
 	}
@@ -151,26 +136,21 @@ public class ListLimitsPanel extends Panel {
     	cbAll  = new CheckBox("all",  new PropertyModel(this,"allButton"));
     	cbDontKnow = new CheckBox("dontknow", new PropertyModel(this,"pageLevelDontKnowButton"));
     	cbRefuse   = new CheckBox("refuse",   new PropertyModel(this,"pageLevelRefuseButton"));
-    	dropListAllOption = new DropDownChoice("allOption", 
-	    		new PropertyModel(this,"allOption"), listOfOptions);
     	
     	cbNone.setOutputMarkupId(true);
     	cbAll.setOutputMarkupId(true);
     	cbDontKnow.setOutputMarkupId(true);
     	cbRefuse.setOutputMarkupId(true);
-    	dropListAllOption.setOutputMarkupId(true);
     	
     	cbNone.setOutputMarkupPlaceholderTag(true);
     	cbAll.setOutputMarkupPlaceholderTag(true);
     	cbDontKnow.setOutputMarkupPlaceholderTag(true);
     	cbRefuse.setOutputMarkupPlaceholderTag(true);
-    	dropListAllOption.setOutputMarkupPlaceholderTag(true);
     	
     	listLimitsForm.add(cbNone);
     	listLimitsForm.add(cbAll);
     	listLimitsForm.add(cbDontKnow);
     	listLimitsForm.add(cbRefuse);
-    	listLimitsForm.add(dropListAllOption);
     	
 	    add(listLimitsForm);
 	}
@@ -188,7 +168,6 @@ public class ListLimitsPanel extends Panel {
 		    	 txtMaxListRange.setEnabled(true);
 		    	 cbNone.setEnabled(true);
 		         cbAll.setEnabled(true);
-		         dropListAllOption.setEnabled(true);
 		         break;
 		    default:
 		    	 cbWithListRange.setEnabled(false);
@@ -197,7 +176,6 @@ public class ListLimitsPanel extends Panel {
 	         	 txtMaxListRange.setEnabled(false);
 	         	 cbNone.setEnabled(false);
 	         	 cbAll.setEnabled(false);
-	          	 dropListAllOption.setEnabled(false);
 	         	 break;		    	
 		}
 	}
@@ -275,20 +253,5 @@ public class ListLimitsPanel extends Panel {
 		if ( pageLevelRefuseButton==null)
 			pageLevelRefuseButton = false;
 		return(pageLevelRefuseButton);
-	}
-	
-	public void setAllOptionString( String allOptionString ) {
-		this.allOptionString = (allOptionString==null) ? new String("") : allOptionString;
-	}
-	public String getAllOptionString() {
-		allOptionString = allOption.getName();
-		return(allOptionString);
-	}
-	
-	public void setAllOption( QuestionOption allOption ) {
-		this.allOption = allOption;
-	}
-	public QuestionOption getAllOption() {
-		return(allOption);
 	}	
 }
