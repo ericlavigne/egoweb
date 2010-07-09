@@ -14,7 +14,6 @@ import net.sf.egonet.web.panel.InterviewNavigationPanel.InterviewLink;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
@@ -25,6 +24,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
@@ -292,6 +292,7 @@ public class ImportExportPage extends EgonetPage {
 		selectCasesForm.add(new ListView("interviews", new PropertyModel(this, "interviews")) {
 			protected void populateItem(ListItem item) {
 				final Interview interview = (Interview) item.getModelObject();
+				AjaxCheckBox cBox;
 				ArrayList<InterviewLink> links;
 				
 				item.add(new Label("interviewName",
@@ -300,7 +301,12 @@ public class ImportExportPage extends EgonetPage {
 				item.add(new Label("interviewActive", (interview.getCompleted()?"Complete":"Incomplete")));
 				CheckIncludeID checkIncludeID = new CheckIncludeID(interview.getId(),interview.getCompleted());
 				checkIncludeIDList.add(checkIncludeID);
-				item.add(new CheckBox("interviewInclude", new PropertyModel(checkIncludeID,"selected")));
+				cBox = new AjaxCheckBox("interviewInclude", new PropertyModel(checkIncludeID,"selected"))	{
+					 protected void onUpdate(AjaxRequestTarget target) {
+					 }
+					 };
+				cBox.setOutputMarkupId(true);
+				item.add(cBox);
 				links = Lists.newArrayList(Interviewing.getAnsweredPagesForInterview(interview.getId()));
 				if ( links.isEmpty())
 				    item.add(new Label("lastQuestion", "(none)"));

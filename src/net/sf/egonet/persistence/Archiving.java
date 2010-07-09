@@ -117,6 +117,7 @@ public class Archiving {
 					
 					// now reconstruct the list of interviews to include
 					for ( Interview interview : oldInterviews ) {
+						// System.out.println ( "interviewID = " + interview.getId());
 						if ( CheckIncludeID.useThisID(checkIncludeIDList, interview.getId()))
 							interviews.add(interview);
 					}
