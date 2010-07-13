@@ -111,10 +111,11 @@ public class Interviewing {
 			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
 		Boolean passedCurrent = current == null;
 		EvaluationContext context = Expressions.getContext(session, interview);
+		
 		for(Question question : questions) {
 			Boolean foundAnswer = false;
 			for(Answer answer : answers) {
-				if(answer.getQuestionId().equals(question.getId())) {
+				if(answer.getQuestionId() != null  &&  answer.getQuestionId().equals(question.getId())) {
 					foundAnswer = true;
 				}
 			}
