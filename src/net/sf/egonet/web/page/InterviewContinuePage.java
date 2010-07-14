@@ -1,5 +1,6 @@
 package net.sf.egonet.web.page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Page;
@@ -7,8 +8,10 @@ import org.apache.wicket.Page;
 import net.sf.egonet.model.Study;
 import net.sf.functionalj.tuple.Pair;
 import net.sf.egonet.model.Interview;
+import net.sf.egonet.persistence.Interviewing;
 import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
+import net.sf.egonet.web.panel.InterviewNavigationPanel.InterviewLink;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,6 +23,8 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.collect.Lists;
 
 
 public class InterviewContinuePage extends EgonetPage {
@@ -87,6 +92,7 @@ public class InterviewContinuePage extends EgonetPage {
 					Link interviewLink;
 					Long id;
 					String egoName;
+					ArrayList<InterviewLink> links;
 					
 					id = interview.getId();
 					egoName = Interviews.getEgoNameForInterview(id);
@@ -104,7 +110,11 @@ public class InterviewContinuePage extends EgonetPage {
 
 					interviewLink.add(new Label("name", egoName));
 					item.add(interviewLink);
-					
+					links = Lists.newArrayList(Interviewing.getAnsweredPagesForInterview(interview.getId()));
+					if ( links.isEmpty())
+					    item.add(new Label("lastQuestion", "(none)"));
+					else
+						item.add(new Label("lastQuestion", links.get(links.size()-1).toString()));
 				}
 			};
 			interviewView.setOutputMarkupId(true);

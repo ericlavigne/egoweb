@@ -142,7 +142,7 @@ public class InterviewingPanel extends Panel {
 	    	listOfOptions = new ArrayList<QuestionOption>(1);
 		}
 		
-		lblBtnAll = new Label("lblSetAlls", "Set All Unanswered To...");
+		lblBtnAll = new Label("lblSetAlls", "SET ALL UNANSWERED TO...");
 		pageButtonsForm.add(lblBtnAll);
 		
 		RepeatingView rv = new RepeatingView("btnParent");
