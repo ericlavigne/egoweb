@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.Iterator;
 
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,6 +29,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		// TODO: need a way for one of these to represent a question intro: firstAlter -> null
 		public Long interviewId;
 		public Question question;
+		public ArrayList<Question> questionList; // used for multiple questions per page
 		public Alter firstAlter;
 		public ArrayList<Alter> secondAlters; // only one alter when not list style, never empty
 		public TreeSet<Question> sectionQuestions;
@@ -73,17 +75,29 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 			return question.compareTo(subject.question);
 		}
 		
+		public Question lastQuestionInList() {
+			if ( questionList==null || questionList.isEmpty())
+				return(null);
+			return ( questionList.get(questionList.size()-1));
+		}
+		
+		public Question firstQuestionInList() {
+			if ( questionList==null || questionList.isEmpty())
+				return(null);
+			return ( questionList.get(0));
+		}	
 	}
 
 	private Subject subject;
 	private InterviewingPanel interviewingPanel;
     private boolean gotoNextUnAnswered;
+    private boolean multipleQuestionsPerPage;
     
 	public InterviewingAlterPairPage(Subject subject) 
 	{
 		super(subject.interviewId);
 		this.subject = subject;
-		gotoNextUnAnswered = false;
+		gotoNextUnAnswered = multipleQuestionsPerPage = false;
 		build();
 		setQuestionId("Question: " + subject.question.getTitle());
 	}
@@ -105,6 +119,24 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		form.add(nextUnanswered);	
 		
 		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
+		multipleQuestionsPerPage = getQuestionsForOnePage ( subject.question, subject );
+		
+		if ( subject.secondAlters.size()==1 && multipleQuestionsPerPage ) {
+		     // ArrayList<Alter> alters = Lists.newArrayList(subject.secondAlters.get(0));
+		     ArrayList<Alter> alters = Lists.newArrayList(subject.firstAlter,subject.secondAlters.get(0));
+		     for ( Question quest : subject.questionList ) {
+		         Answer answer = 
+				    Answers.getAnswerForInterviewQuestionAlters(Interviews.getInterview(subject.interviewId), 
+						    quest, alters);
+				if(answer == null) {
+				    answerFields.add(AnswerFormFieldPanel.getInstance("question", quest, alters, subject.interviewId));
+				} else {
+				    answerFields.add(AnswerFormFieldPanel.getInstance("question", 
+						    quest, answer.getValue(), answer.getOtherSpecifyText(), answer.getSkipReason(), alters, subject.interviewId));
+				}		    	 
+		    }
+			interviewingPanel = new InterviewingPanel("interviewingPanel",answerFields,subject.interviewId);		     
+		} else {
 		for(Alter secondAlter : subject.secondAlters) {
 			ArrayList<Alter> alters = Lists.newArrayList(subject.firstAlter,secondAlter);
 			Answer answer = 
@@ -128,6 +160,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		 
 		interviewingPanel = 
 			new InterviewingPanel("interviewingPanel",subject.question,answerFields,subject.interviewId);
+		}
 		form.add(interviewingPanel);
 		
 		add(form);
@@ -177,7 +210,7 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 				answerField.setNotification(answerField.getRangeCheckNotification());
 			} else if(okayToContinue) {
 				Answers.setAnswerForInterviewQuestionAlters(
-						subject.interviewId, subject.question, answerField.getAlters(), 
+						subject.interviewId, /*subject.question*/ answerField.getQuestion(), answerField.getAlters(), 
 						answerField.getAnswer(), answerField.getOtherText(),
 						answerField.getSkipReason(pageFlags));
 			} else if(consistent) {
@@ -211,6 +244,10 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 	public static EgonetPage askNext(
 			Long interviewId, Subject currentPage, boolean unansweredOnly, EgonetPage comeFrom) 
 	{
+		// to move forward we need to start searching on the last question
+		if ( currentPage!=null && currentPage.questionList != null )
+			currentPage.question = currentPage.lastQuestionInList();
+		
 		Subject nextSubject = 
 			Interviewing.nextAlterPairPageForInterview(interviewId, currentPage, true, unansweredOnly);
 		if(nextSubject != null) {
@@ -223,7 +260,13 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 		}
 		return InterviewingNetworkPage.askNext(interviewId, null, comeFrom);
 	}
+	
 	public static EgonetPage askPrevious(Long interviewId, Subject currentSubject, EgonetPage comeFrom) {
+		
+		// to move backward we need to start searching on the first question
+		if ( currentSubject!=null && currentSubject.questionList != null )
+		    currentSubject.question = currentSubject.firstQuestionInList();
+		
 		Subject previousSubject =
 			Interviewing.nextAlterPairPageForInterview(interviewId, currentSubject, false, false);
 		EgonetPage previousPage = 
@@ -236,4 +279,73 @@ public class InterviewingAlterPairPage extends InterviewingPage {
 				currentSubject == null ? null : currentSubject.question,
 				previousPage,comeFrom);
 	}
+	
+	/**
+	 * the subject has a treeSet sectionQuestions, which is the group of questions this
+	 * question (firstQuestion) belongs to.  The end of the group is the last question within
+	 * this treeset.  Some questions might have a 'keepOnSamePage' flag set, and we will want to 
+	 * group all of those together into an array of answerPanels. 
+	 * @param firstQuestion - just what is says, first question on this 'page'
+	 * @param subject - an object with a question and an alter and the listOfQuestions
+	 * @return true if we will need to display more than one question
+	 */
+	private boolean getQuestionsForOnePage ( Question firstQuestion, Subject subject ) {
+		Iterator<Question> iter;
+		Question question;
+		boolean moreThanOne = false;
+		boolean hit = false;
+		boolean done = false;
+		
+		subject.questionList = new ArrayList<Question>();
+		// If we don't allow multipe questions per page, 
+		// just return a list with one Question and a false value
+		if ( !Question.ALLOW_MULTIPLE_QUESTIONS_PER_PAGE ) {
+			subject.questionList.add(firstQuestion);
+			return(false);
+		}
+		iter = subject.sectionQuestions.iterator();
+		while ( iter.hasNext() && !done ) {
+			question = iter.next();
+			if ( question.equals(firstQuestion)) {
+				subject.questionList.add(question);
+				hit = true;
+			} else if (hit) {
+				if ( question.getKeepOnSamePage()) {
+					subject.questionList.add(question);
+					moreThanOne = true;
+				} else {
+					done = true;
+				}
+			}	
+		}
+		// in a similar manner, if we are going backwards and are on
+		// a question that needs to stay on the same page as the previous one, 
+		// we will need to go back 
+		if ( firstQuestion.getKeepOnSamePage()) {
+			iter = subject.sectionQuestions.descendingIterator();
+			hit = done = false;
+			while ( iter.hasNext() && !done ) {
+				question = iter.next();
+				if ( question.equals(firstQuestion)) {
+					hit = true;
+				} else if (hit) {
+					if ( question.getKeepOnSamePage()) {
+						subject.questionList.add(0,question);
+						moreThanOne = true;
+					} else {
+						subject.questionList.add(0,question);
+						moreThanOne = true;
+						done = true;
+					}
+				}	
+			}
+		}
+		
+		// System.out.println ( "Exitting InterviewingAlterPage.getQuestionsForOnePage");
+		// for ( Question q : subject.questionList) {
+		// 	System.out.println ( "Contains " + q.getTitle());
+		// }
+		return(moreThanOne);
+	}
+
 }

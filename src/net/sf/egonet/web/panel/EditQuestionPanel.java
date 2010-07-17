@@ -104,10 +104,13 @@ public class EditQuestionPanel extends Panel {
 	private Model symmetricModel;
 	private Model dontKnowModel;
 	private Model refuseModel;
+	private Model keepOnSamePageModel;
 	private Label otherSpecifyLabel; 
 	private CheckBox otherSpecifyCheckBox;
 	private Label symmetricLabel;
 	private CheckBox symmetricCheckBox;
+	private Label keepOnSamePageLabel;
+	private CheckBox keepOnSamePageCheckBox;
 	private DropDownChoice dropDownQuestionTypes;  
 	private CheckBox cbDontKnow;
 	private CheckBox cbRefuse;
@@ -318,6 +321,21 @@ public class EditQuestionPanel extends Panel {
 			symmetricLabel.setVisible(false);
 			symmetricCheckBox.setVisible(false);
 		}
+		keepOnSamePageLabel = new Label("keepOnSamePageLabel", "Keep on same page as prev question?");
+		keepOnSamePageModel = new Model();
+		keepOnSamePageModel.setObject(Boolean.FALSE);
+		keepOnSamePageCheckBox = new CheckBox("keepOnSamePageField", keepOnSamePageModel);
+		form.add(keepOnSamePageLabel);
+		form.add(keepOnSamePageCheckBox);
+		keepOnSamePageLabel.setOutputMarkupId(true);
+		keepOnSamePageCheckBox.setOutputMarkupId(true);
+		keepOnSamePageLabel.setOutputMarkupPlaceholderTag(true);
+		keepOnSamePageCheckBox.setOutputMarkupPlaceholderTag(true);
+		if ( !question.ALLOW_MULTIPLE_QUESTIONS_PER_PAGE  ||  
+			  question.getType().equals(Question.QuestionType.EGO_ID)) {
+			keepOnSamePageLabel.setVisible(false);
+			keepOnSamePageCheckBox.setVisible(false);
+		}
 		// questionUseIfField = new TextField("questionUseIfField", new Model(""));
 		// form.add(questionUseIfField);
 		
@@ -480,6 +498,7 @@ public class EditQuestionPanel extends Panel {
 		cbDontKnow.setModelObject(question.getDontKnowButton());
 		cbRefuse.setModelObject(question.getRefuseButton());
 		symmetricCheckBox.setModelObject(question.getSymmetric());
+		keepOnSamePageCheckBox.setModelObject(question.getKeepOnSamePage());
 		if ( aType==Answer.AnswerType.NUMERICAL) {
 			numericLimitsPanel.setVisible(true);
 		} else if ( aType==Answer.AnswerType.MULTIPLE_SELECTION) {
@@ -613,6 +632,7 @@ public class EditQuestionPanel extends Panel {
 		question.setDontKnowButton((Boolean) cbDontKnow.getModelObject());
 		question.setRefuseButton((Boolean) cbRefuse.getModelObject());
 		question.setSymmetric((Boolean) symmetricCheckBox.getModelObject()); 
+		question.setKeepOnSamePage((Boolean) keepOnSamePageCheckBox.getModelObject());
 		if ( question.getAnswerType()==Answer.AnswerType.NUMERICAL) {
 			question.setMinLimitType( numericLimitsPanel.getMinLimitType());
 			question.setMinLiteral  ( numericLimitsPanel.getMinLiteral());

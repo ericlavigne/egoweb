@@ -31,12 +31,22 @@ public class InterviewingPanel extends Panel {
 	private ArrayList<AnswerFormFieldPanel> answerFields;
 	private CheckboxesPanel<String> refDKCheck;
 	private Long interviewId;
+	private boolean multipleQuestions;
 	
 	private final String 
 		dontKnow = AnswerFormFieldPanel.dontKnow,
 		refuse = AnswerFormFieldPanel.refuse,
 		none = AnswerFormFieldPanel.none;
 	
+	/**
+	 * the 'usual' constructor, deals with one question/alter or 
+	 * one question and a list of alters.
+	 * @param id - needed for wicket
+	 * @param question - the question to ask 
+	 * @param answerFields - if one question/alter just one answerField.  
+	 * If a list of alters the answer entry field repeated for each alter
+	 * @param interviewId - uniquely identifies the current interview
+	 */
 	public InterviewingPanel(String id, 
 			Question question, ArrayList<AnswerFormFieldPanel> answerFields, Long interviewId) 
 	{
@@ -44,11 +54,32 @@ public class InterviewingPanel extends Panel {
 		this.question = question;
 		this.answerFields = answerFields;
 		this.interviewId = interviewId;
+		multipleQuestions = false;
 		build();
 	}
 
 	/**
-	 * IF this IS an alter pr alter_pair question, the type IS MULTIPLE_SELECTION 
+	 * this constructor will be used to put multiple questions for one alter
+	 * (or alter-pair, or ego) on one page.  In this case the questions will be 
+	 * extracted from the AnswerFormFieldPanels
+	 * @param id - needed for wicket
+	 * @param answerFields - array of answer fields.  In this case there *should*
+	 * be more than one
+	 * @param interviewId - uniquely identifies the current interview
+	 */
+	public InterviewingPanel(String id, 
+			ArrayList<AnswerFormFieldPanel> answerFields, Long interviewId) 
+	{
+		super(id);
+		this.question = null;
+		this.answerFields = answerFields;
+		this.interviewId = interviewId;
+		multipleQuestions = true;
+		build();
+	}
+
+	/**
+	 * IF this IS an alter or alter_pair question, the type IS MULTIPLE_SELECTION 
 	 * AND there is more than one answer Field 
 	 * THEN we want to use the action buttons to (optionally)
 	 * set Don't Know, Refuse or the 'All' selection
@@ -59,14 +90,18 @@ public class InterviewingPanel extends Panel {
 		Label lblBtnAll;
 		Form pageButtonsForm = new Form("pageButtonsForm");
 		boolean withDKRefActionButtons = false;
-		List<QuestionOption> listOfOptions;
-		Question.QuestionType qType = question.getType();
-		Answer.AnswerType aType = question.getAnswerType();
+		List<QuestionOption> listOfOptions = null;
+		Question.QuestionType qType = null;
+		Answer.AnswerType aType = null;
 		
-		if ( (qType == Question.QuestionType.ALTER || qType==Question.QuestionType.ALTER_PAIR )&&
+		if ( question!=null ) {
+			qType = question.getType();
+			aType = question.getAnswerType();
+			if ((qType == Question.QuestionType.ALTER || qType==Question.QuestionType.ALTER_PAIR )&&
 			  aType == Answer.AnswerType.MULTIPLE_SELECTION ) {
 			if ( answerFields.size() > 1)
 				withDKRefActionButtons = true;
+		}
 		}
 		setOutputMarkupId(true);
 		setOutputMarkupPlaceholderTag(true);
@@ -79,6 +114,21 @@ public class InterviewingPanel extends Panel {
 			altersInPrompt = Lists.newArrayList(answerFields.get(0).getAlters().get(0));
 		}
 		
+		if ( multipleQuestions ) {
+			add(new MultiLineLabel("prompt", ""));
+			ListView questionsView = new ListView("questions",answerFields) {
+				protected void populateItem(ListItem item) {
+					AnswerFormFieldPanel wrapper = (AnswerFormFieldPanel) item.getModelObject();
+					item.add(wrapper);
+					Question question = wrapper.getQuestion();
+					String strPrompt = question.individualizePrompt(wrapper.getAlters());
+					item.add(new Label("alter", strPrompt));
+				}
+			};
+			questionsView.setReuseItems(true);
+			add(questionsView);
+			
+		} else {
 		strPrompt = question.individualizePrompt(altersInPrompt);
 		if ( interviewId==null ) {
 			strPrompt = question.escapeTextInsertionTags(strPrompt);
@@ -110,6 +160,21 @@ public class InterviewingPanel extends Panel {
 		};
 		questionsView.setReuseItems(true);
 		add(questionsView);
+		}
+		
+		// the remainder of the function deals with Don't Know and Refuse
+		// links (buttons) which will not be applicable to Multiple Questions
+		if ( multipleQuestions ) {
+			lblBtnAll = new Label("lblSetAlls", "");
+			pageButtonsForm.add(lblBtnAll);
+			RepeatingView rv = new RepeatingView("btnParent");
+			pageButtonsForm.add(rv);
+			pageButtonsForm.add(new Label("btnDontKnow",""));
+			pageButtonsForm.add(new Label("btnRefuse",""));
+			add(pageButtonsForm);
+			add(new Label("refDKCheck",""));
+			return; 
+		}
 		
 		ArrayList<String> allOptions = Lists.newArrayList();
 		ArrayList<String> selectedOptions = Lists.newArrayList();
@@ -220,6 +285,8 @@ public class InterviewingPanel extends Panel {
 
 	
 	public List<String> pageFlags() {
+		if ( multipleQuestions )
+			return ( new ArrayList<String>());
 		return refDKCheck.getSelected();
 	}
 	

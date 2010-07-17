@@ -3,6 +3,7 @@ package net.sf.egonet.persistence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,11 +112,10 @@ public class Interviewing {
 			Answers.getAnswersForInterview(session, interviewId, QuestionType.EGO);
 		Boolean passedCurrent = current == null;
 		EvaluationContext context = Expressions.getContext(session, interview);
-		
 		for(Question question : questions) {
 			Boolean foundAnswer = false;
 			for(Answer answer : answers) {
-				if(answer.getQuestionId() != null  &&  answer.getQuestionId().equals(question.getId())) {
+				if(answer.getQuestionId()!=null  &&  answer.getQuestionId().equals(question.getId())) {
 					foundAnswer = true;
 				}
 			}
@@ -907,17 +907,17 @@ public class Interviewing {
 	 * @param unansweredOnly  if true looking for unanswered questions only
 	 * @return
 	 */
-	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(final Long interviewId, 
-			final InterviewingAlterPage.Subject currentPage, final Boolean forward, final Boolean unansweredOnly)
-	{
-		return new DB.Action<InterviewingAlterPage.Subject>() {
-			public InterviewingAlterPage.Subject get() {
-				return nextAlterPageForInterviewNEW(
-						session, interviewId, currentPage, 
-						forward, unansweredOnly);
-			}
-		}.execute();
-	}
+//	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(final Long interviewId, 
+//			final InterviewingAlterPage.Subject currentPage, final Boolean forward, final Boolean unansweredOnly)
+//	{
+//		return new DB.Action<InterviewingAlterPage.Subject>() {
+//			public InterviewingAlterPage.Subject get() {
+//				return nextAlterPageForInterviewNEW(
+//						session, interviewId, currentPage, 
+//						forward, unansweredOnly);
+//			}
+//		}.execute();
+//	}
 	
 	/**
 	 * new version of nextAlterPageForInterview
@@ -929,44 +929,159 @@ public class Interviewing {
 	 * @param unansweredOnly if true only want unanswered questions
 	 * @return
 	 */                                       
-	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(Session session, Long interviewId, 
-			InterviewingAlterPage.Subject currentPage, Boolean forward, Boolean unansweredOnly)
+//	public static InterviewingAlterPage.Subject nextAlterPageForInterviewNEW(Session session, Long interviewId, 
+//			InterviewingAlterPage.Subject currentPage, Boolean forward, Boolean unansweredOnly)
+//	{
+//		InterviewingAlterPage.Subject previousPage = currentPage;
+//		Question previousQuestion = (currentPage==null) ? null : currentPage.question;
+//		EvaluationContext context = 
+//			Expressions.getContext(session, Interviews.getInterview(session, interviewId));
+//		TreeSet<InterviewingAlterPage.Subject> pages =
+//			alterPagesForInterview(session, interviewId, context, previousQuestion, forward, unansweredOnly);
+//		
+//		while(true) {
+//			InterviewingAlterPage.Subject nextPage;
+//			if(pages.isEmpty()) {
+//				return null;
+//			}
+//			if(previousPage == null) {
+//				nextPage = 
+//					forward ? pages.first() : pages.last();
+//			} else {
+//				nextPage =
+//					forward ? pages.higher(previousPage) : pages.lower(previousPage);
+//			}
+//			if(nextPage == null) {
+//				return null;
+//			}
+//			if(! unansweredOnly) {
+//				return nextPage;
+//			}
+//			for(Alter alter : nextPage.alters) {
+//				Boolean answered = 
+//					context.qidAidToAlterAnswer.containsKey(
+//							new PairUni<Long>(nextPage.question.getId(),alter.getId()));
+//				if(! answered) {
+//					return nextPage;
+//				}
+//			}
+//			previousPage = nextPage;
+//		}
+//	}
+	
+	/**
+	 * next couple of functions deal with putting multiple questions on a
+	 * page in the ego section.
+	 */
+	
+	public static List<Question> EgoQuestionListForInterview(
+			final Long interviewId, final Question current ) 
 	{
-		InterviewingAlterPage.Subject previousPage = currentPage;
-		Question previousQuestion = (currentPage==null) ? null : currentPage.question;
-		EvaluationContext context = 
-			Expressions.getContext(session, Interviews.getInterview(session, interviewId));
-		TreeSet<InterviewingAlterPage.Subject> pages =
-			alterPagesForInterview(session, interviewId, context, previousQuestion, forward, unansweredOnly);
+		return DB.withTx(new Function<Session,List<Question>>() {
+			public List<Question> apply(Session session) {
+				return EgoQuestionListForInterview(session,interviewId,current);
+			}
+		});
+	}
 		
-		while(true) {
-			InterviewingAlterPage.Subject nextPage;
-			if(pages.isEmpty()) {
-				return null;
+	/**
+	 * this function is specific to putting multiple questions on one page in
+	 * the ego section.  it creates a list of contiguous questions bounded by
+	 * preface questions ( or the bounds of the ego section )
+	 * and possibly connected via the keep-on-one-page variable
+	 * @param session - database structure
+	 * @param interviewId -  uniquely identifies the interview we are dealing with
+	 * @param current - the question to ask the ego
+	 * @return a list of question that should appear on one page. 
+	 * could easily be only one question in the list
+	 */
+	public static List<Question> EgoQuestionListForInterview(
+			Session session, Long interviewId, Question current)
+	{
+		Interview interview = Interviews.getInterview(session, interviewId);
+		List<Question> questions = 
+			Questions.getQuestionsForStudy(session, interview.getStudyId(), QuestionType.EGO);
+		Iterator<Question> iter;
+		EvaluationContext context = Expressions.getContext(session, interview);
+		ArrayList<Question> workList = Lists.newArrayList();
+		ArrayList<Question> retList  = Lists.newArrayList();
+		boolean hit = false;
+		boolean done = false;
+		Question workQuestion;
+		
+		// Step 1: create a list of all questions that need to be answered
+		// and are bounded by questions with a preface.  Only the first question
+		// within a group can have a preface.  So if we hit a second (or third... )
+		// preface question before hitting the current question clear the list.
+		// also, if we hit a preface AFTER the current question we are done, thats
+		// a new group.
+		// This process duplicates similar work done for alter and alter_pair sections.
+		
+		for(Question question : questions) {
+			if ( question.hasPreface()) {
+				if ( hit ) {
+					break;
 			}
-			if(previousPage == null) {
-				nextPage = 
-					forward ? pages.first() : pages.last();
+			}
+			if ( question.getId().equals(current.getId()))
+				hit = true;
+			Long reasonId = question.getAnswerReasonExpressionId();
+			Boolean shouldAnswer = 
+				reasonId == null || 
+				Expressions.evaluateAsBool(
+						context.eidToExpression.get(reasonId), 
+						new ArrayList<Alter>(), 
+						context);
+
+			if(shouldAnswer) {
+				workList.add(question);
+			}
+		}
+		// now further reduce this list to questions connected by the
+		// keep-on-same-page option
+		hit = done = false;
+		iter = workList.iterator();
+		while ( iter.hasNext() && !done ) {
+			workQuestion = iter.next();
+			if ( workQuestion.equals(current)) {
+				retList.add(workQuestion);
+				hit = true;
+			} else if (hit) {
+				if ( workQuestion.getKeepOnSamePage()) {
+					retList.add(workQuestion);
 			} else {
-				nextPage =
-					forward ? pages.higher(previousPage) : pages.lower(previousPage);
+					done = true;
 			}
-			if(nextPage == null) {
-				return null;
 			}
-			if(! unansweredOnly) {
-				return nextPage;
 			}
-			for(Alter alter : nextPage.alters) {
-				Boolean answered = 
-					context.qidAidToAlterAnswer.containsKey(
-							new PairUni<Long>(nextPage.question.getId(),alter.getId()));
-				if(! answered) {
-					return nextPage;
+		// in a similar manner, if we are going backwards and are on
+		// a question that needs to stay on the same page as the previous one, 
+		// we will need to go back 
+		if ( current.getKeepOnSamePage()  && !current.hasPreface()) {
+			Collections.reverse(workList);
+			iter = workList.iterator();
+			hit = done = false;
+			while ( iter.hasNext() && !done ) {
+				workQuestion = iter.next();
+				if ( workQuestion.equals(current)) {
+					hit = true;
+				} else if (hit) {
+					if ( workQuestion.hasPreface()) {
+						retList.add(0,workQuestion);
+						done = true;
+					} else {	
+					    if ( workQuestion.getKeepOnSamePage()) {
+						    retList.add(0,workQuestion);
+					    } else {
+						    retList.add(0,workQuestion);
+						    done = true;
+					    }
 				}
 			}
-			previousPage = nextPage;
 		}
 	}
 		
+		return retList;
+	}
+	
 }

@@ -1,5 +1,6 @@
 package net.sf.egonet.web.page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.html.form.Form;
@@ -12,6 +13,7 @@ import net.sf.egonet.model.Question;
 import net.sf.egonet.model.Study;
 import net.sf.egonet.persistence.Answers;
 import net.sf.egonet.persistence.Interviewing;
+import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Studies;
 import net.sf.egonet.web.panel.AnswerFormFieldPanel;
 import net.sf.egonet.web.panel.InterviewingPanel;
@@ -22,6 +24,7 @@ public class InterviewingEgoPage extends InterviewingPage {
 	
 	private Long interviewId;
 	private Question question;
+	private List<Question> questionList; // used for multiple questions per page
 	private InterviewingPanel interviewingPanel;
     private boolean gotoNextUnAnswered;
     
@@ -50,6 +53,25 @@ public class InterviewingEgoPage extends InterviewingPage {
 		};
 		form.add(nextUnanswered);
 		
+		ArrayList<AnswerFormFieldPanel> answerFields = Lists.newArrayList();
+		if ( question.ALLOW_MULTIPLE_QUESTIONS_PER_PAGE ) {
+		    questionList = Interviewing.EgoQuestionListForInterview(interviewId, question);
+		} else {
+			questionList = new ArrayList<Question>();
+			questionList.add(question);
+		}
+		if ( questionList.size()>1 ) {
+		     for ( Question quest : questionList ) {
+		         Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, quest); 
+				 if(answer == null) {
+				    answerFields.add(AnswerFormFieldPanel.getInstance("question", quest, interviewId));
+				} else {
+				    answerFields.add(AnswerFormFieldPanel.getInstance("question",quest, answer.getValue(),
+                            answer.getOtherSpecifyText(),answer.getSkipReason(),interviewId));
+				}			 
+		     }
+			interviewingPanel = new InterviewingPanel("interviewingPanel",answerFields,interviewId);	
+		} else {
 		AnswerFormFieldPanel field = AnswerFormFieldPanel.getInstance("question",question,interviewId);
 		Answer answer = Answers.getAnswerForInterviewAndQuestion(interviewId, question);
 		if(answer != null) {
@@ -58,17 +80,24 @@ public class InterviewingEgoPage extends InterviewingPage {
 		}
 		field.setAutoFocus();
 		form.add(field);
-		
+			answerFields.add(field);
 		interviewingPanel = 
-			new InterviewingPanel("interviewingPanel",question,Lists.newArrayList(field),interviewId);
+				new InterviewingPanel("interviewingPanel",question,answerFields,interviewId);
+		}
 		form.add(interviewingPanel);
 		
 		add(form);
 
 		add(new Link("backwardLink") {
 			public void onClick() {
+				// if moving backwards, 
+				// start looking from first question in list
+				Question thisQuestion = question;
+				if ( questionList!=null  &&  !questionList.isEmpty())
+					thisQuestion = questionList.get(0);
+				
 				EgonetPage page = 
-					askPrevious(interviewId,question,new InterviewingEgoPage(interviewId,question));
+					askPrevious(interviewId,thisQuestion,new InterviewingEgoPage(interviewId,thisQuestion));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -76,8 +105,12 @@ public class InterviewingEgoPage extends InterviewingPage {
 		});
 		Link forwardLink = new Link("forwardLink") {
 			public void onClick() {
+				Question thisQuestion = question;
+				if ( questionList!=null  &&  !questionList.isEmpty())
+					thisQuestion = questionList.get(questionList.size()-1);
+				
 				EgonetPage page = 
-					askNext(interviewId,question,new InterviewingEgoPage(interviewId,question));
+					askNext(interviewId,thisQuestion,new InterviewingEgoPage(interviewId,thisQuestion));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -112,7 +145,7 @@ public void onSave(boolean gotoNextUnAnswered) {
 			if ( !multipleSelectionsOkay ) {
 				field.setNotification(field.getRangeCheckNotification());
 			} else if(okayToContinue) {
-					Answers.setAnswerForInterviewAndQuestion(interviewId, question, 
+					Answers.setAnswerForInterviewAndQuestion(interviewId, /* question */ field.getQuestion(), 
 							field.getAnswer(),field.getOtherText(),
 							field.getSkipReason(pageFlags));
 			} else if(consistent) {
@@ -126,13 +159,20 @@ public void onSave(boolean gotoNextUnAnswered) {
 			}
 		}
 		if(okayToContinue) {
+			Question thisQuestion = question;
+			// IF we asked a list of questions, 
+			// when we move forward we want to start looking
+			// for the next question from the last question on the pabe
+			if ( questionList!=null  &&  !questionList.isEmpty())
+				thisQuestion = questionList.get(questionList.size()-1);
+			
 			if ( gotoNextUnAnswered ) {
 			setResponsePage(
-					askNextUnanswered(interviewId,question,
-							new InterviewingEgoPage(interviewId,question)));
+					askNextUnanswered(interviewId,thisQuestion,
+							new InterviewingEgoPage(interviewId,thisQuestion)));
 			} else {
 				EgonetPage page = 
-					askNext(interviewId,question,new InterviewingEgoPage(interviewId,question));
+					askNext(interviewId,thisQuestion,new InterviewingEgoPage(interviewId,thisQuestion));
 				if(page != null) {
 					setResponsePage(page);
 				}
@@ -159,6 +199,7 @@ public void onSave(boolean gotoNextUnAnswered) {
 		}
 		return InterviewingAlterPromptPage.askNextUnanswered(interviewId,comeFrom);
 	}
+	
 	public static EgonetPage askNext(Long interviewId,Question currentQuestion, EgonetPage comeFrom) 
 	{
 		Question nextEgoQuestion = 
@@ -181,6 +222,7 @@ public void onSave(boolean gotoNextUnAnswered) {
 		// return InterviewingAlterPage.askNextNEW(interviewId,null,false,comeFrom);
 	}
 	public static EgonetPage askPrevious(Long interviewId,Question currentQuestion, EgonetPage comeFrom) {
+		
 		Question previousEgoQuestion = 
 			Interviewing.nextEgoQuestionForInterview(interviewId,currentQuestion,false,false);
 		EgonetPage previousPage = previousEgoQuestion == null ? null :

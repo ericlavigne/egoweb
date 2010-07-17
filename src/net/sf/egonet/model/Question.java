@@ -8,6 +8,11 @@ import net.sf.egonet.web.panel.NumericLimitsPanel.NumericLimitType;
 
 public class Question extends OrderedEntity
 {
+	// July 2010 - D. Kennedy requested the option for multiple questions
+	// to appear on one page, but did not want it actually incorporated
+	// this variable will control whether the option is available
+	public static final boolean ALLOW_MULTIPLE_QUESTIONS_PER_PAGE = false;
+	
 	public static enum QuestionType { EGO_ID, EGO, ALTER, ALTER_PAIR, NETWORK };
 
 	private Long studyId;
