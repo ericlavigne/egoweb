@@ -32,7 +32,7 @@ public class Interviews {
 				Lists.transform(Answers.getAnswersForInterview(session,interviewId,QuestionType.EGO_ID),
 						new Function<Answer,String>(){
 							public String apply(Answer answer) {
-								return answer.getValue();
+								return answer.getValue()+"";
 							}
 						}));
 	}
