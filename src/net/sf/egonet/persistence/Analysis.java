@@ -144,7 +144,7 @@ public class Analysis {
 		// that data will be in List<CheckIncludeID> checkIncludeIDList.
 		// need to remove unwanted interviews the 'safe' way
 
-		if ( checkIncludeIDList != null  &&  !checkIncludeIDList.isEmpty()) {
+		if ( checkIncludeIDList != null ) {
 			// First, copy interviews to a temp structure and clear original array
 			List<Interview> oldInterviews = Lists.newArrayList(); // new ArrayList<Interview>();
 			oldInterviews.addAll(interviews);
@@ -286,7 +286,7 @@ public class Analysis {
 		// that data will be in List<CheckIncludeID> checkIncludeIDList.
 		// need to remove unwanted interviews the 'safe' way
 
-		if ( checkIncludeIDList != null  &&  !checkIncludeIDList.isEmpty()) {
+		if ( checkIncludeIDList != null  ) {
 			// First, copy interviews to a temp structure and clear original array
 			List<Interview> oldInterviews = Lists.newArrayList(); // new ArrayList<Interview>();
 			oldInterviews.addAll(interviews);

@@ -204,7 +204,7 @@ public class ImportExportPage extends EgonetPage {
 		Form exportOSForm = new Form("exportOSForm");
 		exportOSDropdown = createStudyDropdown("studyToOSExport");
 		exportOSForm.add(exportOSDropdown);
-		exportOSForm.add(buildStudyOSExportButton(exportOSForm));
+		exportOSForm.add(buildStudyOSExportButton());
 		exportOSForm.add( new AjaxFormSubmitBehavior(exportOSForm,"onsubmit") {
 			protected void onSubmit(AjaxRequestTarget target) {
 				// System.out.println ( "ImportExportPage onSubmit");
@@ -220,12 +220,15 @@ public class ImportExportPage extends EgonetPage {
 		return exportOSForm;
 	} 
 	
-	private AjaxFallbackButton buildStudyOSExportButton(Form form) {
-		return new AjaxFallbackButton("studyOSExport", form) {
-			public void onSubmit(AjaxRequestTarget target, Form f) {
+	/**
+	 * this creates a NON-AJAX button so the downloadText function
+	 * will accept text data okay
+	 * @return the button to export 'other specify' reports
+	 */
+	private Button buildStudyOSExportButton() {
+		return new Button("studyOSExport") {
+			public void onSubmit() {
 				Study study = getStudy(exportOSDropdown);
-				target.addComponent(selectCasesForm);
-				selectCasesForm.setVisible(false);
 				if ( study==null )
 					return;
 				downloadText(
@@ -235,6 +238,36 @@ public class ImportExportPage extends EgonetPage {
 			}
 		};
 	}
+	
+	/**
+	 * no longer used, but kept for reference
+	 * Apparantly if the downloadText() function is used within an Ajax
+	 * function it expects data in XML format, not plain-old text
+	 * @param form
+	 * @return
+	 */
+//	private AjaxFallbackButton buildStudyOSExportButtonAjax(Form form) {
+//		return new AjaxFallbackButton("studyOSExport", form) {
+//			public void onSubmit(AjaxRequestTarget target, Form f) {
+//				Study study = getStudy(exportOSDropdown);
+//				System.out.println("export button clicked");
+//				target.addComponent(selectCasesForm);
+//				selectCasesForm.setVisible(false);
+//				if ( study==null ) {
+//					System.out.println ( "ImportExportPage.buildStudyOSExportButton study is null");
+//					return;
+//				}
+//				System.out.println ( "study=" + study.getName());
+//				System.out.println (Archiving.getOtherSpecifyReport(study) );
+//				downloadText(
+//						study.getName()+"OS.txt",
+//						"application/octet-stream",
+//						Archiving.getOtherSpecifyReport(study));
+//			}
+//		};
+//	}
+	
+	
 	private DropDownChoice exportDropdown;
 	
 	private Form buildExportForm() {
