@@ -38,4 +38,7 @@ public class PanelContainer extends Panel {
 		this.panel = panel;
 		empty = false;
 	}
+	public Panel getPanel() {
+		return panel;
+	}
 }
