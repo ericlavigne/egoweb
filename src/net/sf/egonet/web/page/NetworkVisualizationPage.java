@@ -1,16 +1,16 @@
 package net.sf.egonet.web.page;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.commons.collections15.Transformer;
 
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.EmptyPanel;
-import org.apache.wicket.markup.html.panel.Panel;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -29,39 +29,65 @@ import net.sf.egonet.persistence.Interviews;
 import net.sf.egonet.persistence.Options;
 import net.sf.egonet.persistence.Questions;
 import net.sf.egonet.web.component.NetworkImage;
+import net.sf.egonet.web.panel.MapEditorPanel;
+import net.sf.egonet.web.panel.PanelContainer;
 import net.sf.egonet.web.panel.SingleSelectionPanel;
 import net.sf.functionalj.tuple.PairUni;
 
 public class NetworkVisualizationPage extends EgonetPage {
 	
 	private NetworkImage<Alter> networkImage;
-	private Panel primaryPanel;
+	private PanelContainer primaryPanel;
+	private PanelContainer secondaryPanel;
 	private Expressions.EvaluationContext context;
-	
-	private void replacePrimary(Panel newPanel) {
-		primaryPanel.replaceWith(newPanel);
-		primaryPanel = newPanel;
+
+	final ArrayList<Color> colors = 
+		Lists.newArrayList(Color.RED,Color.ORANGE,
+				Color.GREEN,Color.BLUE,Color.CYAN,
+				Color.MAGENTA,Color.WHITE,Color.BLACK);
+	final ArrayList<String> colorNames =
+		Lists.newArrayList("Red","Orange",
+				"Green","Blue","Cyan",
+				"Magenta","White","Black");
+	private String showColor(Color color) {
+		if(color == null) {
+			return " ";
+		}
+		for(int i = 0; i < colors.size(); i++) {
+			if(color.equals(colors.get(i))) {
+				return colorNames.get(i);
+			}
+		}
+		return "Unknown";
 	}
+	
+	private Interview interview;
+	private Expression connectionReason;
 	
 	public NetworkVisualizationPage(final Interview interview, Expression connectionReason) {
 		
 		super(Interviews.getEgoNameForInterview(interview.getId()));
 		
+		this.interview = interview;
+		this.connectionReason = connectionReason;
 		context = Expressions.getContext(interview);
 		
 		networkImage = new NetworkImage<Alter>("networkImage", 
-				Analysis.getNetworkForInterview(interview, connectionReason));
+				Analysis.getNetworkForInterview(interview, this.connectionReason));
 		add(networkImage);
 		
-		primaryPanel = new EmptyPanel("primaryPanel");
+		primaryPanel = new PanelContainer("primaryPanel");
 		add(primaryPanel);
+		
+		secondaryPanel = new PanelContainer("secondaryPanel");
+		add(secondaryPanel);
 
 		add(new Link("layoutLink") {
 			public void onClick() {
 				ArrayList<NetworkService.LayoutOption> options = 
 					Lists.newArrayList(NetworkService.LayoutOption.values());
-				replacePrimary(
-						new SingleSelectionPanel<NetworkService.LayoutOption>("primaryPanel",
+				primaryPanel.changePanel(
+						new SingleSelectionPanel<NetworkService.LayoutOption>("panel",
 								"Layout",options) 
 						{
 							public void action(NetworkService.LayoutOption option) {
@@ -69,19 +95,14 @@ public class NetworkVisualizationPage extends EgonetPage {
 								networkImage.refresh();
 							}
 						});
+				secondaryPanel.removePanel();
 			}
 		});
 
 		add(new Link("backgroundLink") {
 			public void onClick() {
-				final ArrayList<Color> colors = 
-					Lists.newArrayList(Color.WHITE,Color.RED,Color.ORANGE,
-							Color.GREEN,Color.BLUE,Color.CYAN,Color.MAGENTA);
-				final ArrayList<String> colorNames =
-					Lists.newArrayList("White","Red","Orange",
-							"Green","Blue","Cyan","Magenta");
-				replacePrimary(
-						new SingleSelectionPanel<Color>("primaryPanel",
+				primaryPanel.changePanel(
+						new SingleSelectionPanel<Color>("panel",
 								"Background",colors) 
 						{
 							public void action(Color option) {
@@ -89,14 +110,10 @@ public class NetworkVisualizationPage extends EgonetPage {
 								networkImage.refresh();
 							}
 							public String show(Color color) {
-								for(int i = 0; i < colors.size(); i++) {
-									if(color.equals(colors.get(i))) {
-										return colorNames.get(i);
-									}
-								}
-								return "Unknown";
+								return showColor(color);
 							}
 						});
+				secondaryPanel.removePanel();
 			}
 		});
 		add(new Link("nodeLabelLink") {
@@ -108,8 +125,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 				for(Question question : questions) {
 					options.add(new AlterQuestionLabeller(question));
 				}
-				replacePrimary(
-						new SingleSelectionPanel<AlterLabeller>("primaryPanel",
+				primaryPanel.changePanel(
+						new SingleSelectionPanel<AlterLabeller>("panel",
 								"Alter Label",options) 
 						{
 							public void action(AlterLabeller option) {
@@ -117,8 +134,10 @@ public class NetworkVisualizationPage extends EgonetPage {
 								networkImage.refresh();
 							}
 						});
+				secondaryPanel.removePanel();
 			}
 		});
+		add(buildNodeColorLink());
 	}
 
 	public class AlterLabeller implements Transformer<Alter,String>, Serializable {
@@ -179,6 +198,129 @@ public class NetworkVisualizationPage extends EgonetPage {
 	public class AlterExpressionLabeller extends AlterLabeller {
 		public String transform(Alter alter) {
 			return alter.getName(); // TODO: constructor with expression, and use it
+		}
+	}
+
+	private Question nodeColorQuestion;
+	private TreeMap<Question,TreeMap<QuestionOption,Color>> nodeColorSelectionQuestionDetails;
+	
+	private Link buildNodeColorLink() {
+		nodeColorSelectionQuestionDetails = Maps.newTreeMap();
+		return new Link("nodeColorLink") {
+			public void onClick() {
+				ArrayList<Object> primaryOptions = Lists.newArrayList();
+				primaryOptions.add("None");
+				List<Question> questions =
+					Questions.getQuestionsForStudy(interview.getStudyId(), QuestionType.ALTER);
+				for(Question question : questions) {
+					if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+							question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+					{
+						primaryOptions.add(question);
+					}
+				}
+				
+				nodeColorChangeSecondary();
+				primaryPanel.changePanel(
+						new SingleSelectionPanel<Object>("panel","Color node based on",primaryOptions) {
+							public String show(Object object) {
+								return object instanceof Question ? 
+										((Question) object).getTitle() : object.toString();
+							}
+							public void action(Object option) {
+								if(option.equals("None")) {
+									nodeColorQuestion = null;
+								} else if(option instanceof Question) {
+									nodeColorQuestion = (Question) option;
+								} else {
+									throw new RuntimeException("Unrecognized colorizing option: "+option);
+								}
+								nodeColorChangeSecondary();
+								nodeColorUpdate();
+							}
+						});
+			}
+		};
+	}
+	
+	private void nodeColorChangeSecondary() {
+		if(nodeColorQuestion == null) {
+			secondaryPanel.removePanel();
+		} else {
+			if(!nodeColorSelectionQuestionDetails.containsKey(nodeColorQuestion)) {
+				nodeColorSelectionQuestionDetails.put(nodeColorQuestion, 
+						new TreeMap<QuestionOption,Color>());
+			}
+			secondaryPanel.changePanel(
+					new MapEditorPanel<QuestionOption,Color>("panel",
+							"Color for each "+nodeColorQuestion.getTitle()+" option",
+							"Color for $$",
+							nodeColorSelectionQuestionDetails.get(nodeColorQuestion),
+							Options.getOptionsForQuestion(nodeColorQuestion.getId()),
+							colors) 
+					{
+						protected String showValue(Color color) {
+							return showColor(color);
+						}
+						protected void mapChanged() {
+							nodeColorUpdate();
+						}
+					});
+		}
+	}
+	
+	private void nodeColorUpdate() {
+		if(nodeColorQuestion == null) {
+			networkImage.setNodeColorizer(new AlterColorizer());
+		} else {
+			networkImage.setNodeColorizer(
+					new AlterQuestionColorizer(
+							nodeColorQuestion, 
+							nodeColorSelectionQuestionDetails
+							.get(nodeColorQuestion)));
+		}
+		networkImage.refresh();
+	}
+	
+	public class AlterColorizer implements Transformer<Alter,Paint>, Serializable {
+		public Paint transform(Alter alter) {
+			return Color.WHITE;
+		}
+		public String toString() {
+			return "None";
+		}
+	}
+	
+	public class AlterQuestionColorizer extends AlterColorizer {
+		private Question question;
+		private TreeMap<QuestionOption,Color> configuration;
+		public AlterQuestionColorizer(Question question, TreeMap<QuestionOption,Color> configuration) {
+			this.question = question;
+			this.configuration = configuration;
+		}
+		public Paint transform(Alter alter) {
+			String answerValue =
+				context.qidAidToAlterAnswer.get(
+						new PairUni<Long>(question.getId(),alter.getId()))
+				.getValue();
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) 
+			{
+				for(String optionIdString : Lists.newArrayList(answerValue.split(","))) {
+					Color color =
+						configuration.get(context.idToOption.get(Long.parseLong(optionIdString)));
+					if(color != null) {
+						return color;
+					}
+				}
+			}
+			return Color.WHITE;
+		}
+		public String toString() {
+			return question.getTitle();
+		}
+		public ArrayList<QuestionOption> getConfigKeys() {
+			return Options.getOptionsForQuestion(question.getId());
 		}
 	}
 }

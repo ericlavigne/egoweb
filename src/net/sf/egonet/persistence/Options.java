@@ -1,5 +1,6 @@
 package net.sf.egonet.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.egonet.model.Expression;
@@ -30,14 +31,14 @@ public class Options {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static List<QuestionOption> 
+	public static ArrayList<QuestionOption> 
 	getOptionsForQuestion(Session session, final Long questionId) 
 	{
-		List<QuestionOption> options = 
+		ArrayList<QuestionOption> options = new ArrayList<QuestionOption>(
 			session.createQuery("from QuestionOption o where o.active = 1 and " +
 				"o.questionId = :questionId order by o.ordering")
 			.setLong("questionId", questionId)
-			.list();
+			.list());
 		// Add values to those that don't have them (null or "").
 		for(QuestionOption option : options) {
 			if(option.getValue() == null || option.getValue().isEmpty()) {
@@ -58,9 +59,9 @@ public class Options {
 		return options;
 	}
 	
-	public static List<QuestionOption> getOptionsForQuestion(final Long questionId) {
-		return DB.withTx(new DB.Action<List<QuestionOption>>() {
-			public List<QuestionOption> get() {
+	public static ArrayList<QuestionOption> getOptionsForQuestion(final Long questionId) {
+		return DB.withTx(new DB.Action<ArrayList<QuestionOption>>() {
+			public ArrayList<QuestionOption> get() {
 				return getOptionsForQuestion(session,questionId);
 			}
 		});

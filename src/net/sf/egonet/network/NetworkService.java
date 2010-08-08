@@ -68,7 +68,7 @@ public class NetworkService
 			Transformer<PairUni<N>,Stroke> edgeSizer,
 			Transformer<PairUni<N>,Paint> edgeColorizer)
 	{
-        final Color nodeColor = Color.GREEN;
+        final Color nodeColor = Color.WHITE;
         final boolean labelVertices = true;
         final boolean labelEdges = false;
 		final Point center = new Point(0,0);

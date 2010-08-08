@@ -3,14 +3,12 @@ package net.sf.egonet.model;
 /**
  * Value object representing an item of a drop-down, listbox, or similar widget
  */
-public class QuestionOption extends Entity
+public class QuestionOption extends OrderedEntity
 {
 	private Long studyId;
 	private Long questionId;
 	private String name;
 	private String value;
-	
-	private Integer ordering;
 
 	public QuestionOption(Long questionId, String name)
 	{
@@ -30,9 +28,6 @@ public class QuestionOption extends Entity
 	public String getValue() { return this.value; }
 	public void setValue(String value) { this.value = value; }
 
-	public Integer getOrdering() { return ordering; }
-	public void setOrdering(Integer ordering) { this.ordering = ordering; }
-	
 	// For Hibernate use only -----------------
 
 	public QuestionOption() {}
