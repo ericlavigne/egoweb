@@ -2,6 +2,8 @@ package net.sf.egonet.web.page;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Polygon;
+import java.awt.Shape;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +84,18 @@ public class NetworkVisualizationPage extends EgonetPage {
 		secondaryPanel = new PanelContainer("secondaryPanel");
 		add(secondaryPanel);
 
-		add(new Link("layoutLink") {
+		add(buildNetworkLayoutLink());
+		add(buildNetworkBackgroundLink());
+		add(buildNodeLabelLink());
+		add(buildNodeColorLink());
+		add(buildNodeSizeLink());
+		add(buildNodeShapeLink());
+	}
+
+	// XXX: Section network layout
+	
+	private Link buildNetworkLayoutLink() {
+		return new Link("layoutLink") {
 			public void onClick() {
 				ArrayList<NetworkService.LayoutOption> options = 
 					Lists.newArrayList(NetworkService.LayoutOption.values());
@@ -97,9 +110,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 						});
 				secondaryPanel.removePanel();
 			}
-		});
-
-		add(new Link("backgroundLink") {
+		};
+	}
+	
+	// XXX: Section network background
+	
+	private Link buildNetworkBackgroundLink() {
+		return new Link("backgroundLink") {
 			public void onClick() {
 				primaryPanel.changePanel(
 						new SingleSelectionPanel<Color>("panel",
@@ -115,8 +132,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 						});
 				secondaryPanel.removePanel();
 			}
-		});
-		add(new Link("nodeLabelLink") {
+		};
+	}
+	
+	// XXX: Section node label
+	
+	private Link buildNodeLabelLink() {
+		return new Link("nodeLabelLink") {
 			public void onClick() {
 				ArrayList<AlterLabeller> options = 
 					Lists.newArrayList(new AlterNoneLabeller(), new AlterLabeller());
@@ -136,10 +158,9 @@ public class NetworkVisualizationPage extends EgonetPage {
 						});
 				secondaryPanel.removePanel();
 			}
-		});
-		add(buildNodeColorLink());
+		};
 	}
-
+	
 	public class AlterLabeller implements Transformer<Alter,String>, Serializable {
 		public String transform(Alter alter) {
 			return alter.getName();
@@ -197,10 +218,12 @@ public class NetworkVisualizationPage extends EgonetPage {
 	}
 	public class AlterExpressionLabeller extends AlterLabeller {
 		public String transform(Alter alter) {
-			return alter.getName(); // TODO: constructor with expression, and use it
+			return alter.getName();
 		}
 	}
 
+	// XXX: Section node color
+	
 	private Question nodeColorQuestion;
 	private TreeMap<Question,TreeMap<QuestionOption,Color>> nodeColorSelectionQuestionDetails;
 	
@@ -321,6 +344,64 @@ public class NetworkVisualizationPage extends EgonetPage {
 		}
 		public ArrayList<QuestionOption> getConfigKeys() {
 			return Options.getOptionsForQuestion(question.getId());
+		}
+	}
+	
+	// XXX: Section node size 
+	
+	private Integer nodeSize;
+	
+	private Link buildNodeSizeLink() {
+		nodeSize = 5;
+		return new Link("nodeSizeLink") {
+			public void onClick() {
+				nodeSize = (nodeSize + 10) % 100;
+				nodeShapeUpdate();
+			}
+		};
+	}
+
+	// XXX: Section node shape 
+	
+	private Integer nodeSides;
+	
+	private Link buildNodeShapeLink() {
+		nodeSides = 2;
+		return new Link("nodeShapeLink") {
+			public void onClick() {
+				nodeSides = Math.max(2, (nodeSides+1) % 7);
+				nodeShapeUpdate();
+			}
+		};
+	}
+	
+	private void nodeShapeUpdate() {
+		final RegularPolygon shape = new RegularPolygon(nodeSides < 3 ? 20 : nodeSides, nodeSize);
+		networkImage.setNodeShaper(new Transformer<Alter, Shape>() {
+			public Shape transform(Alter alter) {
+				return shape;
+			}
+		});
+		networkImage.refresh();
+	}
+	
+	private static class RegularPolygon extends Polygon {
+		public RegularPolygon(Integer sides, Integer size) {
+			super(xcoords(sides,size),ycoords(sides,size),sides);
+		}
+		private static int[] xcoords(Integer sides, Integer size) {
+			int[] result = new int[sides];
+			for(Integer i = 0; i < sides; i++) {
+				result[i] = (int) (Math.sin(2*(i+0.5)*Math.PI/sides)*size);
+			}
+			return result;
+		}
+		private static int[] ycoords(Integer sides, Integer size) {
+			int[] result = new int[sides];
+			for(Integer i = 0; i < sides; i++) {
+				result[i] = (int) (Math.cos(2*(i+0.5)*Math.PI/sides)*size);
+			}
+			return result;
 		}
 	}
 }
