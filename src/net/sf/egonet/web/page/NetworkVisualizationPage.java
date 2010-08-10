@@ -135,6 +135,23 @@ public class NetworkVisualizationPage extends EgonetPage {
 		};
 	}
 	
+	// XXX: Common helpers
+
+	private ArrayList<Object> alterSelectionQuestionsAndNone() {
+		ArrayList<Object> results = Lists.newArrayList();
+		results.add("None");
+		List<Question> questions =
+			Questions.getQuestionsForStudy(interview.getStudyId(), QuestionType.ALTER);
+		for(Question question : questions) {
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
+			{
+				results.add(question);
+			}
+		}
+		return results;
+	}
+	
 	// XXX: Section node label
 	
 	private Link buildNodeLabelLink() {
@@ -231,39 +248,31 @@ public class NetworkVisualizationPage extends EgonetPage {
 		nodeColorSelectionQuestionDetails = Maps.newTreeMap();
 		return new Link("nodeColorLink") {
 			public void onClick() {
-				ArrayList<Object> primaryOptions = Lists.newArrayList();
-				primaryOptions.add("None");
-				List<Question> questions =
-					Questions.getQuestionsForStudy(interview.getStudyId(), QuestionType.ALTER);
-				for(Question question : questions) {
-					if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
-							question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
-					{
-						primaryOptions.add(question);
-					}
-				}
-				
+				nodeColorChangePrimary();
 				nodeColorChangeSecondary();
-				primaryPanel.changePanel(
-						new SingleSelectionPanel<Object>("panel","Color node based on",primaryOptions) {
-							public String show(Object object) {
-								return object instanceof Question ? 
-										((Question) object).getTitle() : object.toString();
-							}
-							public void action(Object option) {
-								if(option.equals("None")) {
-									nodeColorQuestion = null;
-								} else if(option instanceof Question) {
-									nodeColorQuestion = (Question) option;
-								} else {
-									throw new RuntimeException("Unrecognized colorizing option: "+option);
-								}
-								nodeColorChangeSecondary();
-								nodeColorUpdate();
-							}
-						});
 			}
 		};
+	}
+	
+	private void nodeColorChangePrimary() {
+		primaryPanel.changePanel(
+				new SingleSelectionPanel<Object>("panel","Color node based on",alterSelectionQuestionsAndNone()) {
+					public String show(Object object) {
+						return object instanceof Question ? 
+								((Question) object).getTitle() : object.toString();
+					}
+					public void action(Object option) {
+						if(option.equals("None")) {
+							nodeColorQuestion = null;
+						} else if(option instanceof Question) {
+							nodeColorQuestion = (Question) option;
+						} else {
+							throw new RuntimeException("Unrecognized colorizing option: "+option);
+						}
+						nodeColorChangeSecondary();
+						nodeColorUpdate();
+					}
+				});
 	}
 	
 	private void nodeColorChangeSecondary() {
@@ -349,18 +358,79 @@ public class NetworkVisualizationPage extends EgonetPage {
 	
 	// XXX: Section node size 
 	
-	private Integer nodeSize;
+	final ArrayList<Integer> sizes = 
+		Lists.newArrayList(10,20,30,40,50);
+	final ArrayList<Integer> sizeNames =
+		Lists.newArrayList(1,2,3,4,5);
+	private String showSizeName(Integer sizeName) {
+		return sizeName == null ? " " : sizeName+"";
+	}
+	private Integer sizeOfName(Integer sizeName) {
+		return sizes.get(sizeName == null ? 0 : (sizeName-1));
+	}
+
+	private Question nodeSizeQuestion;
+	private TreeMap<Question,TreeMap<QuestionOption,Integer>> nodeSizeSelectionQuestionDetails;
 	
 	private Link buildNodeSizeLink() {
-		nodeSize = 5;
+		nodeSizeSelectionQuestionDetails = Maps.newTreeMap();
 		return new Link("nodeSizeLink") {
 			public void onClick() {
-				nodeSize = (nodeSize + 10) % 100;
-				nodeShapeUpdate();
+				nodeSizeChangePrimary();
+				nodeSizeChangeSecondary();
 			}
 		};
 	}
 
+
+	private void nodeSizeChangePrimary() {
+		primaryPanel.changePanel(
+				new SingleSelectionPanel<Object>("panel","Size node based on",
+						alterSelectionQuestionsAndNone()) {
+					public String show(Object object) {
+						return object instanceof Question ? 
+								((Question) object).getTitle() : object.toString();
+					}
+					public void action(Object option) {
+						if(option.equals("None")) {
+							nodeSizeQuestion = null;
+						} else if(option instanceof Question) {
+							nodeSizeQuestion = (Question) option;
+						} else {
+							throw new RuntimeException("Unrecognized sizing option: "+option);
+						}
+						nodeSizeChangeSecondary();
+						nodeShapeAndSizeUpdate();
+					}
+				});
+	}
+	
+	private void nodeSizeChangeSecondary() {
+		if(nodeSizeQuestion == null) {
+			secondaryPanel.removePanel();
+		} else {
+			if(!nodeSizeSelectionQuestionDetails.containsKey(nodeSizeQuestion)) {
+				nodeSizeSelectionQuestionDetails.put(nodeSizeQuestion, 
+						new TreeMap<QuestionOption,Integer>());
+			}
+			secondaryPanel.changePanel(
+					new MapEditorPanel<QuestionOption,Integer>("panel",
+							"Size for each "+nodeSizeQuestion.getTitle()+" option",
+							"Size for $$",
+							nodeSizeSelectionQuestionDetails.get(nodeSizeQuestion),
+							Options.getOptionsForQuestion(nodeSizeQuestion.getId()),
+							sizeNames) 
+					{
+						protected String showValue(Integer sizeName) {
+							return showSizeName(sizeName);
+						}
+						protected void mapChanged() {
+							nodeColorUpdate();
+						}
+					});
+		}
+	}
+	
 	// XXX: Section node shape 
 	
 	private Integer nodeSides;
@@ -370,16 +440,39 @@ public class NetworkVisualizationPage extends EgonetPage {
 		return new Link("nodeShapeLink") {
 			public void onClick() {
 				nodeSides = Math.max(2, (nodeSides+1) % 7);
-				nodeShapeUpdate();
+				nodeShapeAndSizeUpdate();
 			}
 		};
 	}
 	
-	private void nodeShapeUpdate() {
-		final RegularPolygon shape = new RegularPolygon(nodeSides < 3 ? 20 : nodeSides, nodeSize);
+	private void nodeShapeAndSizeUpdate() {
 		networkImage.setNodeShaper(new Transformer<Alter, Shape>() {
 			public Shape transform(Alter alter) {
-				return shape;
+				return new RegularPolygon(
+						(nodeSides < 3 ? 20 : nodeSides), 
+						nodeSize(alter));
+			}
+			private Integer nodeSize(Alter alter) {
+				if(nodeSizeQuestion != null) {
+					String answerValue =
+						context.qidAidToAlterAnswer.get(
+								new PairUni<Long>(nodeSizeQuestion.getId(),alter.getId()))
+						.getValue();
+					if(nodeSizeQuestion.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+							nodeSizeQuestion.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) 
+					{
+						for(String optionIdString : Lists.newArrayList(answerValue.split(","))) {
+							Integer sizeName =
+								nodeSizeSelectionQuestionDetails
+								.get(nodeSizeQuestion)
+								.get(context.idToOption.get(Long.parseLong(optionIdString)));
+							if(sizeName != null) {
+								return sizeOfName(sizeName);
+							}
+						}
+					}
+				}
+				return sizeOfName(null);
 			}
 		});
 		networkImage.refresh();
