@@ -69,7 +69,7 @@ public class MapEditorPanel<K,V> extends Panel {
 	private void editPair(final K key) {
 		pairEditorContainer.changePanel(
 				new SingleSelectionPanel<V>("panel", 
-						subEditorHeading.replaceAll("$$", showKey(key)), 
+						subEditorHeading.replaceAll("\\$\\$", showKey(key)), 
 						valueOptions) {
 			public void action(V newValue) {
 				map.put(key, newValue);

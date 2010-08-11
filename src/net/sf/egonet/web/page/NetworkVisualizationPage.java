@@ -425,7 +425,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return showSizeName(sizeName);
 						}
 						protected void mapChanged() {
-							nodeColorUpdate();
+							nodeShapeAndSizeUpdate();
 						}
 					});
 		}
@@ -433,24 +433,112 @@ public class NetworkVisualizationPage extends EgonetPage {
 	
 	// XXX: Section node shape 
 	
-	private Integer nodeSides;
-	
+	final ArrayList<Integer> shapeSides = 
+		Lists.newArrayList(1,3,4,5,6);
+	final ArrayList<String> shapeNames =
+		Lists.newArrayList("Circle","Triangle","Square","Pentagon","Hexagon");
+	private String showShapeName(Integer sides) {
+		if(sides != null) {
+			for(Integer i = 0; i < shapeSides.size(); i++) {
+				if(shapeSides.get(i).equals(sides)) {
+					return shapeNames.get(i);
+				}
+			}
+		}
+		return sides == null || sides < 3 ? "Circle" : (sides+"-gon");
+	}
+
+	private Question nodeShapeQuestion;
+	private TreeMap<Question,TreeMap<QuestionOption,Integer>> nodeShapeSelectionQuestionDetails;
+
 	private Link buildNodeShapeLink() {
-		nodeSides = 2;
+		nodeShapeSelectionQuestionDetails = Maps.newTreeMap();
 		return new Link("nodeShapeLink") {
 			public void onClick() {
-				nodeSides = Math.max(2, (nodeSides+1) % 7);
-				nodeShapeAndSizeUpdate();
+				nodeShapeChangePrimary();
+				nodeShapeChangeSecondary();
 			}
 		};
+	}
+
+
+	private void nodeShapeChangePrimary() {
+		primaryPanel.changePanel(
+				new SingleSelectionPanel<Object>("panel","Shape node based on",
+						alterSelectionQuestionsAndNone()) {
+					public String show(Object object) {
+						return object instanceof Question ? 
+								((Question) object).getTitle() : object.toString();
+					}
+					public void action(Object option) {
+						if(option.equals("None")) {
+							nodeShapeQuestion = null;
+						} else if(option instanceof Question) {
+							nodeShapeQuestion = (Question) option;
+						} else {
+							throw new RuntimeException("Unrecognized shaping option: "+option);
+						}
+						nodeShapeChangeSecondary();
+						nodeShapeAndSizeUpdate();
+					}
+				});
+	}
+	
+	private void nodeShapeChangeSecondary() {
+		if(nodeShapeQuestion == null) {
+			secondaryPanel.removePanel();
+		} else {
+			if(!nodeShapeSelectionQuestionDetails.containsKey(nodeShapeQuestion)) {
+				nodeShapeSelectionQuestionDetails.put(nodeShapeQuestion, 
+						new TreeMap<QuestionOption,Integer>());
+			}
+			secondaryPanel.changePanel(
+					new MapEditorPanel<QuestionOption,Integer>("panel",
+							"Shape for each "+nodeShapeQuestion.getTitle()+" option",
+							"Shape for $$",
+							nodeShapeSelectionQuestionDetails.get(nodeShapeQuestion),
+							Options.getOptionsForQuestion(nodeShapeQuestion.getId()),
+							shapeSides) 
+					{
+						protected String showValue(Integer sides) {
+							return showShapeName(sides);
+						}
+						protected void mapChanged() {
+							nodeShapeAndSizeUpdate();
+						}
+					});
+		}
 	}
 	
 	private void nodeShapeAndSizeUpdate() {
 		networkImage.setNodeShaper(new Transformer<Alter, Shape>() {
 			public Shape transform(Alter alter) {
 				return new RegularPolygon(
-						(nodeSides < 3 ? 20 : nodeSides), 
+						nodeSides(alter), 
 						nodeSize(alter));
+			}
+			private Integer nodeSides(Alter alter) {
+				Integer sides = null;
+				if(nodeShapeQuestion != null) {
+					String answerValue =
+						context.qidAidToAlterAnswer.get(
+								new PairUni<Long>(nodeShapeQuestion.getId(),alter.getId()))
+						.getValue();
+					if(nodeShapeQuestion.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+							nodeShapeQuestion.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) 
+					{
+						for(String optionIdString : Lists.newArrayList(answerValue.split(","))) {
+							sides =
+								nodeShapeSelectionQuestionDetails
+								.get(nodeShapeQuestion)
+								.get(context.idToOption.get(Long.parseLong(optionIdString)));
+							if(sides != null) {
+								return sides < 3 ? 20 : sides;
+							}
+						}
+					}
+				}
+				return 20;
 			}
 			private Integer nodeSize(Alter alter) {
 				if(nodeSizeQuestion != null) {
