@@ -65,7 +65,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 								"Layout",options) 
 						{
 							public void action(NetworkService.LayoutOption option) {
-								networkImage.setLayout(option);
+								networkImage.setLayoutOption(option);
 								networkImage.refresh();
 							}
 						});

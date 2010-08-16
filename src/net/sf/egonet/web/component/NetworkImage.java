@@ -10,6 +10,7 @@ import net.sf.egonet.network.Network;
 import net.sf.egonet.network.NetworkService;
 import net.sf.functionalj.tuple.PairUni;
 
+import edu.uci.ics.jung.algorithms.layout.Layout;
 import org.apache.commons.collections15.Transformer;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.image.resource.DynamicImageResource;
@@ -46,10 +47,32 @@ public class NetworkImage<N> extends Image {
 		refresh();
 	}
 	
-	public void setLayout(NetworkService.LayoutOption layoutOption) {
+	public void setLayoutOption(NetworkService.LayoutOption layoutOption) {
 		this.layoutOption = layoutOption;
+		this.graphLayout = NetworkService.createLayout(NetworkImage.this.network, layoutOption);
 	}
-	
+
+	/*
+	 * Functions to retrieve/set the layout to be used for the network. If a survey
+	 * has multiple NETWORK questions that use the same adjacency expression and 
+	 * node set, these functions can be used to make sure those questions have the
+	 * same graph layout when rendered. The same method could be used to ensure
+	 * that a single question shows the same layout each time the page is rendered,
+	 * rather than redrawing the graph each time.
+	 */
+	public void setLayout(Layout<N, PairUni<N>> graphLayout) {
+		this.graphLayout = graphLayout;
+	}
+
+	public Layout<N, PairUni<N>> getOrCreateLayout() {
+		if (graphLayout == null)
+		{
+			graphLayout = NetworkService.createLayout(NetworkImage.this.network, layoutOption);		
+		}
+		return this.graphLayout;
+	}
+
+
 	public void setBackground(Color color) {
 		this.background = color;
 	}
@@ -87,12 +110,17 @@ public class NetworkImage<N> extends Image {
 	}
 	
 	public void refresh() {
+		if (graphLayout == null)
+		{
+			graphLayout = NetworkService.createLayout(NetworkImage.this.network, layoutOption);
+		}
+
 		setImageResource(new DynamicImageResource() {
 			protected byte[] getImageData() {
 				return getJPEGFromBufferedImage(
 						NetworkService.createImage(
 								NetworkImage.this.network, 
-								layoutOption, 
+								graphLayout, 
 								background,
 								imWidth,
 								imHeight,

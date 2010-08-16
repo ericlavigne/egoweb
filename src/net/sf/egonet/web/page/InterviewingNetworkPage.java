@@ -46,6 +46,9 @@ import net.sf.egonet.web.panel.InterviewingPanel;
 import net.sf.egonet.web.component.NetworkImage;
 import net.sf.functionalj.tuple.PairUni;
 import net.sf.egonet.network.Network;
+import net.sf.egonet.network.NetworkService;
+
+import edu.uci.ics.jung.algorithms.layout.Layout;
 
 import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyReplaceNextQuestionPageWithPreface;
 
@@ -68,11 +71,20 @@ import static net.sf.egonet.web.page.InterviewingQuestionIntroPage.possiblyRepla
  */
 public class InterviewingNetworkPage extends InterviewingPage {
 	
+	private static class InterviewQLayout
+	{
+		public Long interviewId;
+		public Long expressionId;
+		public NetworkService.LayoutOption layoutOption;
+		public Layout<Alter, PairUni<Alter>> networkLayout;
+	}
+
 	private Long interviewId;
 	private Question question;
 	private InterviewingPanel interviewingPanel;
 	private NetworkImage<Alter> networkImage;
-
+	private static List<InterviewQLayout> networkLayouts = Collections.synchronizedList(new ArrayList<InterviewQLayout>());
+	
 	public InterviewingNetworkPage(Long interviewId, Question question) {
 		super(interviewId);
 		this.interviewId = interviewId;
@@ -154,6 +166,32 @@ public class InterviewingNetworkPage extends InterviewingPage {
 			forwardLink.setVisible(false);
 		}
 
+	}
+
+	private static Layout<Alter, PairUni<Alter>> GetLayout(Long interviewId, Long expressionId, NetworkService.LayoutOption layoutOption)
+	{
+		for (InterviewQLayout l : networkLayouts)
+		{
+			if (interviewId.equals(l.interviewId) &&
+				expressionId.equals(l.expressionId) &&
+				(layoutOption.equals(l.layoutOption) || layoutOption == null))
+				return l.networkLayout;
+		}
+		return null;
+	}
+
+	private static void AddLayout(Long interviewId, 
+		Long expressionId, 
+		NetworkService.LayoutOption layoutOption,
+		Layout<Alter, PairUni<Alter>> networkLayout)
+	{
+		InterviewQLayout l = new InterviewQLayout();
+		l.interviewId = interviewId;
+		l.expressionId = expressionId;
+		l.layoutOption = layoutOption;
+		l.networkLayout = networkLayout;
+		
+		networkLayouts.add(l);
 	}
 
 	private void buildNetworkImage()
@@ -303,6 +341,17 @@ public class InterviewingNetworkPage extends InterviewingPage {
 		questionNetwork = Analysis.getNetworkForInterview(interview, Expressions.get(relExprId));
 
 		networkImage = new NetworkImage<Alter>("networkImage", questionNetwork);
+		NetworkService.LayoutOption layoutOption = NetworkService.LayoutOption.FR;
+		Layout<Alter, PairUni<Alter>> layout = GetLayout(this.interviewId, relExprId, layoutOption);
+		if (layout == null)
+		{
+			layout = networkImage.getOrCreateLayout();
+			AddLayout(interviewId, relExprId, layoutOption, layout);
+		}
+		else
+		{
+			networkImage.setLayout(layout);
+		}
 
 		/*
 		 * Set node/edge transformers for the available parameters. If no question was selected for
@@ -583,7 +632,12 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						vtxShape = vertexCircle;
 					
 					if (sizeAnswers == null)
-						return vtxShape;
+					{
+						//return vtxShape;
+						AffineTransform vtxResize = new AffineTransform();
+						vtxResize.scale(1.75, 1.75);
+						return vtxResize.createTransformedShape(vtxShape);
+					}
 
 					String sizeAns = sizeAnswers.get(a.getId());
 					if (sizeQuestion != null && sizeQuestion.getAnswerType() == AnswerType.NUMERICAL)
@@ -613,22 +667,22 @@ public class InterviewingNetworkPage extends InterviewingPage {
 						AffineTransform vtxResize = new AffineTransform();
 						if (sizeAns.contains("0"))
 						{
-							vtxResize.scale(1.35, 1.35);
+							vtxResize.scale(1.75, 1.75);
 							return vtxResize.createTransformedShape(vtxShape);
 						}
 						if (sizeAns.contains("1"))
 						{
-							vtxResize.scale(1.7, 1.7);
+							vtxResize.scale(2.2, 2.2);
 							return vtxResize.createTransformedShape(vtxShape);
 						}
 						if (sizeAns.contains("2"))
 						{
-							vtxResize.scale(2.4, 2.4);
+							vtxResize.scale(2.7, 2.7);
 							return vtxResize.createTransformedShape(vtxShape);
 						}
 						if (sizeAns.contains("3"))
 						{
-							vtxResize.scale(3.3, 3.3);
+							vtxResize.scale(3.4, 3.4);
 							return vtxResize.createTransformedShape(vtxShape);
 						}
 						if (sizeAns.contains("4"))
@@ -735,15 +789,15 @@ public class InterviewingNetworkPage extends InterviewingPage {
 							return defaultStroke;
 				
 						if (ans.contains("0"))
-							return new BasicStroke(2.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+							return new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 						if (ans.contains("1"))
-							return new BasicStroke(4.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+							return new BasicStroke(3.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 						if (ans.contains("2"))
-							return new BasicStroke(5.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+							return new BasicStroke(4.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 						if (ans.contains("3"))
-							return new BasicStroke(7.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+							return new BasicStroke(6.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 						if (ans.contains("4"))
-							return new BasicStroke(10.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+							return new BasicStroke(8.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
 						
 						return defaultStroke;
 					}

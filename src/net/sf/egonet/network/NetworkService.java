@@ -58,8 +58,41 @@ public class NetworkService
 						edgeColorizer);
 	}
 
+	public static <N> Layout<N, PairUni<N>> createLayout(Network<N> network, LayoutOption layoutOption)
+	{
+        Graph<N,PairUni<N>> g = graphFromNetwork(network);
+
+		Layout<N,PairUni<N>> layout = null;
+        if(layoutOption == null || layoutOption.equals(LayoutOption.FR)) {
+        	layout = new FRLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.KK)) {
+        	layout = new KKLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.Circle)) {
+        	layout = new CircleLayout<N,PairUni<N>>(g);
+        } else if(layoutOption.equals(LayoutOption.ISOM)) {
+        	layout = new ISOMLayout<N,PairUni<N>>(g);
+        }
+		return layout;
+
+	}
+
 	public static <N> BufferedImage createImage(Network<N> network, 
     		LayoutOption layoutOption, Color backgroundColor, 
+			int width,
+			int height,
+    		Transformer<N,String> nodeLabeller,
+			Transformer<N,Paint> nodeColorizer,
+			Transformer<N,Shape> nodeShaper,
+			Transformer<PairUni<N>,Stroke> edgeSizer,
+			Transformer<PairUni<N>,Paint> edgeColorizer)
+	{
+		Layout<N, PairUni<N>> layout = createLayout(network, layoutOption);
+		return createImage(network, layout, backgroundColor, width, height,
+			nodeLabeller, nodeColorizer, nodeShaper, edgeSizer, edgeColorizer);
+	}
+
+	public static <N> BufferedImage createImage(Network<N> network, 
+    		Layout<N, PairUni<N>> layout, Color backgroundColor, 
 			int width,
 			int height,
     		Transformer<N,String> nodeLabeller,
@@ -76,27 +109,14 @@ public class NetworkService
 
         //--------------------
 
-        Graph<N,PairUni<N>> g = graphFromNetwork(network);
-
         Dimension d = new Dimension(width, height);
 
-        Layout<N,PairUni<N>> layout = null;
-        if(layoutOption == null || layoutOption.equals(LayoutOption.FR)) {
-        	layout = new FRLayout<N,PairUni<N>>(g);
-        } else if(layoutOption.equals(LayoutOption.KK)) {
-        	layout = new KKLayout<N,PairUni<N>>(g);
-        } else if(layoutOption.equals(LayoutOption.Circle)) {
-        	layout = new CircleLayout<N,PairUni<N>>(g);
-        } else if(layoutOption.equals(LayoutOption.ISOM)) {
-        	layout = new ISOMLayout<N,PairUni<N>>(g);
-        }
-        
         layout.setSize(d);
 
         VisualizationImageServer<N,PairUni<N>> vv = new VisualizationImageServer<N,PairUni<N>>(layout, d);
         vv.getRenderContext().setVertexFillPaintTransformer(newVertexPainter(network, nodeColor));
         vv.setBackground(backgroundColor == null ? Color.WHITE : backgroundColor);
-        vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+        vv.getRenderer().getVertexLabelRenderer().setPosition(Position.SE);
         if (labelVertices) {
         	vv.getRenderContext().setVertexLabelTransformer(
         			nodeLabeller == null ? new ToStringLabeller<N>() : nodeLabeller);
