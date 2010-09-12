@@ -35,6 +35,7 @@ import net.sf.egonet.web.panel.MapEditorPanel;
 import net.sf.egonet.web.panel.PanelContainer;
 import net.sf.egonet.web.panel.SingleSelectionPanel;
 import net.sf.functionalj.tuple.PairUni;
+import net.sf.functionalj.tuple.TripleUni;
 
 public class NetworkVisualizationPage extends EgonetPage {
 	
@@ -90,6 +91,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 		add(buildNodeColorLink());
 		add(buildNodeSizeLink());
 		add(buildNodeShapeLink());
+		add(buildEdgeColorLink());
 	}
 
 	// XXX: Section network layout
@@ -137,11 +139,11 @@ public class NetworkVisualizationPage extends EgonetPage {
 	
 	// XXX: Common helpers
 
-	private ArrayList<Object> alterSelectionQuestionsAndNone() {
+	private ArrayList<Object> noneAndSelectionQuestionsOfQuestionType(QuestionType questionType) {
 		ArrayList<Object> results = Lists.newArrayList();
 		results.add("None");
 		List<Question> questions =
-			Questions.getQuestionsForStudy(interview.getStudyId(), QuestionType.ALTER);
+			Questions.getQuestionsForStudy(interview.getStudyId(), questionType);
 		for(Question question : questions) {
 			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
 					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION))
@@ -150,6 +152,14 @@ public class NetworkVisualizationPage extends EgonetPage {
 			}
 		}
 		return results;
+	}
+	
+	private ArrayList<Object> alterSelectionQuestionsAndNone() {
+		return noneAndSelectionQuestionsOfQuestionType(QuestionType.ALTER);
+	}
+	
+	private ArrayList<Object> alterPairSelectionQuestionsAndNone() {
+		return noneAndSelectionQuestionsOfQuestionType(QuestionType.ALTER_PAIR);
 	}
 	
 	// XXX: Section node label
@@ -585,4 +595,124 @@ public class NetworkVisualizationPage extends EgonetPage {
 			return result;
 		}
 	}
+	
+	// XXX: Section edge color
+	
+	private Question edgeColorQuestion;
+	private TreeMap<Question,TreeMap<QuestionOption,Color>> edgeColorSelectionQuestionDetails;
+	
+	private Link buildEdgeColorLink() {
+		edgeColorSelectionQuestionDetails = Maps.newTreeMap();
+		return new Link("edgeColorLink") {
+			public void onClick() {
+				edgeColorChangePrimary();
+				edgeColorChangeSecondary();
+			}
+		};
+	}
+	
+	private void edgeColorChangePrimary() {
+		primaryPanel.changePanel(
+				new SingleSelectionPanel<Object>("panel","Color edge based on",alterPairSelectionQuestionsAndNone()) {
+					public String show(Object object) {
+						return object instanceof Question ? 
+								((Question) object).getTitle() : object.toString();
+					}
+					public void action(Object option) {
+						if(option.equals("None")) {
+							edgeColorQuestion = null;
+						} else if(option instanceof Question) {
+							edgeColorQuestion = (Question) option;
+						} else {
+							throw new RuntimeException("Unrecognized edge colorizing option: "+option);
+						}
+						edgeColorChangeSecondary();
+						edgeColorUpdate();
+					}
+				});
+	}
+	
+	private void edgeColorChangeSecondary() {
+		if(edgeColorQuestion == null) {
+			secondaryPanel.removePanel();
+		} else {
+			if(!edgeColorSelectionQuestionDetails.containsKey(edgeColorQuestion)) {
+				edgeColorSelectionQuestionDetails.put(edgeColorQuestion, 
+						new TreeMap<QuestionOption,Color>());
+			}
+			secondaryPanel.changePanel(
+					new MapEditorPanel<QuestionOption,Color>("panel",
+							"Color for each "+edgeColorQuestion.getTitle()+" option",
+							"Color for $$",
+							edgeColorSelectionQuestionDetails.get(edgeColorQuestion),
+							Options.getOptionsForQuestion(edgeColorQuestion.getId()),
+							colors) 
+					{
+						protected String showValue(Color color) {
+							return showColor(color);
+						}
+						protected void mapChanged() {
+							edgeColorUpdate();
+						}
+					});
+		}
+	}
+	
+	private void edgeColorUpdate() {
+		if(edgeColorQuestion == null) {
+			networkImage.setEdgeColorizer(new EdgeColorizer());
+		} else {
+			networkImage.setEdgeColorizer(
+					new AlterPairQuestionColorizer(
+							edgeColorQuestion, 
+							edgeColorSelectionQuestionDetails
+							.get(edgeColorQuestion)));
+		}
+		networkImage.refresh();
+	}
+	
+	public class EdgeColorizer implements Transformer<PairUni<Alter>,Paint>, Serializable {
+		public Paint transform(PairUni<Alter> alterPair) {
+			return Color.BLACK;
+		}
+		public String toString() {
+			return "None";
+		}
+	}
+	
+	public class AlterPairQuestionColorizer extends EdgeColorizer {
+		private Question question;
+		private TreeMap<QuestionOption,Color> configuration;
+		public AlterPairQuestionColorizer(Question question, TreeMap<QuestionOption,Color> configuration) {
+			this.question = question;
+			this.configuration = configuration;
+		}
+		public Paint transform(PairUni<Alter> alterPair) {
+			String answerValue =
+				context.qidA1idA2idToAlterPairAnswer.get(
+						new TripleUni<Long>(question.getId(),
+								alterPair.getFirst().getId(),
+								alterPair.getSecond().getId()))
+				.getValue();
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) 
+			{
+				for(String optionIdString : Lists.newArrayList(answerValue.split(","))) {
+					Color color =
+						configuration.get(context.idToOption.get(Long.parseLong(optionIdString)));
+					if(color != null) {
+						return color;
+					}
+				}
+			}
+			return Color.BLACK;
+		}
+		public String toString() {
+			return question.getTitle();
+		}
+		public ArrayList<QuestionOption> getConfigKeys() {
+			return Options.getOptionsForQuestion(question.getId());
+		}
+	}
+	
 }
