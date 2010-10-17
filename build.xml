@@ -20,15 +20,6 @@
 		<path refid="build.classpath"/>
 		<pathelement path="${build.dir}"/>
 	</path>
-
-	<path id="launch4j.classpath">
-		<fileset dir="launch4j">
-			<include name="launch4j.jar" />
-		</fileset>
-		<fileset dir="launch4j/lib">
-			<include name="xstream.jar" />
-		</fileset>
-	</path>
 	
 	<taskdef name="launch4j"
 		classname="net.sf.launch4j.ant.Launch4jTask"
