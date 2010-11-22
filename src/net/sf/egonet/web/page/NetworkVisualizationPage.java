@@ -1,9 +1,11 @@
 package net.sf.egonet.web.page;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,6 +94,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 		add(buildNodeSizeLink());
 		add(buildNodeShapeLink());
 		add(buildEdgeColorLink());
+		add(buildEdgeSizeLink());
 	}
 
 	// XXX: Section network layout
@@ -715,4 +718,128 @@ public class NetworkVisualizationPage extends EgonetPage {
 		}
 	}
 	
+	// XXX: Section edge size
+	
+	private Question edgeSizeQuestion;
+	private TreeMap<Question,TreeMap<QuestionOption,Integer>> edgeSizeSelectionQuestionDetails;
+	
+	private Link buildEdgeSizeLink() {
+		edgeSizeSelectionQuestionDetails = Maps.newTreeMap();
+		return new Link("edgeSizeLink") {
+			public void onClick() {
+				edgeSizeChangePrimary();
+				edgeSizeChangeSecondary();
+			}
+		};
+	}
+	
+	private void edgeSizeChangePrimary() {
+		primaryPanel.changePanel(
+				new SingleSelectionPanel<Object>("panel","Size edge based on",alterPairSelectionQuestionsAndNone()) {
+					public String show(Object object) {
+						return object instanceof Question ? 
+								((Question) object).getTitle() : object.toString();
+					}
+					public void action(Object option) {
+						if(option.equals("None")) {
+							edgeSizeQuestion = null;
+						} else if(option instanceof Question) {
+							edgeSizeQuestion = (Question) option;
+						} else {
+							throw new RuntimeException("Unrecognized edge Sizing option: "+option);
+						}
+						edgeSizeChangeSecondary();
+						edgeSizeUpdate();
+					}
+				});
+	}
+	
+	private void edgeSizeChangeSecondary() {
+		if(edgeSizeQuestion == null) {
+			secondaryPanel.removePanel();
+		} else {
+			if(!edgeSizeSelectionQuestionDetails.containsKey(edgeSizeQuestion)) {
+				edgeSizeSelectionQuestionDetails.put(edgeSizeQuestion, 
+						new TreeMap<QuestionOption,Integer>());
+			}
+			secondaryPanel.changePanel(
+					new MapEditorPanel<QuestionOption,Integer>("panel",
+							"Size for each "+edgeSizeQuestion.getTitle()+" option",
+							"Size for $$",
+							edgeSizeSelectionQuestionDetails.get(edgeSizeQuestion),
+							Options.getOptionsForQuestion(edgeSizeQuestion.getId()),
+							sizeNames) 
+					{
+						protected String showValue(Integer size) {
+							return size == null ? "" : size+"";
+						}
+						protected void mapChanged() {
+							edgeSizeUpdate();
+						}
+					});
+		}
+	}
+	
+	private void edgeSizeUpdate() {
+		if(edgeSizeQuestion == null) {
+			networkImage.setEdgeSizer(new EdgeSizer());
+		} else {
+			networkImage.setEdgeSizer(
+					new AlterPairQuestionSizer(
+							edgeSizeQuestion, 
+							edgeSizeSelectionQuestionDetails
+							.get(edgeSizeQuestion)));
+		}
+		networkImage.refresh();
+	}
+	
+	// TODO: might need to use alters to decide if there should even be an edge
+	private Stroke strokeForAlterPairAndSize(PairUni<Alter> alters, Integer size) {
+		return new BasicStroke(1.3f * size, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f);
+	}
+	
+	public class EdgeSizer implements Transformer<PairUni<Alter>,Stroke>, Serializable {
+		public Stroke transform(PairUni<Alter> alterPair) {
+			return strokeForAlterPairAndSize(alterPair,1);
+		}
+		public String toString() {
+			return "None";
+		}
+	}
+	
+	public class AlterPairQuestionSizer extends EdgeSizer {
+		private Question question;
+		private TreeMap<QuestionOption,Integer> configuration;
+		public AlterPairQuestionSizer(Question question, TreeMap<QuestionOption,Integer> configuration) {
+			this.question = question;
+			this.configuration = configuration;
+		}
+		public Stroke transform(PairUni<Alter> alterPair) {
+			String answerValue =
+				context.qidA1idA2idToAlterPairAnswer.get(
+						new TripleUni<Long>(question.getId(),
+								alterPair.getFirst().getId(),
+								alterPair.getSecond().getId()))
+				.getValue();
+			Integer size = 1;
+			if(question.getAnswerType().equals(Answer.AnswerType.SELECTION) ||
+					question.getAnswerType().equals(Answer.AnswerType.MULTIPLE_SELECTION)) 
+			{
+				for(String optionIdString : Lists.newArrayList(answerValue.split(","))) {
+					Integer newSize =
+						configuration.get(context.idToOption.get(Long.parseLong(optionIdString)));
+					if(newSize != null && newSize > size) {
+						size = newSize;
+					}
+				}
+			}
+			return strokeForAlterPairAndSize(alterPair,size);
+		}
+		public String toString() {
+			return question.getTitle();
+		}
+		public ArrayList<QuestionOption> getConfigKeys() {
+			return Options.getOptionsForQuestion(question.getId());
+		}
+	}
 }
