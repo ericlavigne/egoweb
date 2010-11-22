@@ -13,14 +13,6 @@ Differences from the desktop version on SourceForge
 * Category questions can allow multiple selections.
 * Can add a preface screen before any question.
 * Data is saved continuously to a database, rather than only saving when a study or interview is closed, so accidental data loss is less likely.
-
-Additional features planned for this version
---------------------------------------------
-
-* While creating a question, preview what it will look like while interviewing.
+* While creating a question, you can preview what it will look like in an interview.
 * Navigable list of questions in the sidebar during an interview.
-* "Refuse" and "don't know" options added to each question.
 * Optional limit to range of numeric questions.
-* Interactive settings for visualizing social networks.
-* Support for web surveys.
-
