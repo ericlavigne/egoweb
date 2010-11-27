@@ -48,10 +48,12 @@ public class NetworkImage<N> extends Image {
 	
 	public void setLayout(NetworkService.LayoutOption layoutOption) {
 		this.layoutOption = layoutOption;
+		dirty = true;
 	}
 	
 	public void setBackground(Color color) {
 		this.background = color;
+		dirty = true;
 	}
 
 	/*
@@ -60,18 +62,23 @@ public class NetworkImage<N> extends Image {
 	 */
 	public void setNodeLabeller(Transformer<N,String> nodeLabeller) {
 		this.nodeLabeller = nodeLabeller;
+		dirty = true;
 	}
 	public void setNodeColorizer(Transformer<N,Paint> nodeColorizer) {
 		this.nodeColorizer = nodeColorizer;
+		dirty = true;
 	}
 	public void setNodeShaper(Transformer<N,Shape> nodeShaper) {
 		this.nodeShaper = nodeShaper;
+		dirty = true;
 	}
 	public void setEdgeColorizer(Transformer<PairUni<N>,Paint> edgeColorizer) {
 		this.edgeColorizer = edgeColorizer;
+		dirty = true;
 	}
 	public void setEdgeSizer(Transformer<PairUni<N>,Stroke> edgeSizer) {
 		this.edgeSizer = edgeSizer;
+		dirty = true;
 	}
 
 	/*
@@ -83,26 +90,32 @@ public class NetworkImage<N> extends Image {
 		{
 			this.imWidth = width;
 			this.imHeight = height;
+			dirty = true;
 		}
 	}
 	
+	private Boolean dirty = true;
+	
 	public void refresh() {
-		setImageResource(new DynamicImageResource() {
-			protected byte[] getImageData() {
-				return getJPEGFromBufferedImage(
-						NetworkService.createImage(
-								NetworkImage.this.network, 
-								layoutOption, 
-								background,
-								imWidth,
-								imHeight,
-								nodeLabeller,
-								nodeColorizer,
-								nodeShaper,
-								edgeSizer,
-								edgeColorizer));
-			}
-		});
+		if(dirty) {
+			setImageResource(new DynamicImageResource() {
+				protected byte[] getImageData() {
+					return getJPEGFromBufferedImage(
+							NetworkService.createImage(
+									NetworkImage.this.network, 
+									layoutOption, 
+									background,
+									imWidth,
+									imHeight,
+									nodeLabeller,
+									nodeColorizer,
+									nodeShaper,
+									edgeSizer,
+									edgeColorizer));
+				}
+			});
+			dirty = false;
+		}
 	}
 	
 	public static byte[] getJPEGFromBufferedImage(BufferedImage image) {

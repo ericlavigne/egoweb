@@ -69,6 +69,11 @@ public class NetworkVisualizationPage extends EgonetPage {
 	private Interview interview;
 	private Expression connectionReason;
 	
+	private NetworkImage<Alter> buildNetworkImage() {
+		return new NetworkImage<Alter>("networkImage", 
+				Analysis.getNetworkForInterview(interview, this.connectionReason));
+	}
+	
 	public NetworkVisualizationPage(final Interview interview, Expression connectionReason) {
 		
 		super(Interviews.getEgoNameForInterview(interview.getId()));
@@ -77,8 +82,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 		this.connectionReason = connectionReason;
 		context = Expressions.getContext(interview);
 		
-		networkImage = new NetworkImage<Alter>("networkImage", 
-				Analysis.getNetworkForInterview(interview, this.connectionReason));
+		networkImage = buildNetworkImage();
 		add(networkImage);
 		
 		primaryPanel = new PanelContainer("primaryPanel");
@@ -95,9 +99,12 @@ public class NetworkVisualizationPage extends EgonetPage {
 		add(buildNodeShapeLink());
 		add(buildEdgeColorLink());
 		add(buildEdgeSizeLink());
+		add(buildAdjacencyReasonLink());
 	}
 
 	// XXX: Section network layout
+	
+	private NetworkService.LayoutOption layoutOption = null;
 	
 	private Link buildNetworkLayoutLink() {
 		return new Link("layoutLink") {
@@ -109,7 +116,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 								"Layout",options) 
 						{
 							public void action(NetworkService.LayoutOption option) {
-								networkImage.setLayout(option);
+								layoutOption = option;
+								networkImage.setLayout(layoutOption);
 								networkImage.refresh();
 							}
 						});
@@ -120,6 +128,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 	
 	// XXX: Section network background
 	
+	private Color backgroundColor = Color.WHITE;
+	
 	private Link buildNetworkBackgroundLink() {
 		return new Link("backgroundLink") {
 			public void onClick() {
@@ -128,7 +138,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 								"Background",colors) 
 						{
 							public void action(Color option) {
-								networkImage.setBackground(option);
+								backgroundColor = option;
+								networkImage.setBackground(backgroundColor);
 								networkImage.refresh();
 							}
 							public String show(Color color) {
@@ -167,6 +178,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 	
 	// XXX: Section node label
 	
+	private AlterLabeller alterLabeller = null;
+	
 	private Link buildNodeLabelLink() {
 		return new Link("nodeLabelLink") {
 			public void onClick() {
@@ -182,7 +195,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 								"Alter Label",options) 
 						{
 							public void action(AlterLabeller option) {
-								networkImage.setNodeLabeller(option);
+								alterLabeller = option;
+								networkImage.setNodeLabeller(alterLabeller);
 								networkImage.refresh();
 							}
 						});
@@ -283,7 +297,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							throw new RuntimeException("Unrecognized colorizing option: "+option);
 						}
 						nodeColorChangeSecondary();
-						nodeColorUpdate();
+						nodeColorUpdate(true);
 					}
 				});
 	}
@@ -308,13 +322,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return showColor(color);
 						}
 						protected void mapChanged() {
-							nodeColorUpdate();
+							nodeColorUpdate(true);
 						}
 					});
 		}
 	}
 	
-	private void nodeColorUpdate() {
+	private void nodeColorUpdate(Boolean shouldRefresh) {
 		if(nodeColorQuestion == null) {
 			networkImage.setNodeColorizer(new AlterColorizer());
 		} else {
@@ -324,7 +338,9 @@ public class NetworkVisualizationPage extends EgonetPage {
 							nodeColorSelectionQuestionDetails
 							.get(nodeColorQuestion)));
 		}
-		networkImage.refresh();
+		if(shouldRefresh) {
+			networkImage.refresh();
+		}
 	}
 	
 	public class AlterColorizer implements Transformer<Alter,Paint>, Serializable {
@@ -413,7 +429,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							throw new RuntimeException("Unrecognized sizing option: "+option);
 						}
 						nodeSizeChangeSecondary();
-						nodeShapeAndSizeUpdate();
+						nodeShapeAndSizeUpdate(true);
 					}
 				});
 	}
@@ -438,7 +454,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return showSizeName(sizeName);
 						}
 						protected void mapChanged() {
-							nodeShapeAndSizeUpdate();
+							nodeShapeAndSizeUpdate(true);
 						}
 					});
 		}
@@ -492,7 +508,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							throw new RuntimeException("Unrecognized shaping option: "+option);
 						}
 						nodeShapeChangeSecondary();
-						nodeShapeAndSizeUpdate();
+						nodeShapeAndSizeUpdate(true);
 					}
 				});
 	}
@@ -517,13 +533,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return showShapeName(sides);
 						}
 						protected void mapChanged() {
-							nodeShapeAndSizeUpdate();
+							nodeShapeAndSizeUpdate(true);
 						}
 					});
 		}
 	}
 	
-	private void nodeShapeAndSizeUpdate() {
+	private void nodeShapeAndSizeUpdate(Boolean shouldRefresh) {
 		networkImage.setNodeShaper(new Transformer<Alter, Shape>() {
 			public Shape transform(Alter alter) {
 				return new RegularPolygon(
@@ -576,7 +592,9 @@ public class NetworkVisualizationPage extends EgonetPage {
 				return sizeOfName(null);
 			}
 		});
-		networkImage.refresh();
+		if(shouldRefresh) {
+			networkImage.refresh();
+		}
 	}
 	
 	private static class RegularPolygon extends Polygon {
@@ -630,7 +648,8 @@ public class NetworkVisualizationPage extends EgonetPage {
 							throw new RuntimeException("Unrecognized edge colorizing option: "+option);
 						}
 						edgeColorChangeSecondary();
-						edgeColorUpdate();
+						edgeColorUpdate(true);
+						networkImage.refresh();
 					}
 				});
 	}
@@ -655,13 +674,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return showColor(color);
 						}
 						protected void mapChanged() {
-							edgeColorUpdate();
+							edgeColorUpdate(true);
 						}
 					});
 		}
 	}
 	
-	private void edgeColorUpdate() {
+	private void edgeColorUpdate(Boolean shouldRefresh) {
 		if(edgeColorQuestion == null) {
 			networkImage.setEdgeColorizer(new EdgeColorizer());
 		} else {
@@ -671,7 +690,9 @@ public class NetworkVisualizationPage extends EgonetPage {
 							edgeColorSelectionQuestionDetails
 							.get(edgeColorQuestion)));
 		}
-		networkImage.refresh();
+		if(shouldRefresh) {
+			networkImage.refresh();
+		}
 	}
 	
 	public class EdgeColorizer implements Transformer<PairUni<Alter>,Paint>, Serializable {
@@ -749,7 +770,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 							throw new RuntimeException("Unrecognized edge Sizing option: "+option);
 						}
 						edgeSizeChangeSecondary();
-						edgeSizeUpdate();
+						edgeSizeUpdate(true);
 					}
 				});
 	}
@@ -774,13 +795,13 @@ public class NetworkVisualizationPage extends EgonetPage {
 							return size == null ? "" : size+"";
 						}
 						protected void mapChanged() {
-							edgeSizeUpdate();
+							edgeSizeUpdate(true);
 						}
 					});
 		}
 	}
 	
-	private void edgeSizeUpdate() {
+	private void edgeSizeUpdate(Boolean shouldRefresh) {
 		if(edgeSizeQuestion == null) {
 			networkImage.setEdgeSizer(new EdgeSizer());
 		} else {
@@ -790,7 +811,9 @@ public class NetworkVisualizationPage extends EgonetPage {
 							edgeSizeSelectionQuestionDetails
 							.get(edgeSizeQuestion)));
 		}
-		networkImage.refresh();
+		if(shouldRefresh) {
+			networkImage.refresh();
+		}
 	}
 	
 	// TODO: might need to use alters to decide if there should even be an edge
@@ -841,5 +864,44 @@ public class NetworkVisualizationPage extends EgonetPage {
 		public ArrayList<QuestionOption> getConfigKeys() {
 			return Options.getOptionsForQuestion(question.getId());
 		}
+	}
+	
+	// XXX: Section adjacency reason
+	
+	private Link buildAdjacencyReasonLink() {
+		return new Link("adjacencyReasonLink") {
+			public void onClick() {
+				ArrayList<Expression> options = Lists.newArrayList(
+						Expressions.forStudy(interview.getStudyId()));
+				primaryPanel.changePanel(
+						new SingleSelectionPanel<Expression>("panel",
+								"Adjacency Reason",options) 
+						{
+							public void action(Expression option) {
+								connectionReason = option;
+								NetworkImage<Alter> newNetworkImage = buildNetworkImage();
+								networkImage.replaceWith(newNetworkImage);
+								networkImage = newNetworkImage;
+								
+								if(layoutOption != null) {
+									networkImage.setLayout(layoutOption);
+								}
+								if(backgroundColor != null) {
+									networkImage.setBackground(backgroundColor);
+								}
+								if(alterLabeller != null) {
+									networkImage.setNodeLabeller(alterLabeller);
+								}
+								nodeColorUpdate(false);
+								nodeShapeAndSizeUpdate(false);
+								edgeColorUpdate(false);
+								edgeSizeUpdate(false);
+								
+								networkImage.refresh();
+							}
+						});
+				secondaryPanel.removePanel();
+			}
+		};
 	}
 }
