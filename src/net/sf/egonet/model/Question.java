@@ -1,6 +1,7 @@
 package net.sf.egonet.model;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 
 import net.sf.egonet.model.Answer.AnswerType;
 import net.sf.egonet.persistence.TextInsertionUtil;
@@ -178,6 +179,11 @@ public class Question extends OrderedEntity
 		String blank = "_____";
 		String alter1Name = alters.size() > 0 ? alters.get(0).getName() : blank;
 		String alter2Name = alters.size() > 1 ? alters.get(1).getName() : blank;
+		
+		// Prevent StringIndexOutOfBoundsException when alter name contains ? or \
+		alter1Name = Matcher.quoteReplacement(alter1Name);
+		alter2Name = Matcher.quoteReplacement(alter2Name);
+		
 		if(getType().equals(QuestionType.ALTER)) {
 			questionText = questionText.replaceAll(dd1, alter1Name);
 			questionText = questionText.replaceAll(dd, alter1Name);
