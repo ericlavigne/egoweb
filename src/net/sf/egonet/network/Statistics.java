@@ -37,53 +37,18 @@ public class Statistics<N> {
 	}
 	private Double density;
 
-	// Cliques - tight knit groups of three or more nodes, may overlap
-	private void initCliques() {
-		if(cliques == null) {
-			cliques = Sets.newHashSet();
-			subCliques = Sets.newHashSet();
-			for(N seed : network.getNodes()) {
-				Set<N> subClique = Sets.newHashSet();
-				subClique.add(seed);
-				initCliques(subClique,network.connections(seed));
-			}
-			subCliques = null; // Don't need it anymore. Free the memory.
-		}
-	}
-	private void initCliques(Set<N> subClique, Collection<N> potentialAdditions) {
-		subCliques.add(subClique);
-		Boolean ableToAdd = false;
-		for(N potentialAddition : potentialAdditions) {
-			Boolean newConnectsWithOld = true;
-			for(N oldMember : subClique) {
-				if(! (network.distance(potentialAddition, oldMember) < 2)) {
-					newConnectsWithOld = false;
-				}
-			}
-			if(newConnectsWithOld) {
-				ableToAdd = true;
-				Set<N> newSubClique = Sets.newHashSet();
-				newSubClique.add(potentialAddition);
-				newSubClique.addAll(subClique);
-				if(! subCliques.contains(newSubClique)) {
-					Set<N> remainingPotentials = new HashSet<N>(potentialAdditions);
-					remainingPotentials.remove(potentialAddition);
-					initCliques(newSubClique, remainingPotentials);
-				}
-			}
-		}
-		if((! ableToAdd) && subClique.size() > 2) {
-			cliques.add(Collections.unmodifiableSet(subClique));
-		}
-	}
-	private Set<Set<N>> cliques;
-	private Set<Set<N>> subCliques;
-	
 	public Set<Set<N>> cliques() {
-		initCliques();
-		return Collections.unmodifiableSet(cliques);
+            if(cliques == null) {
+                java.util.Map<N,Set<N>> netAsMap = Maps.newHashMap();
+                for(N node : network.getNodes()) {
+                    netAsMap.put(node,network.connections(node));
+                }
+                cliques = (Set<Set<N>>) (new clj.graph.Core().cliques(netAsMap));
+            }
+            return cliques;
 	}
-	
+        private Set<Set<N>> cliques = null;
+
 	private void initComponents() {
 		if(components == null) {
 			isolates = Sets.newHashSet();
