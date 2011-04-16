@@ -14,6 +14,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
+import org.joda.time.DateTime;
+
 import com.google.common.collect.Lists;
 
 import net.sf.egonet.model.Expression;
@@ -89,7 +91,6 @@ public class AnalysisStudyPage extends EgonetPage {
 			protected void populateItem(ListItem item) {
 				final Interview interview = (Interview) item.getModelObject();
 				AjaxCheckBox cBox;
-				ArrayList<InterviewLink> links;
 
 				item.add(new Label("interviewName",
 						Interviews.getEgoNameForInterview(interview.getId())));
@@ -121,11 +122,16 @@ public class AnalysisStudyPage extends EgonetPage {
 					 };
 				cBox.setOutputMarkupId(true);
 				item.add(cBox);
-				links = Lists.newArrayList(Interviewing.getAnsweredPagesForInterview(interview.getId()));
-				if ( links.isEmpty())
-				    item.add(new Label("lastQuestion", "(none)"));
-				else
-					item.add(new Label("lastQuestion", links.get(links.size()-1).toString()));
+				
+                            // This code indicated the latest screen for each interview. Unfortunately, it is ridiculously
+                            // inefficient and, at about 10 seconds of calculation per interview, made this page unusably
+                            // slow for studies with more than a few interviews.
+                            //  ArrayList<InterviewLink> links = 
+                            //     Lists.newArrayList(Interviewing.getAnsweredPagesForInterview(interview.getId()));
+                            //	if ( links.isEmpty())
+                            //	    item.add(new Label("lastQuestion", "(none)"));
+                            //	else
+                            //		item.add(new Label("lastQuestion", links.get(links.size()-1).toString()));
 			}});
 		
 		add(analysisForm);
@@ -135,8 +141,15 @@ public class AnalysisStudyPage extends EgonetPage {
 		return (Expression) adjacencyReason.getObject();
 	}
 	
+    private ArrayList<Interview> cachedInterviews = null;
+    private DateTime cachedInterviewsTimestamp = null;
+
 	public List<Interview> getInterviews() {
-		return Interviews.getInterviewsForStudy(studyId);
+            if(cachedInterviews == null || new DateTime().isAfter(cachedInterviewsTimestamp.plusSeconds(10))) {
+		cachedInterviews = new ArrayList<Interview>(Interviews.getInterviewsForStudy(studyId));
+                cachedInterviewsTimestamp = new DateTime();
+            }
+                return cachedInterviews;
 	}
 }
 
