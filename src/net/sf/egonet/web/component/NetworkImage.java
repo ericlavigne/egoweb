@@ -10,6 +10,7 @@ import net.sf.egonet.network.Network;
 import net.sf.egonet.network.NetworkService;
 import net.sf.functionalj.tuple.PairUni;
 
+import edu.uci.ics.jung.algorithms.layout.Layout;
 import org.apache.commons.collections15.Transformer;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.image.resource.DynamicImageResource;
@@ -30,6 +31,7 @@ public class NetworkImage<N> extends Image {
 	private Transformer<PairUni<N>,Stroke> edgeSizer;
 	private int imWidth;
 	private int imHeight;
+	private Layout<N, PairUni<N>> graphLayout;
 	
 	public NetworkImage(String id, Network<N> network) {
 		super(id);
@@ -46,14 +48,39 @@ public class NetworkImage<N> extends Image {
 		refresh();
 	}
 	
-	public void setLayout(NetworkService.LayoutOption layoutOption) {
+	public void setLayoutOption(NetworkService.LayoutOption layoutOption) {
 		this.layoutOption = layoutOption;
-		dirty = true;
+		createLayout();
 	}
-	
+
+	/*
+	 * Functions to retrieve/set the layout to be used for the network. If a survey
+	 * has multiple NETWORK questions that use the same adjacency expression and 
+	 * node set, these functions can be used to make sure those questions have the
+	 * same graph layout when rendered. The same method could be used to ensure
+	 * that a single question shows the same layout each time the page is rendered,
+	 * rather than redrawing the graph each time.
+	 */
+	public void setLayout(Layout<N, PairUni<N>> graphLayout) {
+		this.graphLayout = graphLayout;
+	}
+
+        private Layout<N,PairUni<N>> createLayout() {
+            this.graphLayout = NetworkService.createLayout(NetworkImage.this.network, layoutOption);
+            return graphLayout;
+        }
+
+	public Layout<N, PairUni<N>> getOrCreateLayout() {
+		if (graphLayout == null)
+		{
+                    createLayout();		
+		}
+		return this.graphLayout;
+	}
+
+
 	public void setBackground(Color color) {
 		this.background = color;
-		dirty = true;
 	}
 
 	/*
@@ -62,23 +89,18 @@ public class NetworkImage<N> extends Image {
 	 */
 	public void setNodeLabeller(Transformer<N,String> nodeLabeller) {
 		this.nodeLabeller = nodeLabeller;
-		dirty = true;
 	}
 	public void setNodeColorizer(Transformer<N,Paint> nodeColorizer) {
 		this.nodeColorizer = nodeColorizer;
-		dirty = true;
 	}
 	public void setNodeShaper(Transformer<N,Shape> nodeShaper) {
 		this.nodeShaper = nodeShaper;
-		dirty = true;
 	}
 	public void setEdgeColorizer(Transformer<PairUni<N>,Paint> edgeColorizer) {
 		this.edgeColorizer = edgeColorizer;
-		dirty = true;
 	}
 	public void setEdgeSizer(Transformer<PairUni<N>,Stroke> edgeSizer) {
 		this.edgeSizer = edgeSizer;
-		dirty = true;
 	}
 
 	/*
@@ -90,32 +112,26 @@ public class NetworkImage<N> extends Image {
 		{
 			this.imWidth = width;
 			this.imHeight = height;
-			dirty = true;
 		}
 	}
 	
-	private Boolean dirty = true;
-	
 	public void refresh() {
-		if(dirty) {
-			setImageResource(new DynamicImageResource() {
-				protected byte[] getImageData() {
-					return getJPEGFromBufferedImage(
-							NetworkService.createImage(
-									NetworkImage.this.network, 
-									layoutOption, 
-									background,
-									imWidth,
-									imHeight,
-									nodeLabeller,
-									nodeColorizer,
-									nodeShaper,
-									edgeSizer,
-									edgeColorizer));
-				}
-			});
-			dirty = false;
-		}
+		setImageResource(new DynamicImageResource() {
+			protected byte[] getImageData() {
+				return getJPEGFromBufferedImage(
+						NetworkService.createImage(
+								NetworkImage.this.network, 
+                                                                getOrCreateLayout(),
+								background,
+								imWidth,
+								imHeight,
+								nodeLabeller,
+								nodeColorizer,
+								nodeShaper,
+								edgeSizer,
+								edgeColorizer));
+			}
+		});
 	}
 	
 	public static byte[] getJPEGFromBufferedImage(BufferedImage image) {

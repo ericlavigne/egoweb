@@ -117,7 +117,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 						{
 							public void action(NetworkService.LayoutOption option) {
 								layoutOption = option;
-								networkImage.setLayout(layoutOption);
+								networkImage.setLayoutOption(option);
 								networkImage.refresh();
 							}
 						});
@@ -884,7 +884,7 @@ public class NetworkVisualizationPage extends EgonetPage {
 								networkImage = newNetworkImage;
 								
 								if(layoutOption != null) {
-									networkImage.setLayout(layoutOption);
+									networkImage.setLayoutOption(layoutOption);
 								}
 								if(backgroundColor != null) {
 									networkImage.setBackground(backgroundColor);
